@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "explore_majaku";
+$db   = "eksplormajaku";
 
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
