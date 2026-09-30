@@ -49,7 +49,12 @@ try {
   $foundUser = $statement->fetch();
   $statement->close();
 
-  if (!$foundUser || !password_verify($password, $passwordHash)) {
+  if (
+    !$foundUser ||
+    !is_string($passwordHash) ||
+    $passwordHash === "" ||
+    !password_verify($password, $passwordHash)
+  ) {
     $respond(401, [
       "status" => "error",
       "message" => "Email atau kata sandi salah"
