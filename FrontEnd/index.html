@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Majaku</title>
+    <!-- Menghubungkan ke file CSS eksternal -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <div id="loading-screen" class="skeleton-wrapper" aria-live="polite">
+        <div class="skeleton-title"></div>
+        <div class="skeleton-image"></div>
+        <div class="skeleton-buttons">
+            <div class="skeleton-btn"></div>
+            <div class="skeleton-btn"></div>
+        </div>
+    </div>
+
+    <!-- Kontainer Utama -->
+    <main id="main-content" class="main-wrapper">
+        
+        <!-- Bagian Atas (Judul dan Gambar) -->
+        <section class="hero-section">
+            <h1 class="site-title">Explore Majaku</h1>
+            <div class="image-wrapper">
+                <img src="assets/css/images/gunung%20ciremai.jpg" alt="Gunung Ciremai">
+            </div>
+        </section>
+
+        <!-- Bagian Bawah (Dua Tombol) -->
+        <section class="button-section">
+            <div class="button-group">
+                <a href="register.html" class="btn btn-daftar">Daftar</a>
+                <a href="login.html" class="btn btn-masuk">Masuk</a>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const loadingScreen = document.getElementById('loading-screen');
+            const mainContent = document.getElementById('main-content');
+
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+                mainContent.classList.add('visible');
+            }, 1200);
+        });
+    </script>
+
+</body>
+</html>
