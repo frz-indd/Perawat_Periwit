@@ -1,0 +1,586 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #176f63;
+    --button: #3d9588;
+    --button-hover: #327e74;
+    --text: #176f63;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #ffffff;
+    color: var(--text);
+}
+
+
+/* ================= HEADER ================= */
+
+.auth-header {
+    width: 100%;
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ffffff;
+
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+
+    position: relative;
+    z-index: 10;
+}
+
+.brand-name {
+    font-family: 'Dancing Script', cursive;
+    font-size: 28px;
+    font-weight: 700;
+
+    color: var(--primary);
+    text-decoration: none;
+}
+
+
+/* ================= MAIN ================= */
+
+.auth-wrapper {
+    width: 100%;
+    height: calc(100vh - 55px);
+
+    display: flex;
+
+    overflow: hidden;
+}
+
+
+/* ================= LEFT IMAGE ================= */
+
+.auth-image-section {
+    width: 50%;
+    height: 100%;
+
+    position: relative;
+
+    background-image: url('../assets/images/img.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.image-overlay {
+    position: absolute;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.08);
+}
+
+
+/* ================= TEXT IMAGE ================= */
+
+.image-content {
+    position: absolute;
+
+    left: 8%;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: #ffffff;
+
+    max-width: 430px;
+
+    z-index: 2;
+}
+
+.image-content h1 {
+    font-size: 32px;
+    line-height: 1.25;
+
+    font-weight: 500;
+
+    margin-bottom: 16px;
+}
+
+.image-content p {
+    font-size: 15px;
+    line-height: 1.45;
+
+    font-weight: 400;
+}
+
+
+/* ================= FORM AREA ================= */
+
+.auth-form-section {
+    width: 50%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 15px 35px;
+
+    background: #ffffff;
+
+    overflow-y: auto;
+}
+
+
+/* ================= FORM CONTAINER ================= */
+
+.auth-form-container {
+    width: 100%;
+    max-width: 390px;
+}
+
+
+/* ================= TITLE ================= */
+
+.auth-title {
+    text-align: center;
+
+    color: var(--primary);
+
+    font-size: 23px;
+    font-weight: 700;
+
+    margin-bottom: 18px;
+}
+
+
+/* ================= FORM ================= */
+
+.form-group {
+    width: 100%;
+    margin-bottom: 9px;
+}
+
+.form-group label {
+    display: block;
+
+    color: var(--text);
+
+    font-size: 13px;
+
+    margin-bottom: 4px;
+}
+
+
+/* ================= INPUT ================= */
+
+.auth-input {
+    width: 100%;
+    height: 40px;
+
+    padding: 7px 11px;
+
+    border: 1px solid #333;
+    border-radius: 0;
+
+    background: #ffffff;
+
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+
+    outline: none;
+}
+
+.auth-input:focus {
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 2px rgba(61, 149, 136, 0.12);
+}
+
+
+/* ================= PASSWORD ================= */
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-wrapper .auth-input {
+    padding-right: 40px;
+}
+
+.password-toggle {
+    position: absolute;
+
+    top: 50%;
+    right: 8px;
+
+    transform: translateY(-50%);
+
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    background: transparent;
+
+    color: #222;
+
+    font-size: 16px;
+
+    cursor: pointer;
+}
+
+
+/* ================= LOGIN OPTION ================= */
+
+.login-options {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.remember-me input {
+    width: 13px;
+    height: 13px;
+
+    margin: 0;
+
+    cursor: pointer;
+}
+
+.remember-me label {
+    margin: 0;
+
+    font-size: 12px;
+    color: var(--text);
+}
+
+.forgot-password {
+    color: var(--text);
+
+    font-size: 12px;
+
+    text-decoration: none;
+}
+
+
+/* ================= BUTTON ================= */
+
+.auth-button {
+    width: 100%;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #222;
+    border-radius: 0;
+
+    background: var(--button);
+
+    color: #ffffff;
+
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
+}
+
+.auth-button:hover {
+    background: var(--button-hover);
+    color: #ffffff;
+}
+
+
+/* ================= DIVIDER ================= */
+
+.divider {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin: 15px 0;
+}
+
+.divider span {
+    flex: 1;
+
+    height: 1px;
+
+    background: #777;
+}
+
+.divider p {
+    margin: 0;
+
+    color: var(--text);
+
+    font-size: 12px;
+}
+
+
+/* ================= SOCIAL ================= */
+
+.social-button {
+    width: 100%;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 9px;
+
+    margin-bottom: 8px;
+
+    border: 1px solid #222;
+    border-radius: 0;
+
+    background: #ffffff;
+
+    color: var(--text);
+
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+
+    cursor: pointer;
+}
+
+.social-button:hover {
+    background: #f7f7f7;
+}
+
+
+/* ================= ICON ================= */
+
+.google-icon {
+    font-family: Arial, sans-serif;
+
+    font-size: 17px;
+    font-weight: 600;
+
+    color: #4285f4;
+}
+
+.apple-icon {
+    font-size: 17px;
+    color: #999;
+}
+
+
+/* ================= SWITCH ================= */
+
+.switch-auth {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 15px;
+
+    margin-top: 12px;
+
+    color: var(--text);
+
+    font-size: 12px;
+}
+
+.switch-auth a {
+    color: var(--text);
+
+    font-weight: 600;
+
+    text-decoration: none;
+}
+
+.switch-auth a:hover {
+    text-decoration: underline;
+}
+
+
+/* ================= REGISTER ================= */
+
+.register-container .auth-title {
+    margin-bottom: 17px;
+}
+
+.register-container .form-group {
+    margin-bottom: 8px;
+}
+
+.register-container .auth-button {
+    margin-top: 5px;
+}
+
+
+/* ================= VALIDATION ================= */
+
+.invalid-feedback {
+    font-size: 10px;
+}
+
+.auth-input.is-invalid {
+    border-color: #dc3545;
+}
+
+.auth-input.is-valid {
+    border-color: var(--button);
+}
+
+
+/* =====================================================
+   LAPTOP
+===================================================== */
+
+@media (max-width: 1200px) {
+
+    .auth-form-container {
+        max-width: 360px;
+    }
+
+    .auth-form-section {
+        padding: 15px 25px;
+    }
+
+    .image-content h1 {
+        font-size: 29px;
+    }
+
+    .image-content p {
+        font-size: 14px;
+    }
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 991px) {
+
+    .auth-wrapper {
+        overflow-y: auto;
+    }
+
+    .auth-image-section {
+        width: 45%;
+    }
+
+    .auth-form-section {
+        width: 55%;
+    }
+
+    .image-content h1 {
+        font-size: 25px;
+    }
+
+    .image-content p {
+        font-size: 13px;
+    }
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 767px) {
+
+    .auth-wrapper {
+        display: block;
+        height: auto;
+        overflow: visible;
+    }
+
+    .auth-image-section {
+        width: 100%;
+        height: 220px;
+    }
+
+    .auth-form-section {
+        width: 100%;
+        height: auto;
+
+        padding: 30px 20px 40px;
+    }
+
+    .auth-form-container {
+        max-width: 420px;
+    }
+
+    .image-content {
+        left: 7%;
+    }
+
+    .image-content h1 {
+        font-size: 25px;
+    }
+
+    .image-content p {
+        font-size: 13px;
+    }
+}
+
+
+/* =====================================================
+   HP KECIL
+===================================================== */
+
+@media (max-width: 480px) {
+
+    .brand-name {
+        font-size: 26px;
+    }
+
+    .auth-image-section {
+        height: 190px;
+    }
+
+    .image-content h1 {
+        font-size: 21px;
+    }
+
+    .image-content p {
+        font-size: 12px;
+    }
+
+    .auth-form-section {
+        padding: 25px 18px 35px;
+    }
+
+    .auth-title {
+        font-size: 21px;
+    }
+}
