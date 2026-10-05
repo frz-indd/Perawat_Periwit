@@ -244,6 +244,11 @@ body {
     padding-right: 45px;
 }
 
+.password-wrapper .auth-input.is-invalid,
+.password-wrapper .auth-input.is-valid {
+    background-image: none;
+}
+
 .password-toggle {
     position: absolute;
 

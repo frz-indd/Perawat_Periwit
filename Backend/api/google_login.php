@@ -13,10 +13,8 @@ if ($_SERVER["REQUEST_METHOD"] !== "GET") {
 
 $config = googleOauthConfig();
 if ($config === null) {
-  googleOauthRespond(503, [
-    "status" => "error",
-    "message" => "Login Google belum dikonfigurasi di server"
-  ]);
+  header("Location: ../../FrontEnd/auth/Login.php?google=not_configured", true, 303);
+  exit;
 }
 
 try {

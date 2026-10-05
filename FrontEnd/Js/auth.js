@@ -2,22 +2,15 @@
    PASSWORD SHOW / HIDE
 ===================================================== */
 
-const passwordToggleButtons =
-    document.querySelectorAll('.password-toggle');
+const passwordToggleButtons = document.querySelectorAll('.password-toggle');
 
 passwordToggleButtons.forEach(button => {
 
     button.addEventListener('click', function () {
 
-        const targetId =
-            this.getAttribute('data-target');
-
-        const passwordInput =
-            document.getElementById(targetId);
-
-        const icon =
-            this.querySelector('i');
-
+        const targetId = this.getAttribute('data-target');
+        const passwordInput = document.getElementById(targetId);
+        const icon = this.querySelector('i');
 
         if (passwordInput.type === 'password') {
 
@@ -53,70 +46,77 @@ passwordToggleButtons.forEach(button => {
    LOGIN
 ===================================================== */
 
-const loginForm =
-    document.getElementById('loginForm');
+const loginForm = document.getElementById('loginForm');
 
 if (loginForm) {
 
-    loginForm.addEventListener('submit', function (event) {
+    const googleResult = new URLSearchParams(window.location.search).get('google');
+    const googleMessages = {
+        success: 'Login Google berhasil.',
+        not_configured: 'Login Google belum dikonfigurasi di server.',
+        cancelled: 'Login Google dibatalkan.'
+    };
+    const googleMessage = googleMessages[googleResult];
+
+    if (googleMessage) {
+        const message = document.getElementById('loginMessage');
+        message.textContent = googleMessage;
+        message.className = `alert mt-3 ${googleResult === 'success' ? 'alert-success' : 'alert-danger'}`;
+    }
+
+    loginForm.addEventListener('submit', async function (event) {
 
         event.preventDefault();
 
-        const identity =
-            document.getElementById('loginIdentity');
-
-        const password =
-            document.getElementById('loginPassword');
+        const email = document.getElementById('loginIdentity');
+        const password = document.getElementById('loginPassword');
+        const message = document.getElementById('loginMessage');
+        const submitButton = loginForm.querySelector('[type="submit"]');
 
         let isValid = true;
 
-
-        // Identity
-        if (identity.value.trim() === '') {
-
-            identity.classList.add('is-invalid');
-            identity.classList.remove('is-valid');
-
+        if (!email.validity.valid || email.value.trim() === '') {
+            email.classList.add('is-invalid');
+            email.classList.remove('is-valid');
             isValid = false;
-
         } else {
-
-            identity.classList.remove('is-invalid');
-            identity.classList.add('is-valid');
-
+            email.classList.remove('is-invalid');
+            email.classList.add('is-valid');
         }
 
-
-        // Password
         if (password.value.trim() === '') {
-
             password.classList.add('is-invalid');
             password.classList.remove('is-valid');
-
             isValid = false;
-
         } else {
-
             password.classList.remove('is-invalid');
             password.classList.add('is-valid');
-
         }
 
+        if (!isValid) return;
 
-        // Jika valid
-        if (isValid) {
+        message.classList.add('d-none');
+        submitButton.disabled = true;
 
-            alert('Login berhasil!');
+        try {
+            const response = await fetch(loginForm.action, {
+                method: 'POST',
+                body: new FormData(loginForm),
+                headers: { Accept: 'application/json' },
+                credentials: 'same-origin'
+            });
+            const result = await response.json();
 
-            /*
-            NANTI KALAU BACKEND SUDAH ADA,
-            BAGIAN INI BISA DIARAHKAN KE BERANDA.
-
-            window.location.href = "../beranda.html";
-            */
+            message.textContent = result.message || 'Login gagal.';
+            message.className = `alert mt-3 ${response.ok ? 'alert-success' : 'alert-danger'}`;
+        } catch (error) {
+            message.textContent = 'Tidak dapat terhubung ke server. Coba lagi.';
+            message.className = 'alert alert-danger mt-3';
+        } finally {
+            submitButton.disabled = false;
         }
-
     });
+
 }
 
 
@@ -124,144 +124,145 @@ if (loginForm) {
    REGISTER
 ===================================================== */
 
-const registerForm =
-    document.getElementById('registerForm');
+const registerForm = document.getElementById('registerForm');
 
 if (registerForm) {
 
-    registerForm.addEventListener('submit', function (event) {
+    registerForm.addEventListener('submit', async function (event) {
 
         event.preventDefault();
 
-
-        const identity =
-            document.getElementById('registerIdentity');
-
-        const password =
-            document.getElementById('registerPassword');
-
-        const confirmPassword =
-            document.getElementById('confirmPassword');
-
+        const name = document.getElementById('registerName');
+        const email = document.getElementById('registerIdentity');
+        const password = document.getElementById('registerPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
         const confirmPasswordError =
             document.getElementById('confirmPasswordError');
-
+        const message = document.getElementById('registerMessage');
+        const submitButton = registerForm.querySelector('[type="submit"]');
 
         let isValid = true;
 
-
-        // Identity
-        if (identity.value.trim() === '') {
-
-            identity.classList.add('is-invalid');
-            identity.classList.remove('is-valid');
-
+        if (name.value.trim() === '') {
+            name.classList.add('is-invalid');
+            name.classList.remove('is-valid');
             isValid = false;
-
         } else {
-
-            identity.classList.remove('is-invalid');
-            identity.classList.add('is-valid');
-
+            name.classList.remove('is-invalid');
+            name.classList.add('is-valid');
         }
 
-
-        // Password
-        if (password.value.trim() === '') {
-
-            password.classList.add('is-invalid');
-            password.classList.remove('is-valid');
-
+        if (!email.validity.valid || email.value.trim() === '') {
+            email.classList.add('is-invalid');
+            email.classList.remove('is-valid');
             isValid = false;
-
-        } else if (password.value.length < 6) {
-
-            password.classList.add('is-invalid');
-            password.classList.remove('is-valid');
-
-            password.nextElementSibling.textContent =
-                'Password minimal 6 karakter.';
-
-            isValid = false;
-
         } else {
+            email.classList.remove('is-invalid');
+            email.classList.add('is-valid');
+        }
 
+        if (password.value.length < 8) {
+            password.classList.add('is-invalid');
+            password.classList.remove('is-valid');
+            password.closest('.form-group').querySelector('.invalid-feedback').textContent =
+                'Password harus terdiri dari minimal 8 karakter.';
+            isValid = false;
+        } else {
             password.classList.remove('is-invalid');
             password.classList.add('is-valid');
-
         }
 
-
-        // Confirm password
-        if (confirmPassword.value.trim() === '') {
-
+        if (confirmPassword.value === '') {
             confirmPassword.classList.add('is-invalid');
             confirmPassword.classList.remove('is-valid');
-
-            confirmPasswordError.textContent =
-                'Verifikasi password wajib diisi.';
-
+            confirmPasswordError.textContent = 'Verifikasi password wajib diisi.';
             isValid = false;
-
-        } else if (
-            password.value !== confirmPassword.value
-        ) {
-
+        } else if (password.value !== confirmPassword.value) {
             confirmPassword.classList.add('is-invalid');
             confirmPassword.classList.remove('is-valid');
-
-            confirmPasswordError.textContent =
-                'Password tidak sama.';
-
+            confirmPasswordError.textContent = 'Password tidak sama.';
             isValid = false;
-
         } else {
-
             confirmPassword.classList.remove('is-invalid');
             confirmPassword.classList.add('is-valid');
-
         }
 
+        if (!isValid) return;
 
-        // Jika valid
-        if (isValid) {
+        message.classList.add('d-none');
+        submitButton.disabled = true;
 
-            alert('Pendaftaran berhasil!');
+        try {
+            const response = await fetch(registerForm.action, {
+                method: 'POST',
+                body: new FormData(registerForm),
+                headers: { Accept: 'application/json' },
+                credentials: 'same-origin'
+            });
+            const result = await response.json();
 
-            /*
-            NANTI KALAU BACKEND SUDAH ADA,
-            BISA DIARAHKAN KE LOGIN.
+            if (response.ok && result.status === 'success') {
+                window.location.assign('Login.php');
+                return;
+            }
 
-            window.location.href = "login.html";
-            */
+            message.textContent = result.message || 'Pendaftaran gagal.';
+            message.className = `alert mt-3 ${response.ok ? 'alert-success' : 'alert-danger'}`;
+        } catch (error) {
+            message.textContent = 'Tidak dapat terhubung ke server. Coba lagi.';
+            message.className = 'alert alert-danger mt-3';
+        } finally {
+            submitButton.disabled = false;
         }
-
     });
+
 }
 
 
 /* =====================================================
-   GOOGLE
+   GOOGLE LOGIN / REGISTER
 ===================================================== */
 
 const googleButtons = [
-
     document.getElementById('googleLogin'),
-
     document.getElementById('googleRegister')
-
 ];
-
 
 googleButtons.forEach(button => {
 
     if (button) {
 
         button.addEventListener('click', function () {
+                window.location.assign('../../Backend/api/google_login.php');
 
-            alert(
-                'Login dengan Google belum dihubungkan.'
-            );
+        });
+
+    }
+
+});
+
+
+/* =====================================================
+   APPLE LOGIN / REGISTER
+===================================================== */
+
+const appleButtons = [
+    document.getElementById('appleLogin'),
+    document.getElementById('appleRegister')
+];
+
+appleButtons.forEach(button => {
+
+    if (button) {
+
+        button.addEventListener('click', function () {
+
+            /*
+                Nanti dihubungkan dengan
+                Apple OAuth / backend.
+            */
+
+            alert('Login dengan Apple belum dihubungkan.');
 
         });
 
@@ -274,39 +275,44 @@ googleButtons.forEach(button => {
    LUPA PASSWORD
 ===================================================== */
 
-const forgotPassword =
-    document.querySelector('.forgot-password');
+const forgotPassword = document.querySelector('.forgot-password');
 
 if (forgotPassword) {
 
-    forgotPassword.addEventListener(
-        'click',
-        function (event) {
+    forgotPassword.addEventListener('click', function (event) {
 
-            event.preventDefault();
+        event.preventDefault();
 
-            alert(
-                'Halaman lupa password belum dibuat.'
-            );
+        alert('Halaman lupa password belum dibuat.');
 
-        }
-    );
+    });
 
 }
 
 
 /* =====================================================
-   HAPUS ERROR SAAT INPUT
+   INPUT VALIDATION SAAT DIISI
 ===================================================== */
 
-const allInputs =
-    document.querySelectorAll('.auth-input');
+const allInputs = document.querySelectorAll('.auth-input');
 
 allInputs.forEach(input => {
 
     input.addEventListener('input', function () {
 
-        this.classList.remove('is-invalid');
+        if (this.id === 'registerPassword') {
+            if (this.value.length >= 8) {
+                this.classList.remove('is-invalid');
+            }
+
+            return;
+        }
+
+        if (this.value.trim() !== '') {
+
+            this.classList.remove('is-invalid');
+
+        }
 
     });
 

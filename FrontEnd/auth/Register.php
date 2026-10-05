@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Daftar | Explore Majaku</title>
+
+    <!-- Bootstrap 5 -->
+    <link 
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link 
+        rel="stylesheet" 
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link 
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" 
+        rel="stylesheet"
+    >
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../CSS/auth.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="auth-header">
+        <a href="../index.php" class="brand-name">
+            Explore Majaku
+        </a>
+    </header>
+
+    <!-- Main -->
+    <main class="auth-wrapper">
+
+        <!-- Bagian kiri -->
+        <section class="auth-image-section">
+
+            <div class="image-overlay"></div>
+
+            <div class="image-content">
+                <h1>
+                    Jelajahi<br>
+                    majalengka dan<br>
+                    kuningan dengan<br>
+                    Mudah
+                </h1>
+
+                <p>
+                    Temukan Rekomendasi<br>
+                    Wisata dan jadikan wisata<br>
+                    favoritmu!
+                </p>
+            </div>
+
+        </section>
+
+
+        <!-- Bagian kanan -->
+        <section class="auth-form-section">
+
+            <div class="auth-form-container register-container">
+
+                <h2 class="auth-title">DAFTAR</h2>
+
+
+                <form id="registerForm" action="../../Backend/api/fungsi_register.php" method="post" novalidate>
+
+                    <div class="form-group">
+                        <label for="registerName">Nama lengkap</label>
+                        <input
+                            type="text"
+                            id="registerName"
+                            name="nama"
+                            class="form-control auth-input"
+                            autocomplete="name"
+                            maxlength="255"
+                            required
+                        >
+                        <div class="invalid-feedback">Nama wajib diisi.</div>
+                    </div>
+
+                    <!-- Email / Nomor Telepon -->
+                    <div class="form-group">
+
+                        <label for="registerIdentity">
+                            Email
+                        </label>
+
+                        <input 
+                            type="email"
+                            id="registerIdentity"
+                            name="email"
+                            class="form-control auth-input"
+                            autocomplete="username"
+                            required
+                        >
+
+                        <div class="invalid-feedback">
+                            Email atau nomor telephone wajib diisi.
+                        </div>
+
+                    </div>
+
+
+                    <!-- Password -->
+                    <div class="form-group">
+
+                        <label for="registerPassword">
+                            Password
+                        </label>
+
+                        <div class="password-wrapper">
+
+                            <input 
+                                type="password"
+                                id="registerPassword"
+                                name="password"
+                                class="form-control auth-input"
+                                autocomplete="new-password"
+                                required
+                            >
+
+                            <button 
+                                type="button"
+                                class="password-toggle"
+                                data-target="registerPassword"
+                                aria-label="Tampilkan password"
+                            >
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+
+                            <div class="invalid-feedback">
+                                Password harus terdiri dari minimal 8 karakter.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Verifikasi Password -->
+                    <div class="form-group">
+
+                        <label for="confirmPassword">
+                            Verifikasi Password
+                        </label>
+
+                        <div class="password-wrapper">
+
+                            <input 
+                                type="password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                class="form-control auth-input"
+                                autocomplete="new-password"
+                                required
+                            >
+
+                            <button 
+                                type="button"
+                                class="password-toggle"
+                                data-target="confirmPassword"
+                                aria-label="Tampilkan password"
+                            >
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+
+                            <div 
+                                class="invalid-feedback"
+                                id="confirmPasswordError"
+                            >
+                                Password tidak sama.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Button Daftar -->
+                    <button 
+                        type="submit" 
+                        class="btn auth-button"
+                    >
+                        Daftar
+                    </button>
+
+                </form>
+
+                <div id="registerMessage" class="alert d-none mt-3" role="status" aria-live="polite"></div>
+
+
+                <!-- Divider -->
+                <div class="divider">
+                    <span></span>
+                    <p>Atau</p>
+                    <span></span>
+                </div>
+
+
+                <!-- Google -->
+                <button 
+                    type="button" 
+                    class="social-button"
+                    id="googleRegister"
+                >
+                    <span class="google-icon">G</span>
+                    <span>Masuk dengan Google</span>
+                </button>
+
+                <!-- Login -->
+                <div class="switch-auth">
+
+                    <span>Sudah Punya Akun ?</span>
+
+                    <a href="Login.php">
+                        Masuk
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- JavaScript -->
+    <script src="../Js/auth.js"></script>
+
+</body>
+</html>

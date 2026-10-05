@@ -1,4 +1,4 @@
-<?php
+0<?php
 header("Content-Type: application/json; charset=utf-8");
 
 require_once __DIR__ . "/google_oauth_helpers.php";
@@ -41,10 +41,8 @@ if (
 }
 
 if (isset($_GET["error"])) {
-  googleOauthRespond(401, [
-    "status" => "error",
-    "message" => "Login Google dibatalkan"
-  ]);
+  header("Location: ../../FrontEnd/auth/Login.php?google=cancelled", true, 303);
+  exit;
 }
 
 $authorizationCode = $_GET["code"] ?? "";
@@ -72,7 +70,7 @@ try {
   if ($tokenStatus !== 200 || !is_string($idToken) || $idToken === "") {
     googleOauthRespond(401, [
       "status" => "error",
-      "message" => "Google tidak menerima kode otorisasi"
+      "message" => "Google ga menerima kode otorisasi"
     ]);
   }
 
@@ -91,8 +89,8 @@ try {
   $isEmailVerified = $emailVerified === true || $emailVerified === "true";
   $subject = $identity["sub"] ?? "";
   $email = strtolower(trim((string) ($identity["email"] ?? "")));
-  $name = trim((string) ($identity["name"] ?? ""));
-  $nonce = $identity["nonce"] ?? "";
+    $name = trim((string) ($identity["name"] ?? ""));
+    $nonce = $identity["nonce"] ?? "";
 
   if (
     !in_array($issuer, ["accounts.google.com", "https://accounts.google.com"], true) ||
@@ -177,15 +175,8 @@ try {
   $_SESSION["nama_user"] = $userName;
   $_SESSION["email"] = $userEmail;
 
-  googleOauthRespond(200, [
-    "status" => "success",
-    "message" => "Login Google berhasil",
-    "data" => [
-      "id_user" => (int) $userId,
-      "nama" => $userName,
-      "email" => $userEmail
-    ]
-  ]);
+  header("Location: ../../FrontEnd/auth/Login.php?google=success", true, 303);
+  exit;
 } catch (Throwable $exception) {
   error_log($exception->getMessage());
   googleOauthRespond(500, [

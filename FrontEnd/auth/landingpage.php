@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Majaku</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+
+    <!-- Kontainer Utama -->
+    <main id="main-content" class="main-wrapper visible">
+        
+        <!-- Bagian Atas (Judul dan Gambar) -->
+        <section class="hero-section">
+            <h1 class="site-title">Explore Majaku</h1>
+            <div class="image-wrapper">
+                <img src="../assets/images/img.png" alt="Gunung Ciremai">
+            </div>
+        </section>
+
+        <!-- Bagian Bawah (Dua Tombol) -->
+        <section class="button-section">
+            <div class="button-group">
+                <a href="/Register.php" class="btn btn-daftar">Daftar</a>
+                <a href="/Login.php" class="btn btn-masuk">Masuk</a>
+            </div>
+        </section>
+
+    </main>
+</body>
+</html>
