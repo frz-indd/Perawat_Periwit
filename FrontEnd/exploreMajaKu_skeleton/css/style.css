@@ -87,10 +87,18 @@ a{text-decoration:none}
  .profile-sidebar{border-right:0;border-bottom:2px solid #ddd}
  .info-grid,.location-grid,.review-grid,.auth-layout{grid-template-columns:1fr}
  .auth-image{min-height:350px}
+ .nav-icons{padding-bottom:12px}
 }
 @media(max-width:576px){
  .brand{font-size:30px}.navbar{min-height:65px}
  .card-grid{grid-template-columns:1fr}.section-title{font-size:30px}
  .profile-content{padding:35px 20px}.profile-sidebar{padding:30px 20px}
  .auth-image{padding:35px;min-height:300px}.auth-image h1{font-size:32px}
+ .landing-hero{height:240px;padding:24px}
+ .landing-hero h1{font-size:clamp(28px,7vw,36px)}
+ .landing-hero p{font-size:15px}
+ .landing-search{margin: -36px 16px 42px}
+ .search-bar input{min-width:0;font-size:15px}
+ .search-bar button{width:52px;flex:none}
+ .landing-grid{padding:0 16px}
 }
