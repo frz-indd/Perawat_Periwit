@@ -15,7 +15,7 @@
         <section class="hero-section">
             <h1 class="site-title">Explore Majaku</h1>
             <div class="image-wrapper">
-                <img src="../assets/images/img.png" alt="Gunung Ciremai">
+                <img src="../assets/images/gununglandscape.jpg" alt="Gunung Ciremai">
             </div>
         </section>
 
