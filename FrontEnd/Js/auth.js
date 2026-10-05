@@ -2,15 +2,22 @@
    PASSWORD SHOW / HIDE
 ===================================================== */
 
-const passwordToggleButtons = document.querySelectorAll('.password-toggle');
+const passwordToggleButtons =
+    document.querySelectorAll('.password-toggle');
 
 passwordToggleButtons.forEach(button => {
 
     button.addEventListener('click', function () {
 
-        const targetId = this.getAttribute('data-target');
-        const passwordInput = document.getElementById(targetId);
-        const icon = this.querySelector('i');
+        const targetId =
+            this.getAttribute('data-target');
+
+        const passwordInput =
+            document.getElementById(targetId);
+
+        const icon =
+            this.querySelector('i');
+
 
         if (passwordInput.type === 'password') {
 
@@ -46,7 +53,8 @@ passwordToggleButtons.forEach(button => {
    LOGIN
 ===================================================== */
 
-const loginForm = document.getElementById('loginForm');
+const loginForm =
+    document.getElementById('loginForm');
 
 if (loginForm) {
 
@@ -54,13 +62,16 @@ if (loginForm) {
 
         event.preventDefault();
 
-        const identity = document.getElementById('loginIdentity');
-        const password = document.getElementById('loginPassword');
+        const identity =
+            document.getElementById('loginIdentity');
+
+        const password =
+            document.getElementById('loginPassword');
 
         let isValid = true;
 
 
-        // Validasi Email / Nomor Telephone
+        // Identity
         if (identity.value.trim() === '') {
 
             identity.classList.add('is-invalid');
@@ -76,7 +87,7 @@ if (loginForm) {
         }
 
 
-        // Validasi Password
+        // Password
         if (password.value.trim() === '') {
 
             password.classList.add('is-invalid');
@@ -95,33 +106,17 @@ if (loginForm) {
         // Jika valid
         if (isValid) {
 
+            alert('Login berhasil!');
+
             /*
-                Untuk sekarang hanya frontend.
+            NANTI KALAU BACKEND SUDAH ADA,
+            BAGIAN INI BISA DIARAHKAN KE BERANDA.
 
-                Nanti bagian ini diganti dengan
-                request API ke backend.
-
-                Contoh:
-
-                fetch('/api/login', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        identity: identity.value,
-                        password: password.value
-                    })
-                });
+            window.location.href = "../beranda.html";
             */
-
-            alert('Form login berhasil diisi.');
-
-            console.log('Login:', {
-                identity: identity.value,
-                password: password.value
-            });
         }
 
     });
-
 }
 
 
@@ -129,7 +124,8 @@ if (loginForm) {
    REGISTER
 ===================================================== */
 
-const registerForm = document.getElementById('registerForm');
+const registerForm =
+    document.getElementById('registerForm');
 
 if (registerForm) {
 
@@ -137,20 +133,24 @@ if (registerForm) {
 
         event.preventDefault();
 
-        const identity = document.getElementById('registerIdentity');
-        const password = document.getElementById('registerPassword');
-        const confirmPassword = document.getElementById('confirmPassword');
+
+        const identity =
+            document.getElementById('registerIdentity');
+
+        const password =
+            document.getElementById('registerPassword');
+
+        const confirmPassword =
+            document.getElementById('confirmPassword');
 
         const confirmPasswordError =
             document.getElementById('confirmPasswordError');
 
+
         let isValid = true;
 
 
-        /* ---------------------------------------------
-           Validasi Email / Nomor Telephone
-        --------------------------------------------- */
-
+        // Identity
         if (identity.value.trim() === '') {
 
             identity.classList.add('is-invalid');
@@ -166,10 +166,7 @@ if (registerForm) {
         }
 
 
-        /* ---------------------------------------------
-           Validasi Password
-        --------------------------------------------- */
-
+        // Password
         if (password.value.trim() === '') {
 
             password.classList.add('is-invalid');
@@ -195,10 +192,7 @@ if (registerForm) {
         }
 
 
-        /* ---------------------------------------------
-           Validasi Konfirmasi Password
-        --------------------------------------------- */
-
+        // Confirm password
         if (confirmPassword.value.trim() === '') {
 
             confirmPassword.classList.add('is-invalid');
@@ -209,7 +203,9 @@ if (registerForm) {
 
             isValid = false;
 
-        } else if (password.value !== confirmPassword.value) {
+        } else if (
+            password.value !== confirmPassword.value
+        ) {
 
             confirmPassword.classList.add('is-invalid');
             confirmPassword.classList.remove('is-valid');
@@ -227,56 +223,35 @@ if (registerForm) {
         }
 
 
-        /* ---------------------------------------------
-           Jika semua valid
-        --------------------------------------------- */
-
+        // Jika valid
         if (isValid) {
 
-            /*
-                Untuk sekarang hanya frontend.
-
-                Nanti dihubungkan ke API backend.
-
-                Contoh:
-
-                fetch('/api/register', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        identity: identity.value,
-                        password: password.value
-                    })
-                });
-            */
-
-            alert('Pendaftaran berhasil.');
-
-            console.log('Register:', {
-                identity: identity.value,
-                password: password.value
-            });
+            alert('Pendaftaran berhasil!');
 
             /*
-                Setelah backend sudah tersedia,
-                bisa diarahkan ke login:
+            NANTI KALAU BACKEND SUDAH ADA,
+            BISA DIARAHKAN KE LOGIN.
 
-                window.location.href = 'login.html';
+            window.location.href = "login.html";
             */
         }
 
     });
-
 }
 
 
 /* =====================================================
-   GOOGLE LOGIN / REGISTER
+   GOOGLE
 ===================================================== */
 
 const googleButtons = [
+
     document.getElementById('googleLogin'),
+
     document.getElementById('googleRegister')
+
 ];
+
 
 googleButtons.forEach(button => {
 
@@ -284,41 +259,9 @@ googleButtons.forEach(button => {
 
         button.addEventListener('click', function () {
 
-            /*
-                Nanti dihubungkan dengan
-                Google OAuth / backend.
-            */
-
-            alert('Login dengan Google belum dihubungkan.');
-
-        });
-
-    }
-
-});
-
-
-/* =====================================================
-   APPLE LOGIN / REGISTER
-===================================================== */
-
-const appleButtons = [
-    document.getElementById('appleLogin'),
-    document.getElementById('appleRegister')
-];
-
-appleButtons.forEach(button => {
-
-    if (button) {
-
-        button.addEventListener('click', function () {
-
-            /*
-                Nanti dihubungkan dengan
-                Apple OAuth / backend.
-            */
-
-            alert('Login dengan Apple belum dihubungkan.');
+            alert(
+                'Login dengan Google belum dihubungkan.'
+            );
 
         });
 
@@ -331,36 +274,39 @@ appleButtons.forEach(button => {
    LUPA PASSWORD
 ===================================================== */
 
-const forgotPassword = document.querySelector('.forgot-password');
+const forgotPassword =
+    document.querySelector('.forgot-password');
 
 if (forgotPassword) {
 
-    forgotPassword.addEventListener('click', function (event) {
+    forgotPassword.addEventListener(
+        'click',
+        function (event) {
 
-        event.preventDefault();
+            event.preventDefault();
 
-        alert('Halaman lupa password belum dibuat.');
+            alert(
+                'Halaman lupa password belum dibuat.'
+            );
 
-    });
+        }
+    );
 
 }
 
 
 /* =====================================================
-   INPUT VALIDATION SAAT DIISI
+   HAPUS ERROR SAAT INPUT
 ===================================================== */
 
-const allInputs = document.querySelectorAll('.auth-input');
+const allInputs =
+    document.querySelectorAll('.auth-input');
 
 allInputs.forEach(input => {
 
     input.addEventListener('input', function () {
 
-        if (this.value.trim() !== '') {
-
-            this.classList.remove('is-invalid');
-
-        }
+        this.classList.remove('is-invalid');
 
     });
 
