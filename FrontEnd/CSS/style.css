@@ -83,6 +83,10 @@ body {
     flex: 1;
     height: 42px;
     border: 2px solid #e1e4e3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #777777;
 }
 
 /* --- Bagian Atas --- */
@@ -98,6 +102,10 @@ body {
     color: #2B6E63;
     text-align: center;
     align-self: center;
+}
+
+.skeleton-wrapper .site-title {
+    color: #777777;
 }
 
 .image-wrapper {
