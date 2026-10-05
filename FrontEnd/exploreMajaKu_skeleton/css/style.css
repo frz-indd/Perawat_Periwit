@@ -80,6 +80,7 @@ a{text-decoration:none}
 .landing-hero h1{font-family:Georgia,serif;font-size:42px}
 .landing-search{max-width:810px;margin:-48px auto 60px;position:relative}
 .landing-grid{max-width:1170px;margin:auto;padding:0 20px}
+.landing-grid .card-grid{display:flex;flex-wrap:wrap;gap:0}
 @media(max-width:992px){
  .card-grid{grid-template-columns:repeat(2,1fr)}
  .profile-layout{grid-template-columns:1fr}
