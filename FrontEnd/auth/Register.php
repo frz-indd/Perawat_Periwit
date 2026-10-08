@@ -81,34 +81,11 @@
                 </h2>
                 <form id="registerForm" action="../../Backend/api/fungsi_register.php" method="post" novalidate>
 
-                    <!-- NAME -->
-                    <div class="form-group">
-
-                        <label for="registerName">
-                            Nama Lengkap
-                        </label>
-
-                        <input
-                            type="text"
-                            id="registerName"
-                            name="nama"
-                            class="auth-input"
-                            placeholder="Masukkan nama lengkap anda"
-                            autocomplete="name"
-                            required
-                        >
-
-                        <div class="invalid-feedback">
-                            Nama wajib diisi.
-                        </div>
-
-                    </div>
-
                     <!-- EMAIL -->
                     <div class="form-group">
 
                         <label for="registerIdentity">
-                            Email
+                            Email atau No telephone
                         </label>
 
                         <input

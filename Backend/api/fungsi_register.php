@@ -31,17 +31,22 @@ $name = trim((string) ($input["nama"] ?? $input["Nama_user"] ?? ""));
 $email = strtolower(trim((string) ($input["email"] ?? $input["Email"] ?? "")));
 $password = $input["password"] ?? $input["Password"] ?? null;
 
-if ($name === "" || strlen($name) > 255) {
-  $respond(422, [
-    "status" => "error",
-    "message" => "Nama wajib diisi dan maksimal 255 karakter"
-  ]);
-}
-
 if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
   $respond(422, [
     "status" => "error",
     "message" => "Alamat email tidak valid"
+  ]);
+}
+
+if ($name === "") {
+  $emailName = strstr($email, "@", true);
+  $name = is_string($emailName) ? $emailName : "Pengguna";
+}
+
+if (strlen($name) > 255) {
+  $respond(422, [
+    "status" => "error",
+    "message" => "Nama maksimal 255 karakter"
   ]);
 }
 

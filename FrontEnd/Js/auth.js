@@ -141,7 +141,6 @@ if (registerForm) {
 
         event.preventDefault();
 
-        const name = document.getElementById('registerName');
         const email = document.getElementById('registerIdentity');
         const password = document.getElementById('registerPassword');
         const passwordFeedback =
@@ -153,15 +152,6 @@ if (registerForm) {
         const submitButton = registerForm.querySelector('[type="submit"]');
 
         let isValid = true;
-
-        if (name.value.trim() === '') {
-            name.classList.add('is-invalid');
-            name.classList.remove('is-valid');
-            isValid = false;
-        } else {
-            name.classList.remove('is-invalid');
-            name.classList.add('is-valid');
-        }
 
         if (!email.validity.valid || email.value.trim() === '') {
             email.classList.add('is-invalid');
