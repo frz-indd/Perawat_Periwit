@@ -69,7 +69,7 @@
                 </article>
                 <article class="about-card">
                     <h2>Misi</h2>
-                    <p>Menyediakan informasi wisata yang akurat dan terkini, Memudahkan wisatawan dalam merencanakan perjalanan,</p>
+                    <p>Menyediakan informasi wisata yang akurat dan terkini, Memudahkan wisatawan dalam merencanakan perjalanan.</p>
                 </article>
             </div>
 
