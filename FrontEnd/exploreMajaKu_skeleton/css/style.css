@@ -38,6 +38,40 @@ a{text-decoration:none}
 .about-placeholder{height:210px;background:#d6d6d6;max-width:630px}
 .contact{margin-top:100px}
 
+.about-page{background:#000}
+.about-page .site-header,
+.about-page main{max-width:900px;margin-left:max(20px,calc((100% - 900px)/2 + 4px));margin-right:auto}
+.about-page .site-header{margin-top:20px}
+.about-page main{background:#fff}
+.about-page .navbar{height:50px;min-height:50px;padding-top:0;padding-bottom:0}
+.about-page .navbar .container{max-width:720px}
+.about-page .brand{font-size:26px}
+.about-page .nav-link{font-size:14px}
+.about-page .nav-icons{gap:16px}
+.about-page .nav-icons i{font-size:22px}
+.about-page .nav-link.active{color:var(--green)}
+.about-hero{height:165px;position:relative;overflow:hidden}
+.about-hero>img{width:100%;height:100%;display:block;object-fit:cover;object-position:center 53%}
+.about-hero-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.55),rgba(0,0,0,.18))}
+.about-hero-copy{position:absolute;left:9%;top:50%;transform:translateY(-50%);color:#fff}
+.about-hero-copy h1{font:700 24px Georgia,serif;margin:0 0 10px}
+.about-hero-copy p{font:13px/1.25 'Courier New',monospace;margin:0}
+.about-content{max-width:740px;margin:0 auto;padding:29px 0 36px;color:#111;font-family:Georgia,serif;position:relative;left:7px}
+.about-card,.benefit-card{background:#eef2ef;border:1px solid #c7ceca;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.28)}
+.about-card{text-align:center;padding:10px 24px}
+.about-card h2{font:bold 18px Georgia,serif;color:var(--green);margin:0 0 5px}
+.about-card p{font:15px/1.33 Georgia,serif;margin:0}
+.about-intro{min-height:120px;padding:10px 28px}
+.about-purpose{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:10px}
+.about-purpose .about-card{min-height:110px;display:flex;flex-direction:column;justify-content:center;padding:10px 24px}
+.about-benefits{margin-top:10px}
+.about-benefits>h2{font:bold 19px Georgia,serif;color:var(--green);margin:0 0 9px 6px}
+.benefit-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.benefit-card{min-height:76px;display:flex;align-items:center;gap:12px;padding:9px 14px}
+.benefit-card i{flex:none;color:var(--green);font-size:31px;line-height:1}
+.benefit-card p{font:14px/1.3 Georgia,serif;margin:0}
+.benefit-card strong{font-size:14px;color:var(--green);white-space:nowrap}
+
 .profile-layout{display:grid;grid-template-columns:340px 1fr;min-height:calc(100vh - 82px)}
 .profile-sidebar{padding:35px 40px;border-right:2px solid #ddd;text-align:center}
 .profile-avatar{width:220px;height:220px;border-radius:50%;background:#d6d6d6;border:14px solid var(--green);margin:0 auto 18px}
@@ -88,6 +122,8 @@ a{text-decoration:none}
  .info-grid,.location-grid,.review-grid,.auth-layout{grid-template-columns:1fr}
  .auth-image{min-height:350px}
  .nav-icons{padding-bottom:12px}
+ .about-content{width:calc(100% - 48px)}
+ .about-purpose{gap:16px}
 }
 @media(max-width:576px){
  .brand{font-size:30px}.navbar{min-height:65px}
@@ -101,4 +137,24 @@ a{text-decoration:none}
  .search-bar input{min-width:0;font-size:15px}
  .search-bar button{width:52px;flex:none}
  .landing-grid{padding:0 16px}
+ .about-page{background:#fff}
+ .about-page .navbar{min-height:65px}
+ .about-page .navbar{height:auto;padding-top:.5rem;padding-bottom:.5rem}
+ .about-page .navbar .container{max-width:100%}
+ .about-page .brand{font-size:27px}
+ .about-page .site-header,.about-page main{width:100%;max-width:none;margin-left:0;margin-right:0}
+ .about-page .site-header{margin-top:0}
+ .about-hero{height:180px}
+ .about-hero-copy{left:6%;right:5%}
+ .about-hero-copy h1{font-size:21px}
+ .about-hero-copy p{font-size:12px}
+ .desktop-break{display:none}
+ .about-content{width:calc(100% - 32px);padding:22px 0 28px;left:0}
+ .about-intro{padding:12px 16px}
+ .about-card p{font-size:14px}
+ .about-purpose{grid-template-columns:1fr;gap:10px}
+ .about-purpose .about-card{min-height:90px}
+ .about-benefits>h2{font-size:18px;margin-left:0}
+ .benefit-grid{grid-template-columns:1fr;gap:9px}
+ .benefit-card{min-height:68px}
 }

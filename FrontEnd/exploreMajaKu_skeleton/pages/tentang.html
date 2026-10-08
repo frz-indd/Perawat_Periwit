@@ -10,14 +10,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/style.css?v=20261008-about4">
 </head>
-<body>
+<body class="about-page">
 <header class="site-header">
-  <nav class="navbar navbar-expand-lg">
+  <nav class="navbar navbar-expand-md">
     <div class="container">
       <a class="brand" href="../index.html">Explore Majaku</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Buka navigasi">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="mainNav">
@@ -32,7 +32,7 @@
         <li><a class="dropdown-item" href="kategori-sejarah-budaya.html">Sejarah & Budaya</a></li>
     </ul>
 </li>
-          <li class="nav-item"><a class="nav-link" href="tentang.html">Tentang</a></li>
+          <li class="nav-item"><a class="nav-link active" href="../../auth/tentang.php" aria-current="page">Tentang</a></li>
         </ul>
         <div class="nav-icons">
           <a href="hasil-pencarian.html" aria-label="Cari"><i class="bi bi-search"></i></a>
@@ -43,15 +43,50 @@
   </nav>
 </header>
 
-
-<main class="container-main about-section">
-  <section>
-    <h1 class="section-title">Tentang Kami</h1>
-    <div class="about-placeholder"></div>
+<main>
+  <section class="about-hero" aria-label="Tentang Explore Majaku">
+    <img src="../../assets/images/gununglandscape.jpg" alt="Pemandangan Gunung Ciremai dan alam Majalengka">
+    <div class="about-hero-shade"></div>
+    <div class="about-hero-copy">
+      <h1>EXPLORE MAJAKU</h1>
+      <p>Solusi Terbaik untuk menemukan destinasi wisata menarik di wilayah<br class="desktop-break"> majalengka dan kuningan</p>
+    </div>
   </section>
-  <section class="contact">
-    <h2 class="section-title">Hubungi kami</h2>
-    <p class="fs-4">WhatsApp &nbsp; +62 5723969967</p>
+
+  <section class="about-content" aria-label="Informasi tentang Explore Majaku">
+    <article class="about-card about-intro">
+      <h2>Tentang Kami</h2>
+      <p>Explore MajaKu adalah platform informasi wisata yang membantu pengguna menemukan dan mengenal berbagai destinasi wisata di Majalengka dan Kuningan. Kami menyediakan informasi destinasi, lokasi, fasilitas, harga tiket, jam operasional, dan ulasan untuk memudahkan wisatawan</p>
+    </article>
+
+    <div class="about-purpose">
+      <article class="about-card">
+        <h2>Visi</h2>
+        <p>Menjadi platform wisata terpercaya yang mendukung pengembangan pariwisata wilayah majalengka kuningan</p>
+      </article>
+      <article class="about-card">
+        <h2>Misi</h2>
+        <p>Menyediakan informasi wisata yang akurat dan terkini, Memudahkan wisatawan dalam merencanakan perjalanan,</p>
+      </article>
+    </div>
+
+    <section class="about-benefits">
+      <h2>Kenapa Memilih Explore MajaKu?</h2>
+      <div class="benefit-grid">
+        <article class="benefit-card">
+          <i class="bi bi-clipboard-check-fill" aria-hidden="true"></i>
+          <p><strong>Informasi Lengkap</strong><br>Semua Kebutuhan Wisata dalam satu platform</p>
+        </article>
+        <article class="benefit-card">
+          <i class="bi bi-hand-thumbs-up-fill" aria-hidden="true"></i>
+          <p><strong>Mudah diakses</strong><br>Tampilan sederhana dan User-friendly</p>
+        </article>
+        <article class="benefit-card">
+          <i class="bi bi-patch-check" aria-hidden="true"></i>
+          <p><strong>Terpercaya</strong><br>Informasi Valid dan update</p>
+        </article>
+      </div>
+    </section>
   </section>
 </main>
 
