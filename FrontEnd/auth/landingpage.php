@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Explore Majaku</title>
-    <link rel="stylesheet" href="../CSS/style.css?v=20261008-3">
+    <link rel="stylesheet" href="../CSS/style.css?v=20261008-6">
 </head>
 <body>
     <main id="main-content" class="main-wrapper visible">
