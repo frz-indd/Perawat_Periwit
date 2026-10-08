@@ -110,7 +110,7 @@ if (loginForm) {
             const result = await response.json();
 
             if (response.ok && result.status === 'success') {
-                window.location.assign('../../dashboard.php');
+                window.location.assign(result.redirect || '../../dashboard.php');
                 return;
             }
 

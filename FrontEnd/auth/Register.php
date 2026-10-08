@@ -228,7 +228,7 @@
                     </span>
 
                     <a href="Login.php">
-                        Masuk
+                        login
                     </a>
 
                 </div>

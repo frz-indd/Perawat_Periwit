@@ -77,6 +77,7 @@ try {
   $respond(200, [
     "status" => "success",
     "message" => "Login berhasil",
+    "redirect" => "../../dashboard.php",
     "data" => [
       "id_user" => (int) $userId,
       "nama" => $name,
