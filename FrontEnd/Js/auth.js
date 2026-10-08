@@ -96,6 +96,8 @@ if (loginForm) {
         if (!isValid) return;
 
         message.classList.add('d-none');
+        document.getElementById('loginPasswordError').classList.add('d-none');
+        password.classList.remove('is-invalid');
         submitButton.disabled = true;
 
         try {
@@ -107,11 +109,18 @@ if (loginForm) {
             });
             const result = await response.json();
 
-            message.textContent = result.message || 'Login gagal.';
-            message.className = `alert mt-3 ${response.ok ? 'alert-success' : 'alert-danger'}`;
+            if (response.ok && result.status === 'success') {
+                window.location.assign('../../dashboard.php');
+                return;
+            }
+
+            message.textContent = result.message || 'Login gagal. Silakan coba lagi.';
+            message.className = 'login-password-error';
+            password.classList.add('is-invalid');
         } catch (error) {
             message.textContent = 'Tidak dapat terhubung ke server. Coba lagi.';
-            message.className = 'alert alert-danger mt-3';
+            message.className = 'login-password-error';
+            password.classList.add('is-invalid');
         } finally {
             submitButton.disabled = false;
         }
@@ -135,6 +144,8 @@ if (registerForm) {
         const name = document.getElementById('registerName');
         const email = document.getElementById('registerIdentity');
         const password = document.getElementById('registerPassword');
+        const passwordFeedback =
+            password.closest('.form-group').querySelector('.invalid-feedback');
         const confirmPassword = document.getElementById('confirmPassword');
         const confirmPasswordError =
             document.getElementById('confirmPasswordError');
@@ -164,27 +175,32 @@ if (registerForm) {
         if (password.value.length < 8) {
             password.classList.add('is-invalid');
             password.classList.remove('is-valid');
-            password.closest('.form-group').querySelector('.invalid-feedback').textContent =
+            passwordFeedback.textContent =
                 'Password harus terdiri dari minimal 8 karakter.';
+            passwordFeedback.classList.add('d-block');
             isValid = false;
         } else {
             password.classList.remove('is-invalid');
             password.classList.add('is-valid');
+            passwordFeedback.classList.remove('d-block');
         }
 
         if (confirmPassword.value === '') {
             confirmPassword.classList.add('is-invalid');
             confirmPassword.classList.remove('is-valid');
             confirmPasswordError.textContent = 'Verifikasi password wajib diisi.';
+            confirmPasswordError.classList.add('d-block');
             isValid = false;
         } else if (password.value !== confirmPassword.value) {
             confirmPassword.classList.add('is-invalid');
             confirmPassword.classList.remove('is-valid');
             confirmPasswordError.textContent = 'Password tidak sama.';
+            confirmPasswordError.classList.add('d-block');
             isValid = false;
         } else {
             confirmPassword.classList.remove('is-invalid');
             confirmPassword.classList.add('is-valid');
+            confirmPasswordError.classList.remove('d-block');
         }
 
         if (!isValid) return;
@@ -207,10 +223,10 @@ if (registerForm) {
             }
 
             message.textContent = result.message || 'Pendaftaran gagal.';
-            message.className = `alert mt-3 ${response.ok ? 'alert-success' : 'alert-danger'}`;
+            message.className = 'auth-inline-error';
         } catch (error) {
             message.textContent = 'Tidak dapat terhubung ke server. Coba lagi.';
-            message.className = 'alert alert-danger mt-3';
+            message.className = 'auth-inline-error';
         } finally {
             submitButton.disabled = false;
         }

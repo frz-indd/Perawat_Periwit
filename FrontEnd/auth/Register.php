@@ -28,7 +28,7 @@
     >
 
     <!-- CSS -->
-    <link rel="stylesheet" href="../CSS/auth.css">
+    <link rel="stylesheet" href="../CSS/auth.css?v=20261008-3">
 </head>
 
 <body>
@@ -81,25 +81,48 @@
                 </h2>
                 <form id="registerForm" action="../../Backend/api/fungsi_register.php" method="post" novalidate>
 
-                    <!-- EMAIL -->
+                    <!-- NAME -->
                     <div class="form-group">
 
-                        <label for="registerIdentity">
-                            Email atau No telephone
+                        <label for="registerName">
+                            Nama Lengkap
                         </label>
 
                         <input
                             type="text"
-                            id="registerIdentity"
-                            name="identity"
+                            id="registerName"
+                            name="nama"
                             class="auth-input"
-                            placeholder="Masukkan email/ No telephone anda"
+                            placeholder="Masukkan nama lengkap anda"
+                            autocomplete="name"
+                            required
+                        >
+
+                        <div class="invalid-feedback">
+                            Nama wajib diisi.
+                        </div>
+
+                    </div>
+
+                    <!-- EMAIL -->
+                    <div class="form-group">
+
+                        <label for="registerIdentity">
+                            Email
+                        </label>
+
+                        <input
+                            type="email"
+                            id="registerIdentity"
+                            name="email"
+                            class="auth-input"
+                            placeholder="Masukkan email anda"
                             autocomplete="username"
                             required
                         >
 
                         <div class="invalid-feedback">
-                            Email atau nomor telephone wajib diisi.
+                            Masukkan alamat email yang valid.
                         </div>
 
                     </div>
@@ -181,6 +204,7 @@
 
                     </div>
 
+                    <div id="registerMessage" class="auth-inline-error d-none" role="alert"></div>
 
                     <!-- REGISTER BUTTON -->
                     <button
@@ -226,7 +250,7 @@
                         Sudah Punya Akun ?
                     </span>
 
-                    <a href="Login.html">
+                    <a href="Login.php">
                         Masuk
                     </a>
 
@@ -240,7 +264,7 @@
 
 
     <!-- JAVASCRIPT -->
-    <script src="../js/auth.js"></script>
+    <script src="../js/auth.js?v=20261008-3"></script>
 
 </body>
 </html>

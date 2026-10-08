@@ -524,6 +524,24 @@ body {
     font-size: 11px;
 }
 
+.login-password-error,
+.auth-inline-error {
+    margin: 2px 0 0 8px;
+    color: #dc3545;
+    font-size: 14px;
+}
+
+#loginMessage.alert-danger,
+#registerMessage.alert-danger {
+    margin: 2px 0 0 8px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #dc3545;
+    font-size: 14px;
+}
+
 .auth-input.is-invalid {
     border-color: #dc3545;
 }

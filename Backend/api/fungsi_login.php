@@ -57,7 +57,7 @@ try {
   ) {
     $respond(401, [
       "status" => "error",
-      "message" => "Email atau kata sandi salah"
+      "message" => "Password salah silahkan coba lagi"
     ]);
   }
 

@@ -28,7 +28,7 @@
     >
 
     <!-- CSS -->
-    <link rel="stylesheet" href="../CSS/auth.css">
+    <link rel="stylesheet" href="../CSS/auth.css?v=20261008-2">
 </head>
 
 <body>
@@ -77,10 +77,7 @@
                 <h2 class="auth-title">
                     LOGIN
                 </h2>
-                <form id="loginForm" action="../../Backend/api/fungsi_login.php" method="post" novalidate></form>
-
-                <form id="loginForm" novalidate>
-
+                <form id="loginForm" action="../../Backend/api/fungsi_login.php" method="post" novalidate>
                     <!-- EMAIL -->
                     <div class="form-group">
 
@@ -90,8 +87,8 @@
 
                         <input
                             type="text"
-                            id="registIdentity"
-                            name="identity"
+                            id="loginIdentity"
+                            name="email"
                             class="auth-input"
                             placeholder="Masukkan email/ No telephone anda"
                             autocomplete="username"
@@ -138,6 +135,9 @@
                         <div class="invalid-feedback">
                             Password wajib diisi.
                         </div>
+
+                        <div id="loginMessage" class="login-password-error d-none" role="alert"></div>
+                        <div id="loginPasswordError" class="login-password-error d-none" role="alert"></div>
 
                     </div>
 
@@ -214,7 +214,7 @@
                         Belum punya akun?
                     </span>
 
-                    <a href="Register.html">
+                    <a href="Register.php">
                         DAFTAR
                     </a>
 
@@ -228,7 +228,7 @@
 
 
     <!-- JAVASCRIPT -->
-    <script src="../js/auth.js"></script>
+    <script src="../js/auth.js?v=20261008-2"></script>
 
 </body>
 </html>
