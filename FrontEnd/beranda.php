@@ -29,7 +29,7 @@
     >
 
     <!-- CSS -->
-    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="CSS/beranda.css">
 </head>
 
 <body>
