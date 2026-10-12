@@ -34,13 +34,13 @@ a {
 }
 
 .about-page .navbar {
-    height: 53px;
-    min-height: 53px;
+    height: 48px;
+    min-height: 48px;
     padding: 0;
 }
 
 .about-page .navbar .container {
-    max-width: 790px;
+    max-width: 900px;
 }
 
 .brand {
@@ -61,6 +61,16 @@ a {
     color: var(--green);
 }
 
+@media (min-width: 992px) {
+    .about-page .navbar .container {
+        padding-left: 48px;
+    }
+
+    .about-page .navbar-nav {
+        margin-right: 85px !important;
+    }
+}
+
 .nav-icons {
     display: flex;
     gap: 16px;
@@ -73,13 +83,13 @@ a {
 
 .about-page main {
     display: flex;
-    height: calc(100dvh - 53px);
+    height: calc(100dvh - 48px);
     min-height: 0;
     flex-direction: column;
 }
 
 .about-hero {
-    height: clamp(150px, 25.85vh, 200px);
+    height: clamp(150px, 25.45vh, 200px);
     flex: none;
     position: relative;
     overflow: hidden;
@@ -89,7 +99,7 @@ a {
     display: grid;
     width: 100%;
     height: 100%;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: 1fr 0.96fr 1.04fr;
     grid-template-rows: minmax(0, 1fr);
 }
 
@@ -121,7 +131,7 @@ a {
 .about-hero-copy {
     position: absolute;
     top: 50%;
-    left: 9%;
+    left: 8.5%;
     color: #ffffff;
     transform: translateY(-50%);
 }
@@ -138,14 +148,14 @@ a {
 
 .about-content {
     display: flex;
-    width: min(82.3%, 1000px);
+    width: min(83.6%, 1000px);
     flex: 1;
     flex-direction: column;
     position: relative;
-    left: 8px;
+    left: 7px;
     min-height: 0;
     margin: 0 auto;
-    padding: clamp(24px, 4.62vh, 36px) 0 clamp(24px, 5.5vh, 42px);
+    padding: clamp(24px, 4.2vh, 36px) 0 clamp(24px, 5.5vh, 42px);
     color: #111111;
     font-family: Georgia, serif;
 }
@@ -171,35 +181,35 @@ a {
 
 .about-card p {
     margin: 0;
-    font: 16px/1.3 Georgia, serif;
+    font: 17px/1.3 Georgia, serif;
 }
 
 .about-intro {
-    min-height: clamp(110px, 19.08vh, 145px);
+    min-height: clamp(110px, 18.85vh, 145px);
     padding: 10px 28px;
 }
 
 .about-purpose {
     display: grid;
     grid-template-columns: 1.06fr 1fr;
-    gap: clamp(16px, 3.2vw, 32px);
+    gap: clamp(16px, 3.35vw, 34px);
     margin-top: 10px;
 }
 
 .about-purpose .about-card {
     display: flex;
-    min-height: clamp(100px, 17.34vh, 135px);
+    min-height: clamp(100px, 17.2vh, 135px);
     flex-direction: column;
     justify-content: center;
     padding: 10px 24px;
 }
 
 .about-benefits {
-    margin-top: 10px;
+    margin-top: 13px;
 }
 
 .about-benefits > h2 {
-    margin: 0 0 14px 8px;
+    margin: 0 0 10px 8px;
     color: var(--green);
     font: bold 20px Georgia, serif;
 }
@@ -227,9 +237,10 @@ a {
 
 .benefit-thumb-icon {
     flex: none;
-    width: 42px;
-    height: 42px;
+    width: 48px;
+    height: 48px;
     fill: var(--green);
+    transform: scaleX(-1);
 }
 
 .benefit-trust-icon {
@@ -245,74 +256,94 @@ a {
 
 .benefit-card p {
     margin: 0;
-    font: 16px/1.2 Georgia, serif;
+    font: 17px/1.2 Georgia, serif;
 }
 
 .benefit-card strong {
     color: var(--green);
-    font-size: 16px;
+    font-size: 17px;
+    white-space: nowrap;
+}
+
+.benefit-description-first-line {
     white-space: nowrap;
 }
 
 @media (min-width: 768px) and (max-height: 680px) {
     .about-page main {
         height: auto;
-        min-height: calc(100dvh - 53px);
+        min-height: calc(100dvh - 48px);
     }
 
     .about-hero {
-        height: clamp(125px, 22vh, 170px);
+        height: clamp(150px, 25.45vh, 200px);
     }
 
     .about-content {
         flex: 1 0 auto;
-        padding: clamp(14px, 2.5vh, 20px) 0;
+        padding: 31px 0 47px;
     }
 
     .about-intro {
-        min-height: clamp(90px, 17vh, 120px);
+        flex: none;
+        height: clamp(110px, 18.9vh, 145px);
+        min-height: 0;
+    }
+
+    .about-purpose {
+        flex: none;
+        height: clamp(100px, 17vh, 135px);
     }
 
     .about-purpose .about-card {
-        min-height: clamp(80px, 14vh, 110px);
-    }
-
-    .about-card h2,
-    .about-benefits > h2 {
-        font-size: 18px;
+        height: 100%;
+        min-height: 0;
     }
 
     .about-card p {
-        font-size: 14px;
-        line-height: 1.2;
+        font-size: 16px;
     }
 
     .about-benefits {
-        margin-top: clamp(8px, 1.5vh, 12px);
+        flex: none;
+        margin-top: 16px;
+    }
+
+    .about-benefits > h2 {
+        margin-bottom: 5px;
     }
 
     .benefit-card {
-        min-height: clamp(58px, 9vh, 74px);
-        gap: 8px;
-        padding: 6px 10px;
+        height: 80px;
+        min-height: 80px;
     }
 
-    .benefit-card i {
-        font-size: 30px;
-    }
-
-    .benefit-thumb-icon,
-    .benefit-trust-icon {
-        width: 34px;
-        height: 34px;
+    .benefit-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.95fr);
     }
 
     .benefit-card p {
-        font-size: 14px;
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .about-page .navbar .container {
+        max-width: 755px;
     }
 
-    .benefit-card strong {
-        font-size: 14px;
+    .about-page .navbar-nav {
+        gap: 32px;
+        margin-right: 110px !important;
+    }
+
+    .site-header {
+        position: relative;
+    }
+
+    .nav-icons {
+        position: absolute;
+        right: 58px;
     }
 }
 

@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../CSS/tentang.css?v=20261008-14">
+    <link rel="stylesheet" href="../CSS/tentang.css?v=20261012-14">
 </head>
 <body class="about-page">
     <header class="site-header">
@@ -31,7 +31,7 @@
                                 <li><a class="dropdown-item" href="../exploreMajaKu_skeleton/pages/kategori-sejarah-budaya.html">Sejarah &amp; Budaya</a></li>
                             </ul>
                         </li>
-                        <li class="nav-item"><a class="nav-link active" href="tentang.php" aria-current="page">Tentang</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="/frontend/Perawat_Periwit/FrontEnd/pages/tentang.php" aria-current="page">Tentang</a></li>
                     </ul>
                     <div class="nav-icons">
                         <a href="../exploreMajaKu_skeleton/pages/hasil-pencarian.html" aria-label="Cari"><i class="bi bi-search"></i></a>
@@ -78,7 +78,7 @@
                 <div class="benefit-grid">
                     <article class="benefit-card">
                         <i class="bi bi-clipboard-check-fill" aria-hidden="true"></i>
-                        <p><strong>Informasi Lengkap</strong><br>Semua Kebutuhan Wisata dalam satu platform</p>
+                        <p><strong>Informasi Lengkap</strong><br><span class="benefit-description-first-line">Semua Kebutuhan Wisata</span><br>dalam satu platform</p>
                     </article>
                     <article class="benefit-card">
                         <svg class="benefit-thumb-icon" viewBox="0 0 24 24" aria-hidden="true">

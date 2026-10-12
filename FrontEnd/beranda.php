@@ -60,7 +60,7 @@
                 kategori
             </a>
 
-            <a href="tentang.php">
+            <a href="pages/tentang.php">
                 Tentang
             </a>
 
