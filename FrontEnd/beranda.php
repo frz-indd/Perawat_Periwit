@@ -28,541 +28,435 @@
         rel="stylesheet"
     >
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="CSS/beranda.css">
+    <!-- CSS Beranda -->
+    <link rel="stylesheet" href="CSS/beranda.css?v=20261013-1">
 </head>
 
 <body>
 
+    <!-- =====================================================
+         NAVBAR
+    ====================================================== -->
 
-<!-- =====================================================
-     NAVBAR
-===================================================== -->
+    <header class="navbar">
 
-<header class="navbar">
+        <div class="navbar-container">
 
-    <div class="navbar-container">
-
-        <!-- LOGO -->
-        <a href="index.php" class="navbar-logo">
-            Explore Majaku
-        </a>
-
-
-        <!-- MENU -->
-        <nav class="navbar-menu">
-
-            <a href="index.php" class="active">
-                Beranda
+            <!-- LOGO -->
+            <a href="index.php" class="navbar-logo">
+                Explore Majaku
             </a>
 
-            <a href="kategori/kategori-alam.php">
-                kategori
-            </a>
+            <!-- MENU -->
+            <nav class="navbar-menu">
 
-            <a href="pages/tentang.php">
-                Tentang
-            </a>
+                <a href="index.php" class="active">
+                    Beranda
+                </a>
 
-        </nav>
+                <a href="kategori/kategori-alam.php">
+                    Kategori
+                </a>
 
+                <a href="pages/tentang.php">
+                    Tentang
+                </a>
 
-        <!-- ICON -->
-        <div class="navbar-icons">
+            </nav>
 
-            <a href="#" class="nav-icon">
-                <i class="bi bi-search"></i>
-            </a>
+            <!-- ICON DAN TOMBOL LOGIN -->
+            <div class="navbar-icons">
 
-            <a href="auth/Login.php" class="nav-icon">
-                <i class="bi bi-person-circle"></i>
-            </a>
+                <!-- Pencarian -->
+                <a
+                    href="hasil-pencarian.php"
+                    class="nav-icon"
+                    aria-label="Cari wisata"
+                    title="Cari wisata"
+                >
+                    <i class="bi bi-search"></i>
+                </a>
+
+                <!-- Profil -->
+                <a
+                    href="auth/Login.php"
+                    class="nav-icon"
+                    aria-label="Profil pengguna"
+                    title="Profil pengguna"
+                >
+                    <i class="bi bi-person-circle"></i>
+                </a>
+
+                <!-- Tombol Login -->
+                <a href="auth/Login.php" class="login-button">
+                    Login
+                </a>
+
+            </div>
 
         </div>
 
-    </div>
-
-</header>
+    </header>
 
 
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
 
-<!-- =====================================================
-     HERO
-===================================================== -->
+    <section class="hero">
 
-<section class="hero">
+        <div class="hero-overlay"></div>
 
-    <div class="hero-overlay"></div>
+        <div class="hero-content">
 
-    <div class="hero-content">
+            <h1>
+                Mau Liburan Ke Mana?
+            </h1>
 
-        <h1>
-            Mau Liburan Ke mana?
-        </h1>
+            <p>
+                Temukan destinasi wisata terbaik di Majalengka &amp; Kuningan
+            </p>
 
-        <p>
-            Temukan destinasi wisata terbaik di majalengka &amp; Kuningan
-        </p>
-
-
-        <!-- SEARCH -->
-        <div class="search-box">
-
-            <input
-                type="text"
-                placeholder="Cari destinasi,kata kunci atau lokasi"
-                id="searchInput"
+            <!-- SEARCH -->
+            <form
+                class="search-box"
+                id="searchForm"
+                action="hasil-pencarian.php"
+                method="GET"
             >
 
-            <button type="button" id="searchButton">
-                <i class="bi bi-search"></i>
-            </button>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-
-<!-- =====================================================
-     MAIN CONTENT
-===================================================== -->
-
-<main class="main-content">
-
-
-    <!-- =================================================
-         REKOMENDASI
-    ================================================== -->
-
-    <section class="destination-section">
-
-        <h2>
-            Rekomendasi Untuk kamu
-        </h2>
-
-
-        <div class="destination-grid">
-
-
-            <!-- CARD 1 -->
-            <a href="#" class="destination-card">
-
-                <img
-                    src="assets/images/wisata/cilengkrang.jpg"
-                    alt="Cilengkrang"
+                <input
+                    type="text"
+                    name="keyword"
+                    placeholder="Cari destinasi, kata kunci atau lokasi"
+                    id="searchInput"
+                    aria-label="Cari destinasi wisata"
+                    required
                 >
 
-                <div class="card-content">
-
-                    <h3>
-                        Cilengkrang
-                    </h3>
-
-                    <div class="rating">
-
-                        <span class="stars">
-                            ★ ★ ★
-                        </span>
-
-                        <span>
-                            (2,7k ulasan)
-                        </span>
-
-                    </div>
-
-                    <div class="location">
-
-                        <i class="bi bi-geo-alt-fill"></i>
-
-                        <span>
-                            Kabupaten Kuningan,<br>
-                            Jawa Barat.
-                        </span>
-
-                    </div>
-
-                    <span class="distance">
-                        5.76 KM
-                    </span>
-
-                </div>
-
-            </a>
-
-
-
-            <!-- CARD 2 -->
-            <a href="#" class="destination-card">
-
-                <img
-                    src="assets/images/wisata/bukit-pamor.jpg"
-                    alt="Bukit Pamoroan"
+                <button
+                    type="submit"
+                    id="searchButton"
+                    aria-label="Cari"
                 >
+                    <i class="bi bi-search"></i>
+                </button>
 
-                <div class="card-content">
-
-                    <h3>
-                        Bukit Pamoroan
-                    </h3>
-
-                    <div class="rating">
-
-                        <span class="stars">
-                            ★ ★ ★
-                        </span>
-
-                        <span>
-                            (2,6k ulasan)
-                        </span>
-
-                    </div>
-
-                    <div class="location">
-
-                        <i class="bi bi-geo-alt-fill"></i>
-
-                        <span>
-                            Kabupaten Majalengka,<br>
-                            Jawa Barat.
-                        </span>
-
-                    </div>
-
-                    <span class="distance">
-                        5.76 KM
-                    </span>
-
-                </div>
-
-            </a>
-
-
-
-            <!-- CARD 3 -->
-            <a href="#" class="destination-card">
-
-                <img
-                    src="assets/images/wisata/arunika-garden.jpg"
-                    alt="Arunika Garden"
-                >
-
-                <div class="card-content">
-
-                    <h3>
-                        Arunika Garden
-                    </h3>
-
-                    <div class="rating">
-
-                        <span class="stars">
-                            ★ ★ ★
-                        </span>
-
-                        <span>
-                            (2,5k ulasan)
-                        </span>
-
-                    </div>
-
-                    <div class="location">
-
-                        <i class="bi bi-geo-alt-fill"></i>
-
-                        <span>
-                            Kabupaten Kuningan,<br>
-                            Jawa Barat.
-                        </span>
-
-                    </div>
-
-                    <span class="distance">
-                        7.68 KM
-                    </span>
-
-                </div>
-
-            </a>
-
-
-
-            <!-- CARD 4 -->
-            <a href="#" class="destination-card">
-
-                <img
-                    src="assets/images/wisata/curug-putri.jpg"
-                    alt="Curug Putri Palutungan"
-                >
-
-                <div class="card-content">
-
-                    <h3>
-                        Curug putri palutungan
-                    </h3>
-
-                    <div class="rating">
-
-                        <span class="stars">
-                            ★ ★ ★
-                        </span>
-
-                        <span>
-                            (1,5k ulasan)
-                        </span>
-
-                    </div>
-
-                    <div class="location">
-
-                        <i class="bi bi-geo-alt-fill"></i>
-
-                        <span>
-                            Kabupaten Kuningan,<br>
-                            Jawa Barat.
-                        </span>
-
-                    </div>
-
-                    <span class="distance">
-                        12.68 KM
-                    </span>
-
-                </div>
-
-            </a>
+            </form>
 
         </div>
 
     </section>
 
 
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
 
-    <!-- =================================================
-         WISATA TERDEKAT
-    ================================================== -->
+    <main class="main-content">
 
-    <section class="destination-section nearby-section">
+        <!-- REKOMENDASI -->
+        <section class="destination-section">
 
-        <h2>
-            Wisata Terdekat dari lokasi mu
-        </h2>
+            <h2>
+                Rekomendasi Untuk Kamu
+            </h2>
 
+            <div class="destination-grid">
 
-        <div class="destination-grid">
+                <!-- CARD 1 -->
+                <a href="#" class="destination-card">
 
+                    <img
+                        src="assets/images/wisata/cilengkrang.jpg"
+                        alt="Cilengkrang"
+                        loading="lazy"
+                    >
 
-            <!-- CARD 1 -->
-            <a href="#" class="destination-card">
+                    <div class="card-content">
 
-                <img
-                    src="assets/images/wisata/cilengkrang.jpg"
-                    alt="Cilengkrang"
-                >
+                        <h3>Cilengkrang</h3>
 
-                <div class="card-content">
+                        <div class="rating">
+                            <span class="stars">★ ★ ★</span>
+                            <span>(2,7k ulasan)</span>
+                        </div>
 
-                    <h3>
-                        Cilengkrang
-                    </h3>
+                        <div class="location">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>
+                                Kabupaten Kuningan,<br>
+                                Jawa Barat.
+                            </span>
+                        </div>
 
-                    <div class="rating">
-
-                        <span class="stars">
-                            ★ ★ ★
-                        </span>
-
-                        <span>
-                            (2,7k ulasan)
-                        </span>
-
-                    </div>
-
-                    <div class="location">
-
-                        <i class="bi bi-geo-alt-fill"></i>
-
-                        <span>
-                            Kabupaten Kuningan,<br>
-                            Jawa Barat.
-                        </span>
+                        <span class="distance">5.76 KM</span>
 
                     </div>
 
-                </div>
-
-            </a>
+                </a>
 
 
+                <!-- CARD 2 -->
+                <a href="#" class="destination-card">
 
-            <!-- CARD 2 -->
-            <a href="#" class="destination-card">
+                    <img
+                        src="assets/images/wisata/bukit-pamor.jpg"
+                        alt="Bukit Pamoroan"
+                        loading="lazy"
+                    >
 
-                <img
-                    src="assets/images/wisata/bukit-pamor.jpg"
-                    alt="Bukit Pamoroan"
-                >
+                    <div class="card-content">
 
-                <div class="card-content">
+                        <h3>Bukit Pamoroan</h3>
 
-                    <h3>
-                        Bukit pamoroan
-                    </h3>
+                        <div class="rating">
+                            <span class="stars">★ ★ ★</span>
+                            <span>(2,6k ulasan)</span>
+                        </div>
 
-                    <div class="rating">
+                        <div class="location">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>
+                                Kabupaten Majalengka,<br>
+                                Jawa Barat.
+                            </span>
+                        </div>
 
-                        <span class="stars">
-                            ★ ★ ★
-                        </span>
-
-                        <span>
-                            (2,6k ulasan)
-                        </span>
-
-                    </div>
-
-                    <div class="location">
-
-                        <i class="bi bi-geo-alt-fill"></i>
-
-                        <span>
-                            Kabupaten Majalengka,<br>
-                            Jawa Barat.
-                        </span>
+                        <span class="distance">5.76 KM</span>
 
                     </div>
 
-                </div>
-
-            </a>
+                </a>
 
 
+                <!-- CARD 3 -->
+                <a href="#" class="destination-card">
 
-            <!-- CARD 3 -->
-            <a href="#" class="destination-card">
+                    <img
+                        src="assets/images/wisata/arunika-garden.jpg"
+                        alt="Arunika Garden"
+                        loading="lazy"
+                    >
 
-                <img
-                    src="assets/images/wisata/arunika-garden.jpg"
-                    alt="Arunika Garden"
-                >
+                    <div class="card-content">
 
-                <div class="card-content">
+                        <h3>Arunika Garden</h3>
 
-                    <h3>
-                        Arunika Garden
-                    </h3>
+                        <div class="rating">
+                            <span class="stars">★ ★ ★</span>
+                            <span>(2,5k ulasan)</span>
+                        </div>
 
-                    <div class="rating">
+                        <div class="location">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>
+                                Kabupaten Kuningan,<br>
+                                Jawa Barat.
+                            </span>
+                        </div>
 
-                        <span class="stars">
-                            ★ ★ ★
-                        </span>
-
-                        <span>
-                            (2,5k ulasan)
-                        </span>
-
-                    </div>
-
-                    <div class="location">
-
-                        <i class="bi bi-geo-alt-fill"></i>
-
-                        <span>
-                            Kabupaten Kuningan,<br>
-                            Jawa Barat.
-                        </span>
+                        <span class="distance">7.68 KM</span>
 
                     </div>
 
-                </div>
-
-            </a>
+                </a>
 
 
+                <!-- CARD 4 -->
+                <a href="#" class="destination-card">
 
-            <!-- CARD 4 -->
-            <a href="#" class="destination-card">
+                    <img
+                        src="assets/images/wisata/curug-putri.jpg"
+                        alt="Curug Putri Palutungan"
+                        loading="lazy"
+                    >
 
-                <img
-                    src="assets/images/wisata/curug-putri.jpg"
-                    alt="Curug Putri Palutungan"
-                >
+                    <div class="card-content">
 
-                <div class="card-content">
+                        <h3>Curug Putri Palutungan</h3>
 
-                    <h3>
-                        Curug putri palutungan
-                    </h3>
+                        <div class="rating">
+                            <span class="stars">★ ★ ★</span>
+                            <span>(1,5k ulasan)</span>
+                        </div>
 
-                    <div class="rating">
+                        <div class="location">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>
+                                Kabupaten Kuningan,<br>
+                                Jawa Barat.
+                            </span>
+                        </div>
 
-                        <span class="stars">
-                            ★ ★ ★
-                        </span>
-
-                        <span>
-                            (1,5k ulasan)
-                        </span>
-
-                    </div>
-
-                    <div class="location">
-
-                        <i class="bi bi-geo-alt-fill"></i>
-
-                        <span>
-                            Kabupaten Kuningan,<br>
-                            Jawa Barat.
-                        </span>
+                        <span class="distance">12.68 KM</span>
 
                     </div>
 
-                </div>
+                </a>
 
-            </a>
+            </div>
 
-        </div>
-
-    </section>
+        </section>
 
 
-</main>
+        <!-- WISATA TERDEKAT -->
+        <section class="destination-section nearby-section">
+
+            <h2>
+                Wisata Terdekat dari Lokasimu
+            </h2>
+
+            <div class="destination-grid">
+
+                <!-- CARD 1 -->
+                <a href="#" class="destination-card">
+
+                    <img
+                        src="assets/images/wisata/cilengkrang.jpg"
+                        alt="Cilengkrang"
+                        loading="lazy"
+                    >
+
+                    <div class="card-content">
+
+                        <h3>Cilengkrang</h3>
+
+                        <div class="rating">
+                            <span class="stars">★ ★ ★</span>
+                            <span>(2,7k ulasan)</span>
+                        </div>
+
+                        <div class="location">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>
+                                Kabupaten Kuningan,<br>
+                                Jawa Barat.
+                            </span>
+                        </div>
+
+                    </div>
+
+                </a>
 
 
-<!-- =====================================================
-     JAVASCRIPT
-===================================================== -->
+                <!-- CARD 2 -->
+                <a href="#" class="destination-card">
 
-<script>
+                    <img
+                        src="assets/images/wisata/bukit-pamor.jpg"
+                        alt="Bukit Pamoroan"
+                        loading="lazy"
+                    >
 
-    const searchButton = document.getElementById('searchButton');
-    const searchInput = document.getElementById('searchInput');
+                    <div class="card-content">
 
-    searchButton.addEventListener('click', function () {
+                        <h3>Bukit Pamoroan</h3>
 
-        const keyword = searchInput.value.trim();
+                        <div class="rating">
+                            <span class="stars">★ ★ ★</span>
+                            <span>(2,6k ulasan)</span>
+                        </div>
 
-        if (keyword === '') {
-            alert('Silakan masukkan destinasi yang ingin dicari.');
-            return;
-        }
+                        <div class="location">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>
+                                Kabupaten Majalengka,<br>
+                                Jawa Barat.
+                            </span>
+                        </div>
 
-        console.log('Pencarian:', keyword);
+                    </div>
 
-    });
+                </a>
 
 
-    searchInput.addEventListener('keypress', function (event) {
+                <!-- CARD 3 -->
+                <a href="#" class="destination-card">
 
-        if (event.key === 'Enter') {
-            searchButton.click();
-        }
+                    <img
+                        src="assets/images/wisata/arunika-garden.jpg"
+                        alt="Arunika Garden"
+                        loading="lazy"
+                    >
 
-    });
+                    <div class="card-content">
 
-</script>
+                        <h3>Arunika Garden</h3>
+
+                        <div class="rating">
+                            <span class="stars">★ ★ ★</span>
+                            <span>(2,5k ulasan)</span>
+                        </div>
+
+                        <div class="location">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>
+                                Kabupaten Kuningan,<br>
+                                Jawa Barat.
+                            </span>
+                        </div>
+
+                    </div>
+
+                </a>
+
+
+                <!-- CARD 4 -->
+                <a href="#" class="destination-card">
+
+                    <img
+                        src="assets/images/wisata/curug-putri.jpg"
+                        alt="Curug Putri Palutungan"
+                        loading="lazy"
+                    >
+
+                    <div class="card-content">
+
+                        <h3>Curug Putri Palutungan</h3>
+
+                        <div class="rating">
+                            <span class="stars">★ ★ ★</span>
+                            <span>(1,5k ulasan)</span>
+                        </div>
+
+                        <div class="location">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>
+                                Kabupaten Kuningan,<br>
+                                Jawa Barat.
+                            </span>
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script>
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+
+        searchForm.addEventListener('submit', function (event) {
+            const keyword = searchInput.value.trim();
+
+            if (keyword === '') {
+                event.preventDefault();
+                alert('Silakan masukkan destinasi yang ingin dicari.');
+                searchInput.focus();
+            }
+        });
+    </script>
 
 </body>
 </html>
