@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -223,9 +222,3 @@ Temukan destinasi wisata terbaik di majalengka &amp; Kuningan
 </div>
 </body>
 </html>
-=======
-<?php
-
-header('Location: FrontEnd/beranda.php');
-exit;
->>>>>>> be88452a0d05faa67e6630d6684171b762de11dc
