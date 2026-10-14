@@ -77,7 +77,7 @@ try {
   $respond(200, [
     "status" => "success",
     "message" => "Login berhasil",
-    "redirect" => "../exploreMajaKu_skeleton/auth/landingpage.php",
+    "redirect" => "../dashboard.php",
     "data" => [
       "id_user" => (int) $userId,
       "nama" => $name,

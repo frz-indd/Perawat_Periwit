@@ -1,4 +1,4 @@
 <?php
 
-header('Location: FrontEnd/auth/Login.php');
+header('Location: FrontEnd/beranda.php');
 exit;

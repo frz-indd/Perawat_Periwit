@@ -7,5 +7,5 @@ if (!isset($_SESSION["id_user"])) {
   exit;
 }
 
-header("Location: exploreMajaKu_skeleton/index.html");
+header("Location: ../FrontEnd/beranda.php");
 exit;
