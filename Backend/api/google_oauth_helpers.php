@@ -5,12 +5,23 @@ function googleOauthConfig(): ?array
   $clientSecret = getenv("GOOGLE_CLIENT_SECRET");
   $redirectUri = getenv("GOOGLE_REDIRECT_URI");
 
-  if (
-    !is_string($clientId) || trim($clientId) === "" ||
-    !is_string($clientSecret) || trim($clientSecret) === "" ||
-    !is_string($redirectUri) || trim($redirectUri) === ""
-  ) {
+  if (!is_string($clientId) || trim($clientId) === "") {
     return null;
+  }
+
+  if (!is_string($clientSecret) || trim($clientSecret) === "") {
+    return null;
+  }
+
+  if (!is_string($redirectUri) || trim($redirectUri) === "") {
+    $scheme = ((!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") || ($_SERVER["SERVER_PORT"] ?? null) == 443)
+      ? "https"
+      : "http";
+
+    $host = $_SERVER["HTTP_HOST"] ?? "localhost";
+    $scriptName = $_SERVER["SCRIPT_NAME"] ?? "/Backend/api/google_login.php";
+    $callbackPath = dirname($scriptName) . "/google_callback.php";
+    $redirectUri = $scheme . "://" . $host . $callbackPath;
   }
 
   return [
