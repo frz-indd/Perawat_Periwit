@@ -1,101 +1,195 @@
+
 <?php
 header("Content-Type: application/json; charset=utf-8");
 
-$respond = static function (int $statusCode, array $payload): void {
-  http_response_code($statusCode);
-  echo json_encode($payload, JSON_UNESCAPED_UNICODE);
-  exit;
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+$respond = static function (int $code, array $data): void {
+    http_response_code($code);
+
+    echo json_encode(
+        $data,
+        JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE
+    );
+
+    exit;
 };
 
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-  header("Allow: POST");
-  $respond(405, [
-    "status" => "error",
-    "message" => "Metode tidak diizinkan"
-  ]);
-}
+/* METODE REQUEST */
 
-$contentType = $_SERVER["CONTENT_TYPE"] ?? "";
-$input = $_POST;
-if (stripos($contentType, "application/json") !== false) {
-  $input = json_decode(file_get_contents("php://input"), true);
-  if (!is_array($input)) {
-    $respond(400, [
-      "status" => "error",
-      "message" => "Format JSON tidak valid"
+if (($_SERVER["REQUEST_METHOD"] ?? "") !== "POST") {
+    header("Allow: POST");
+
+    $respond(405, [
+        "status" => "validation_error",
+        "message" => "Metode tidak diizinkan."
     ]);
-  }
 }
 
-$name = trim((string) ($input["nama"] ?? $input["Nama_user"] ?? ""));
-$email = strtolower(trim((string) ($input["email"] ?? $input["Email"] ?? "")));
-$password = $input["password"] ?? $input["Password"] ?? null;
+/* INPUT */
 
-if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
-  $respond(422, [
-    "status" => "error",
-    "message" => "Alamat email tidak valid"
-  ]);
+$name = trim((string) ($_POST["nama"] ?? $_POST["Nama_user"] ?? ""));
+
+$email = strtolower(
+    trim((string) ($_POST["email"] ?? $_POST["Email"] ?? ""))
+);
+
+$password = $_POST["password"] ?? $_POST["Password"] ?? null;
+
+$confirmPassword =
+    $_POST["confirmPassword"] ??
+    $_POST["confirm_password"] ??
+    null;
+
+/* VALIDASI EMAIL */
+
+if ($email === "") {
+    $respond(422, [
+        "status" => "validation_error",
+        "message" => "Email wajib diisi."
+    ]);
 }
+
+if (strlen($email) > 255 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $respond(422, [
+        "status" => "validation_error",
+        "message" => "Masukkan alamat email yang valid."
+    ]);
+}
+
+/* VALIDASI PASSWORD */
+
+if (!is_string($password) || trim($password) === "") {
+    $respond(422, [
+        "status" => "validation_error",
+        "message" => "Password wajib diisi."
+    ]);
+}
+
+if (strlen($password) < 8) {
+    $respond(422, [
+        "status" => "validation_error",
+        "message" => "Password harus terdiri dari minimal 8 karakter."
+    ]);
+}
+
+/* VALIDASI KONFIRMASI */
+
+if (!is_string($confirmPassword) || trim($confirmPassword) === "") {
+    $respond(422, [
+        "status" => "validation_error",
+        "message" => "Verifikasi password wajib diisi."
+    ]);
+}
+
+if ($password !== $confirmPassword) {
+    $respond(422, [
+        "status" => "validation_error",
+        "message" => "Konfirmasi password tidak sesuai."
+    ]);
+}
+
+/* NAMA DEFAULT
+   Form Register saat ini tidak memiliki input nama.
+*/
 
 if ($name === "") {
-  $emailName = strstr($email, "@", true);
-  $name = is_string($emailName) ? $emailName : "Pengguna";
+    $emailName = strstr($email, "@", true);
+
+    $name = is_string($emailName) && $emailName !== ""
+        ? $emailName
+        : "Pengguna";
 }
 
 if (strlen($name) > 255) {
-  $respond(422, [
-    "status" => "error",
-    "message" => "Nama maksimal 255 karakter"
-  ]);
+    $respond(422, [
+        "status" => "validation_error",
+        "message" => "Nama maksimal 255 karakter."
+    ]);
 }
 
-if (!is_string($password) || strlen($password) < 8) {
-  $respond(422, [
-    "status" => "error",
-    "message" => "Kata sandi minimal 8 karakter"
-  ]);
-}
+/* SIMPAN KE DATABASE */
 
 try {
-  require_once __DIR__ . "/../database/koneksi.php";
+    require_once __DIR__ . "/../database/koneksi.php";
 
-  $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-  $statement = $conn->prepare(
-    "INSERT INTO `user` (Nama_user, Email, Password) VALUES (?, ?, ?)"
-  );
-  $statement->bind_param("sss", $name, $email, $passwordHash);
-  $statement->execute();
+    /* CEK EMAIL SUDAH TERDAFTAR */
 
-  $userId = (int) $conn->insert_id;
-  $statement->close();
+    $check = $conn->prepare(
+        "SELECT Id_user
+         FROM `user`
+         WHERE Email = ?
+         LIMIT 1"
+    );
 
-  $respond(201, [
-    "status" => "success",
-    "message" => "Pendaftaran berhasil",
-    "data" => [
-      "id_user" => $userId,
-      "nama" => $name,
-      "email" => $email
-    ]
-  ]);
-} catch (mysqli_sql_exception $exception) {
-  error_log($exception->getMessage());
-  if ($exception->getCode() === 1062) {
-    $respond(409, [
-      "status" => "error",
-      "message" => "Email sudah terdaftar"
+    $check->bind_param("s", $email);
+    $check->execute();
+    $check->store_result();
+
+    $emailExists = $check->num_rows > 0;
+    $check->close();
+
+    if ($emailExists) {
+        $respond(409, [
+            "status" => "email_exists",
+            "message" => "Email sudah terdaftar. Silakan gunakan email lain."
+        ]);
+    }
+
+    /* HASH PASSWORD */
+
+    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+    if ($passwordHash === false) {
+        throw new RuntimeException("Gagal membuat hash password.");
+    }
+
+    /* INSERT USER */
+
+    $statement = $conn->prepare(
+        "INSERT INTO `user` (Nama_user, Email, Password)
+         VALUES (?, ?, ?)"
+    );
+
+    $statement->bind_param("sss", $name, $email, $passwordHash);
+    $statement->execute();
+
+    $userId = (int) $conn->insert_id;
+
+    $statement->close();
+
+    /* REGISTRASI BERHASIL */
+
+    $respond(201, [
+        "status" => "success",
+        "message" => "Pendaftaran berhasil.",
+        "data" => [
+            "id_user" => $userId,
+            "nama" => $name,
+            "email" => $email
+        ]
     ]);
-  }
 
-  $respond(500, [
-    "status" => "error",
-    "message" => "Pendaftaran gagal"
-  ]);
+} catch (mysqli_sql_exception $exception) {
+    error_log("Register database error: " . $exception->getMessage());
+
+    if ((int) $exception->getCode() === 1062) {
+        $respond(409, [
+            "status" => "email_exists",
+            "message" => "Email sudah terdaftar. Silakan gunakan email lain."
+        ]);
+    }
+
+    $respond(500, [
+        "status" => "server_error",
+        "message" => "Terjadi kesalahan pada server. Silakan coba lagi."
+    ]);
+
 } catch (Throwable $exception) {
-  error_log($exception->getMessage());
-  $respond(500, [
-    "status" => "error",
-    "message" => "Pendaftaran gagal"
-  ]);
+    error_log("Register error: " . $exception->getMessage());
+
+    $respond(500, [
+        "status" => "server_error",
+        "message" => "Terjadi kesalahan pada server. Silakan coba lagi."
+    ]);
 }

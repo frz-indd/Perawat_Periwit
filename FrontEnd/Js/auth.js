@@ -1,44 +1,122 @@
+
+/* =====================================================
+   HELPER VALIDASI
+===================================================== */
+
+function showMessage(element, message, type = 'danger') {
+    if (!element) return;
+
+    element.textContent = message;
+    element.className = `alert alert-${type} mt-3`;
+    element.setAttribute('role', 'alert');
+}
+
+function hideMessage(element) {
+    if (!element) return;
+
+    element.textContent = '';
+    element.classList.add('d-none');
+}
+
+function setInvalid(input, feedback, message) {
+    if (input) {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+    }
+
+    if (feedback) {
+        feedback.textContent = message;
+        feedback.classList.add('d-block');
+    }
+}
+
+function setValid(input, feedback) {
+    if (input) {
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+    }
+
+    if (feedback) {
+        feedback.textContent = '';
+        feedback.classList.remove('d-block');
+    }
+}
+
+function clearValidation(input) {
+    if (!input) return;
+
+    input.classList.remove('is-invalid', 'is-valid');
+
+    const feedback = input
+        .closest('.form-group')
+        ?.querySelector('.invalid-feedback');
+
+    if (feedback) {
+        feedback.textContent = '';
+        feedback.classList.remove('d-block');
+    }
+}
+
+function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function isValidPhone(value) {
+    const phone = value.replace(/[\s()-]/g, '');
+
+    return /^(?:\+62|62|0)8[1-9][0-9]{6,11}$/.test(phone);
+}
+
+async function sendForm(form) {
+    const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {
+            Accept: 'application/json'
+        },
+        credentials: 'same-origin'
+    });
+
+    let result;
+
+    try {
+        result = await response.json();
+    } catch {
+        throw new Error('server_error');
+    }
+
+    if (!response.ok && !result.status) {
+        throw new Error('server_error');
+    }
+
+    return result;
+}
+
+
 /* =====================================================
    PASSWORD SHOW / HIDE
 ===================================================== */
 
-const passwordToggleButtons = document.querySelectorAll('.password-toggle');
-
-passwordToggleButtons.forEach(button => {
-
+document.querySelectorAll('.password-toggle').forEach(button => {
     button.addEventListener('click', function () {
-
         const targetId = this.getAttribute('data-target');
-        const passwordInput = document.getElementById(targetId);
+        const input = document.getElementById(targetId);
         const icon = this.querySelector('i');
 
-        if (passwordInput.type === 'password') {
+        if (!input || !icon) return;
 
-            passwordInput.type = 'text';
+        const show = input.type === 'password';
 
-            icon.classList.remove('bi-eye-slash');
-            icon.classList.add('bi-eye');
+        input.type = show ? 'text' : 'password';
 
-            this.setAttribute(
-                'aria-label',
-                'Sembunyikan password'
-            );
+        icon.classList.toggle('bi-eye', show);
+        icon.classList.toggle('bi-eye-slash', !show);
 
-        } else {
-
-            passwordInput.type = 'password';
-
-            icon.classList.remove('bi-eye');
-            icon.classList.add('bi-eye-slash');
-
-            this.setAttribute(
-                'aria-label',
-                'Tampilkan password'
-            );
-        }
-
+        this.setAttribute(
+            'aria-label',
+            show ? 'Sembunyikan password' : 'Tampilkan password'
+        );
     });
-
 });
 
 
@@ -49,83 +127,143 @@ passwordToggleButtons.forEach(button => {
 const loginForm = document.getElementById('loginForm');
 
 if (loginForm) {
+    const identity = document.getElementById('loginIdentity');
+    const password = document.getElementById('loginPassword');
+    const message = document.getElementById('loginMessage');
+    const submitButton = loginForm.querySelector('[type="submit"]');
 
-    const googleResult = new URLSearchParams(window.location.search).get('google');
+    const identityFeedback = identity
+        .closest('.form-group')
+        .querySelector('.invalid-feedback');
+
+    const passwordFeedback = password
+        .closest('.form-group')
+        .querySelector('.invalid-feedback');
+
+    const googleResult = new URLSearchParams(
+        window.location.search
+    ).get('google');
+
     const googleMessages = {
         success: 'Login Google berhasil.',
         not_configured: 'Login Google belum dikonfigurasi di server.',
         cancelled: 'Login Google dibatalkan.'
     };
-    const googleMessage = googleMessages[googleResult];
 
-    if (googleMessage) {
-        const message = document.getElementById('loginMessage');
-        message.textContent = googleMessage;
-        message.className = `alert mt-3 ${googleResult === 'success' ? 'alert-success' : 'alert-danger'}`;
+    if (googleMessages[googleResult]) {
+        showMessage(
+            message,
+            googleMessages[googleResult],
+            googleResult === 'success' ? 'success' : 'danger'
+        );
     }
 
     loginForm.addEventListener('submit', async function (event) {
-
         event.preventDefault();
 
-        const email = document.getElementById('loginIdentity');
-        const password = document.getElementById('loginPassword');
-        const message = document.getElementById('loginMessage');
-        const submitButton = loginForm.querySelector('[type="submit"]');
+        hideMessage(message);
 
-        let isValid = true;
+        const identityValue = identity.value.trim();
+        const passwordValue = password.value;
 
-        if (!email.validity.valid || email.value.trim() === '') {
-            email.classList.add('is-invalid');
-            email.classList.remove('is-valid');
-            isValid = false;
+        let valid = true;
+        const errors = [];
+
+        if (!identityValue) {
+            const error = 'Email atau nomor telepon wajib diisi.';
+
+            setInvalid(identity, identityFeedback, error);
+            errors.push(error);
+            valid = false;
+        } else if (
+            identityValue.includes('@')
+                ? !isValidEmail(identityValue)
+                : !isValidPhone(identityValue)
+        ) {
+            const error = identityValue.includes('@')
+                ? 'Masukkan alamat email yang valid.'
+                : 'Masukkan nomor telepon yang valid.';
+
+            setInvalid(identity, identityFeedback, error);
+            errors.push(error);
+            valid = false;
         } else {
-            email.classList.remove('is-invalid');
-            email.classList.add('is-valid');
+            setValid(identity, identityFeedback);
         }
 
-        if (password.value.trim() === '') {
-            password.classList.add('is-invalid');
-            password.classList.remove('is-valid');
-            isValid = false;
+        if (!passwordValue.trim()) {
+            const error = 'Password wajib diisi.';
+
+            setInvalid(password, passwordFeedback, error);
+            errors.push(error);
+            valid = false;
         } else {
-            password.classList.remove('is-invalid');
-            password.classList.add('is-valid');
+            setValid(password, passwordFeedback);
         }
 
-        if (!isValid) return;
+        if (!valid) {
+            showMessage(message, errors.join(' '));
+            return;
+        }
 
-        message.classList.add('d-none');
-        document.getElementById('loginPasswordError').classList.add('d-none');
-        password.classList.remove('is-invalid');
         submitButton.disabled = true;
 
         try {
-            const response = await fetch(loginForm.action, {
-                method: 'POST',
-                body: new FormData(loginForm),
-                headers: { Accept: 'application/json' },
-                credentials: 'same-origin'
-            });
-            const result = await response.json();
+            const result = await sendForm(loginForm);
 
-            if (response.ok && result.status === 'success') {
-                window.location.assign(result.redirect || '../../dashboard.php');
+            if (result.status === 'success') {
+                alert(
+                    'Login Berhasil! Selamat datang di Explore Majaku.'
+                );
+
+                window.location.assign(
+                    result.redirect || '../index.html'
+                );
+
                 return;
             }
 
-            message.textContent = result.message || 'Login gagal. Silakan coba lagi.';
-            message.className = 'login-password-error';
-            password.classList.add('is-invalid');
-        } catch (error) {
-            message.textContent = 'Tidak dapat terhubung ke server. Coba lagi.';
-            message.className = 'login-password-error';
-            password.classList.add('is-invalid');
+            const messages = {
+                account_not_found:
+                    'Akun tidak ditemukan. Silakan daftar terlebih dahulu.',
+
+                wrong_password:
+                    'Password yang kamu masukkan salah. Silakan coba lagi.',
+
+                invalid_email:
+                    'Masukkan alamat email yang valid.',
+
+                invalid_phone:
+                    'Masukkan nomor telepon yang valid.',
+
+                validation_error:
+                    result.message || 'Data login tidak valid.',
+
+                server_error:
+                    'Terjadi kesalahan pada server. Silakan coba lagi.'
+            };
+
+            const error = messages[result.status] ||
+                result.message ||
+                'Terjadi kesalahan pada server. Silakan coba lagi.';
+
+            if (result.status === 'wrong_password') {
+                setInvalid(password, passwordFeedback, error);
+            } else if (result.status === 'account_not_found') {
+                setInvalid(identity, identityFeedback, error);
+            }
+
+            showMessage(message, error);
+
+        } catch {
+            showMessage(
+                message,
+                'Terjadi kesalahan pada server. Silakan coba lagi.'
+            );
         } finally {
             submitButton.disabled = false;
         }
     });
-
 }
 
 
@@ -136,92 +274,135 @@ if (loginForm) {
 const registerForm = document.getElementById('registerForm');
 
 if (registerForm) {
+    const email = document.getElementById('registerIdentity');
+    const password = document.getElementById('registerPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const message = document.getElementById('registerMessage');
+    const submitButton = registerForm.querySelector('[type="submit"]');
+
+    const emailFeedback = email
+        .closest('.form-group')
+        .querySelector('.invalid-feedback');
+
+    const passwordFeedback = password
+        .closest('.form-group')
+        .querySelector('.invalid-feedback');
+
+    const confirmFeedback = document.getElementById(
+        'confirmPasswordError'
+    );
 
     registerForm.addEventListener('submit', async function (event) {
-
         event.preventDefault();
 
-        const email = document.getElementById('registerIdentity');
-        const password = document.getElementById('registerPassword');
-        const passwordFeedback =
-            password.closest('.form-group').querySelector('.invalid-feedback');
-        const confirmPassword = document.getElementById('confirmPassword');
-        const confirmPasswordError =
-            document.getElementById('confirmPasswordError');
-        const message = document.getElementById('registerMessage');
-        const submitButton = registerForm.querySelector('[type="submit"]');
+        hideMessage(message);
 
-        let isValid = true;
+        const emailValue = email.value.trim();
+        const passwordValue = password.value;
+        const confirmValue = confirmPassword.value;
 
-        if (!email.validity.valid || email.value.trim() === '') {
-            email.classList.add('is-invalid');
-            email.classList.remove('is-valid');
-            isValid = false;
+        let valid = true;
+        const errors = [];
+
+        if (!emailValue) {
+            const error = 'Email wajib diisi.';
+
+            setInvalid(email, emailFeedback, error);
+            errors.push(error);
+            valid = false;
+        } else if (!isValidEmail(emailValue)) {
+            const error = 'Masukkan alamat email yang valid.';
+
+            setInvalid(email, emailFeedback, error);
+            errors.push(error);
+            valid = false;
         } else {
-            email.classList.remove('is-invalid');
-            email.classList.add('is-valid');
+            setValid(email, emailFeedback);
         }
 
-        if (password.value.length < 8) {
-            password.classList.add('is-invalid');
-            password.classList.remove('is-valid');
-            passwordFeedback.textContent =
+        if (!passwordValue.trim()) {
+            const error = 'Password wajib diisi.';
+
+            setInvalid(password, passwordFeedback, error);
+            errors.push(error);
+            valid = false;
+        } else if (passwordValue.length < 8) {
+            const error =
                 'Password harus terdiri dari minimal 8 karakter.';
-            passwordFeedback.classList.add('d-block');
-            isValid = false;
+
+            setInvalid(password, passwordFeedback, error);
+            errors.push(error);
+            valid = false;
         } else {
-            password.classList.remove('is-invalid');
-            password.classList.add('is-valid');
-            passwordFeedback.classList.remove('d-block');
+            setValid(password, passwordFeedback);
         }
 
-        if (confirmPassword.value === '') {
-            confirmPassword.classList.add('is-invalid');
-            confirmPassword.classList.remove('is-valid');
-            confirmPasswordError.textContent = 'Verifikasi password wajib diisi.';
-            confirmPasswordError.classList.add('d-block');
-            isValid = false;
-        } else if (password.value !== confirmPassword.value) {
-            confirmPassword.classList.add('is-invalid');
-            confirmPassword.classList.remove('is-valid');
-            confirmPasswordError.textContent = 'Password tidak sama.';
-            confirmPasswordError.classList.add('d-block');
-            isValid = false;
+        if (!confirmValue.trim()) {
+            const error = 'Verifikasi password wajib diisi.';
+
+            setInvalid(confirmPassword, confirmFeedback, error);
+            errors.push(error);
+            valid = false;
+        } else if (passwordValue !== confirmValue) {
+            const error = 'Konfirmasi password tidak sesuai.';
+
+            setInvalid(confirmPassword, confirmFeedback, error);
+            errors.push(error);
+            valid = false;
         } else {
-            confirmPassword.classList.remove('is-invalid');
-            confirmPassword.classList.add('is-valid');
-            confirmPasswordError.classList.remove('d-block');
+            setValid(confirmPassword, confirmFeedback);
         }
 
-        if (!isValid) return;
+        if (!valid) {
+            showMessage(message, errors.join(' '));
+            return;
+        }
 
-        message.classList.add('d-none');
         submitButton.disabled = true;
 
         try {
-            const response = await fetch(registerForm.action, {
-                method: 'POST',
-                body: new FormData(registerForm),
-                headers: { Accept: 'application/json' },
-                credentials: 'same-origin'
-            });
-            const result = await response.json();
+            const result = await sendForm(registerForm);
 
-            if (response.ok && result.status === 'success') {
+            if (result.status === 'success') {
+                alert(
+                    'Registrasi Berhasil! Akun kamu berhasil dibuat. ' +
+                    'Silakan login untuk melanjutkan.'
+                );
+
                 window.location.assign('Login.php');
                 return;
             }
 
-            message.textContent = result.message || 'Pendaftaran gagal.';
-            message.className = 'auth-inline-error';
-        } catch (error) {
-            message.textContent = 'Tidak dapat terhubung ke server. Coba lagi.';
-            message.className = 'auth-inline-error';
+            const messages = {
+                email_exists:
+                    'Email sudah terdaftar. Silakan gunakan email lain.',
+
+                validation_error:
+                    result.message || 'Data pendaftaran tidak valid.',
+
+                server_error:
+                    'Terjadi kesalahan pada server. Silakan coba lagi.'
+            };
+
+            const error = messages[result.status] ||
+                result.message ||
+                'Terjadi kesalahan pada server. Silakan coba lagi.';
+
+            if (result.status === 'email_exists') {
+                setInvalid(email, emailFeedback, error);
+            }
+
+            showMessage(message, error);
+
+        } catch {
+            showMessage(
+                message,
+                'Terjadi kesalahan pada server. Silakan coba lagi.'
+            );
         } finally {
             submitButton.disabled = false;
         }
     });
-
 }
 
 
@@ -229,22 +410,17 @@ if (registerForm) {
    GOOGLE LOGIN / REGISTER
 ===================================================== */
 
-const googleButtons = [
+[
     document.getElementById('googleLogin'),
     document.getElementById('googleRegister')
-];
-
-googleButtons.forEach(button => {
-
+].forEach(button => {
     if (button) {
-
         button.addEventListener('click', function () {
-                window.location.assign('../../Backend/api/google_login.php');
-
+            window.location.assign(
+                '../../Backend/api/google_login.php'
+            );
         });
-
     }
-
 });
 
 
@@ -252,28 +428,15 @@ googleButtons.forEach(button => {
    APPLE LOGIN / REGISTER
 ===================================================== */
 
-const appleButtons = [
+[
     document.getElementById('appleLogin'),
     document.getElementById('appleRegister')
-];
-
-appleButtons.forEach(button => {
-
+].forEach(button => {
     if (button) {
-
         button.addEventListener('click', function () {
-
-            /*
-                Nanti dihubungkan dengan
-                Apple OAuth / backend.
-            */
-
             alert('Login dengan Apple belum dihubungkan.');
-
         });
-
     }
-
 });
 
 
@@ -284,42 +447,28 @@ appleButtons.forEach(button => {
 const forgotPassword = document.querySelector('.forgot-password');
 
 if (forgotPassword) {
-
     forgotPassword.addEventListener('click', function (event) {
-
         event.preventDefault();
-
         alert('Halaman lupa password belum dibuat.');
-
     });
-
 }
 
 
 /* =====================================================
-   INPUT VALIDATION SAAT DIISI
+   HAPUS VALIDASI KETIKA INPUT DIUBAH
 ===================================================== */
 
-const allInputs = document.querySelectorAll('.auth-input');
-
-allInputs.forEach(input => {
-
+document.querySelectorAll('.auth-input').forEach(input => {
     input.addEventListener('input', function () {
+        clearValidation(this);
 
         if (this.id === 'registerPassword') {
-            if (this.value.length >= 8) {
-                this.classList.remove('is-invalid');
+            const confirmPassword =
+                document.getElementById('confirmPassword');
+
+            if (confirmPassword && confirmPassword.value !== '') {
+                clearValidation(confirmPassword);
             }
-
-            return;
         }
-
-        if (this.value.trim() !== '') {
-
-            this.classList.remove('is-invalid');
-
-        }
-
     });
-
 });
