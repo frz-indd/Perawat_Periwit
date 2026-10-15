@@ -21,8 +21,7 @@ $budgetMax = isset($_GET['max']) && $_GET['max'] !== ''
     ? max(0, (int) $_GET['max']) : 1000000;
 
 
-// DATA CONTOH DESTINASI
-// Nantinya data ini dapat diganti dengan hasil query database.
+// Destinasi yang ditampilkan di website tetap dapat dicari meski belum ada di database.
 $destinasi = [
     [
         'id' => 1,
@@ -116,6 +115,86 @@ $destinasi = [
     ],
 ];
 
+// Tambahkan destinasi database dan prioritaskan datanya jika nama juga ada di website.
+try {
+    require_once __DIR__ . '/../../Backend/database/koneksi.php';
+
+    $sql = "SELECT
+                w.id_wisata AS id,
+                w.nama_wisata AS nama,
+                w.domisili AS wilayah,
+                w.harga_tiket AS harga,
+                k.nama_kategori AS kategori
+            FROM wisata AS w
+            LEFT JOIN kategori AS k ON k.Id_kategori = w.id_kategori";
+    $parameters = [];
+    $parameterTypes = '';
+
+    if ($keyword !== '') {
+        $sql .= " WHERE w.nama_wisata LIKE ?
+                    OR w.domisili LIKE ?
+                    OR w.alamat LIKE ?
+                    OR w.deskripsi LIKE ?
+                    OR k.nama_kategori LIKE ?";
+        $searchTerm = '%' . $keyword . '%';
+        $parameters = array_fill(0, 5, $searchTerm);
+        $parameterTypes = 'sssss';
+    }
+
+    $sql .= ' ORDER BY w.nama_wisata';
+    $statement = $conn->prepare($sql);
+
+    if ($parameters !== []) {
+        $statement->bind_param($parameterTypes, ...$parameters);
+    }
+
+    $statement->execute();
+    $databaseRows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
+    $statement->close();
+
+    $databaseDestinasi = [];
+    $databaseNames = [];
+
+    foreach ($databaseRows as $row) {
+        $name = trim((string) ($row['nama'] ?? ''));
+        if ($name === '') {
+            continue;
+        }
+
+        $category = trim((string) ($row['kategori'] ?? ''));
+        $categoryKey = strtolower($category);
+        if (str_contains($categoryKey, 'alam')) {
+            $category = 'Wisata Alam & Pegunungan';
+        } elseif (str_contains($categoryKey, 'budaya') || str_contains($categoryKey, 'sejarah')) {
+            $category = 'Wisata Sejarah & Budaya';
+        } elseif (str_contains($categoryKey, 'air') || str_contains($categoryKey, 'curug')) {
+            $category = 'Wisata Air & Curug';
+        } elseif (str_contains($categoryKey, 'kuliner') || str_contains($categoryKey, 'buatan')) {
+            $category = 'Wisata Buatan/Kuliner';
+        }
+
+        $row['nama'] = $name;
+        $row['wilayah'] = trim((string) $row['wilayah']);
+        $row['kategori'] = $category;
+        $row['jarak'] = null;
+        $row['rating'] = 0;
+        $row['harga'] = (float) $row['harga'];
+        $row['gambar'] = '../assets/images/img.png';
+
+        $databaseDestinasi[] = $row;
+        $databaseNames[strtolower($name)] = true;
+    }
+
+    $destinasi = array_merge(
+        $databaseDestinasi,
+        array_filter($destinasi, static function ($item) use ($databaseNames) {
+            return !isset($databaseNames[strtolower($item['nama'])]);
+        })
+    );
+} catch (Throwable $exception) {
+    error_log($exception->getMessage());
+}
+
 
 // FILTER DATA DESTINASI
 $hasil = array_filter($destinasi, function ($item) use (
@@ -147,10 +226,10 @@ $hasil = array_filter($destinasi, function ($item) use (
 
     foreach ($jarakDipilih as $jarak) {
         if (
-            ($jarak === '5' && $item['jarak'] <= 5) ||
-            ($jarak === '5-10' && $item['jarak'] > 5 && $item['jarak'] <= 10) ||
-            ($jarak === '10-20' && $item['jarak'] > 10 && $item['jarak'] <= 20) ||
-            ($jarak === '20-30' && $item['jarak'] > 20 && $item['jarak'] <= 30)
+            (is_numeric($item['jarak']) && $jarak === '5' && $item['jarak'] <= 5) ||
+            (is_numeric($item['jarak']) && $jarak === '5-10' && $item['jarak'] > 5 && $item['jarak'] <= 10) ||
+            (is_numeric($item['jarak']) && $jarak === '10-20' && $item['jarak'] > 10 && $item['jarak'] <= 20) ||
+            (is_numeric($item['jarak']) && $jarak === '20-30' && $item['jarak'] > 20 && $item['jarak'] <= 30)
         ) {
             $cocokJarak = true;
         }
@@ -211,7 +290,7 @@ function terpilih($daftar, $nilai)
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="CSS/hasil-pencarian.css">
+    <link rel="stylesheet" href="../CSS/hasil_pencarian.css">
 </head>
 
 <body>
@@ -231,7 +310,7 @@ function terpilih($daftar, $nilai)
         </nav>
 
         <div class="navbar-icons">
-            <a href="hasil-pencarian.php" class="nav-icon" aria-label="Pencarian">
+            <a href="hasil_pencarian.php" class="nav-icon" aria-label="Pencarian">
                 <i class="bi bi-search"></i>
             </a>
 
@@ -246,7 +325,7 @@ function terpilih($daftar, $nilai)
 
 <!-- SEARCH BAR -->
 <section class="search-header">
-    <form action="hasil-pencarian.php" method="GET" class="search-box">
+    <form action="hasil_pencarian.php" method="GET" class="search-box">
 
         <input
             type="text"
@@ -270,7 +349,7 @@ function terpilih($daftar, $nilai)
     <!-- FILTER SIDEBAR -->
     <aside class="filter-sidebar">
 
-        <form action="hasil-pencarian.php" method="GET" id="filterForm">
+        <form action="hasil_pencarian.php" method="GET" id="filterForm">
 
             <input
                 type="hidden"
@@ -400,7 +479,7 @@ function terpilih($daftar, $nilai)
                 Terapkan Filter
             </button>
 
-            <a href="hasil-pencarian.php" class="reset-filter">
+            <a href="hasil_pencarian.php" class="reset-filter">
                 Reset Filter
             </a>
 
@@ -436,7 +515,7 @@ function terpilih($daftar, $nilai)
                             src="<?= htmlspecialchars($item['gambar'], ENT_QUOTES, 'UTF-8') ?>"
                             alt="<?= htmlspecialchars($item['nama'], ENT_QUOTES, 'UTF-8') ?>"
                             loading="lazy"
-                            onerror="this.onerror=null;this.src='assets/images/wisata/cilengkrang.jpg';"
+                            onerror="this.onerror=null;this.src='../assets/images/img.png';"
                         >
 
                         <div class="card-content">
@@ -483,7 +562,7 @@ function terpilih($daftar, $nilai)
                         Coba ubah kata kunci atau filter pencarianmu.
                     </p>
 
-                    <a href="hasil-pencarian.php">
+                    <a href="hasil_pencarian.php">
                         Tampilkan Semua Destinasi
                     </a>
                 </div>

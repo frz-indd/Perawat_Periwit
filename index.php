@@ -16,7 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <!-- CSS Beranda -->
-    <link rel="stylesheet" href="CSS/style.css?v=20261014">
+    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=20261014">
 </head>
 
 <body>
@@ -37,13 +37,13 @@
 
             <div class="navbar-icons">
 
-                <a href="auth/Login.php"
+                <a href="FrontEnd/auth/Profile.php"
                    class="profile-icon"
                    aria-label="Login atau profil">
                     <i class="bi bi-person-circle"></i>
                 </a>
 
-                <a href="auth/Login.php" class="login-button">
+                <a href="FrontEnd /auth/Login.php" class="login-button">
                     Login
                 </a>
 
@@ -68,7 +68,7 @@
 
             <form
                 class="search-box"
-                action="hasil_pencarian.php"
+                action="FrontEnd/pages/hasil_pencarian.php"
                 method="GET"
                 id="searchForm"
             >
@@ -137,7 +137,7 @@
                 <a href="#" class="destination-card">
 
                     <img
-                        src="assets/images/wisata/bukit-pamor.jpg"
+                        src="FrontEnd/assets/images/pamoroan.jpg"
                         alt="Bukit Pamoroan"
                     >
 
@@ -168,7 +168,7 @@
                 <a href="#" class="destination-card">
 
                     <img
-                        src="assets/images/wisata/arunika-garden.jpg"
+                        src="FrontEnd/assets/images/arunika-garden.jpg"
                         alt="Arunika Garden"
                     >
 
