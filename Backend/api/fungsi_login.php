@@ -198,7 +198,7 @@ try {
     $respond(200, [
         "status" => "success",
         "message" => "Login berhasil.",
-        "redirect" => "../index.html",
+        "redirect" => "../../index.php",
         "data" => [
             "id_user" => (int) $userId,
             "nama" => $name,

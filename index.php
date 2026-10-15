@@ -1,3 +1,8 @@
+<?php
+session_start();
+
+$isLoggedIn = isset($_SESSION["id_user"]);
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -37,15 +42,17 @@
 
             <div class="navbar-icons">
 
-                <a href="FrontEnd/auth/Profile.php"
+                <a href="<?= $isLoggedIn ? 'FrontEnd/pages/profil.php' : 'FrontEnd/auth/Login.php' ?>"
                    class="profile-icon"
-                   aria-label="Login atau profil">
+                   aria-label="<?= $isLoggedIn ? 'Profil' : 'Login' ?>">
                     <i class="bi bi-person-circle"></i>
                 </a>
 
-                <a href="FrontEnd /auth/Login.php" class="login-button">
-                    Login
-                </a>
+                <?php if (!$isLoggedIn): ?>
+                    <a href="FrontEnd/auth/Login.php" class="login-button">
+                        Login
+                    </a>
+                <?php endif; ?>
 
             </div>
 
