@@ -299,7 +299,7 @@ function terpilih($daftar, $nilai)
 <header class="navbar">
     <div class="navbar-container">
 
-        <a href="index.php" class="navbar-logo">
+        <a href="../../index.php" class="navbar-logo">
             Explore Majaku
         </a>
 

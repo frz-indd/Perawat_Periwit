@@ -22,7 +22,7 @@
                     <circle cx="24" cy="24" r="17"></circle>
                     <circle cx="24" cy="19" r="6"></circle>
                     <path d="M13.5 34c1.2-6 5-9.5 10.5-9.5s9.3 3.5 10.5 9.5"></path>
-                </svg>
+                </svg>  
             </a>
         </div>
     </header>
