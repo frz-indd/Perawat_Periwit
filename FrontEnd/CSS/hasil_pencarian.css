@@ -134,8 +134,8 @@ body {
 
 .search-box button {
     flex-shrink: 0;
-    width: 70px;
-    height: 50px;
+    width: 74px;
+    height: 46px;
     border: none;
     border-radius: 19px;
     background: #176f63;
@@ -440,11 +440,24 @@ body {
 }
 
 .stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
     color: #ffb800;
     font-family: Arial, sans-serif;
     font-size: 20px;
     letter-spacing: 0;
     white-space: nowrap;
+}
+
+.star-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-color: currentColor;
+    -webkit-mask: url("../assets/images/star.svg") center / contain no-repeat;
+    mask: url("../assets/images/star.svg") center / contain no-repeat;
+    font-size: 0;
 }
 
 .review-count {
@@ -719,7 +732,7 @@ body {
     }
 
     .search-box {
-        height: 52px;
+        height: 54px;
         border-radius: 14px;
         padding: 4px 6px 4px 15px;
     }
@@ -729,8 +742,8 @@ body {
     }
 
     .search-box button {
-        width: 44px;
-        height: 42px;
+        width: 74px;
+        height: 46px;
         border-radius: 12px;
         font-size: 22px;
     }

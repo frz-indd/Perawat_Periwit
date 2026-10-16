@@ -360,9 +360,14 @@ p {
 }
 
 .profil .image {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  background-color: currentColor;
+  -webkit-mask: url("../assets/images/star.svg") center / contain no-repeat;
+  mask: url("../assets/images/star.svg") center / contain no-repeat;
   color: #ffb000;
-  font-size: 18px;
-  line-height: 1;
+  font-size: 0;
 }
 
 .profil .text-wrapper-10 {

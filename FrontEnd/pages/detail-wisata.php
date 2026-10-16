@@ -85,7 +85,7 @@ $destination = [
                 <div class="destination-heading">
                     <h1 id="destination-title"><?= htmlspecialchars($destination['title'], ENT_QUOTES, 'UTF-8'); ?></h1>
                     <div class="destination-rating" aria-label="Rating 4,5 dari 5, 1500k ulasan">
-                        <span class="rating-stars" aria-hidden="true">★ ★ ★ ★</span>
+                        <span class="rating-stars" aria-hidden="true"><span class="star-icon">★</span><span class="star-icon">★</span><span class="star-icon">★</span><span class="star-icon">★</span></span>
                         <span class="rating-score"><?= htmlspecialchars($destination['rating'], ENT_QUOTES, 'UTF-8'); ?></span>
                     </div>
                     <p class="destination-location">
@@ -192,7 +192,7 @@ $destination = [
                 <div class="review-summary-card">
                     <div class="review-score">4,5</div>
                     <div class="review-overview">
-                        <span class="review-stars" aria-hidden="true">★ ★ ★ ★ ★</span>
+                        <span class="review-stars" aria-hidden="true"><span class="star-icon">★</span><span class="star-icon">★</span><span class="star-icon">★</span><span class="star-icon">★</span><span class="star-icon">★</span></span>
                         <span class="review-count">Dari 1500k ulasan</span>
                     </div>
                     <div class="rating-distribution" aria-label="Sebaran rating pengunjung">
@@ -216,7 +216,7 @@ $destination = [
                             </svg>
                             <div class="review-card-content">
                                 <strong><?= htmlspecialchars($review['name'], ENT_QUOTES, 'UTF-8'); ?></strong>
-                                <span class="review-card-stars" aria-label="<?= (int) $review['rating']; ?> dari 5 bintang"><?= str_repeat('★ ', (int) $review['rating']); ?></span>
+                                <span class="review-card-stars" aria-label="<?= (int) $review['rating']; ?> dari 5 bintang"><?php for ($star = 0; $star < (int) $review['rating']; $star++): ?><span class="star-icon" aria-hidden="true">★</span><?php endfor; ?></span>
                                 <span class="review-age"><?= htmlspecialchars($review['age'], ENT_QUOTES, 'UTF-8'); ?></span>
                                 <p><?= htmlspecialchars($review['comment'], ENT_QUOTES, 'UTF-8'); ?></p>
                             </div>

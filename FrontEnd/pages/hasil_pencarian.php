@@ -519,7 +519,7 @@ function terpilih($daftar, $nilai)
                             </h2>
 
                             <div class="rating">
-                                <span class="stars">★ ★ ★</span>
+                                <span class="stars"><span class="star-icon">★</span><span class="star-icon">★</span><span class="star-icon">★</span></span>
 
                                 <span class="review-count">
                                     (<?= number_format($item['rating'], 1, ',', '.') ?>k ulasan)
