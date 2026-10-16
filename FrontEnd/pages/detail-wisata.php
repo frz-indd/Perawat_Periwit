@@ -1,48 +1,69 @@
 <?php
+require_once __DIR__ . '/../../Backend/database/koneksi.php';
+require_once __DIR__ . '/../../Backend/database/wisata_repository.php';
+
+$tourismId = $_GET['id'] ?? '';
+if (!is_string($tourismId) || preg_match('/^[KM][0-9]{5,}$/', $tourismId) !== 1) {
+    http_response_code(404);
+    exit('Destinasi tidak ditemukan.');
+}
+
+$tourismRows = fetchTourismRows($conn, ['id_wisata' => $tourismId]);
+$tourism = $tourismRows[0] ?? null;
+if ($tourism === null) {
+    http_response_code(404);
+    exit('Destinasi tidak ditemukan.');
+}
+
+$facilities = fetchTourismFacilities($conn, $tourismId);
+$reviewRows = fetchTourismReviews($conn, $tourismId);
+$ratingCounts = array_fill(1, 5, 0);
+foreach ($reviewRows as $review) {
+    $roundedRating = max(1, min(5, (int) round($review['rating'])));
+    $ratingCounts[$roundedRating]++;
+}
+
+$ratingDistribution = [];
+foreach ([5, 4, 3, 2, 1] as $stars) {
+    $ratingDistribution[] = [
+        'stars' => $stars,
+        'percentage' => count($reviewRows) > 0
+            ? (int) round($ratingCounts[$stars] / count($reviewRows) * 100)
+            : 0
+    ];
+}
+
+$reviews = array_map(static function (array $review): array {
+    return [
+        'name' => $review['nama'],
+        'rating' => (int) round($review['rating']),
+        'age' => date('d M Y', strtotime($review['tanggal_ulasan'])),
+        'comment' => $review['komentar']
+    ];
+}, $reviewRows);
+
+$hasRating = $tourism['rating'] !== null && $tourism['jumlah_ulasan'] > 0;
 $destination = [
-    'title' => 'Terasering Panyaweuyan',
-    'rating' => '4,5 (1500k ulasan)',
-    'location' => 'Kabupaten Majalengka, Jawa Barat.',
-    'subtitle' => 'Temukan Informasi Terasering Panyaweuyan dengan lebih detail',
-    'description' => 'Pos pengamatan puncak bukit yang menghadap sawah terasering, bukit berhutan, dan Gunung Ciremai.',
-    'facilities' => [
-        'Area parkir',
-        'Toilet Umum',
-        'Mushola',
-        'Spot Foto'
-    ],
-    'ticket_price' => 'Rp 15.000/orang',
-    'parking_price' => ['Rp 5000/Motor', 'Rp 10.000 / Mobil'],
-    'hours' => '08.00 - 17.00 WIB',
-    'address' => 'Terasering Panyaweuyan, Argapura, Kabupaten Majalengka, Jawa Barat',
-    'maps_url' => 'https://www.google.com/maps/search/?api=1&query=Terasering+Panyaweuyan%2C+Argapura%2C+Majalengka',
-    'rating_distribution' => [
-        ['stars' => 5, 'percentage' => 80],
-        ['stars' => 4, 'percentage' => 17],
-        ['stars' => 3, 'percentage' => 7],
-        ['stars' => 2, 'percentage' => 2],
-        ['stars' => 1, 'percentage' => 1],
-    ],
-    'reviews' => [
-        [
-            'name' => 'Cinta',
-            'rating' => 5,
-            'age' => '1 Minggu yang lalu',
-            'comment' => 'Pemandangannya bener-bener bagus banget, cocok untuk liburan bareng keluarga, banyak spot foto juga, parkirannya luas, fasilitasnya lengkap'
-        ],
-        [
-            'name' => 'Aurora',
-            'rating' => 5,
-            'age' => '1 bulan yang lalu',
-            'comment' => 'Best view in Majalengka. Sejuk dan bikin betah pokoknya'
-        ],
-        [
-            'name' => 'Nuraisiyah',
-            'rating' => 5,
-            'age' => '3 Minggu yang lalu',
-            'comment' => 'Puas banget! Suka banget! Seger banget! Pokoknya bikin nagih!!!!!!!'
-        ]
-    ],
+    'id' => $tourism['id_wisata'],
+    'image' => $tourism['gambar'],
+    'title' => $tourism['nama_wisata'],
+    'rating' => $tourism['rating'],
+    'review_count' => $tourism['jumlah_ulasan'],
+    'location' => $tourism['wilayah'],
+    'subtitle' => $tourism['deskripsi'] ?? 'Informasi destinasi wisata.',
+    'description' => $tourism['deskripsi'] ?? 'Deskripsi belum tersedia.',
+    'facilities' => $facilities,
+    'ticket_price' => $tourism['harga_tiket'] > 0
+        ? 'Rp ' . number_format($tourism['harga_tiket'], 0, ',', '.')
+        : 'Belum tersedia',
+    'hours' => $tourism['jam_buka'] !== null && $tourism['jam_tutup'] !== null
+        ? substr($tourism['jam_buka'], 0, 5) . ' - ' . substr($tourism['jam_tutup'], 0, 5)
+        : 'Belum tersedia',
+    'address' => $tourism['alamat'] ?: 'Alamat belum tersedia.',
+    'maps_url' => $tourism['Maps_Wisata'],
+    'rating_distribution' => $ratingDistribution,
+    'reviews' => $reviews,
+    'has_rating' => $hasRating
 ];
 ?>
 <!DOCTYPE html>
@@ -61,14 +82,14 @@ $destination = [
     <div class="destination-detail-shell">
         <header class="detail-header">
             <nav class="detail-navbar" aria-label="Navigasi utama">
-                <a class="detail-brand" href="../exploreMajaKu_skeleton/index.html">Explore Majaku</a>
+                <a class="detail-brand" href="../../index.php">Explore Majaku</a>
                 <div class="detail-nav-links">
-                    <a href="../exploreMajaKu_skeleton/index.html">Beranda</a>
-                    <a href="../exploreMajaKu_skeleton/pages/kategori-alam.html">kategori</a>
+                    <a href="../../index.php">Beranda</a>
+                    <a href="kategori.php?kategori=alam">kategori</a>
                     <a href="tentang.php">Tentang</a>
                 </div>
                 <div class="detail-nav-icons">
-                    <a href="../exploreMajaKu_skeleton/pages/hasil-pencarian.html" aria-label="Cari">
+                    <a href="hasil_pencarian.php" aria-label="Cari">
                         <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="15.5" cy="15.5" r="11"></circle><path d="m23.5 23.5 10.5 10.5"></path></svg>
                     </a>
                     <a href="profil.php" aria-label="Profil">
@@ -79,14 +100,18 @@ $destination = [
         </header>
 
     <main class="detail-main">
-        <div class="detail-hero" role="img" aria-label="Pemandangan sawah Terasering Panyaweuyan dan Gunung Ciremai"></div>
+        <div class="detail-hero" style="background-image: url('../../<?= htmlspecialchars($destination['image'] ?: 'FrontEnd/assets/images/img.png', ENT_QUOTES, 'UTF-8'); ?>')" role="img" aria-label="<?= htmlspecialchars($destination['title'], ENT_QUOTES, 'UTF-8'); ?>"></div>
         <div class="detail-content">
             <section class="destination-summary" aria-labelledby="destination-title">
                 <div class="destination-heading">
                     <h1 id="destination-title"><?= htmlspecialchars($destination['title'], ENT_QUOTES, 'UTF-8'); ?></h1>
-                    <div class="destination-rating" aria-label="Rating 4,5 dari 5, 1500k ulasan">
-                        <span class="rating-stars" aria-hidden="true"><span class="star-icon">★</span><span class="star-icon">★</span><span class="star-icon">★</span><span class="star-icon">★</span></span>
-                        <span class="rating-score"><?= htmlspecialchars($destination['rating'], ENT_QUOTES, 'UTF-8'); ?></span>
+                    <div class="destination-rating">
+                        <?php if ($destination['has_rating']): ?>
+                            <span class="rating-stars" aria-hidden="true">★</span>
+                            <span class="rating-score"><?= number_format($destination['rating'], 1, ',', '.'); ?>/5 (<?= (int) $destination['review_count']; ?> ulasan)</span>
+                        <?php else: ?>
+                            <span class="rating-score">Belum ada ulasan</span>
+                        <?php endif; ?>
                     </div>
                     <p class="destination-location">
                         <svg viewBox="0 0 28 28" aria-hidden="true">
@@ -113,6 +138,7 @@ $destination = [
                     <article class="information-card facilities-card">
                         <h3>Fasilitas</h3>
                         <ul>
+                            <?php if ($destination['facilities'] !== []): ?>
                             <?php foreach ($destination['facilities'] as $facility): ?>
                                 <li>
                                     <?php
@@ -128,6 +154,9 @@ $destination = [
                                     <span><?= htmlspecialchars($facility, ENT_QUOTES, 'UTF-8'); ?></span>
                                 </li>
                             <?php endforeach; ?>
+                            <?php else: ?>
+                                <li>Belum ada fasilitas yang tercatat.</li>
+                            <?php endif; ?>
                         </ul>
                     </article>
 
@@ -139,15 +168,6 @@ $destination = [
                                 <div class="price-copy">
                                     <strong>Tiket Masuk</strong>
                                     <span><?= htmlspecialchars($destination['ticket_price'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                </div>
-                            </div>
-                            <div class="price-entry parking-entry">
-                                <div aria-hidden="true" class="parking-spacer"></div>
-                                <div class="price-copy">
-                                    <strong>Tiket Parkir</strong>
-                                    <?php foreach ($destination['parking_price'] as $parking): ?>
-                                        <span><?= htmlspecialchars($parking, ENT_QUOTES, 'UTF-8'); ?></span>
-                                    <?php endforeach; ?>
                                 </div>
                             </div>
                         </div>
@@ -162,11 +182,11 @@ $destination = [
 
             <section class="tour-location" aria-labelledby="location-title">
                 <h2 id="location-title">LOKASI WISATA</h2>
-                <p class="information-subtitle">Temukan lokasi terasering panyaweuyan dengan mudah di peta/maps</p>
+                <p class="information-subtitle">Lokasi destinasi berdasarkan data yang tersimpan.</p>
                 <div class="location-grid">
                     <div class="map-placeholder" role="img" aria-label="Peta ilustrasi lokasi Terasering Panyaweuyan">
-                        <span class="map-town">Majalengka</span>
-                        <span class="map-place">Panyaweuyan</span>
+                        <span class="map-town"><?= htmlspecialchars($destination['location'], ENT_QUOTES, 'UTF-8'); ?></span>
+                        <span class="map-place"><?= htmlspecialchars($destination['title'], ENT_QUOTES, 'UTF-8'); ?></span>
                         <svg class="location-map-art" viewBox="0 0 600 340" aria-hidden="true">
                             <path class="map-road map-road-main" d="M-20 220C80 110 150 250 245 180S365 40 475 85 565 160 630 200"></path>
                             <path class="map-road map-road-secondary" d="M-20 330C90 255 160 320 255 265S385 245 465 270 555 285 630 235"></path>
@@ -188,13 +208,20 @@ $destination = [
 
             <section class="tour-reviews" aria-labelledby="reviews-title">
                 <h2 id="reviews-title">ULASAN</h2>
-                <p class="information-subtitle">Simak pengalaman pengunjung yang sudah datang ke tempat</p>
+                <p class="information-subtitle">Ulasan pengunjung yang tersimpan di database.</p>
                 <div class="review-summary-card">
-                    <div class="review-score">4,5</div>
-                    <div class="review-overview">
-                        <span class="review-stars" aria-hidden="true"><span class="star-icon">★</span><span class="star-icon">★</span><span class="star-icon">★</span><span class="star-icon">★</span><span class="star-icon">★</span></span>
-                        <span class="review-count">Dari 1500k ulasan</span>
+                    <div class="review-score">
+                        <?= $destination['has_rating'] ? number_format($destination['rating'], 1, ',', '.') : '-'; ?>
                     </div>
+                    <div class="review-overview">
+                        <?php if ($destination['has_rating']): ?>
+                            <span class="review-stars" aria-hidden="true">★</span>
+                            <span class="review-count">Dari <?= (int) $destination['review_count']; ?> ulasan</span>
+                        <?php else: ?>
+                            <span class="review-count">Belum ada ulasan</span>
+                        <?php endif; ?>
+                    </div>
+                    <?php if ($destination['has_rating']): ?>
                     <div class="rating-distribution" aria-label="Sebaran rating pengunjung">
                         <?php foreach ($destination['rating_distribution'] as $rating): ?>
                             <div class="rating-bar-row">
@@ -205,8 +232,10 @@ $destination = [
                             </div>
                         <?php endforeach; ?>
                     </div>
+                    <?php endif; ?>
                 </div>
                 <div class="review-grid">
+                    <?php if ($destination['reviews'] !== []): ?>
                     <?php foreach ($destination['reviews'] as $review): ?>
                         <article class="review-card">
                             <svg class="review-avatar" viewBox="0 0 40 40" aria-hidden="true">
@@ -222,6 +251,9 @@ $destination = [
                             </div>
                         </article>
                     <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>Belum ada ulasan untuk destinasi ini.</p>
+                    <?php endif; ?>
                 </div>
                 <button class="add-review-button" type="button">Tambah Ulasan dan Rating</button>
             </section>

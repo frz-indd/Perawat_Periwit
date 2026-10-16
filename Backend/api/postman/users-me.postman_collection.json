@@ -28,6 +28,10 @@
     {
       "key": "profileUpdateBody",
       "value": "{}"
+    },
+    {
+      "key": "categoryId",
+      "value": ""
     }
   ],
   "item": [
@@ -52,6 +56,160 @@
               "pm.test('Anonymous GET returns 401', function () {",
               "    pm.response.to.have.status(401);",
               "    pm.expect(pm.response.json().status).to.eql('unauthenticated');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /categories aktif",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/categories"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Active categories include ID, name, and image', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const categories = pm.response.json().data;",
+              "    pm.expect(categories).to.be.an('array').that.is.not.empty;",
+              "    categories.forEach(function (category) {",
+              "        pm.expect(category.id_kategori).to.be.a('number');",
+              "        pm.expect(category.nama).to.be.a('string').and.not.empty;",
+              "        pm.expect(category).to.have.property('gambar');",
+              "    });",
+              "    pm.collectionVariables.set('categoryId', categories[0].id_kategori);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET wisata berdasarkan kategori",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/categories/{{categoryId}}/wisata"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Tourism is returned for the selected category', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const data = pm.response.json().data;",
+              "    pm.expect(data.kategori.id_kategori).to.eql(Number(pm.collectionVariables.get('categoryId')));",
+              "    pm.expect(data.kategori).to.have.property('gambar');",
+              "    pm.expect(data.wisata).to.be.an('array');",
+              "    data.wisata.forEach(function (tourism) {",
+              "        pm.expect(tourism.id_kategori).to.eql(data.kategori.id_kategori);",
+              "        pm.expect(tourism.gambar).to.be.a('string').and.not.empty;",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET wisata menolak ID kategori invalid",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/categories/not-a-number/wisata"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Malformed category ID returns 400', function () {",
+              "    pm.response.to.have.status(400);",
+              "    pm.expect(pm.response.json().status).to.eql('invalid_category_id');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET wisata menangani kategori tidak ditemukan",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/categories/999999/wisata"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Unknown category ID returns 404', function () {",
+              "    pm.response.to.have.status(404);",
+              "    pm.expect(pm.response.json().status).to.eql('category_not_found');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /wisata menyertakan foto",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/Backend/api/wisata.php"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Tourism rows include valid IDs and stored photos', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const tourism = pm.response.json().data;",
+              "    pm.expect(tourism).to.be.an('array').that.is.not.empty;",
+              "    tourism.forEach(function (item) {",
+              "        pm.expect(item.id_wisata).to.match(/^[KM][0-9]{5,}$/);",
+              "        pm.expect(item.gambar).to.be.a('string').and.not.empty;",
+              "    });",
               "});"
             ]
           }

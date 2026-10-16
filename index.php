@@ -2,6 +2,13 @@
 session_start();
 
 $isLoggedIn = isset($_SESSION["id_user"]);
+
+require_once __DIR__ . "/Backend/database/koneksi.php";
+require_once __DIR__ . "/Backend/database/wisata_repository.php";
+
+$wisata = fetchTourismRows($conn);
+$destinasiUtama = array_slice($wisata, 0, 4);
+$destinasiLain = array_slice($wisata, 4, 4);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -36,8 +43,8 @@ $isLoggedIn = isset($_SESSION["id_user"]);
 
             <nav class="navbar-menu">
                 <a href="index.php" class="active">Beranda</a>
-                <a href="kategori/kategori-alam.php">kategori</a>
-                <a href="pages/tentang.php">Tentang</a>
+                <a href="FrontEnd/pages/kategori.php">kategori</a>
+                <a href="FrontEnd/pages/tentang.php">Tentang</a>
             </nav>
 
             <div class="navbar-icons">
@@ -102,266 +109,72 @@ $isLoggedIn = isset($_SESSION["id_user"]);
     <!-- KONTEN UTAMA -->
     <main class="main-content">
 
-        <!-- REKOMENDASI -->
+        <!-- DESTINASI UTAMA -->
         <section class="destination-section">
 
-            <h2>Rekomendasi Untuk kamu</h2>
+            <h2>Destinasi Wisata</h2>
 
             <div class="destination-grid">
-
-                <!-- CILENGKRANG -->
-                <a href="" class="destination-card">
-
-                    <img
-                        src="FrontEnd/assets/images/img.png"
-                        alt="Cilengkrang"
-                    >
-
-                    <div class="card-content">
-
-                        <h3>Cilengkrang</h3>
-
-                        <div class="rating">
-                            <span class="stars">★ ★ ★</span>
-                            <span class="review">(2,7k ulasan)</span>
-                        </div>
-
-                        <div class="location">
-                            <i class="bi bi-geo-alt-fill"></i>
-                            <span>
-                                Kabupaten Kuningan,<br>
-                                Jawa Barat.
+                <?php foreach ($destinasiUtama as $destination): ?>
+                    <a href="FrontEnd/pages/detail-wisata.php?id=<?= rawurlencode($destination['id_wisata']); ?>" class="destination-card">
+                        <img src="<?= htmlspecialchars($destination['gambar'] ?? 'FrontEnd/assets/images/img.png', ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($destination['nama_wisata'], ENT_QUOTES, 'UTF-8'); ?>" loading="lazy">
+                        <div class="card-content">
+                            <h3><?= htmlspecialchars($destination['nama_wisata'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                            <div class="rating">
+                                <?php if ($destination['rating'] !== null): ?>
+                                    <span class="stars">★ <?= number_format($destination['rating'], 1, ',', '.'); ?>/5</span>
+                                    <span class="review">(<?= (int) $destination['jumlah_ulasan']; ?> ulasan)</span>
+                                <?php else: ?>
+                                    <span class="review">Belum ada ulasan</span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="location">
+                                <i class="bi bi-geo-alt-fill"></i>
+                                <span><?= htmlspecialchars($destination['wilayah'], ENT_QUOTES, 'UTF-8'); ?></span>
+                            </div>
+                            <span class="distance">
+                                <?= $destination['harga_tiket'] > 0
+                                    ? 'Rp ' . number_format($destination['harga_tiket'], 0, ',', '.')
+                                    : 'Harga belum tersedia'; ?>
                             </span>
                         </div>
-
-                        <span class="distance">5.76 KM</span>
-
-                    </div>
-                </a>
-
-
-                <!-- BUKIT PAMOROAN -->
-                <a href="#" class="destination-card">
-
-                    <img
-                        src="FrontEnd/assets/images/pamoroan.jpg"
-                        alt="Bukit Pamoroan"
-                    >
-
-                    <div class="card-content">
-
-                        <h3>Bukit Pamoroan</h3>
-
-                        <div class="rating">
-                            <span class="stars">★ ★ ★</span>
-                            <span class="review">(2,6k ulasan)</span>
-                        </div>
-
-                        <div class="location">
-                            <i class="bi bi-geo-alt-fill"></i>
-                            <span>
-                                Kabupaten Majalengka,<br>
-                                Jawa Barat.
-                            </span>
-                        </div>
-
-                        <span class="distance">5.76 KM</span>
-
-                    </div>
-                </a>
-
-
-                <!-- ARUNIKA GARDEN -->
-                <a href="#" class="destination-card">
-
-                    <img
-                        src="FrontEnd/assets/images/arunika-garden.jpg"
-                        alt="Arunika Garden"
-                    >
-
-                    <div class="card-content">
-
-                        <h3>Arunika Garden</h3>
-
-                        <div class="rating">
-                            <span class="stars">★ ★ ★</span>
-                            <span class="review">(2,5k ulasan)</span>
-                        </div>
-
-                        <div class="location">
-                            <i class="bi bi-geo-alt-fill"></i>
-                            <span>
-                                Kabupaten Kuningan,<br>
-                                Jawa Barat.
-                            </span>
-                        </div>
-
-                        <span class="distance">7.68 KM</span>
-
-                    </div>
-                </a>
-
-
-                <!-- CURUG PUTRI -->
-                <a href="#" class="destination-card">
-
-                    <img
-                        src="assets/images/wisata/curug-putri.jpg"
-                        alt="Curug Putri Palutungan"
-                    >
-
-                    <div class="card-content">
-
-                        <h3>Curug putri palutungan</h3>
-
-                        <div class="rating">
-                            <span class="stars">★ ★ ★</span>
-                            <span class="review">(1,5k ulasan)</span>
-                        </div>
-
-                        <div class="location">
-                            <i class="bi bi-geo-alt-fill"></i>
-                            <span>
-                                Kabupaten Kuningan,<br>
-                                Jawa Barat.
-                            </span>
-                        </div>
-
-                        <span class="distance">6.68 KM</span>
-
-                    </div>
-                </a>
-
+                    </a>
+                <?php endforeach; ?>
             </div>
         </section>
 
 
-        <!-- WISATA TERDEKAT -->
+        <!-- DESTINASI LAINNYA -->
         <section class="destination-section nearby-section">
 
-            <h2>Wisata Terdekat dari lokasi mu</h2>
+            <h2>Destinasi Lainnya</h2>
 
             <div class="destination-grid">
-
-                <!-- CILENGKRANG -->
-                <a href="#" class="destination-card">
-
-                    <img
-                        src="assets/images/wisata/cilengkrang.jpg"
-                        alt="Cilengkrang"
-                        loading="lazy"
-                    >
-
-                    <div class="card-content">
-
-                        <h3>Cilengkrang</h3>
-
-                        <div class="rating">
-                            <span class="stars">★ ★ ★</span>
-                            <span class="review">(2,7k ulasan)</span>
-                        </div>
-
-                        <div class="location">
-                            <i class="bi bi-geo-alt-fill"></i>
-                            <span>
-                                Kabupaten Kuningan,<br>
-                                Jawa Barat.
+                <?php foreach ($destinasiLain as $destination): ?>
+                    <a href="FrontEnd/pages/detail-wisata.php?id=<?= rawurlencode($destination['id_wisata']); ?>" class="destination-card">
+                        <img src="<?= htmlspecialchars($destination['gambar'] ?? 'FrontEnd/assets/images/img.png', ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($destination['nama_wisata'], ENT_QUOTES, 'UTF-8'); ?>" loading="lazy">
+                        <div class="card-content">
+                            <h3><?= htmlspecialchars($destination['nama_wisata'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                            <div class="rating">
+                                <?php if ($destination['rating'] !== null): ?>
+                                    <span class="stars">★ <?= number_format($destination['rating'], 1, ',', '.'); ?>/5</span>
+                                    <span class="review">(<?= (int) $destination['jumlah_ulasan']; ?> ulasan)</span>
+                                <?php else: ?>
+                                    <span class="review">Belum ada ulasan</span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="location">
+                                <i class="bi bi-geo-alt-fill"></i>
+                                <span><?= htmlspecialchars($destination['wilayah'], ENT_QUOTES, 'UTF-8'); ?></span>
+                            </div>
+                            <span class="distance">
+                                <?= $destination['harga_tiket'] > 0
+                                    ? 'Rp ' . number_format($destination['harga_tiket'], 0, ',', '.')
+                                    : 'Harga belum tersedia'; ?>
                             </span>
                         </div>
-
-                    </div>
-                </a>
-
-
-                <!-- BUKIT PAMOROAN -->
-                <a href="#" class="destination-card">
-
-                    <img
-                        src="assets/images/wisata/bukit-pamor.jpg"
-                        alt="Bukit Pamoroan"
-                        loading="lazy"
-                    >
-
-                    <div class="card-content">
-
-                        <h3>Bukit Pamoroan</h3>
-
-                        <div class="rating">
-                            <span class="stars">★ ★ ★</span>
-                            <span class="review">(2,6k ulasan)</span>
-                        </div>
-
-                        <div class="location">
-                            <i class="bi bi-geo-alt-fill"></i>
-                            <span>
-                                Kabupaten Majalengka,<br>
-                                Jawa Barat.
-                            </span>
-                        </div>
-
-                    </div>
-                </a>
-
-
-                <!-- ARUNIKA GARDEN -->
-                <a href="#" class="destination-card">
-
-                    <img
-                        src="assets/images/wisata/arunika-garden.jpg"
-                        alt="Arunika Garden"
-                        loading="lazy"
-                    >
-
-                    <div class="card-content">
-
-                        <h3>Arunika Garden</h3>
-
-                        <div class="rating">
-                            <span class="stars">★ ★ ★</span>
-                            <span class="review">(2,5k ulasan)</span>
-                        </div>
-
-                        <div class="location">
-                            <i class="bi bi-geo-alt-fill"></i>
-                            <span>
-                                Kabupaten Kuningan,<br>
-                                Jawa Barat.
-                            </span>
-                        </div>
-
-                    </div>
-                </a>
-
-
-                <!-- CURUG PUTRI -->
-                <a href="#" class="destination-card">
-
-                    <img
-                        src="assets/images/wisata/curug-putri.jpg"
-                        alt="Curug Putri Palutungan"
-                        loading="lazy"
-                    >
-
-                    <div class="card-content">
-
-                        <h3>Curug putri palutungan</h3>
-
-                        <div class="rating">
-                            <span class="stars">★ ★ ★</span>
-                            <span class="review">(1,5k ulasan)</span>
-                        </div>
-
-                        <div class="location">
-                            <i class="bi bi-geo-alt-fill"></i>
-                            <span>
-                                Kabupaten Kuningan,<br>
-                                Jawa Barat.
-                            </span>
-                        </div>
-
-                    </div>
-                </a>
-
+                    </a>
+                <?php endforeach; ?>
             </div>
         </section>
 

@@ -1,3 +1,6 @@
+-- Legacy migration for the pre-export schema.
+-- Do not run after importing eksplormajaku_export.sql; its keys and foreign keys are already present.
+-- For current setup, use categories_api_migration.sql followed by wisata_seed.sql.
 USE eksplormajaku;
 
 ALTER TABLE `user`

@@ -1,3 +1,13 @@
+<?php
+session_start();
+require_once __DIR__ . "/../../Backend/database/koneksi.php";
+require_once __DIR__ . "/../../Backend/database/wisata_repository.php";
+
+$userId = filter_var($_SESSION["id_user"] ?? null, FILTER_VALIDATE_INT);
+$favorites = $userId !== false && $userId > 0
+    ? fetchUserTourismFavorites($conn, (int) $userId)
+    : [];
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -9,9 +19,9 @@
 <body>
 <main class="profil">
     <header class="site-header">
-        <a class="text-wrapper-6" href="../exploreMajaKu_skeleton/index.html">Explore Majaku</a>
+        <a class="text-wrapper-6" href="../../index.php">Explore Majaku</a>
         <nav class="header-nav" aria-label="Navigasi utama">
-            <a class="text-wrapper-7" href="../exploreMajaKu_skeleton/index.html">Beranda</a>
+            <a class="text-wrapper-7" href="../../index.php">Beranda</a>
             <a class="text-wrapper-8" href="hasil_pencarian.php">Kategori</a>
             <a class="tentang" href="tentang.php">Tentang</a>
         </nav>
@@ -46,7 +56,7 @@
         </span></h1>
         <p class="text-wrapper-2" id="profile-email"></p>
         <nav class="group" aria-label="Menu profil">
-            <a class="text-wrapper-3" href="../exploreMajaKu_skeleton/index.html">
+            <a class="text-wrapper-3" href="../../index.php">
                 <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="m2 13 12-10 12 10M5 11v14h18V11M11 25v-9h6v9"></path></svg></span>Beranda
             </a>
             <a class="text-wrapper-4" href="#favorit">
@@ -61,80 +71,21 @@
     <section class="profile-content" aria-labelledby="favorite-title">
         <h2 class="div" id="favorite-title">Destinasi Favorit</h2>
 
-        <article class="favorite-card" id="favorit" aria-label="Curug Putri Palutungan" tabindex="0">
-            <img class="cuplikan-layar" src="../assets/images/CurugPutri.png" alt="Curug Putri Palutungan">
-            <div class="group-5">
-                <h3 class="text-wrapper-9">Curug Putri palutungan</h3>
-                <div class="rating-row" aria-label="Rating 3 dari 5">
-                    <div class="group-6" aria-hidden="true"><span class="image">★</span><span class="image">★</span><span class="image">★</span></div>
-                    <span class="text-wrapper-10">(1,8k ulasan)</span>
-                </div>
-                <div class="location-row">
-                    <svg class="image-2" viewBox="0 0 24 30" aria-hidden="true">
-                        <ellipse cx="12" cy="26" rx="10" ry="3.5" fill="#42cf71"></ellipse>
-                        <path d="M12 1C6.5 1 2 5.5 2 11c0 7 10 17 10 17s10-10 10-17C22 5.5 17.5 1 12 1Z" fill="#ed342d"></path>
-                        <circle cx="12" cy="11" r="3.5" fill="#fff"></circle>
-                    </svg>
-                    <p class="kabupaten-kuningan">Kabupaten<br>Kuningan, Jawa Barat.</p>
-                </div>
-            </div>
-            <button class="delete-icon" type="button" aria-label="Hapus Curug Putri Palutungan">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M9 2h6l1 2h5v2H3V4h5l1-2ZM5 7h14l-1 14H6L5 7Z"></path>
-                    <path d="M9 10v8m3-8v8m3-8v8"></path>
-                </svg>
-            </button>
-        </article>
-
-        <article class="favorite-card" aria-label="Woodland" tabindex="0">
-            <img class="img" src="../assets/images/Woodland.png" alt="Woodland">
-            <div class="group-7">
-                <h3 class="text-wrapper-9">Woodland</h3>
-                <div class="rating-row" aria-label="Rating 3 dari 5">
-                    <div class="group-6" aria-hidden="true"><span class="image">★</span><span class="image">★</span><span class="image">★</span></div>
-                    <span class="text-wrapper-10">(1,8k ulasan)</span>
-                </div>
-                <div class="location-row">
-                    <svg class="image-2" viewBox="0 0 24 30" aria-hidden="true">
-                        <ellipse cx="12" cy="26" rx="10" ry="3.5" fill="#42cf71"></ellipse>
-                        <path d="M12 1C6.5 1 2 5.5 2 11c0 7 10 17 10 17s10-10 10-17C22 5.5 17.5 1 12 1Z" fill="#ed342d"></path>
-                        <circle cx="12" cy="11" r="3.5" fill="#fff"></circle>
-                    </svg>
-                    <p class="kabupaten-kuningan">Kabupaten<br>Kuningan, Jawa Barat.</p>
-                </div>
-            </div>
-            <button class="delete-icon" type="button" aria-label="Hapus Woodland">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M9 2h6l1 2h5v2H3V4h5l1-2ZM5 7h14l-1 14H6L5 7Z"></path>
-                    <path d="M9 10v8m3-8v8m3-8v8"></path>
-                </svg>
-            </button>
-        </article>
-
-        <article class="favorite-card" aria-label="Arunika Eatry Garden" tabindex="0">
-            <img class="cuplikan-layar-2" src="../assets/images/Arunika.png" alt="Arunika Eatry Garden">
-            <div class="group-8">
-                <h3 class="text-wrapper-9">Arunika Eatry Garden</h3>
-                <div class="rating-row" aria-label="Rating 3 dari 5">
-                    <div class="group-6" aria-hidden="true"><span class="image">★</span><span class="image">★</span><span class="image">★</span></div>
-                    <span class="text-wrapper-10">(1,8k ulasan)</span>
-                </div>
-                <div class="location-row">
-                    <svg class="image-2" viewBox="0 0 24 30" aria-hidden="true">
-                        <ellipse cx="12" cy="26" rx="10" ry="3.5" fill="#42cf71"></ellipse>
-                        <path d="M12 1C6.5 1 2 5.5 2 11c0 7 10 17 10 17s10-10 10-17C22 5.5 17.5 1 12 1Z" fill="#ed342d"></path>
-                        <circle cx="12" cy="11" r="3.5" fill="#fff"></circle>
-                    </svg>
-                    <p class="kabupaten-kuningan">Kabupaten<br>Kuningan, Jawa Barat.</p>
-                </div>
-            </div>
-            <button class="delete-icon" type="button" aria-label="Hapus Arunika Eatry Garden">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M9 2h6l1 2h5v2H3V4h5l1-2ZM5 7h14l-1 14H6L5 7Z"></path>
-                    <path d="M9 10v8m3-8v8m3-8v8"></path>
-                </svg>
-            </button>
-        </article>
+        <?php if ($favorites !== []): ?>
+            <?php foreach ($favorites as $favoriteIndex => $favorite): ?>
+                <article class="favorite-card" id="<?= $favoriteIndex === 0 ? 'favorit' : 'favorite-' . (int) $favoriteIndex; ?>" aria-label="<?= htmlspecialchars($favorite['nama_wisata'], ENT_QUOTES, 'UTF-8'); ?>" tabindex="0">
+                    <img class="cuplikan-layar" src="../../<?= htmlspecialchars($favorite['gambar'] ?? 'FrontEnd/assets/images/img.png', ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($favorite['nama_wisata'], ENT_QUOTES, 'UTF-8'); ?>">
+                    <div class="group-5">
+                        <h3 class="text-wrapper-9"><?= htmlspecialchars($favorite['nama_wisata'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                        <div class="location-row">
+                            <p class="kabupaten-kuningan"><?= htmlspecialchars($favorite['wilayah'], ENT_QUOTES, 'UTF-8'); ?></p>
+                        </div>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p>Belum ada destinasi favorit.</p>
+        <?php endif; ?>
     </section>
 </main>
 <script>

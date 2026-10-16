@@ -41,7 +41,7 @@ $confirmPassword =
     $_POST["confirm_password"] ??
     null;
 
-/* VALIDASI EMAIL */
+//VALIDASI EMAIK
 
 if ($email === "") {
     $respond(422, [
@@ -57,7 +57,7 @@ if (strlen($email) > 255 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     ]);
 }
 
-/* VALIDASI PASSWORD */
+// VALIDASI PASSWORD
 
 if (!is_string($password) || trim($password) === "") {
     $respond(422, [
@@ -73,7 +73,7 @@ if (strlen($password) < 8) {
     ]);
 }
 
-/* VALIDASI KONFIRMASI */
+// VALIDASI KONFIRMASI 
 
 if (!is_string($confirmPassword) || trim($confirmPassword) === "") {
     $respond(422, [
@@ -88,10 +88,6 @@ if ($password !== $confirmPassword) {
         "message" => "Konfirmasi password tidak sesuai."
     ]);
 }
-
-/* NAMA DEFAULT
-   Form Register saat ini tidak memiliki input nama.
-*/
 
 if ($name === "") {
     $emailName = strstr($email, "@", true);
@@ -108,7 +104,7 @@ if (strlen($name) > 255) {
     ]);
 }
 
-/* SIMPAN KE DATABASE */
+// SIMPAN KE DATABASE
 
 try {
     require_once __DIR__ . "/../database/koneksi.php";
@@ -136,7 +132,7 @@ try {
         ]);
     }
 
-    /* HASH PASSWORD */
+    // HASH PASSWORD
 
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
@@ -144,7 +140,7 @@ try {
         throw new RuntimeException("Gagal membuat hash password.");
     }
 
-    /* INSERT USER */
+// INSERT USER
 
     $statement = $conn->prepare(
         "INSERT INTO `user` (Nama_user, Email, Password)
@@ -158,8 +154,7 @@ try {
 
     $statement->close();
 
-    /* REGISTRASI BERHASIL */
-
+//  REGISTRASI BERHASIL 
     $respond(201, [
         "status" => "success",
         "message" => "Pendaftaran berhasil.",

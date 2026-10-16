@@ -2,11 +2,12 @@
 <?php
 session_start();
 
-$keyword = trim($_GET['keyword'] ?? '');
+$keyword = isset($_GET['keyword']) && is_string($_GET['keyword'])
+    ? trim($_GET['keyword'])
+    : '';
 
-$jarakDipilih = $_GET['jarak'] ?? [];
-$wilayahDipilih = $_GET['wilayah'] ?? [];
-$kategoriDipilih = $_GET['kategori'] ?? [];
+$wilayahDipilih = is_array($_GET['wilayah'] ?? null) ? $_GET['wilayah'] : [];
+$kategoriDipilih = is_array($_GET['kategori'] ?? null) ? $_GET['kategori'] : [];
 
 $budgetMin = isset($_GET['min']) && $_GET['min'] !== ''
     ? max(0, (int) $_GET['min']) : 0;
@@ -15,185 +16,49 @@ $budgetMax = isset($_GET['max']) && $_GET['max'] !== ''
     ? max(0, (int) $_GET['max']) : 1000000;
 
 
-// Destinasi yang ditampilkan di website tetap dapat dicari meski belum ada di database.
-$destinasi = [
-    [
-        'id' => 1,
-        'nama' => 'Wonderland',
-        'wilayah' => 'Kuningan',
-        'kategori' => 'Wisata Buatan/Kuliner',
-        'jarak' => 5.79,
-        'rating' => 1.8,
-        'harga' => 15000,
-        'gambar' => 'assets/images/wisata/wonderland.jpg'
-    ],
-    [
-        'id' => 2,
-        'nama' => 'Cilengkrang',
-        'wilayah' => 'Kuningan',
-        'kategori' => 'Wisata Alam & Pegunungan',
-        'jarak' => 7.09,
-        'rating' => 2.7,
-        'harga' => 15000,
-        'gambar' => 'assets/images/wisata/cilengkrang.jpg'
-    ],
-    [
-        'id' => 3,
-        'nama' => 'Arunika Garden',
-        'wilayah' => 'Kuningan',
-        'kategori' => 'Wisata Buatan/Kuliner',
-        'jarak' => 5.29,
-        'rating' => 2.5,
-        'harga' => 25000,
-        'gambar' => 'assets/images/wisata/arunika-garden.jpg'
-    ],
-    [
-        'id' => 4,
-        'nama' => 'Cibuntu',
-        'wilayah' => 'Kuningan',
-        'kategori' => 'Wisata Alam & Pegunungan',
-        'jarak' => 8.20,
-        'rating' => 1.7,
-        'harga' => 10000,
-        'gambar' => 'assets/images/wisata/cibuntu.jpg'
-    ],
-    [
-        'id' => 5,
-        'nama' => 'Curug Putri Palutungan',
-        'wilayah' => 'Kuningan',
-        'kategori' => 'Wisata Air & Curug',
-        'jarak' => 12.68,
-        'rating' => 1.5,
-        'harga' => 20000,
-        'gambar' => 'assets/images/wisata/curug-putri.jpg'
-    ],
-    [
-        'id' => 6,
-        'nama' => 'Bukit Pamoroan',
-        'wilayah' => 'Majalengka',
-        'kategori' => 'Wisata Alam & Pegunungan',
-        'jarak' => 5.76,
-        'rating' => 2.6,
-        'harga' => 10000,
-        'gambar' => 'assets/images/wisata/bukit-pamor.jpg'
-    ],
-    [
-        'id' => 7,
-        'nama' => 'Telaga Biru',
-        'wilayah' => 'Majalengka',
-        'kategori' => 'Wisata Air & Curug',
-        'jarak' => 15.00,
-        'rating' => 1.9,
-        'harga' => 10000,
-        'gambar' => 'assets/images/wisata/telaga-biru.jpg'
-    ],
-    [
-        'id' => 8,
-        'nama' => 'Gunung Ciwaru',
-        'wilayah' => 'Majalengka',
-        'kategori' => 'Wisata Alam & Pegunungan',
-        'jarak' => 20.00,
-        'rating' => 2.1,
-        'harga' => 15000,
-        'gambar' => 'assets/images/wisata/gunung-ciwaru.jpg'
-    ],
-    [
-        'id' => 9,
-        'nama' => 'Bumi Pakuwon',
-        'wilayah' => 'Majalengka',
-        'kategori' => 'Wisata Buatan/Kuliner',
-        'jarak' => 10.00,
-        'rating' => 1.6,
-        'harga' => 20000,
-        'gambar' => 'assets/images/wisata/bumi-pakuwon.jpg'
-    ],
-];
+// Destination cards are populated from the active database rows below.
+$destinasi = [];
 
-// Tambahkan destinasi database dan prioritaskan datanya jika nama juga ada di website.
+// Keep results empty if the database cannot be read; never show sample destinations.
+$destinasi = [];
+$filterCategories = [];
+$regionOptions = [];
 try {
     require_once __DIR__ . '/../../Backend/database/koneksi.php';
+    require_once __DIR__ . '/../../Backend/database/wisata_repository.php';
+    $allDatabaseTourism = fetchTourismRows($conn);
+    $databaseTourism = fetchTourismRows($conn, ['keyword' => $keyword]);
+    $filterCategories = fetchActiveCategories($conn);
 
-    $sql = "SELECT
-                w.id_wisata AS id,
-                w.nama_wisata AS nama,
-                w.domisili AS wilayah,
-                w.harga_tiket AS harga,
-                k.nama_kategori AS kategori
-            FROM wisata AS w
-            LEFT JOIN kategori AS k ON k.Id_kategori = w.id_kategori";
-    $parameters = [];
-    $parameterTypes = '';
+    foreach ($allDatabaseTourism as $row) {
+        $region = stripos($row['wilayah'], 'Majalengka') !== false
+            ? 'Majalengka'
+            : 'Kuningan';
+        $regionOptions[$region] = $region;
 
-    if ($keyword !== '') {
-        $sql .= " WHERE w.nama_wisata LIKE ?
-                    OR w.domisili LIKE ?
-                    OR w.alamat LIKE ?
-                    OR w.deskripsi LIKE ?
-                    OR k.nama_kategori LIKE ?";
-        $searchTerm = '%' . $keyword . '%';
-        $parameters = array_fill(0, 5, $searchTerm);
-        $parameterTypes = 'sssss';
+        $destinasi[] = [
+            'id' => $row['id_wisata'],
+            'nama' => $row['nama_wisata'],
+            'wilayah' => $region,
+            'lokasi' => $row['wilayah'],
+            'kategori' => $row['kategori'],
+            'id_kategori' => (string) $row['id_kategori'],
+            'rating' => $row['rating'],
+            'review_count' => $row['jumlah_ulasan'],
+            'harga' => $row['harga_tiket'],
+            'gambar' => $row['gambar']
+        ];
     }
-
-    $sql .= ' ORDER BY w.nama_wisata';
-    $statement = $conn->prepare($sql);
-
-    if ($parameters !== []) {
-        $statement->bind_param($parameterTypes, ...$parameters);
-    }
-
-    $statement->execute();
-    $databaseRows = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
-    $statement->close();
-
-    $databaseDestinasi = [];
-    $databaseNames = [];
-
-    foreach ($databaseRows as $row) {
-        $name = trim((string) ($row['nama'] ?? ''));
-        if ($name === '') {
-            continue;
-        }
-
-        $category = trim((string) ($row['kategori'] ?? ''));
-        $categoryKey = strtolower($category);
-        if (str_contains($categoryKey, 'alam')) {
-            $category = 'Wisata Alam & Pegunungan';
-        } elseif (str_contains($categoryKey, 'budaya') || str_contains($categoryKey, 'sejarah')) {
-            $category = 'Wisata Sejarah & Budaya';
-        } elseif (str_contains($categoryKey, 'air') || str_contains($categoryKey, 'curug')) {
-            $category = 'Wisata Air & Curug';
-        } elseif (str_contains($categoryKey, 'kuliner') || str_contains($categoryKey, 'buatan')) {
-            $category = 'Wisata Buatan/Kuliner';
-        }
-
-        $row['nama'] = $name;
-        $row['wilayah'] = trim((string) $row['wilayah']);
-        $row['kategori'] = $category;
-        $row['jarak'] = null;
-        $row['rating'] = 0;
-        $row['harga'] = (float) $row['harga'];
-        $row['gambar'] = '../assets/images/img.png';
-
-        $databaseDestinasi[] = $row;
-        $databaseNames[strtolower($name)] = true;
-    }
-
-    $destinasi = array_merge(
-        $databaseDestinasi,
-        array_filter($destinasi, static function ($item) use ($databaseNames) {
-            return !isset($databaseNames[strtolower($item['nama'])]);
-        })
-    );
 } catch (Throwable $exception) {
     error_log($exception->getMessage());
+    $destinasi = [];
 }
+$regionOptions = array_values($regionOptions);
 
 
 // FILTER DATA DESTINASI
 $hasil = array_filter($destinasi, function ($item) use (
     $keyword,
-    $jarakDipilih,
     $wilayahDipilih,
     $kategoriDipilih,
     $budgetMin,
@@ -215,34 +80,23 @@ $hasil = array_filter($destinasi, function ($item) use (
         ) !== false;
     }
 
-    // Filter jarak
-    $cocokJarak = empty($jarakDipilih);
-
-    foreach ($jarakDipilih as $jarak) {
-        if (
-            (is_numeric($item['jarak']) && $jarak === '5' && $item['jarak'] <= 5) ||
-            (is_numeric($item['jarak']) && $jarak === '5-10' && $item['jarak'] > 5 && $item['jarak'] <= 10) ||
-            (is_numeric($item['jarak']) && $jarak === '10-20' && $item['jarak'] > 10 && $item['jarak'] <= 20) ||
-            (is_numeric($item['jarak']) && $jarak === '20-30' && $item['jarak'] > 20 && $item['jarak'] <= 30)
-        ) {
-            $cocokJarak = true;
+    // Filter wilayah
+    $cocokWilayah = empty($wilayahDipilih);
+    foreach ($wilayahDipilih as $wilayah) {
+        if (is_string($wilayah) && stripos($item['lokasi'], $wilayah) !== false) {
+            $cocokWilayah = true;
         }
     }
 
-    // Filter wilayah
-    $cocokWilayah = empty($wilayahDipilih) ||
-        in_array($item['wilayah'], $wilayahDipilih, true);
-
     // Filter kategori
     $cocokKategori = empty($kategoriDipilih) ||
-        in_array($item['kategori'], $kategoriDipilih, true);
+        in_array($item['id_kategori'], $kategoriDipilih, true);
 
     // Filter budget
     $cocokBudget = $item['harga'] >= $budgetMin &&
         $item['harga'] <= $budgetMax;
 
     return $cocokKeyword &&
-        $cocokJarak &&
         $cocokWilayah &&
         $cocokKategori &&
         $cocokBudget;
@@ -298,9 +152,9 @@ function terpilih($daftar, $nilai)
         </a>
 
         <nav class="navbar-menu">
-            <a href="dashboard.php">Beranda</a>
-            <a href="kategori/kategori-alam.php">kategori</a>
-            <a href="pages/tentang.php">Tentang</a>
+            <a href="../../index.php">Beranda</a>
+            <a href="kategori.php?kategori=alam">kategori</a>
+            <a href="tentang.php">Tentang</a>
         </nav>
 
         <div class="navbar-icons">
@@ -308,7 +162,7 @@ function terpilih($daftar, $nilai)
                 <i class="bi bi-search"></i>
             </a>
 
-            <a href="auth/Login.php" class="nav-icon" aria-label="Akun">
+            <a href="../auth/Login.php" class="nav-icon" aria-label="Akun">
                 <i class="bi bi-person-circle"></i>
             </a>
         </div>
@@ -353,85 +207,30 @@ function terpilih($daftar, $nilai)
 
             <h2 class="filter-title">Filter</h2>
 
-            <!-- JARAK -->
-            <div class="filter-group">
-                <h3>Jarak</h3>
-
-                <label class="filter-option">
-                    <input type="checkbox" name="jarak[]" value="5"
-                        <?= terpilih($jarakDipilih, '5') ?>>
-                    <span>5 Km</span>
-                </label>
-
-                <label class="filter-option">
-                    <input type="checkbox" name="jarak[]" value="5-10"
-                        <?= terpilih($jarakDipilih, '5-10') ?>>
-                    <span>5 - 10 Km</span>
-                </label>
-
-                <label class="filter-option">
-                    <input type="checkbox" name="jarak[]" value="10-20"
-                        <?= terpilih($jarakDipilih, '10-20') ?>>
-                    <span>10 - 20 Km</span>
-                </label>
-
-                <label class="filter-option">
-                    <input type="checkbox" name="jarak[]" value="20-30"
-                        <?= terpilih($jarakDipilih, '20-30') ?>>
-                    <span>20 - 30 Km</span>
-                </label>
-            </div>
-
-
             <!-- WILAYAH -->
             <div class="filter-group">
                 <h3>Wilayah</h3>
-
-                <label class="filter-option">
-                    <input type="checkbox" name="wilayah[]" value="Kuningan"
-                        <?= terpilih($wilayahDipilih, 'Kuningan') ?>>
-                    <span>Kuningan</span>
-                </label>
-
-                <label class="filter-option">
-                    <input type="checkbox" name="wilayah[]" value="Majalengka"
-                        <?= terpilih($wilayahDipilih, 'Majalengka') ?>>
-                    <span>Majalengka</span>
-                </label>
+                <?php foreach ($regionOptions as $region): ?>
+                    <label class="filter-option">
+                        <input type="checkbox" name="wilayah[]" value="<?= htmlspecialchars($region, ENT_QUOTES, 'UTF-8') ?>"
+                            <?= terpilih($wilayahDipilih, $region) ?>>
+                        <span><?= htmlspecialchars($region, ENT_QUOTES, 'UTF-8') ?></span>
+                    </label>
+                <?php endforeach; ?>
             </div>
 
 
             <!-- KATEGORI -->
             <div class="filter-group">
                 <h3>Kategori</h3>
-
-                <label class="filter-option">
-                    <input type="checkbox" name="kategori[]"
-                        value="Wisata Alam & Pegunungan"
-                        <?= terpilih($kategoriDipilih, 'Wisata Alam & Pegunungan') ?>>
-                    <span>Wisata Alam &amp; Pegunungan</span>
-                </label>
-
-                <label class="filter-option">
-                    <input type="checkbox" name="kategori[]"
-                        value="Wisata Air & Curug"
-                        <?= terpilih($kategoriDipilih, 'Wisata Air & Curug') ?>>
-                    <span>Wisata Air &amp; Curug</span>
-                </label>
-
-                <label class="filter-option">
-                    <input type="checkbox" name="kategori[]"
-                        value="Wisata Buatan/Kuliner"
-                        <?= terpilih($kategoriDipilih, 'Wisata Buatan/Kuliner') ?>>
-                    <span>Wisata Buatan/Kuliner</span>
-                </label>
-
-                <label class="filter-option">
-                    <input type="checkbox" name="kategori[]"
-                        value="Wisata Sejarah & Budaya"
-                        <?= terpilih($kategoriDipilih, 'Wisata Sejarah & Budaya') ?>>
-                    <span>Wisata Sejarah &amp; Budaya</span>
-                </label>
+                <?php foreach ($filterCategories as $filterCategory): ?>
+                    <?php $categoryValue = (string) $filterCategory['Id_kategori']; ?>
+                    <label class="filter-option">
+                        <input type="checkbox" name="kategori[]" value="<?= $categoryValue ?>"
+                            <?= terpilih($kategoriDipilih, $categoryValue) ?>>
+                        <span><?= htmlspecialchars($filterCategory['nama_kategori'], ENT_QUOTES, 'UTF-8') ?></span>
+                    </label>
+                <?php endforeach; ?>
             </div>
 
 
@@ -501,12 +300,12 @@ function terpilih($daftar, $nilai)
                 <?php foreach ($hasil as $item): ?>
 
                     <a
-                        href="detail-wisata.php?id=<?= (int) $item['id'] ?>"
+                        href="detail-wisata.php?id=<?= rawurlencode($item['id']) ?>"
                         class="destination-card"
                     >
 
                         <img
-                            src="<?= htmlspecialchars($item['gambar'], ENT_QUOTES, 'UTF-8') ?>"
+                            src="../../<?= htmlspecialchars($item['gambar'] ?? 'FrontEnd/assets/images/img.png', ENT_QUOTES, 'UTF-8') ?>"
                             alt="<?= htmlspecialchars($item['nama'], ENT_QUOTES, 'UTF-8') ?>"
                             loading="lazy"
                             onerror="this.onerror=null;this.src='../assets/images/img.png';"
@@ -519,24 +318,26 @@ function terpilih($daftar, $nilai)
                             </h2>
 
                             <div class="rating">
-                                <span class="stars"><span class="star-icon">★</span><span class="star-icon">★</span><span class="star-icon">★</span></span>
-
-                                <span class="review-count">
-                                    (<?= number_format($item['rating'], 1, ',', '.') ?>k ulasan)
-                                </span>
+                                <?php if ($item['rating'] !== null && $item['review_count'] > 0): ?>
+                                    <span class="stars">★ <?= number_format($item['rating'], 1, ',', '.') ?>/5</span>
+                                    <span class="review-count">(<?= (int) $item['review_count'] ?> ulasan)</span>
+                                <?php else: ?>
+                                    <span class="review-count">Belum ada ulasan</span>
+                                <?php endif; ?>
                             </div>
 
                             <div class="location">
                                 <i class="bi bi-geo-alt-fill"></i>
 
                                 <span>
-                                    Kabupaten <?= htmlspecialchars($item['wilayah'], ENT_QUOTES, 'UTF-8') ?>,
-                                    <br>Jawa Barat.
+                                    <?= htmlspecialchars($item['lokasi'], ENT_QUOTES, 'UTF-8') ?>
                                 </span>
                             </div>
 
                             <span class="distance">
-                                <?= number_format($item['jarak'], 2, '.', '') ?> KM
+                                <?= $item['harga'] > 0
+                                    ? 'Rp ' . number_format($item['harga'], 0, ',', '.')
+                                    : 'Harga belum tersedia' ?>
                             </span>
 
                         </div>

@@ -37,11 +37,6 @@ CREATE TABLE `admin` (
   `Password` varchar(255) NOT NULL,
   PRIMARY KEY (`Id_admin`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `admin`
---
 
 LOCK TABLES `admin` WRITE;
 /*!40000 ALTER TABLE `admin` DISABLE KEYS */;
@@ -81,7 +76,7 @@ DROP TABLE IF EXISTS `favorit`;
 CREATE TABLE `favorit` (
   `Id_favorit` int(12) NOT NULL AUTO_INCREMENT,
   `Id_user` int(12) NOT NULL,
-  `Id_wisata` int(12) NOT NULL,
+  `Id_wisata` varchar(16) NOT NULL,
   `tanggal_ditambahkan` date NOT NULL,
   PRIMARY KEY (`Id_favorit`),
   UNIQUE KEY `uq_favorit_user_wisata` (`Id_user`,`Id_wisata`),
@@ -109,8 +104,9 @@ DROP TABLE IF EXISTS `foto_wisata`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `foto_wisata` (
   `Id_foto` int(12) NOT NULL AUTO_INCREMENT,
-  `id_wisata` int(12) NOT NULL,
+  `id_wisata` varchar(16) NOT NULL,
   `Nama_Foto` varchar(255) NOT NULL,
+  `link_foto` varchar(600) NOT NULL,
   PRIMARY KEY (`Id_foto`),
   KEY `fk_foto_wisata` (`id_wisata`),
   CONSTRAINT `fk_foto_wisata` FOREIGN KEY (`id_wisata`) REFERENCES `wisata` (`id_wisata`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -137,8 +133,10 @@ CREATE TABLE `kategori` (
   `Id_kategori` int(12) NOT NULL AUTO_INCREMENT,
   `nama_kategori` varchar(255) NOT NULL,
   `deskripsi` text DEFAULT NULL,
+  `gambar` varchar(600) DEFAULT NULL,
+  `aktif` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`Id_kategori`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -147,7 +145,11 @@ CREATE TABLE `kategori` (
 
 LOCK TABLES `kategori` WRITE;
 /*!40000 ALTER TABLE `kategori` DISABLE KEYS */;
-INSERT INTO `kategori` VALUES (1,'Alam','Destinasi alam dan ruang terbuka'),(2,'Budaya','Destinasi budaya dan sejarah'),(3,'Kuliner','Destinasi kuliner dan makanan lokal');
+INSERT INTO `kategori` (`Id_kategori`, `nama_kategori`, `deskripsi`, `gambar`, `aktif`) VALUES
+(1,'Alam','Destinasi alam dan ruang terbuka','FrontEnd/assets/images/gununglandscape.jpg',1),
+(2,'Budaya','Destinasi budaya dan sejarah','FrontEnd/assets/images/TeraseringPanyawean.jpg',1),
+(3,'Kuliner','Destinasi buatan dan kuliner','FrontEnd/assets/images/makanan.png',1),
+(4,'Air & Curug','Destinasi air dan curug','FrontEnd/assets/images/CurugPutri.png',1);
 /*!40000 ALTER TABLE `kategori` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -161,7 +163,7 @@ DROP TABLE IF EXISTS `ulasan`;
 CREATE TABLE `ulasan` (
   `Id_ulasan` int(12) NOT NULL AUTO_INCREMENT,
   `Id_user` int(12) NOT NULL,
-  `Id_wisata` int(12) NOT NULL,
+  `Id_wisata` varchar(16) NOT NULL,
   `rating` float NOT NULL,
   `komentar` text NOT NULL,
   `tanggal_ulasan` date NOT NULL,
@@ -248,7 +250,7 @@ DROP TABLE IF EXISTS `wisata`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `wisata` (
-  `id_wisata` int(12) NOT NULL,
+  `id_wisata` varchar(16) NOT NULL,
   `id_kategori` int(12) DEFAULT NULL,
   `nama_wisata` varchar(255) DEFAULT NULL,
   `deskripsi` varchar(1000) DEFAULT NULL,
@@ -257,8 +259,10 @@ CREATE TABLE `wisata` (
   `jam_buka` time DEFAULT NULL,
   `jam_tutup` time DEFAULT NULL,
   `domisili` varchar(255) NOT NULL,
+  `aktif` tinyint(1) NOT NULL DEFAULT 1,
   `latitude` decimal(10,7) DEFAULT NULL,
   `longitude` decimal(10,7) DEFAULT NULL,
+  `Maps_Wisata` varchar(500) NOT NULL,
   PRIMARY KEY (`id_wisata`),
   KEY `fk_wisata_kategori` (`id_kategori`),
   CONSTRAINT `fk_wisata_kategori` FOREIGN KEY (`id_kategori`) REFERENCES `kategori` (`Id_kategori`) ON DELETE SET NULL ON UPDATE CASCADE
@@ -282,7 +286,7 @@ DROP TABLE IF EXISTS `wisata_fasilitas`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `wisata_fasilitas` (
-  `Id_wisata` int(12) NOT NULL,
+  `Id_wisata` varchar(16) NOT NULL,
   `Id_fasilitas` int(12) NOT NULL,
   PRIMARY KEY (`Id_wisata`,`Id_fasilitas`),
   KEY `fk_wisata_fasilitas_fasilitas` (`Id_fasilitas`),

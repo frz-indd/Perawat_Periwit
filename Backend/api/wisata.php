@@ -80,6 +80,13 @@ try {
     "SELECT
       w.id_wisata,
       w.nama_wisata,
+      (
+        SELECT f.link_foto
+        FROM foto_wisata AS f
+        WHERE f.id_wisata = w.id_wisata
+        ORDER BY f.Id_foto
+        LIMIT 1
+      ) AS gambar,
       w.deskripsi,
       w.harga_tiket,
       w.domisili AS wilayah,
@@ -98,7 +105,7 @@ try {
 
   $data = [];
   while ($row = $result->fetch_assoc()) {
-    $row["id_wisata"] = (int) $row["id_wisata"];
+    $row["id_wisata"] = (string) $row["id_wisata"];
     if (is_numeric($row["harga_tiket"])) {
       $row["harga_tiket"] = 0 + $row["harga_tiket"];
     }

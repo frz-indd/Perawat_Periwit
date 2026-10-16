@@ -1,2 +1,4 @@
 RewriteEngine On
 RewriteRule ^users/me/?$ Backend/api/users_me.php [QSA,L]
+RewriteRule ^categories/?$ Backend/api/categories.php [QSA,L]
+RewriteRule ^categories/([^/]+)/wisata/?$ Backend/api/wisata_by_category.php?id_kategori=$1 [B,L]
