@@ -28,7 +28,7 @@ $destinasiLain = array_slice($wisata, 4, 4);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <!-- CSS Beranda -->
-    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=20261014">
+    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=20261016">
 </head>
 
 <body>

@@ -102,7 +102,7 @@ function escapeHtml(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../CSS/kategori.css">
+    <link rel="stylesheet" href="../CSS/kategori.css?v=20261016">
 </head>
 <body>
     <header class="site-header">
