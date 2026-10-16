@@ -110,10 +110,10 @@ $isLoggedIn = isset($_SESSION["id_user"]);
             <div class="destination-grid">
 
                 <!-- CILENGKRANG -->
-                <a href="#" class="destination-card">
+                <a href="" class="destination-card">
 
                     <img
-                        src="assets/images/wisata/cilengkrang.jpg"
+                        src="FrontEnd/assets/images/img.png"
                         alt="Cilengkrang"
                     >
 

@@ -35,7 +35,7 @@
                 <path class="avatar-body" d="M39 144c3-20 15-32 34-38l8-3c5 5 11 8 18 8s13-3 18-8l8 3c19 6 31 18 34 38-18 17-42 27-66 27s-48-10-66-27Z"></path>
             </svg>
         </div>
-        <h1 class="text-wrapper">Nama User <span class="edit-icon" aria-hidden="true">
+        <h1 class="text-wrapper"><span id="profile-name">Memuat profil...</span> <span class="edit-icon" aria-hidden="true">
             <svg viewBox="0 0 48 48">
                 <path d="M15 10h-3.5A4.5 4.5 0 0 0 7 14.5v22A4.5 4.5 0 0 0 11.5 41h22a4.5 4.5 0 0 0 4.5-4.5V33"></path>
                 <path d="m20 32 2.1-7.1L37.7 9.3a3.3 3.3 0 0 1 4.7 4.7L26.8 29.6 20 32Z"></path>
@@ -44,7 +44,7 @@
                 <circle cx="45" cy="5" r="1.4"></circle>
             </svg>
         </span></h1>
-        <p class="text-wrapper-2">PerawatPeriwit124@gmail.com</p>
+        <p class="text-wrapper-2" id="profile-email"></p>
         <nav class="group" aria-label="Menu profil">
             <a class="text-wrapper-3" href="../exploreMajaKu_skeleton/index.html">
                 <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="m2 13 12-10 12 10M5 11v14h18V11M11 25v-9h6v9"></path></svg></span>Beranda
@@ -138,6 +138,28 @@
     </section>
 </main>
 <script>
+    const profileName = document.getElementById('profile-name');
+    const profileEmail = document.getElementById('profile-email');
+
+    fetch(new URL('../../users/me', window.location.href), {
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json' }
+    })
+        .then(async (response) => {
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Profil gagal dimuat.');
+            }
+
+            profileName.textContent = result.data.nama;
+            profileEmail.textContent = result.data.email;
+        })
+        .catch(() => {
+            profileName.textContent = 'Profil tidak tersedia';
+            profileEmail.textContent = '';
+        });
+
     document.querySelectorAll('.favorite-card').forEach((card) => {
         const selectCard = () => {
             document.querySelectorAll('.favorite-card.is-selected').forEach((selected) => {
