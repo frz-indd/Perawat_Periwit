@@ -25,7 +25,7 @@
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="../CSS/auth.css?v=20261014-1">
+    <link rel="stylesheet" href="../CSS/auth.css?v=20261015-1">
 </head>
 
 <body>
@@ -186,7 +186,28 @@
 
     </main>
 
-    <script src="../js/auth.js?v=20261014-1"></script>
+    <div
+        class="auth-success-modal"
+        id="authSuccessModal"
+        hidden
+    >
+        <section
+            class="auth-success-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="authSuccessTitle"
+            aria-describedby="authSuccessDescription"
+        >
+            <span class="auth-success-icon" aria-hidden="true"></span>
+            <h2 id="authSuccessTitle"></h2>
+            <p id="authSuccessDescription"></p>
+            <button type="button" class="auth-success-button" id="authSuccessConfirm">
+                OK
+            </button>
+        </section>
+    </div>
+
+    <script src="../js/auth.js?v=20261015-1"></script>
 
 </body>
 </html>

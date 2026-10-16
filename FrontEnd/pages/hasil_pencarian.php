@@ -2,12 +2,6 @@
 <?php
 session_start();
 
-// Jika halaman hasil pencarian wajib login, aktifkan kode berikut.
-// if (!isset($_SESSION['id_user'])) {
-//     header('Location: auth/Login.php');
-//     exit;
-// }
-
 $keyword = trim($_GET['keyword'] ?? '');
 
 $jarakDipilih = $_GET['jarak'] ?? [];
@@ -507,7 +501,7 @@ function terpilih($daftar, $nilai)
                 <?php foreach ($hasil as $item): ?>
 
                     <a
-                        href="pages/detail-wisata.php?id=<?= (int) $item['id'] ?>"
+                        href="detail-wisata.php?id=<?= (int) $item['id'] ?>"
                         class="destination-card"
                     >
 

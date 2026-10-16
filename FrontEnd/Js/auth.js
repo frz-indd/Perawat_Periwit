@@ -92,6 +92,32 @@ async function sendForm(form) {
     return result;
 }
 
+function showSuccessModal(title, description, onConfirm) {
+    const modal = document.getElementById('authSuccessModal');
+    const titleElement = document.getElementById('authSuccessTitle');
+    const descriptionElement = document.getElementById(
+        'authSuccessDescription'
+    );
+    const confirmButton = document.getElementById('authSuccessConfirm');
+
+    titleElement.textContent = title;
+    descriptionElement.textContent = description;
+    modal.hidden = false;
+
+    confirmButton.onclick = function () {
+        modal.hidden = true;
+        onConfirm();
+    };
+
+    confirmButton.focus();
+}
+
+function setFormSubmitting(form, button, submitting, idleLabel) {
+    form.setAttribute('aria-busy', String(submitting));
+    button.disabled = submitting;
+    button.textContent = submitting ? 'Memproses...' : idleLabel;
+}
+
 
 /* =====================================================
    PASSWORD SHOW / HIDE
@@ -131,6 +157,8 @@ if (loginForm) {
     const password = document.getElementById('loginPassword');
     const message = document.getElementById('loginMessage');
     const submitButton = loginForm.querySelector('[type="submit"]');
+    const submitLabel = submitButton.textContent.trim();
+    let isSubmitting = false;
 
     const identityFeedback = identity
         .closest('.form-group')
@@ -160,6 +188,8 @@ if (loginForm) {
 
     loginForm.addEventListener('submit', async function (event) {
         event.preventDefault();
+
+        if (isSubmitting) return;
 
         hideMessage(message);
 
@@ -206,20 +236,22 @@ if (loginForm) {
             return;
         }
 
-        submitButton.disabled = true;
+        isSubmitting = true;
+        setFormSubmitting(loginForm, submitButton, true, submitLabel);
 
         try {
             const result = await sendForm(loginForm);
 
             if (result.status === 'success') {
-                alert(
-                    'Login Berhasil! Selamat datang di Explore Majaku.'
+                showSuccessModal(
+                    'Login Berhasil!',
+                    'Selamat datang kembali di Explore MajaKu',
+                    function () {
+                        window.location.assign(
+                            result.redirect || '../index.html'
+                        );
+                    }
                 );
-
-                window.location.assign(
-                    result.redirect || '../index.html'
-                );
-
                 return;
             }
 
@@ -261,7 +293,8 @@ if (loginForm) {
                 'Terjadi kesalahan pada server. Silakan coba lagi.'
             );
         } finally {
-            submitButton.disabled = false;
+            isSubmitting = false;
+            setFormSubmitting(loginForm, submitButton, false, submitLabel);
         }
     });
 }
@@ -279,6 +312,8 @@ if (registerForm) {
     const confirmPassword = document.getElementById('confirmPassword');
     const message = document.getElementById('registerMessage');
     const submitButton = registerForm.querySelector('[type="submit"]');
+    const submitLabel = submitButton.textContent.trim();
+    let isSubmitting = false;
 
     const emailFeedback = email
         .closest('.form-group')
@@ -294,6 +329,8 @@ if (registerForm) {
 
     registerForm.addEventListener('submit', async function (event) {
         event.preventDefault();
+
+        if (isSubmitting) return;
 
         hideMessage(message);
 
@@ -358,18 +395,20 @@ if (registerForm) {
             return;
         }
 
-        submitButton.disabled = true;
+        isSubmitting = true;
+        setFormSubmitting(registerForm, submitButton, true, submitLabel);
 
         try {
             const result = await sendForm(registerForm);
 
             if (result.status === 'success') {
-                alert(
-                    'Registrasi Berhasil! Akun kamu berhasil dibuat. ' +
-                    'Silakan login untuk melanjutkan.'
+                showSuccessModal(
+                    'Register Berhasil!',
+                    'Akun kamu berhasil dibuat. Silakan Login untuk melanjutkan',
+                    function () {
+                        window.location.assign('Login.php');
+                    }
                 );
-
-                window.location.assign('Login.php');
                 return;
             }
 
@@ -400,7 +439,8 @@ if (registerForm) {
                 'Terjadi kesalahan pada server. Silakan coba lagi.'
             );
         } finally {
-            submitButton.disabled = false;
+            isSubmitting = false;
+            setFormSubmitting(registerForm, submitButton, false, submitLabel);
         }
     });
 }
