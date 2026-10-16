@@ -77,9 +77,61 @@ body {
     white-space: nowrap;
 }
 
+.category-dropdown {
+    position: relative;
+}
+
+.category-dropdown > summary {
+    color: #000000;
+    cursor: pointer;
+    font-size: 21px;
+    font-weight: 600;
+    list-style: none;
+    white-space: nowrap;
+}
+
+.category-dropdown > summary::-webkit-details-marker {
+    display: none;
+}
+
+.category-dropdown > summary i {
+    font-size: 15px;
+}
+
 .navbar-menu a:hover,
-.navbar-menu a.active {
+.navbar-menu a.active,
+.category-dropdown[open] > summary,
+.category-dropdown > summary:hover {
     color: #176f63;
+}
+
+.category-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 50%;
+    z-index: 20;
+    display: none;
+    min-width: 205px;
+    padding: 8px;
+    transform: translateX(-50%);
+    border-radius: 0 0 10px 10px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+.category-dropdown[open] .category-menu {
+    display: flex;
+    flex-direction: column;
+}
+
+.category-menu a {
+    padding: 9px 11px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.category-menu a:hover {
+    background: #edf5f2;
 }
 
 
@@ -141,7 +193,7 @@ body {
     align-items: center;
     justify-content: center;
 
-    background-image: url('../assets/images/hero/hero-home.jpg');
+    background-image: url('../assets/images/hero-index.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

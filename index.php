@@ -43,7 +43,15 @@ $destinasiLain = array_slice($wisata, 4, 4);
 
             <nav class="navbar-menu">
                 <a href="index.php" class="active">Beranda</a>
-                <a href="FrontEnd/pages/kategori.php">kategori</a>
+                <details class="category-dropdown">
+                    <summary>Kategori <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+                    <div class="category-menu">
+                        <a href="FrontEnd/pages/kategori.php?kategori=alam">Alam</a>
+                        <a href="FrontEnd/pages/kategori.php?kategori=air-curug">Air &amp; Curug</a>
+                        <a href="FrontEnd/pages/kategori.php?kategori=buatan-kuliner">Buatan &amp; Kuliner</a>
+                        <a href="FrontEnd/pages/kategori.php?kategori=sejarah-budaya">Sejarah &amp; Budaya</a>
+                    </div>
+                </details>
                 <a href="FrontEnd/pages/tentang.php">Tentang</a>
             </nav>
 

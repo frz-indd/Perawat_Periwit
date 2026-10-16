@@ -17,6 +17,9 @@ if (!is_string($categoryKey) || !isset($categoryRoutes[$categoryKey])) {
 $categories = fetchActiveCategories($conn);
 $categoryId = $categoryRoutes[$categoryKey];
 $category = null;
+$keyword = isset($_GET["keyword"]) && is_string($_GET["keyword"])
+    ? trim($_GET["keyword"])
+    : "";
 foreach ($categories as $availableCategory) {
     if ($availableCategory["Id_kategori"] === $categoryId) {
         $category = $availableCategory;
@@ -32,14 +35,55 @@ if ($category === null) {
         "nama_kategori" => "Kategori tidak tersedia",
         "deskripsi" => "Kategori ini belum tersedia."
     ];
+    $categoryDestinations = [];
 } else {
-    $keyword = isset($_GET["keyword"]) && is_string($_GET["keyword"])
-        ? trim($_GET["keyword"])
-        : "";
     $destinations = fetchTourismRows($conn, [
         "id_kategori" => $categoryId,
         "keyword" => $keyword
     ]);
+    $categoryDestinations = fetchTourismRows($conn, [
+        "id_kategori" => $categoryId
+    ]);
+}
+
+$heroImageFallbacks = [
+    1 => [
+        "FrontEnd/assets/images/pamoroan.jpg",
+        "FrontEnd/assets/images/TeraseringPanyawean.jpg",
+        "FrontEnd/assets/images/gununglandscape.jpg"
+    ],
+    2 => [
+        "FrontEnd/assets/images/Arunika.png",
+        "FrontEnd/assets/images/Woodland.png",
+        "FrontEnd/assets/images/gununglandscape.jpg"
+    ],
+    3 => [
+        "FrontEnd/assets/images/Woodland.png",
+        "FrontEnd/assets/images/Arunika.png",
+        "FrontEnd/assets/images/makanan.png"
+    ],
+    4 => [
+        "FrontEnd/assets/images/CurugPutri.png",
+        "FrontEnd/assets/images/telaga.png",
+        "FrontEnd/assets/images/img.png"
+    ]
+];
+$heroImages = [];
+$heroImageCandidates = array_merge(
+    array_column($categoryDestinations, "gambar"),
+    [$category["gambar"] ?? null],
+    $heroImageFallbacks[$categoryId]
+);
+foreach ($heroImageCandidates as $image) {
+    if (is_string($image) && $image !== "" && !in_array($image, $heroImages, true)) {
+        $heroImages[] = $image;
+        if (count($heroImages) === 3) {
+            break;
+        }
+    }
+}
+while (count($heroImages) < 3) {
+    $heroImages[] = $heroImages[0] ?? "FrontEnd/assets/images/img.png";
 }
 
 function escapeHtml(string $value): string
@@ -66,7 +110,19 @@ function escapeHtml(string $value): string
             <a class="brand" href="../../index.php">Explore Majaku</a>
             <div class="nav-links">
                 <a href="../../index.php">Beranda</a>
-                <a class="active category-trigger" href="kategori.php?kategori=alam" aria-current="page">kategori</a>
+                <details class="category-dropdown">
+                    <summary class="active">kategori <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+                    <div class="category-nav">
+                        <?php foreach ($categories as $navigationCategory): ?>
+                            <?php $slug = $categorySlugs[$navigationCategory["Id_kategori"]] ?? null; ?>
+                            <?php if ($slug !== null): ?>
+                                <a href="kategori.php?kategori=<?= escapeHtml($slug); ?>"<?= $categoryKey === $slug ? ' aria-current="page"' : ''; ?>>
+                                    <?= escapeHtml($navigationCategory["nama_kategori"]); ?>
+                                </a>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                </details>
                 <a href="tentang.php">Tentang</a>
             </div>
             <div class="nav-icons">
@@ -76,21 +132,12 @@ function escapeHtml(string $value): string
         </nav>
     </header>
 
-    <nav class="category-nav" aria-label="Pilih kategori wisata">
-        <?php foreach ($categories as $navigationCategory): ?>
-            <?php $slug = $categorySlugs[$navigationCategory["Id_kategori"]] ?? null; ?>
-            <?php if ($slug !== null): ?>
-                <a href="kategori.php?kategori=<?= escapeHtml($slug); ?>"<?= $categoryKey === $slug ? ' aria-current="page"' : ''; ?>>
-                    <?= escapeHtml($navigationCategory["nama_kategori"]); ?>
-                </a>
-            <?php endif; ?>
-        <?php endforeach; ?>
-    </nav>
-
     <main>
         <section class="hero" aria-label="<?= escapeHtml($category['nama_kategori']); ?>">
             <div class="hero-images" aria-hidden="true">
-                <img src="../../<?= escapeHtml($category['gambar'] ?? 'FrontEnd/assets/images/img.png'); ?>" alt="">
+                <?php foreach ($heroImages as $heroImage): ?>
+                    <img src="../../<?= escapeHtml($heroImage); ?>" alt="">
+                <?php endforeach; ?>
             </div>
             <div class="hero-shade"></div>
             <div class="hero-copy">
