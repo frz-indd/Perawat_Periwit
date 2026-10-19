@@ -118,13 +118,7 @@ $gravatar = filter_var($email, FILTER_VALIDATE_EMAIL)
     : '';
 
 $errors = [];
-$sukses = false;
 $gagal  = '';
-
-if (!empty($_SESSION['flash_profil'])) {
-    $sukses = true;
-    unset($_SESSION['flash_profil']);
-}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $namaBaru = trim($_POST['nama_lengkap'] ?? '');
@@ -178,8 +172,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user']['nama'] = $namaBaru;
                 $_SESSION['user']['foto_profil'] = $fotoBaru;
             }
-            $_SESSION['flash_profil'] = 1;
-            header('Location: edit-profil.php');
+            $_SESSION['pesan'] = 'Perubahan profil berhasil disimpan.';
+            header('Location: profil.php');
             exit;
         }
         if ($fileBaru && is_file($fileBaru)) @unlink($fileBaru);
@@ -271,9 +265,7 @@ $srcTampil = $fotoSrc ?: $gravatar;
         <span class="ep-back__teks">Back</span>
       </div>
 
-      <?php if ($sukses): ?>
-        <div class="ep-alert ep-alert--sukses" role="status">Perubahan profil berhasil disimpan.</div>
-      <?php elseif ($gagal !== ''): ?>
+      <?php if ($gagal !== ''): ?>
         <div class="ep-alert ep-alert--gagal" role="alert"><?= e($gagal) ?></div>
       <?php endif; ?>
 
@@ -302,7 +294,7 @@ $srcTampil = $fotoSrc ?: $gravatar;
       <p class="ep-email"><?= e($email) ?></p>
       <p class="ep-catatan">Email tidak dapat diubah karena digunakan sebagai identitas akun.</p>
 
-      <button type="submit" class="ep-btn ep-btn--utama">Simpan Perubahan</button>
+      <button href "eksplorMajaKu/FrontEnd/pages/profil.php" type="submit" class="ep-btn ep-btn--utama">Simpan Perubahan</button>
       <a href="profil.php" class="ep-btn ep-btn--batal">Batal</a>
     </main>
   </form>

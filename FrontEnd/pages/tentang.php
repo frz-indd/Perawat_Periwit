@@ -40,10 +40,10 @@ session_start();
 
     <header class="ep-navbar">
         <div class="ep-navbar__inner">
-            <a class="ep-logo" href="/frontend/Perawat_Periwit/index.php">Explore Majaku</a>
+            <a class="ep-logo" href="../../index.php">Explore Majaku</a>
 
             <nav class="ep-menu" aria-label="Menu utama">
-                <a class="ep-menu__beranda" href="/frontend/Perawat_Periwit/index.php">Beranda</a>
+                <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
                 <a class="ep-menu__kategori" href="#" id="kategori-toggle"
                    aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">kategori</a>
                 <a class="ep-menu__tentang" href="tentang.php" style="color: var(--hijau);">Tentang</a>

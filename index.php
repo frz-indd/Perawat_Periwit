@@ -146,10 +146,12 @@ $destinasiLain = array_slice($wisata, 4, 4);
                                 </svg>
                                 <span><?= htmlspecialchars($destination['wilayah'], ENT_QUOTES, 'UTF-8'); ?></span>
                             </div>
-                            <span class="distance">
-                                <?= $destination['harga_tiket'] > 0
-                                    ? 'Rp ' . number_format($destination['harga_tiket'], 0, ',', '.')
-                                    : 'Harga belum tersedia'; ?>
+                            <span
+                                class="distance"
+                                data-latitude="<?= htmlspecialchars((string) ($destination['latitude'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                                data-longitude="<?= htmlspecialchars((string) ($destination['longitude'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                            >
+                                Menghitung jarak...
                             </span>
                         </div>
                     </a>
@@ -186,10 +188,12 @@ $destinasiLain = array_slice($wisata, 4, 4);
                                 </svg>
                                 <span><?= htmlspecialchars($destination['wilayah'], ENT_QUOTES, 'UTF-8'); ?></span>
                             </div>
-                            <span class="distance">
-                                <?= $destination['harga_tiket'] > 0
-                                    ? 'Rp ' . number_format($destination['harga_tiket'], 0, ',', '.')
-                                    : 'Harga belum tersedia'; ?>
+                            <span
+                                class="distance"
+                                data-latitude="<?= htmlspecialchars((string) ($destination['latitude'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                                data-longitude="<?= htmlspecialchars((string) ($destination['longitude'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                            >
+                                Menghitung jarak...
                             </span>
                         </div>
                     </a>
@@ -211,6 +215,74 @@ $destinasiLain = array_slice($wisata, 4, 4);
                 searchInput.focus();
             }
         });
+
+        const distanceElements = Array.from(
+            document.querySelectorAll('.distance[data-latitude][data-longitude]')
+        );
+        const destinationsWithCoordinates = distanceElements
+            .map(element => ({
+                element,
+                latitude: Number(element.dataset.latitude),
+                longitude: Number(element.dataset.longitude)
+            }))
+            .filter(destination =>
+                elementHasCoordinates(destination.element) &&
+                Number.isFinite(destination.latitude) &&
+                destination.latitude >= -90 && destination.latitude <= 90 &&
+                Number.isFinite(destination.longitude) &&
+                destination.longitude >= -180 && destination.longitude <= 180
+            );
+
+        distanceElements.forEach(element => {
+            if (!destinationsWithCoordinates.some(destination => destination.element === element)) {
+                element.textContent = 'Jarak tidak tersedia';
+            }
+        });
+
+        function elementHasCoordinates(element) {
+            return element.dataset.latitude.trim() !== '' &&
+                element.dataset.longitude.trim() !== '';
+        }
+
+        if (destinationsWithCoordinates.length > 0) {
+            if (!navigator.geolocation) {
+                destinationsWithCoordinates.forEach(({ element }) => {
+                    element.textContent = 'Lokasi tidak didukung';
+                });
+            } else {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const toRadians = degrees => degrees * Math.PI / 180;
+                        const originLatitude = toRadians(position.coords.latitude);
+                        const originLongitude = toRadians(position.coords.longitude);
+
+                        destinationsWithCoordinates.forEach(destination => {
+                            const latitudeDifference =
+                                toRadians(destination.latitude) - originLatitude;
+                            const longitudeDifference =
+                                toRadians(destination.longitude) - originLongitude;
+                            const haversine =
+                                Math.sin(latitudeDifference / 2) ** 2 +
+                                Math.cos(originLatitude) *
+                                Math.cos(toRadians(destination.latitude)) *
+                                Math.sin(longitudeDifference / 2) ** 2;
+                            const distance = 6371 * 2 * Math.atan2(
+                                Math.sqrt(haversine),
+                                Math.sqrt(1 - haversine)
+                            );
+
+                            destination.element.textContent = `${distance.toFixed(2)} KM`;
+                        });
+                    },
+                    () => {
+                        destinationsWithCoordinates.forEach(({ element }) => {
+                            element.textContent = 'Jarak tidak tersedia';
+                        });
+                    },
+                    { maximumAge: 300000, timeout: 10000 }
+                );
+            }
+        }
     </script>
 
 </body>

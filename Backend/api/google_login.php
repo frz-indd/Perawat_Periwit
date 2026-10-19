@@ -11,9 +11,12 @@ if ($_SERVER["REQUEST_METHOD"] !== "GET") {
   ]);
 }
 
+$intent = ($_GET["intent"] ?? "login") === "register" ? "register" : "login";
+
 $config = googleOauthConfig();
 if ($config === null) {
-  header("Location: ../../FrontEnd/auth/Login.php?google=not_configured", true, 303);
+  $authPage = $intent === "register" ? "Register.php" : "Login.php";
+  header("Location: ../../FrontEnd/auth/$authPage?google=not_configured", true, 303);
   exit;
 }
 
@@ -31,6 +34,7 @@ try {
   $_SESSION["google_oauth_state"] = $state;
   $_SESSION["google_oauth_nonce"] = $nonce;
   $_SESSION["google_oauth_code_verifier"] = $codeVerifier;
+  $_SESSION["google_oauth_intent"] = $intent;
 
   $authorizationUrl = "https://accounts.google.com/o/oauth2/v2/auth?" . http_build_query([
     "client_id" => $config["client_id"],

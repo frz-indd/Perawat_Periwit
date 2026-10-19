@@ -327,6 +327,20 @@ if (registerForm) {
         'confirmPasswordError'
     );
 
+    const googleResult = new URLSearchParams(
+        window.location.search
+    ).get('google');
+    const googleMessages = {
+        email_exists:
+            'Email Google ini sudah terdaftar. Silakan login dengan email tersebut.',
+        not_configured: 'Login Google belum dikonfigurasi di server.',
+        cancelled: 'Pendaftaran dengan Google dibatalkan.'
+    };
+
+    if (googleMessages[googleResult]) {
+        showMessage(message, googleMessages[googleResult]);
+    }
+
     registerForm.addEventListener('submit', async function (event) {
         event.preventDefault();
 
@@ -456,8 +470,9 @@ if (registerForm) {
 ].forEach(button => {
     if (button) {
         button.addEventListener('click', function () {
+            const intent = this.id === 'googleRegister' ? 'register' : 'login';
             window.location.assign(
-                '../../Backend/api/google_login.php'
+                `../../Backend/api/google_login.php?intent=${intent}`
             );
         });
     }

@@ -46,6 +46,8 @@ try {
             'rating' => $row['rating'],
             'review_count' => $row['jumlah_ulasan'],
             'harga' => $row['harga_tiket'],
+            'latitude' => $row['latitude'],
+            'longitude' => $row['longitude'],
             'gambar' => $row['gambar']
         ];
     }
@@ -340,10 +342,12 @@ function terpilih($daftar, $nilai)
                                 </span>
                             </div>
 
-                            <span class="distance">
-                                <?= $item['harga'] > 0
-                                    ? 'Rp ' . number_format($item['harga'], 0, ',', '.')
-                                    : 'Harga belum tersedia' ?>
+                            <span
+                                class="distance"
+                                data-latitude="<?= htmlspecialchars((string) $item['latitude'], ENT_QUOTES, 'UTF-8') ?>"
+                                data-longitude="<?= htmlspecialchars((string) $item['longitude'], ENT_QUOTES, 'UTF-8') ?>"
+                            >
+                                Menghitung jarak...
                             </span>
 
                         </div>
@@ -388,6 +392,72 @@ function terpilih($daftar, $nilai)
             alert('Budget minimum tidak boleh lebih besar dari budget maksimum.');
         }
     });
+
+    const distanceElements = Array.from(
+        document.querySelectorAll('.distance[data-latitude][data-longitude]')
+    );
+    const destinationsWithCoordinates = distanceElements
+        .map(element => ({
+            element,
+            latitudeValue: element.dataset.latitude.trim(),
+            longitudeValue: element.dataset.longitude.trim(),
+            latitude: Number(element.dataset.latitude),
+            longitude: Number(element.dataset.longitude)
+        }))
+        .filter(destination =>
+            destination.latitudeValue !== '' &&
+            destination.longitudeValue !== '' &&
+            Number.isFinite(destination.latitude) &&
+            destination.latitude >= -90 && destination.latitude <= 90 &&
+            Number.isFinite(destination.longitude) &&
+            destination.longitude >= -180 && destination.longitude <= 180
+        );
+
+    distanceElements.forEach(element => {
+        if (!destinationsWithCoordinates.some(destination => destination.element === element)) {
+            element.textContent = 'Jarak tidak tersedia';
+        }
+    });
+
+    if (destinationsWithCoordinates.length > 0) {
+        if (!navigator.geolocation) {
+            destinationsWithCoordinates.forEach(({ element }) => {
+                element.textContent = 'Lokasi tidak didukung';
+            });
+        } else {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const toRadians = degrees => degrees * Math.PI / 180;
+                    const originLatitude = toRadians(position.coords.latitude);
+                    const originLongitude = toRadians(position.coords.longitude);
+
+                    destinationsWithCoordinates.forEach(destination => {
+                        const latitudeDifference =
+                            toRadians(destination.latitude) - originLatitude;
+                        const longitudeDifference =
+                            toRadians(destination.longitude) - originLongitude;
+                        const haversine =
+                            Math.sin(latitudeDifference / 2) ** 2 +
+                            Math.cos(originLatitude) *
+                            Math.cos(toRadians(destination.latitude)) *
+                            Math.sin(longitudeDifference / 2) ** 2;
+                        const distance = 6371 * 2 * Math.atan2(
+                            Math.sqrt(haversine),
+                            Math.sqrt(1 - haversine)
+                        );
+
+                        destination.element.textContent = `${distance.toFixed(2)} KM`;
+                    });
+                },
+                () => {
+                    destinationsWithCoordinates.forEach(({ element }) => {
+                        element.textContent = 'Jarak tidak tersedia';
+                    });
+                },
+                { maximumAge: 300000, timeout: 10000 }
+            );
+        }
+    }
 </script>
 
 </body>
