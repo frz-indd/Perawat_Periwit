@@ -150,7 +150,8 @@ body.halaman-profil {
     padding-left: 21%;
 }
 
-.menu-profil a {
+.menu-profil a,
+.menu-profil button {
     display: flex;
     align-items: center;
     gap: calc(23 * var(--p));
@@ -162,7 +163,16 @@ body.halaman-profil {
     text-decoration: none;
 }
 
-.menu-profil a:hover {
+.menu-profil button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+}
+
+.menu-profil a:hover,
+.menu-profil button:hover {
     color: var(--hijau);
 }
 
