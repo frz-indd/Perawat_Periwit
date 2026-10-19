@@ -21,7 +21,7 @@ body.halaman-tentang {
     font-family: var(--font-main);
     overflow-y: auto !important;
     height: auto !important;
-    padding-top: calc(83 * var(--u));
+    padding-top: 0;
 }
 
 .about-page {
@@ -307,72 +307,6 @@ body.halaman-tentang {
     margin-top: calc(-4 * var(--u));
     font-size: calc(20.8 * var(--u));
     line-height: calc(30 * var(--u));
-}
-
-/* =====================================================
-   NAVBAR: kategori + dropdown
-   ===================================================== */
-
-/* Tulisan "kategori" jadi hijau saat disentuh / di-hover */
-.ep-menu__kategori:hover,
-.ep-menu__kategori:focus,
-.ep-menu__kategori:active {
-    color: var(--hijau) !important;
-}
-
-/* Pastikan link menu navbar bisa diklik */
-.ep-menu a {
-    z-index: 10;
-    pointer-events: auto;
-    cursor: pointer;
-}
-
-/* Dropdown kategori (menempel di bawah navbar, sesuai desain).
-   Posisi diatur lewat JavaScript. */
-.kat-menu {
-    display: none;
-    position: fixed;
-    z-index: 3000;
-    min-width: calc(230 * var(--u));
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    background: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 0;
-    box-shadow: 0 calc(4 * var(--u)) calc(10 * var(--u)) rgba(0, 0, 0, 0.18);
-}
-
-.kat-menu.show {
-    display: block;
-}
-
-.kat-menu li {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.kat-menu a.kat-item {
-    display: block;
-    position: static;
-    padding: calc(5 * var(--u)) calc(14 * var(--u));
-    font-family: var(--font-sans, 'Poppins', sans-serif);
-    font-size: calc(16 * var(--u));
-    font-weight: 400;
-    line-height: 1.4;
-    color: #000;
-    text-align: center;
-    white-space: nowrap;
-    text-decoration: none;
-}
-
-.kat-menu a.kat-item:hover,
-.kat-menu a.kat-item:focus,
-.kat-menu a.kat-item:active {
-    background: var(--hijau);
-    color: #fff;
-    outline: none;
 }
 
 /* =====================================================

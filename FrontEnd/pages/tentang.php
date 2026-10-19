@@ -22,54 +22,41 @@ session_start();
     <!-- CSS utama (urutan penting: tentang.css paling akhir) -->
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=font-map-2">
     <link rel="stylesheet" href="../CSS/tentang.css?v=font-map-2">
-    <link rel="stylesheet" href="../CSS/theme.css?v=profile-icon-1">
+    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-3">
 </head>
 <body class="about-page halaman-tentang">
 
-    <!-- Sprite ikon profil (sama seperti Edit Profil) -->
-    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-        <defs>
-            <clipPath id="klip-avatar"><circle cx="110" cy="110" r="110"/></clipPath>
-            <symbol id="ikon-profil" viewBox="0 0 220 220">
-                <circle cx="110" cy="110" r="93.5" fill="none" stroke="#166d5c" stroke-width="11"/>
-                <circle cx="110" cy="82.5" r="27.5" fill="none" stroke="#166d5c" stroke-width="11"/>
-                <path d="M49.5 170.5c9.35-27.5 30.25-41.25 60.5-41.25s51.15 13.75 60.5 41.25" fill="none" stroke="#166d5c" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
-            </symbol>
-        </defs>
-    </svg>
+    <header class="navbar">
+        <div class="navbar-container">
+            <a class="navbar-logo" href="../../index.php">Explore Majaku</a>
 
-    <header class="ep-navbar">
-        <div class="ep-navbar__inner">
-            <a class="ep-logo" href="../../index.php">Explore Majaku</a>
-
-            <nav class="ep-menu" aria-label="Menu utama">
-                <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
-                <a class="ep-menu__kategori" href="#" id="kategori-toggle"
-                   aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">kategori</a>
-                <a class="ep-menu__tentang" href="tentang.php" style="color: var(--hijau);">Tentang</a>
+            <nav class="navbar-menu" aria-label="Menu utama">
+                <a href="../../index.php">Beranda</a>
+                <details class="category-dropdown">
+                    <summary>Kategori <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+                    <div class="category-menu">
+                        <a href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a>
+                        <a href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a>
+                        <a href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a>
+                        <a href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a>
+                    </div>
+                </details>
+                <a href="tentang.php" class="active" aria-current="page">Tentang</a>
             </nav>
 
-            <!-- Ikon cari (sama persis dengan Edit Profil) -->
-            <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
-                <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round">
-                    <circle cx="16" cy="16" r="12"/>
-                    <line x1="25" y1="25" x2="37" y2="37"/>
-                </svg>
-            </a>
-
-            <!-- Ikon profil (sama persis dengan Edit Profil) -->
-            <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
-                <svg viewBox="0 0 220 220"><use href="#ikon-profil"/></svg>
-            </a>
+            <div class="navbar-icons">
+                <a class="profile-icon" href="hasil_pencarian.php" aria-label="Cari">
+                    <i class="bi bi-search nav-search-icon" aria-hidden="true"></i>
+                </a>
+                <a class="profile-icon" href="profil.php" aria-label="Profil">
+                    <svg class="profile-outline-icon" viewBox="0 0 40 40" aria-hidden="true">
+                        <circle cx="20" cy="20" r="17"></circle>
+                        <circle cx="20" cy="15" r="5"></circle>
+                        <path d="M9 31c1.7-5 5.5-7.5 11-7.5S29.3 26 31 31"></path>
+                    </svg>
+                </a>
+            </div>
         </div>
-
-        <!-- Daftar kategori: sengaja di luar .ep-menu -->
-        <ul class="kat-menu" id="kategori-menu">
-            <li><a class="kat-item" href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
-        </ul>
     </header>
 
     <!-- Konten Utama Halaman Tentang -->
@@ -137,51 +124,5 @@ session_start();
             </section>
         </section>
     </main>
-
-    <script>
-        (function () {
-            var toggle = document.getElementById('kategori-toggle');
-            var menu = document.getElementById('kategori-menu');
-            var header = document.querySelector('.ep-navbar');
-
-            // Menempel tepat di bawah navbar, rata tengah di bawah tulisan "kategori"
-            function posisikan() {
-                var r = toggle.getBoundingClientRect();
-                var bawahNavbar = header.getBoundingClientRect().bottom;
-                menu.style.top = bawahNavbar + 'px';
-                menu.style.left = (r.left + r.width / 2 - menu.offsetWidth / 2) + 'px';
-            }
-
-            function buka() {
-                menu.classList.add('show'); // tampilkan dulu supaya lebar bisa diukur
-                posisikan();
-                toggle.classList.add('aktif');
-                toggle.setAttribute('aria-expanded', 'true');
-            }
-
-            function tutup() {
-                menu.classList.remove('show');
-                toggle.classList.remove('aktif');
-                toggle.setAttribute('aria-expanded', 'false');
-            }
-
-            toggle.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                menu.classList.contains('show') ? tutup() : buka();
-            });
-
-            document.addEventListener('click', function (e) {
-                if (!menu.contains(e.target)) tutup();
-            });
-
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') tutup();
-            });
-
-            window.addEventListener('resize', tutup);
-            window.addEventListener('scroll', tutup, { passive: true });
-        })();
-    </script>
 </body>
 </html>

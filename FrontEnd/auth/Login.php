@@ -26,7 +26,7 @@
     >
 
     <link rel="stylesheet" href="../CSS/auth.css?v=font-map-2">
-    <link rel="stylesheet" href="../CSS/theme.css?v=profile-icon-1">
+    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-3">
 </head>
 
 <body>
