@@ -211,9 +211,9 @@ $srcTampil = $fotoSrc ?: $gravatar;
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261030">
-  <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
+  <link rel="stylesheet" href="../CSS/theme.css?v=layout-fonts-1">
 </head>
 <body class="halaman-edit-profil">
 

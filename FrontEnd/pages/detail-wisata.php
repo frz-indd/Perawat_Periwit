@@ -355,13 +355,13 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- edit-profil.css dulu (navbar), detail-wisata.css terakhir -->
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261018">
     <link rel="stylesheet" href="../CSS/detail-wisata.css?v=12">
-    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
+    <link rel="stylesheet" href="../CSS/theme.css?v=layout-fonts-1">
 </head>
 <body class="halaman-detail">
 
@@ -380,8 +380,9 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             </symbol>
 
             <symbol id="i-lokasi" viewBox="0 0 40 44">
-                <ellipse cx="20" cy="36" rx="13" ry="5" fill="#2fbf6b"/>
-                <path d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z" fill="#f2301d"/>
+                <ellipse cx="20" cy="37" rx="14" ry="5" fill="#45d84f"/>
+                <path d="M20 32a14 5 0 0 1 0 10z" fill="#10b981"/>
+                <path d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z" fill="#ed2118"/>
                 <circle cx="20" cy="13.5" r="4.8" fill="#fff"/>
             </symbol>
 

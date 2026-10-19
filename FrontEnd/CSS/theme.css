@@ -10,6 +10,11 @@
     --theme-page: #f7f9f8;
     --theme-radius: 14px;
     --theme-shadow: 0 8px 24px rgba(22, 55, 44, 0.09);
+    --font-logo: 'Kaushan Script', cursive;
+    --font-main: 'Poppins', Arial, sans-serif;
+    --font-form: 'Inter', Arial, sans-serif;
+    --font-mono: 'Fragment Mono', 'Courier New', monospace;
+    --font-card-title: 'Frank Ruhl Libre', Georgia, serif;
 }
 
 html {
@@ -18,6 +23,7 @@ html {
 
 body {
     color: var(--theme-ink);
+    font-family: var(--font-main);
 }
 
 button,
@@ -46,12 +52,38 @@ summary:focus-visible {
     box-shadow: 0 2px 12px rgba(22, 55, 44, 0.09);
 }
 
+.navbar,
+.site-header {
+    height: 68px;
+}
+
+.navbar-container,
+.main-nav {
+    width: min(1200px, calc(100% - 48px));
+    height: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: 0;
+    padding-left: 0;
+}
+
 .navbar-logo,
 .brand,
 .detail-brand,
 .ep-logo,
 .brand-name {
     color: var(--theme-green);
+    font-family: var(--font-logo);
+}
+
+.navbar-logo {
+    flex-shrink: 0;
+    font-size: clamp(27px, 2.3vw, 32px);
+}
+
+.ep-logo {
+    font-size: clamp(27px, 2.3vw, 32px);
+    line-height: 1.2;
 }
 
 .navbar-logo:hover,
@@ -67,7 +99,38 @@ summary:focus-visible {
 .nav-links a,
 .detail-nav-links a,
 .ep-menu a {
+    font-family: var(--font-main);
+    font-size: 15px;
+    font-weight: 500;
     transition: color 160ms ease;
+}
+
+.navbar-menu {
+    width: auto;
+    justify-content: flex-start;
+    gap: clamp(22px, 3vw, 44px);
+    margin-left: auto;
+}
+
+.navbar-icons {
+    flex-shrink: 0;
+    gap: 16px;
+    margin-left: 32px;
+}
+
+.navbar-icons .profile-icon,
+.navbar-icons .profile-icon i {
+    color: var(--theme-green);
+}
+
+.login-button {
+    width: auto;
+    min-width: 80px;
+    padding: 0 16px;
+    border-radius: 9px;
+    font-family: var(--font-main);
+    font-size: 14px;
+    font-weight: 600;
 }
 
 .navbar-menu a:hover,
@@ -141,6 +204,24 @@ summary:focus-visible {
     line-height: 1.55;
 }
 
+.hero-content h1,
+.hero-copy h1,
+.about-hero-copy h1,
+.destination-section h2,
+.category-content > h2,
+.results-heading h1,
+.filter-title {
+    font-family: var(--font-main);
+}
+
+.hero-content p,
+.hero-copy p,
+.about-hero-copy p,
+.search-box input::placeholder,
+.search-box input[type="search"]::placeholder {
+    font-family: var(--font-mono);
+}
+
 .search-box {
     border: 1px solid var(--theme-border);
     border-radius: var(--theme-radius);
@@ -178,6 +259,117 @@ summary:focus-visible {
     margin-left: auto;
     padding-right: 0;
     padding-left: 0;
+}
+
+.home-page .hero {
+    height: clamp(200px, 20vw, 250px);
+}
+
+.home-page .hero-content h1 {
+    margin-bottom: 10px;
+    font-size: clamp(27px, 3vw, 36px);
+}
+
+.home-page .hero-content p {
+    margin-bottom: 16px;
+    font-size: clamp(13px, 1.25vw, 16px);
+}
+
+.home-page .search-box {
+    width: min(720px, calc(100% - 40px));
+    height: 56px;
+    padding: 5px 7px 5px 20px;
+    border-radius: 12px;
+}
+
+.home-page .search-box input {
+    font-family: var(--font-mono);
+    font-size: 14px;
+}
+
+.home-page .search-box button {
+    width: 46px;
+    height: 44px;
+    border-radius: 9px;
+    font-size: 22px;
+}
+
+.home-page .main-content {
+    width: min(1200px, calc(100% - 48px));
+    padding: clamp(30px, 3.8vw, 48px) 0 56px;
+}
+
+.home-page .destination-section h2 {
+    margin-bottom: 18px;
+    font-size: clamp(22px, 2vw, 28px);
+}
+
+.home-page .destination-grid {
+    width: 100%;
+    margin: 0;
+    gap: 24px;
+}
+
+.home-page .destination-card {
+    display: flex;
+    height: auto;
+    min-height: 0;
+    flex-direction: column;
+    border-radius: var(--theme-radius);
+}
+
+.home-page .destination-card > img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border-radius: 0;
+    object-fit: cover;
+}
+
+.home-page .card-content {
+    min-height: 132px;
+    flex: 1;
+    padding: 12px 14px 34px;
+}
+
+.home-page .card-content h3 {
+    margin-bottom: 5px;
+    font-family: var(--font-card-title);
+    font-size: 19px;
+    font-weight: 600;
+    white-space: normal;
+}
+
+.home-page .rating {
+    gap: 7px;
+}
+
+.home-page .stars,
+.home-page .review,
+.home-page .distance {
+    font-family: var(--font-mono);
+}
+
+.home-page .stars {
+    font-size: 14px;
+}
+
+.home-page .review {
+    font-size: 11px;
+}
+
+.home-page .location {
+    font-family: var(--font-main);
+    font-size: 12px;
+}
+
+.home-page .distance {
+    font-family: var(--font-form);
+    font-size: 11px;
+}
+
+.home-page .nearby-section {
+    margin-top: 30px;
 }
 
 .destination-section h2,
@@ -227,11 +419,25 @@ summary:focus-visible {
     overflow-wrap: anywhere;
 }
 
+.destination-card .card-content h2,
+.destination-card .card-content h3,
+.kartu__judul,
+.kartu__judul a {
+    font-family: var(--font-card-title);
+    font-weight: 600;
+}
+
+.destination-card .card-content h2,
+.destination-card .card-content h3 {
+    font-size: 17px;
+}
+
 .review,
 .review-count,
 .rating small,
 .rating__ulasan {
     color: var(--theme-muted);
+    font-family: var(--font-mono);
 }
 
 .distance,
@@ -239,6 +445,95 @@ summary:focus-visible {
 .nama,
 .email {
     color: var(--theme-green);
+}
+
+.distance {
+    font-family: var(--font-form);
+}
+
+.filter-option,
+.budget-labels,
+.budget-hint,
+.results-heading > p,
+.rating__ulasan,
+.rating-row {
+    font-family: var(--font-mono);
+}
+
+.auth-form-container,
+.auth-form-container label,
+.auth-form-container input,
+.auth-form-container button,
+.auth-form-container a,
+.auth-form-container p,
+.auth-form-container .invalid-feedback,
+.auth-form-container .auth-inline-error {
+    font-family: var(--font-form);
+}
+
+body.halaman-detail {
+    --font-mono: 'Fragment Mono', 'Courier New', monospace;
+}
+
+body.halaman-profil {
+    --font-mono: 'Fragment Mono', 'Courier New', monospace;
+}
+
+body.halaman-profil .nama,
+body.halaman-profil .email,
+body.halaman-profil .avatar__inisial {
+    font-family: var(--font-main);
+}
+
+body.halaman-edit-profil {
+    font-family: var(--font-main);
+}
+
+body.halaman-edit-profil input,
+body.halaman-edit-profil select,
+body.halaman-edit-profil textarea,
+body.halaman-edit-profil button,
+body.halaman-edit-profil .ep-error {
+    font-family: var(--font-form);
+}
+
+body.about-page h1,
+body.about-page h2,
+body.about-page h3 {
+    font-family: var(--font-main);
+}
+
+.ep-error,
+.invalid-feedback,
+.auth-inline-error,
+#loginMessage,
+#registerMessage,
+.ep-alert {
+    font-family: var(--font-form);
+}
+
+.location .map-pin-icon {
+    display: block;
+    width: 28px;
+    height: 32px;
+    flex: 0 0 28px;
+    overflow: visible;
+}
+
+.location .map-pin-icon .map-pin-ground {
+    fill: #45d84f;
+}
+
+.location .map-pin-icon .map-pin-ground-right {
+    fill: #10b981;
+}
+
+.location .map-pin-icon .map-pin-body {
+    fill: #ed2118;
+}
+
+.location .map-pin-icon .map-pin-hole {
+    fill: #fff;
 }
 
 .search-header {
@@ -465,6 +760,10 @@ summary:focus-visible {
     .about-content {
         width: min(100% - 36px, 720px);
     }
+
+    .home-page .destination-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 767px) {
@@ -513,6 +812,38 @@ summary:focus-visible {
     .benefit-card {
         border-radius: 12px;
     }
+
+    .navbar-container,
+    .main-nav {
+        width: calc(100% - 32px);
+    }
+
+    .navbar-menu {
+        gap: 18px;
+    }
+
+    .navbar-icons {
+        gap: 12px;
+        margin-left: 18px;
+    }
+
+    .home-page .hero {
+        height: 220px;
+    }
+
+    .home-page .main-content {
+        width: calc(100% - 32px);
+        padding-top: 28px;
+    }
+
+    .home-page .destination-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .home-page .destination-card > img {
+        aspect-ratio: 16 / 10;
+    }
 }
 
 @media (max-width: 480px) {
@@ -525,6 +856,40 @@ summary:focus-visible {
     .destination-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
+    }
+
+    .home-page .hero {
+        height: 205px;
+    }
+
+    .home-page .hero-content {
+        padding-right: 14px;
+        padding-left: 14px;
+    }
+
+    .home-page .hero-content h1 {
+        font-size: 25px;
+    }
+
+    .home-page .hero-content p {
+        font-size: 12px;
+    }
+
+    .home-page .search-box {
+        width: 100%;
+    }
+
+    .home-page .destination-grid {
+        gap: 12px;
+    }
+
+    .home-page .card-content {
+        min-height: 122px;
+        padding: 10px 9px 32px;
+    }
+
+    .home-page .card-content h3 {
+        font-size: 16px;
     }
 
     .card-content {

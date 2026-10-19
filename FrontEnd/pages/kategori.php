@@ -100,10 +100,10 @@ function escapeHtml(string $value): string
     <title><?= escapeHtml($category['nama_kategori']); ?> | Explore Majaku</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../CSS/kategori.css?v=20261016">
-    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
+    <link rel="stylesheet" href="../CSS/theme.css?v=layout-fonts-1">
 </head>
 <body>
     <header class="site-header">
@@ -183,7 +183,12 @@ function escapeHtml(string $value): string
                                     <?php endif; ?>
                                 </div>
                                 <p class="location">
-                                    <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
+                                    <svg class="map-pin-icon" viewBox="0 0 40 44" aria-hidden="true">
+                                        <ellipse class="map-pin-ground" cx="20" cy="37" rx="14" ry="5"></ellipse>
+                                        <path class="map-pin-ground-right" d="M20 32a14 5 0 0 1 0 10z"></path>
+                                        <path class="map-pin-body" d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z"></path>
+                                        <circle class="map-pin-hole" cx="20" cy="13.5" r="4.8"></circle>
+                                    </svg>
                                     <span><?= escapeHtml($destination['wilayah']); ?></span>
                                 </p>
                                 <small class="distance">

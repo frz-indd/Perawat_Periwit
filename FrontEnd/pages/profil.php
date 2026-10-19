@@ -195,10 +195,10 @@ if ($loginEmail) {
     <title>Profil | Explore Majaku</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261018">
     <link rel="stylesheet" href="../CSS/profil.css?v=11">
-    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
+    <link rel="stylesheet" href="../CSS/theme.css?v=layout-fonts-1">
 </head>
 <body class="halaman-profil">
     <!-- Sprite ikon -->
@@ -214,8 +214,9 @@ if ($loginEmail) {
                 <path d="M12 1.8l3.1 6.6 7.2.9-5.3 4.9 1.4 7.1L12 17.7l-6.4 3.6 1.4-7.1L1.7 9.3l7.2-.9L12 1.8z"/>
             </symbol>
             <symbol id="i-lokasi" viewBox="0 0 40 44">
-                <ellipse cx="20" cy="36" rx="13" ry="5" fill="#2fbf6b"/>
-                <path d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z" fill="#f2301d"/>
+                <ellipse cx="20" cy="37" rx="14" ry="5" fill="#45d84f"/>
+                <path d="M20 32a14 5 0 0 1 0 10z" fill="#10b981"/>
+                <path d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z" fill="#ed2118"/>
                 <circle cx="20" cy="13.5" r="4.8" fill="#fff"/>
             </symbol>
             <symbol id="i-pensil" viewBox="0 0 512 512">
