@@ -206,8 +206,8 @@ $srcTampil = $fotoSrc ?: $gravatar;
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261030">
-  <link rel="stylesheet" href="../CSS/theme.css?v=layout-fonts-1">
+  <link rel="stylesheet" href="../CSS/edit-profil.css?v=font-map-2">
+  <link rel="stylesheet" href="../CSS/theme.css?v=layout-fonts-4">
 </head>
 <body class="halaman-edit-profil">
 
@@ -245,10 +245,10 @@ $srcTampil = $fotoSrc ?: $gravatar;
     </div>
 
     <ul class="kat-menu" id="kategori-menu">
-      <li><a class="kat-item" href="kategori.php?jenis=alam">Wisata Alam &amp; pegunungan</a></li>
-      <li><a class="kat-item" href="kategori.php?jenis=air-curug">Wisata Air &amp; Curug</a></li>
-      <li><a class="kat-item" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-      <li><a class="kat-item" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
+      <li><a class="kat-item" href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a></li>
+      <li><a class="kat-item" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
+      <li><a class="kat-item" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
+      <li><a class="kat-item" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
     </ul>
   </header>
 

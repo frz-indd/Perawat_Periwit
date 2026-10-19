@@ -20,9 +20,9 @@ session_start();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- CSS utama (urutan penting: tentang.css paling akhir) -->
-    <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261017">
-    <link rel="stylesheet" href="../CSS/tentang.css?v=20261025">
-    <link rel="stylesheet" href="../CSS/theme.css?v=layout-fonts-1">
+    <link rel="stylesheet" href="../CSS/edit-profil.css?v=font-map-2">
+    <link rel="stylesheet" href="../CSS/tentang.css?v=font-map-2">
+    <link rel="stylesheet" href="../CSS/theme.css?v=layout-fonts-4">
 </head>
 <body class="about-page halaman-tentang">
 
@@ -65,10 +65,10 @@ session_start();
 
         <!-- Daftar kategori: sengaja di luar .ep-menu -->
         <ul class="kat-menu" id="kategori-menu">
-            <li><a class="kat-item" href="kategori.php?jenis=alam">Wisata Alam &amp; pegunungan</a></li>
-            <li><a class="kat-item" href="kategori.php?jenis=air-curug">Wisata Air &amp; Curug</a></li>
-            <li><a class="kat-item" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-            <li><a class="kat-item" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
+            <li><a class="kat-item" href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a></li>
+            <li><a class="kat-item" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
+            <li><a class="kat-item" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
+            <li><a class="kat-item" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
         </ul>
     </header>
 
@@ -82,7 +82,7 @@ session_start();
             </div>
             <div class="about-hero-shade"></div>
             <div class="about-hero-copy">
-                <h1>EXPLORE MAJAKU</h1>
+                <h1>Explore MajaKu</h1>
                 <p>Solusi Terbaik untuk menemukan destinasi wisata menarik di wilayah<br class="br-d">majalengka dan kuningan</p>
             </div>
         </section>

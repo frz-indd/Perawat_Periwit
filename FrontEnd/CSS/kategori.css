@@ -17,7 +17,7 @@ body {
     margin: 0;
     background: #fff;
     color: var(--text);
-    font-family: 'Poppins', Arial, sans-serif;
+    font-family: var(--font-main);
 }
 
 a {
@@ -43,7 +43,7 @@ a {
 
 .brand {
     color: var(--green);
-    font-family: 'Dancing Script', cursive;
+    font-family: var(--font-logo);
     font-size: 31px;
     font-weight: 700;
     white-space: nowrap;
@@ -193,12 +193,12 @@ a {
 .hero-copy h1 {
     max-width: 420px;
     margin: 0 0 8px;
-    font: 700 29px/1.35 Georgia, 'Times New Roman', serif;
+    font: 700 29px/1.35 var(--font-card-title);
 }
 
 .hero-copy p {
     margin: 0;
-    font: 15px/1.25 'Courier New', monospace;
+    font: 15px/1.25 var(--font-mono);
 }
 
 .category-content {
@@ -225,7 +225,7 @@ a {
     outline: 0;
     background: transparent;
     color: #222;
-    font: italic 15px 'Courier New', monospace;
+    font: italic 15px var(--font-mono);
 }
 
 .search-box input::placeholder {
@@ -252,7 +252,7 @@ a {
 
 .category-content h2 {
     margin: 0 0 8px 43px;
-    font: 700 29px/1.25 Georgia, 'Times New Roman', serif;
+    font: 700 29px/1.25 var(--font-card-title);
 }
 
 .destination-grid {
@@ -290,7 +290,7 @@ a {
 
 .card-content h3 {
     margin: 0 0 2px;
-    font: 700 15px/1.25 Georgia, 'Times New Roman', serif;
+    font: 700 15px/1.25 var(--font-card-title);
 }
 
 .rating {
@@ -302,7 +302,7 @@ a {
 
 .rating span {
     color: #ffb000;
-    font: 700 14px/1.1 Arial, sans-serif;
+    font: 700 14px/1.1 var(--font-main);
     letter-spacing: 1px;
 }
 
@@ -318,7 +318,7 @@ a {
 
 .rating small {
     color: #222;
-    font: 11px/1.2 'Courier New', monospace;
+    font: 11px/1.2 var(--font-mono);
 }
 
 .location {

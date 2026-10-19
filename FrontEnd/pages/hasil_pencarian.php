@@ -140,8 +140,8 @@ function terpilih($daftar, $nilai)
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="../CSS/hasil_pencarian.css">
-    <link rel="stylesheet" href="../CSS/theme.css?v=layout-fonts-1">
+    <link rel="stylesheet" href="../CSS/hasil_pencarian.css?v=font-map-2">
+    <link rel="stylesheet" href="../CSS/theme.css?v=layout-fonts-4">
 </head>
 
 <body>

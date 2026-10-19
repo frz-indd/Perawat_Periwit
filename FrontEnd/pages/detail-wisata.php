@@ -359,9 +359,9 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- edit-profil.css dulu (navbar), detail-wisata.css terakhir -->
-    <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261018">
-    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=12">
-    <link rel="stylesheet" href="../CSS/theme.css?v=layout-fonts-1">
+    <link rel="stylesheet" href="../CSS/edit-profil.css?v=font-map-2">
+    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=font-map-2">
+    <link rel="stylesheet" href="../CSS/theme.css?v=layout-fonts-4">
 </head>
 <body class="halaman-detail">
 
@@ -475,10 +475,10 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         </div>
 
         <ul class="kat-menu" id="kategori-menu">
-            <li><a class="kat-item" href="kategori.php?kategori=alam">Alam</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=air-curug">Air &amp; Curug</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=buatan-kuliner">Buatan &amp; Kuliner</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=sejarah-budaya">Sejarah &amp; Budaya</a></li>
+            <li><a class="kat-item" href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a></li>
+            <li><a class="kat-item" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
+            <li><a class="kat-item" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
+            <li><a class="kat-item" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
         </ul>
     </header>
 

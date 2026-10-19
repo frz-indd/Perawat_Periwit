@@ -15,6 +15,8 @@
     --font-form: 'Inter', Arial, sans-serif;
     --font-mono: 'Fragment Mono', 'Courier New', monospace;
     --font-card-title: 'Frank Ruhl Libre', Georgia, serif;
+    --font-sans: var(--font-main);
+    --font-serif: var(--font-card-title);
 }
 
 html {
@@ -74,6 +76,7 @@ summary:focus-visible {
 .brand-name {
     color: var(--theme-green);
     font-family: var(--font-logo);
+    font-weight: 400;
 }
 
 .navbar-logo {
@@ -177,6 +180,12 @@ summary:focus-visible {
     box-shadow: var(--theme-shadow);
 }
 
+.category-menu a,
+.category-nav a,
+.kat-menu .kat-item {
+    font-family: var(--font-main);
+}
+
 .category-menu a:hover,
 .category-nav a:hover,
 .category-nav a[aria-current="page"],
@@ -204,14 +213,25 @@ summary:focus-visible {
     line-height: 1.55;
 }
 
-.hero-content h1,
 .hero-copy h1,
-.about-hero-copy h1,
-.destination-section h2,
 .category-content > h2,
+.destination-card .card-content h2,
+.destination-card .card-content h3,
+.kartu__judul,
+.kartu__judul a,
+.destination-section h2 {
+    font-family: var(--font-card-title);
+}
+
+.hero-content h1,
 .results-heading h1,
 .filter-title {
     font-family: var(--font-main);
+}
+
+.about-hero-copy h1 {
+    font-family: var(--font-logo);
+    font-weight: 400;
 }
 
 .hero-content p,
@@ -423,7 +443,6 @@ summary:focus-visible {
 .destination-card .card-content h3,
 .kartu__judul,
 .kartu__judul a {
-    font-family: var(--font-card-title);
     font-weight: 600;
 }
 
@@ -451,6 +470,18 @@ summary:focus-visible {
     font-family: var(--font-form);
 }
 
+.location {
+    font-family: var(--font-main);
+}
+
+.stars {
+    font-family: var(--font-main);
+}
+
+.rating .stars {
+    font-family: var(--font-main);
+}
+
 .filter-option,
 .budget-labels,
 .budget-hint,
@@ -472,10 +503,12 @@ summary:focus-visible {
 }
 
 body.halaman-detail {
+    --font-serif: var(--font-card-title);
     --font-mono: 'Fragment Mono', 'Courier New', monospace;
 }
 
 body.halaman-profil {
+    --font-serif: var(--font-card-title);
     --font-mono: 'Fragment Mono', 'Courier New', monospace;
 }
 
@@ -501,6 +534,11 @@ body.about-page h1,
 body.about-page h2,
 body.about-page h3 {
     font-family: var(--font-main);
+}
+
+body.about-page .about-hero-copy h1 {
+    font-family: var(--font-logo);
+    font-weight: 400;
 }
 
 .ep-error,

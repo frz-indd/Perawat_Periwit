@@ -28,8 +28,8 @@ $destinasiLain = array_slice($wisata, 4, 4);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <!-- CSS Beranda -->
-    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=20261016">
-    <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=layout-fonts-1">
+    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=font-map-2">
+    <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=layout-fonts-4">
 </head>
 
 <body class="home-page">
@@ -47,10 +47,10 @@ $destinasiLain = array_slice($wisata, 4, 4);
                 <details class="category-dropdown">
                     <summary>Kategori <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
                     <div class="category-menu">
-                        <a href="FrontEnd/pages/kategori.php?kategori=alam">Alam</a>
-                        <a href="FrontEnd/pages/kategori.php?kategori=air-curug">Air &amp; Curug</a>
-                        <a href="FrontEnd/pages/kategori.php?kategori=buatan-kuliner">Buatan &amp; Kuliner</a>
-                        <a href="FrontEnd/pages/kategori.php?kategori=sejarah-budaya">Sejarah &amp; Budaya</a>
+                        <a href="FrontEnd/pages/kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a>
+                        <a href="FrontEnd/pages/kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a>
+                        <a href="FrontEnd/pages/kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a>
+                        <a href="FrontEnd/pages/kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a>
                     </div>
                 </details>
                 <a href="FrontEnd/pages/tentang.php">Tentang</a>

@@ -17,8 +17,8 @@ body.halaman-profil {
     --p: min(calc(100vw / 1440), calc((100vh - 83 * var(--u)) / 941));
     --abu-garis: #d0d0d0;
     --bintang: #ffb800;
-    --font-serif: "Noto Serif", Georgia, serif;
-    --font-mono: "Courier Prime", "Courier New", monospace;
+    --font-serif: var(--font-card-title);
+    --font-mono: 'Fragment Mono', 'Courier New', monospace;
 
     margin: 0;
     padding-top: calc(83 * var(--u));

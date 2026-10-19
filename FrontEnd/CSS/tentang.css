@@ -18,7 +18,7 @@ body.halaman-tentang {
     min-height: 100vh;
     color: #111111;
     background: #ffffff;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-main);
     overflow-y: auto !important;
     height: auto !important;
     padding-top: calc(83 * var(--u));
@@ -77,7 +77,7 @@ body.halaman-tentang {
     top: calc(60 * var(--u));
     height: calc(46 * var(--u));
     margin: 0;
-    font-family: 'Noto Serif', Georgia, serif;
+    font-family: var(--font-main);
     font-size: calc(37.3 * var(--u));
     font-weight: 700;
     line-height: calc(46 * var(--u));
@@ -89,7 +89,7 @@ body.halaman-tentang {
     left: calc(130 * var(--u));
     top: calc(124 * var(--u));
     margin: 0;
-    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: calc(20.5 * var(--u));
     font-weight: 400;
     line-height: calc(24 * var(--u));
@@ -102,7 +102,7 @@ body.halaman-tentang {
     margin: calc(47 * var(--u)) auto 0;
     padding-bottom: calc(67 * var(--u));
     color: #111111;
-    font-family: 'Noto Serif', Georgia, serif;
+    font-family: var(--font-main);
 }
 
 .about-card,
@@ -121,7 +121,7 @@ body.halaman-tentang {
     height: calc(36 * var(--u));
     margin: 0 0 calc(6 * var(--u));
     color: var(--green);
-    font-family: 'Noto Serif', Georgia, serif;
+    font-family: var(--font-main);
     font-size: calc(27.3 * var(--u));
     font-weight: 700;
     line-height: calc(36 * var(--u));
@@ -130,7 +130,7 @@ body.halaman-tentang {
 .about-card p {
     margin: 0;
     color: #111111;
-    font-family: 'Noto Serif', Georgia, serif;
+    font-family: var(--font-main);
     font-weight: 400;
     white-space: nowrap;
 }
@@ -184,7 +184,7 @@ body.halaman-tentang {
     width: calc(1181 * var(--u));
     padding-left: calc(8 * var(--u));
     color: var(--green);
-    font-family: 'Noto Serif', Georgia, serif;
+    font-family: var(--font-main);
     font-size: calc(27.3 * var(--u));
     font-weight: 700;
     line-height: calc(36 * var(--u));
@@ -212,14 +212,14 @@ body.halaman-tentang {
 .benefit-title {
     display: block;
     color: var(--green);
-    font-family: 'Noto Serif', Georgia, serif;
+    font-family: var(--font-main);
     font-weight: 600;
 }
 
 .benefit-desc {
     display: block;
     color: #111111;
-    font-family: 'Noto Serif', Georgia, serif;
+    font-family: var(--font-main);
     font-weight: 400;
 }
 
