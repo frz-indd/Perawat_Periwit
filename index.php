@@ -29,7 +29,6 @@ $destinasiLain = array_slice($wisata, 4, 4);
 
     <!-- CSS Beranda -->
     <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=20261016">
-    <link rel="stylesheet" href="FrontEnd/CSS/site.css?v=20261019">
 </head>
 
 <body>

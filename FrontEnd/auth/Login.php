@@ -26,13 +26,12 @@
     >
 
     <link rel="stylesheet" href="../CSS/auth.css?v=20261015-1">
-    <link rel="stylesheet" href="../CSS/site.css?v=20261019">
 </head>
 
 <body>
 
     <header class="auth-header">
-        <a href="../../index.php" class="brand-name">
+        <a href="../index.html" class="brand-name">
             Explore Majaku
         </a>
     </header>
