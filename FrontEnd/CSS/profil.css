@@ -1,9 +1,3 @@
-/* =====================================================
-   profil.css - Explore Majaku
-   Dimuat SETELAH edit-profil.css (navbar memakai class ep-*)
-   ===================================================== */
-
-/* Sprite ikon tersembunyi */
 .sprite {
     position: absolute;
     width: 0;
@@ -12,8 +6,6 @@
 }
 
 body.halaman-profil {
-    /* --p = 1 "piksel desain" (acuan 1440 x 1024).
-       Dipilih yang terkecil antara lebar & tinggi supaya pas satu layar. */
     --p: min(calc(100vw / 1440), calc((100vh - 83 * var(--u)) / 941));
     --abu-garis: #d0d0d0;
     --bintang: #ffb800;
@@ -23,7 +15,7 @@ body.halaman-profil {
     margin: 0;
     padding-top: calc(83 * var(--u));
     height: 100vh !important;
-    overflow: hidden !important;   /* halaman diam; yang di-scroll hanya daftar favorit */
+    overflow: hidden !important;
     background: #fff;
     color: #000;
     font-family: "Poppins", Arial, sans-serif;
@@ -36,26 +28,27 @@ body.halaman-profil {
     margin: 0;
 }
 
-/* ================= LAYOUT ================= */
 .halaman {
     display: grid;
-    grid-template-columns: 34.1% minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr);   /* baris tidak melebar -> daftar favorit bisa di-scroll */
+    grid-template-columns: calc(527 * var(--p)) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     height: calc(100vh - 83 * var(--u));
 }
 
-/* ================= SIDEBAR ================= */
 .sidebar {
     position: relative;
+    box-sizing: border-box;
     min-height: 0;
     padding-top: calc(71 * var(--p));
+    padding-right: calc(36 * var(--p));
+    overflow: hidden;
     text-align: center;
 }
 
 .sidebar::after {
     content: "";
     position: absolute;
-    top: 0;                        /* garis pembatas menyentuh navbar */
+    top: 0;
     right: 0;
     bottom: 0;
     width: calc(4 * var(--p));
@@ -63,7 +56,6 @@ body.halaman-profil {
     box-shadow: calc(2 * var(--p)) 0 calc(3 * var(--p)) rgba(0, 0, 0, 0.18);
 }
 
-/* ----- Avatar: ikon bawaan / inisial (SVG) + foto di atasnya bila ada ----- */
 .avatar {
     position: relative;
     width: calc(220 * var(--p));
@@ -81,11 +73,10 @@ body.halaman-profil {
 
 .avatar__inisial {
     font-family: var(--font-serif);
-    font-size: 104px;              /* satuan viewBox SVG (220 x 220) */
+    font-size: 104px;
     font-weight: 700;
 }
 
-/* Foto profil: bulat, dengan cincin hijau setebal cincin ikon (15/220) */
 .avatar__foto {
     position: absolute;
     inset: 0;
@@ -102,20 +93,29 @@ body.halaman-profil {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: calc(10 * var(--p));
-    margin-top: calc(18 * var(--p));
+    gap: calc(6 * var(--p));
+    min-width: 0;
+    margin-top: calc(16 * var(--p));
     color: var(--hijau);
     font-family: var(--font-serif);
     font-size: calc(38 * var(--p));
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.2;
 }
 
+.nama__teks {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 .nama__edit {
-    display: inline-block;
+    display: block;
     flex: none;
-    width: calc(60 * var(--p));
-    height: calc(60 * var(--p));
+    width: calc(48 * var(--p));
+    height: calc(48 * var(--p));
+    margin: calc(-4 * var(--p)) 0;
     color: var(--hijau);
     transition: opacity 0.15s;
 }
@@ -131,12 +131,12 @@ body.halaman-profil {
 }
 
 .email {
-    margin-top: calc(4 * var(--p));
+    margin-top: calc(6 * var(--p));
     padding: 0 calc(12 * var(--p));
     color: var(--hijau);
     font-family: var(--font-serif);
-    font-size: calc(22 * var(--p));
-    font-weight: 500;
+    font-size: calc(24 * var(--p));
+    font-weight: 400;
     line-height: 1.3;
     word-break: break-all;
 }
@@ -146,40 +146,64 @@ body.halaman-profil {
     flex-direction: column;
     align-items: flex-start;
     gap: calc(40 * var(--p));
-    margin-top: calc(122 * var(--p));
-    padding-left: 21%;
+    margin-top: calc(124 * var(--p));
+    padding-left: calc(103 * var(--p));
 }
 
-.menu-profil a {
+.menu-profil__item {
     display: flex;
     align-items: center;
     gap: calc(23 * var(--p));
     color: #000;
     font-family: var(--font-serif);
     font-size: calc(26 * var(--p));
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1;
-    text-decoration: none;
+    cursor: default;
+    user-select: none;
 }
 
-.menu-profil a:hover {
+.menu-profil__item--logout {
+    color: #ff0000;
+}
+
+.menu-profil__ikon {
+    display: block;
+    flex: none;
+    width: calc(38 * var(--p));
+    height: calc(38 * var(--p));
     color: var(--hijau);
+    text-decoration: none;
+    transition: opacity 0.15s, transform 0.1s;
+}
+
+.menu-profil__ikon:hover {
+    opacity: 0.75;
+}
+
+.menu-profil__ikon:active {
+    transform: scale(0.94);
+}
+
+.menu-profil__ikon:focus-visible {
+    outline: 2px solid var(--hijau);
+    outline-offset: 3px;
+    border-radius: 4px;
 }
 
 .menu-profil svg {
-    flex: none;
-    width: calc(36 * var(--p));
-    height: calc(36 * var(--p));
+    display: block;
+    width: 100%;
+    height: 100%;
     color: var(--hijau);
 }
 
-/* ================= KONTEN (bisa di-scroll) ================= */
 .konten {
     box-sizing: border-box;
     width: 100%;
     height: 100%;
     min-height: 0;
-    padding: calc(70 * var(--p)) calc(56 * var(--p)) calc(40 * var(--p)) calc(81 * var(--p));
+    padding: calc(89 * var(--p)) calc(110 * var(--p)) calc(40 * var(--p)) calc(43 * var(--p));
     overflow-x: hidden;
     overflow-y: auto;
     scrollbar-width: thin;
@@ -187,12 +211,21 @@ body.halaman-profil {
     scroll-behavior: smooth;
 }
 
-.konten::-webkit-scrollbar { width: 8px; }
-.konten::-webkit-scrollbar-thumb { background: #b9cdc8; border-radius: 8px; }
-.konten::-webkit-scrollbar-track { background: transparent; }
+.konten::-webkit-scrollbar {
+    width: 8px;
+}
+
+.konten::-webkit-scrollbar-thumb {
+    background: #b9cdc8;
+    border-radius: 8px;
+}
+
+.konten::-webkit-scrollbar-track {
+    background: transparent;
+}
 
 .konten__judul {
-    margin: 0 0 calc(30 * var(--p)) calc(11 * var(--p));
+    margin: 0 0 calc(29 * var(--p)) calc(11 * var(--p));
     color: #000;
     font-family: var(--font-serif);
     font-size: calc(38 * var(--p));
@@ -203,14 +236,15 @@ body.halaman-profil {
 .kartu {
     position: relative;
     display: flex;
-    flex: none;                    /* tinggi kartu tetap, tidak menyusut saat daftar panjang */
-    align-items: center;
-    gap: calc(36 * var(--p));
+    flex: none;
+    align-items: flex-start;
+    gap: calc(30 * var(--p));
     box-sizing: border-box;
     width: 100%;
-    height: calc(222 * var(--p));
-    margin-bottom: calc(36 * var(--p));
-    padding: 0 calc(80 * var(--p)) 0 calc(34 * var(--p));
+    height: calc(210 * var(--p));
+    margin-bottom: calc(33 * var(--p));
+    padding: calc(17 * var(--p)) calc(76 * var(--p)) 0 calc(30 * var(--p));
+    overflow: hidden;
     background: #fff;
     border: 1px solid #d9d9d9;
     border-radius: calc(10 * var(--p));
@@ -224,29 +258,23 @@ body.halaman-profil {
     border-color: #398a7b;
 }
 
-.kartu:focus-visible {
-    outline: 2px solid var(--hijau);
-    outline-offset: 2px;
-}
-
 .kartu__tautan {
     display: block;
-    flex: 0 0 calc(250 * var(--p));
-    width: calc(250 * var(--p));
-    height: calc(178 * var(--p));
+    flex: 0 0 calc(229 * var(--p));
+    width: calc(229 * var(--p));
+    height: calc(175 * var(--p));
     color: inherit;
     text-decoration: none;
 }
 
 .kartu__foto {
     display: block;
-    width: calc(250 * var(--p));
-    height: calc(178 * var(--p));
+    width: calc(229 * var(--p));
+    height: calc(175 * var(--p));
     border-radius: calc(18 * var(--p));
     object-fit: cover;
 }
 
-/* Foto belum tersedia (sama dengan hero di halaman detail) */
 .kartu__foto--kosong {
     display: flex;
     flex-direction: column;
@@ -273,12 +301,15 @@ body.halaman-profil {
 .kartu__isi {
     min-width: 0;
     flex: 1;
+    overflow: hidden;
+    padding-top: calc(10 * var(--p));
 }
 
 .kartu__judul {
     overflow: hidden;
+    color: #000;
     font-family: var(--font-serif);
-    font-size: calc(30 * var(--p));
+    font-size: calc(31 * var(--p));
     font-weight: 700;
     line-height: 1.2;
     white-space: nowrap;
@@ -294,7 +325,6 @@ body.halaman-profil {
     color: var(--hijau);
 }
 
-/* Tautan meliputi seluruh kartu: klik di mana saja -> halaman detail wisata */
 .kartu__judul a::after {
     content: "";
     position: absolute;
@@ -308,20 +338,22 @@ body.halaman-profil {
 
 .kartu:has(.kartu__judul a:focus-visible) {
     outline: 2px solid var(--hijau);
-    outline-offset: 2px;
+    outline-offset: -2px;
 }
 
 .rating {
     display: flex;
     align-items: center;
-    gap: calc(12 * var(--p));
-    margin-top: calc(14 * var(--p));
+    gap: calc(11 * var(--p));
+    height: calc(25 * var(--p));
+    margin-top: calc(13 * var(--p));
+    white-space: nowrap;
 }
 
-/* Bintang (mendukung setengah bintang untuk rating desimal) */
 .bintang {
     display: flex;
-    gap: calc(8 * var(--p));
+    flex: none;
+    gap: calc(11 * var(--p));
 }
 
 .bintang svg {
@@ -336,41 +368,48 @@ body.halaman-profil {
 }
 
 .rating__ulasan {
+    min-width: 0;
+    overflow: hidden;
+    color: #000;
     font-family: var(--font-mono);
-    font-size: calc(16 * var(--p));
-    letter-spacing: 1px;
+    font-size: calc(17 * var(--p));
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1;
     white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .lokasi {
     display: flex;
     align-items: center;
     gap: calc(14 * var(--p));
-    margin-top: calc(24 * var(--p));
+    min-width: 0;
+    margin-top: calc(16 * var(--p));
 }
 
 .lokasi__ikon {
     flex: none;
     width: calc(34 * var(--p));
-    height: calc(37 * var(--p));
+    height: calc(38 * var(--p));
 }
 
 .lokasi p {
-    max-width: calc(230 * var(--p));
-    font-family: var(--font-sans, "Poppins", Arial, sans-serif);
-    font-size: calc(17 * var(--p));
+    min-width: 0;
+    color: #000;
+    font-family: "Poppins", Arial, sans-serif;
+    font-size: calc(18 * var(--p));
     font-weight: 500;
-    line-height: 1.5;
+    line-height: calc(27 * var(--p));
 }
 
-/* Tombol sampah (hapus dari favorit) */
 .hapus-form {
-    z-index: 2;                    /* di atas tautan kartu */
     position: absolute;
-    top: calc(22 * var(--p));
-    right: calc(34 * var(--p));
-    width: calc(36 * var(--p));
-    height: calc(36 * var(--p));
+    top: calc(19 * var(--p));
+    right: calc(28 * var(--p));
+    z-index: 2;
+    width: calc(33 * var(--p));
+    height: calc(34 * var(--p));
     margin: 0;
 }
 
@@ -396,7 +435,7 @@ body.halaman-profil {
 
 .hapus:focus-visible {
     outline: 2px solid var(--hijau);
-    outline-offset: 3px;
+    outline-offset: 2px;
     border-radius: 4px;
 }
 
@@ -411,7 +450,6 @@ body.halaman-profil {
     font-size: calc(20 * var(--p));
 }
 
-/* Notifikasi (mis. "Dihapus dari destinasi favorit.") */
 .notif {
     margin: 0 0 calc(22 * var(--p)) calc(11 * var(--p));
     padding: calc(10 * var(--p)) calc(16 * var(--p));
@@ -428,53 +466,97 @@ body.halaman-profil {
     opacity: 0;
 }
 
-/* ================= DROPDOWN KATEGORI (sama dengan halaman Tentang) ================= */
-.ep-menu__kategori:hover,
-.ep-menu__kategori.aktif {
+body.halaman-profil .ep-ikon--cari,
+body.halaman-profil .ep-ikon--profil {
     color: var(--hijau);
 }
 
-.kat-menu {
+body.halaman-profil .ep-ikon--profil svg,
+body.halaman-profil .ep-ikon--cari svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+body.halaman-profil .ep-menu__kategori {
+    white-space: nowrap;
+}
+
+body.halaman-profil .ep-menu__kategori::after {
+    content: "";
+    display: inline-block;
+    width: calc(21 * var(--u));
+    height: calc(12 * var(--u));
+    margin-left: calc(12 * var(--u));
+    vertical-align: middle;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 14'%3E%3Cpath d='M2 2l10 10L22 2' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 14'%3E%3Cpath d='M2 2l10 10L22 2' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    transform: none !important;
+    transition: none;
+}
+
+body.halaman-profil .ep-menu__kategori.aktif::after,
+body.halaman-profil .ep-menu__kategori:hover::after,
+body.halaman-profil .ep-menu__kategori[aria-expanded="true"]::after {
+    transform: none !important;
+}
+
+body.halaman-profil .ep-menu__kategori:hover,
+body.halaman-profil .ep-menu__kategori.aktif {
+    color: var(--hijau);
+}
+
+body.halaman-profil .kat-menu {
     display: none;
     position: fixed;
     z-index: 3000;
-    min-width: calc(230 * var(--u));
+    box-sizing: border-box;
+    width: max-content;
+    min-width: 0;
     margin: 0;
-    padding: calc(8 * var(--u)) 0;
+    padding: 0;
+    overflow: hidden;
     list-style: none;
     background: #fff;
-    border: 1px solid rgba(22, 108, 92, 0.25);
-    border-radius: calc(10 * var(--u));
-    box-shadow: 0 calc(6 * var(--u)) calc(18 * var(--u)) rgba(0, 0, 0, 0.15);
+    border: 0;
+    border-radius: 0;
+    box-shadow: 0 calc(2 * var(--u)) calc(5 * var(--u)) rgba(0, 0, 0, 0.2);
 }
 
-.kat-menu.show {
+body.halaman-profil .kat-menu.show {
     display: block;
 }
 
-.kat-menu li {
+body.halaman-profil .kat-menu li {
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-.kat-menu a.kat-item {
+body.halaman-profil .kat-menu a.kat-item {
     display: block;
     position: static;
-    padding: calc(9 * var(--u)) calc(22 * var(--u));
-    font-family: var(--font-sans, "Poppins", sans-serif);
-    font-size: calc(18 * var(--u));
-    font-weight: 400;
-    line-height: 1.4;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0 calc(4 * var(--u));
+    overflow: hidden;
+    background: transparent;
     color: #000;
-    text-align: left;
+    font-family: "Poppins", sans-serif;
+    font-size: max(9px, calc(12 * var(--u)));
+    font-weight: 400 !important;
+    line-height: calc(21 * var(--u));
+    text-align: center;
     white-space: nowrap;
+    text-overflow: ellipsis;
     text-decoration: none;
 }
 
-.kat-menu a.kat-item:hover,
-.kat-menu a.kat-item:focus {
-    background: #eef6f4;
-    color: var(--hijau);
+body.halaman-profil .kat-menu a.kat-item:hover,
+body.halaman-profil .kat-menu a.kat-item:focus {
+    background: var(--hijau);
+    color: #fff;
+    font-weight: 400 !important;
     outline: none;
 }

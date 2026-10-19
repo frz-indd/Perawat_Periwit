@@ -10,7 +10,6 @@ function e($s): string {
     return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
 }
 
-/** Tampilkan nilai dari database, atau keterangan (teks redup) jika datanya belum ada. */
 function nilaiAtauKet($nilai, string $keterangan = 'Belum Tersedia'): string {
     $teks = trim((string) $nilai);
     return $teks !== ''
@@ -18,7 +17,6 @@ function nilaiAtauKet($nilai, string $keterangan = 'Belum Tersedia'): string {
         : '<span class="belum">' . e($keterangan) . '</span>';
 }
 
-/** Waktu relatif seperti di desain: "1 minggu yang lalu". */
 function waktuRelatif(string $tanggal): string {
     $t = strtotime($tanggal);
     if (!$t) return '';
@@ -30,24 +28,18 @@ function waktuRelatif(string $tanggal): string {
     return intdiv($hari, 365) . ' tahun yang lalu';
 }
 
-/** Format angka rating dengan koma desimal: 4.5 -> "4,5". */
 function formatRating(float $nilai): string {
     return number_format($nilai, 1, ',', '.');
 }
 
-/**
- * Deretan bintang yang mendukung rating desimal (dibulatkan ke 0,5 terdekat).
- * Contoh: 4,5 -> 4 bintang penuh + 1 bintang setengah.
- */
 function bintangHtml(float $nilai): string {
-    $nilai   = max(0.0, min(5.0, $nilai));
-    $dibulat = round($nilai * 2) / 2;
-    $penuh   = (int) floor($dibulat);
+    $nilai    = max(0.0, min(5.0, $nilai));
+    $dibulat  = round($nilai * 2) / 2;
+    $penuh    = (int) floor($dibulat);
     $setengah = ($dibulat - $penuh) >= 0.5;
 
     $html = str_repeat('<svg viewBox="0 0 24 24"><use href="#i-bintang"/></svg>', $penuh);
     if ($setengah) {
-        // viewBox hanya separuh kiri bintang
         $html .= '<svg class="setengah" viewBox="0 0 12 24"><use href="#i-bintang" width="24" height="24"/></svg>';
     }
     return $html;
@@ -56,7 +48,6 @@ function bintangHtml(float $nilai): string {
 require_once __DIR__ . '/../../Backend/database/koneksi.php';
 require_once __DIR__ . '/../../Backend/database/wisata_repository.php';
 
-/** Harga parkir (kolom parkir_motor & parkir_mobil). Aman dipanggil walau kolom belum ada. */
 function fetchTourismParking(mysqli $conn, string $tourismId): array {
     try {
         $stmt = $conn->prepare('SELECT parkir_motor, parkir_mobil FROM wisata WHERE id_wisata = ? LIMIT 1');
@@ -77,10 +68,6 @@ function fetchTourismParking(mysqli $conn, string $tourismId): array {
     return $baris;
 }
 
-/**
- * Simpan ulasan (tabel `ulasan`). Jika user sudah pernah mengulas wisata ini, ulasannya diperbarui.
- * Rating boleh desimal (0,5 s/d 5). Kolom `ulasan.rating` harus bertipe DECIMAL(2,1) atau FLOAT.
- */
 function simpanUlasan(mysqli $conn, int $userId, string $tourismId, float $rating, string $komentar): bool
 {
     try {
@@ -108,7 +95,6 @@ function simpanUlasan(mysqli $conn, int $userId, string $tourismId, float $ratin
     }
 }
 
-/** Sinkronkan rata-rata rating & jumlah ulasan ke tabel `wisata` (diam-diam dilewati jika kolomnya tidak ada). */
 function perbaruiRatingWisata(mysqli $conn, string $tourismId): void
 {
     try {
@@ -119,7 +105,6 @@ function perbaruiRatingWisata(mysqli $conn, string $tourismId): void
         $stmt->execute();
         $stmt->close();
     } catch (Throwable $e) {
-        // kolom rating tidak ada / dihitung di repository -> abaikan
     }
     try {
         $stmt = $conn->prepare(
@@ -129,11 +114,9 @@ function perbaruiRatingWisata(mysqli $conn, string $tourismId): void
         $stmt->execute();
         $stmt->close();
     } catch (Throwable $e) {
-        // kolom jumlah_ulasan tidak ada -> abaikan
     }
 }
 
-/* ===== Fungsi favorit (tabel `favorit`) ===== */
 if (!function_exists('isTourismFavorite')) {
     function isTourismFavorite(mysqli $conn, int $userId, string $tourismId): bool
     {
@@ -168,20 +151,17 @@ if (!function_exists('removeTourismFavorite')) {
     }
 }
 
-/* ===== Ambil data wisata dari database berdasarkan ?id= ===== */
 $tourismId = $_GET['id'] ?? '';
 if (!is_string($tourismId) || preg_match('/^[KM][0-9]{5,}$/', $tourismId) !== 1) {
     http_response_code(404);
     exit('Destinasi tidak ditemukan.');
 }
 
-/* ===== Simpan / hapus favorit & tambah ulasan (POST) ===== */
 $userId = filter_var($_SESSION['id_user'] ?? null, FILTER_VALIDATE_INT);
 $sudahLogin = $userId !== false && $userId > 0;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'toggle_favorit') {
     if (!$sudahLogin) {
-        // Belum login -> arahkan ke Login
         header('Location: ../auth/Login.php');
         exit;
     }
@@ -206,7 +186,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'tambah_
 
     $csrfOk = isset($_POST['csrf'], $_SESSION['csrf']) && hash_equals($_SESSION['csrf'], (string) $_POST['csrf']);
 
-    // Rating desimal: kelipatan 0,5 antara 0,5 dan 5 (titik atau koma diterima)
     $ratingMentah = str_replace(',', '.', trim((string) ($_POST['rating'] ?? '')));
     $ratingIn     = filter_var($ratingMentah, FILTER_VALIDATE_FLOAT);
     $ratingValid  = $ratingIn !== false
@@ -258,17 +237,13 @@ foreach ([5, 4, 3, 2, 1] as $stars) {
     ];
 }
 
-/* Desain menampilkan 3 ulasan; sebaran bintang tetap dihitung dari semua ulasan */
 $reviews = array_map(static fn(array $r): array => [
     'name'    => $r['nama'],
-    'rating'  => (float) $r['rating'],          // desimal, tidak dibulatkan
+    'rating'  => (float) $r['rating'],
     'age'     => waktuRelatif((string) $r['tanggal_ulasan']),
     'comment' => $r['komentar'],
 ], array_slice($reviewRows, 0, 3));
 
-/* ===== Rating & jumlah ulasan =====
-   Jika ada ulasan: rata-rata dihitung dari semua ulasan (desimal, 1 angka di belakang koma).
-   Jika belum ada: pakai nilai yang tersimpan di database. */
 if (count($reviewRows) > 0) {
     $total = 0.0;
     foreach ($reviewRows as $r) {
@@ -281,16 +256,14 @@ if (count($reviewRows) > 0) {
     $nilaiRating  = $tourism['rating'] !== null ? (float) $tourism['rating'] : 0.0;
 }
 
-/* ===== Harga parkir ===== */
 $parkir = fetchTourismParking($conn, $tourismId);
 
-/* ===== Lokasi: alamat, koordinat, dan tautan Google Maps ===== */
-$alamat       = trim((string) ($tourism['alamat'] ?? ''));
-$lat          = $tourism['latitude'] ?? null;
-$lng          = $tourism['longitude'] ?? null;
+$alamat         = trim((string) ($tourism['alamat'] ?? ''));
+$lat            = $tourism['latitude'] ?? null;
+$lng            = $tourism['longitude'] ?? null;
 $punyaKoordinat = is_numeric($lat) && is_numeric($lng);
-$linkMaps     = trim((string) ($tourism['Maps_Wisata'] ?? ''));
-$linkMapsValid = preg_match('#^https?://#i', $linkMaps) === 1;
+$linkMaps       = trim((string) ($tourism['Maps_Wisata'] ?? ''));
+$linkMapsValid  = preg_match('#^https?://#i', $linkMaps) === 1;
 
 if ($punyaKoordinat) {
     $mapQuery = $lat . ',' . $lng;
@@ -304,7 +277,6 @@ $mapsUrl = $linkMapsValid
     ? $linkMaps
     : 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($tourism['nama_wisata'] . ', ' . $tourism['wilayah']);
 
-/* ===== Foto hero: dianggap ada hanya jika kolom terisi DAN file benar-benar ada ===== */
 $gambar  = trim((string) ($tourism['gambar'] ?? ''));
 $adaFoto = $gambar !== '' && is_file(__DIR__ . '/../../' . $gambar);
 
@@ -343,7 +315,6 @@ unset($_SESSION['pesan']);
 $pesanUlasan = $_SESSION['pesan_ulasan'] ?? '';
 unset($_SESSION['pesan_ulasan']);
 
-// Contoh: 4,5 ; belum ada rating -> "-"
 $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) : '-';
 ?>
 <!DOCTYPE html>
@@ -358,14 +329,12 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <!-- edit-profil.css dulu (navbar), detail-wisata.css terakhir -->
-    <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261018">
-    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=12">
+    <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
+    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=17">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
 </head>
 <body class="halaman-detail">
 
-    <!-- Sprite ikon -->
     <svg class="sprite" aria-hidden="true">
         <defs>
             <clipPath id="klip-avatar"><circle cx="110" cy="110" r="110"/></clipPath>
@@ -387,7 +356,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
             <symbol id="i-hati" viewBox="0 0 28 28">
                 <path d="M14 24S3 17.2 3 9.8A5.8 5.8 0 0 1 14 7.2a5.8 5.8 0 0 1 11 2.6C25 17.2 14 24 14 24Z"
-                      fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                      stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
             </symbol>
 
             <symbol id="i-pin-hijau" viewBox="0 0 40 46">
@@ -396,26 +365,22 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 <path d="M10 31.5C5 33 2.5 35.5 4 38.5c3 5 29 5 32 0 1.5-3-1-5.5-6-7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
             </symbol>
 
-            <!-- Pin dicoret: koordinat belum tersedia -->
             <symbol id="i-pin-coret" viewBox="0 0 40 46">
                 <path d="M20 3C12.3 3 6.5 8.8 6.5 16c0 8 13.5 20 13.5 20s13.5-12 13.5-20C33.5 8.8 27.7 3 20 3Z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
                 <circle cx="20" cy="16" r="5" fill="none" stroke="currentColor" stroke-width="3.2"/>
                 <path d="M6 5 34 40" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>
             </symbol>
 
-            <!-- Ikon foto: dipakai saat gambar destinasi belum tersedia -->
             <symbol id="i-foto" viewBox="0 0 64 56">
                 <rect x="3" y="3" width="58" height="50" rx="8" fill="none" stroke="currentColor" stroke-width="6"/>
                 <circle cx="22" cy="20" r="5.5" fill="currentColor"/>
                 <path d="M9 47 24 30 33 40 43 27 55 47Z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
             </symbol>
 
-            <!-- Titik cincin di sebaran rating -->
             <symbol id="i-titik" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="7.5" fill="#fff" stroke="currentColor" stroke-width="3.6"/>
             </symbol>
 
-            <!-- Ikon fasilitas (solid hitam, sesuai desain) -->
             <symbol id="i-parkir" viewBox="0 0 32 28">
                 <path d="M3.2 14.2 5.6 8.6C6.1 7.4 7.2 6.7 8.5 6.7h9c1.3 0 2.4.7 2.9 1.9l2.4 5.6c1.4.3 2.2 1.4 2.2 2.8v4.4c0 .8-.6 1.4-1.4 1.4H22v1.6c0 .8-.6 1.4-1.4 1.4h-1.8c-.8 0-1.4-.6-1.4-1.4v-1.6H9.6v1.6c0 .8-.6 1.4-1.4 1.4H6.4c-.8 0-1.4-.6-1.4-1.4v-1.6H3.4c-.8 0-1.4-.6-1.4-1.4V17c0-1.4.8-2.5 1.2-2.8z"/>
                 <path d="M7.6 9.2h9.8l1.6 4.2H6z" fill="#eef2ee"/>
@@ -449,7 +414,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         </defs>
     </svg>
 
-    <!-- Navbar (sama dengan Edit Profil, Tentang, dan Profil) -->
     <header class="ep-navbar">
         <div class="ep-navbar__inner">
             <a class="ep-logo" href="../../index.php">Explore Majaku</a>
@@ -462,27 +426,29 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             </nav>
 
             <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
-                <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round">
-                    <circle cx="16" cy="16" r="12"/>
-                    <line x1="25" y1="25" x2="37" y2="37"/>
+                <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" aria-hidden="true">
+                    <circle cx="16.5" cy="16.5" r="11.5"/>
+                    <line x1="25" y1="25" x2="36" y2="36"/>
                 </svg>
             </a>
 
             <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
-                <svg viewBox="0 0 220 220"><use href="#ikon-profil"/></svg>
+                <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="20" cy="20" r="17.5"/>
+                    <circle cx="20" cy="16" r="5.8"/>
+                    <path d="M9 31.5c1.5-5.8 5.6-8.8 11-8.8s9.5 3 11 8.8"/>
+                </svg>
             </a>
         </div>
 
         <ul class="kat-menu" id="kategori-menu">
-            <li><a class="kat-item" href="kategori.php?kategori=alam">Alam</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=air-curug">Air &amp; Curug</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=buatan-kuliner">Buatan &amp; Kuliner</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=sejarah-budaya">Sejarah &amp; Budaya</a></li>
+            <li><a class="kat-item" href="kategori.php?jenis=alam">Wisata Alam &amp; pegunungan</a></li>
+            <li><a class="kat-item" href="kategori.php?jenis=air-curug">Wisata Air &amp; Curug</a></li>
+            <li><a class="kat-item" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
+            <li><a class="kat-item" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
         </ul>
     </header>
 
-    <!-- Foto hero: tetap diam (fixed), konten di bawahnya yang di-scroll.
-         Jika foto belum ada / gagal dimuat -> tampil kotak abu-abu "Foto Tidak Tersedia". -->
     <div class="hero-wisata<?= $destination['has_photo'] ? '' : ' tanpa-foto' ?>" id="hero-wisata">
         <?php if ($destination['has_photo']): ?>
             <img src="../../<?= e($destination['gambar']) ?>"
@@ -501,7 +467,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <div class="notif" role="status"><?= e($pesan) ?></div>
         <?php endif; ?>
 
-        <!-- Judul + rating + lokasi + tombol favorit -->
         <section class="ringkasan" aria-labelledby="judul-wisata">
             <div class="ringkasan__teks">
                 <h1 id="judul-wisata"><?= e($destination['title']) ?></h1>
@@ -521,18 +486,16 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 </p>
             </div>
 
-            <!-- Klik -> wisata ini masuk / keluar dari Destinasi Favorit di profil -->
             <form method="post" action="detail-wisata.php?id=<?= e(rawurlencode($destination['id'])) ?>">
                 <input type="hidden" name="aksi" value="toggle_favorit">
                 <button class="tombol-favorit<?= $sudahFavorit ? ' aktif' : '' ?>" type="submit" id="tombol-favorit"
                         aria-pressed="<?= $sudahFavorit ? 'true' : 'false' ?>">
                     <svg viewBox="0 0 28 28" aria-hidden="true"><use href="#i-hati"/></svg>
-                    <span><?= $sudahFavorit ? 'Tersimpan' : 'Simpan Favorit' ?></span>
+                    <span><?= $sudahFavorit ? 'Tersimpan Di Favorit' : 'Simpan Favorit' ?></span>
                 </button>
             </form>
         </section>
 
-        <!-- Informasi wisata -->
         <section class="blok" aria-labelledby="judul-info">
             <h2 class="blok__judul" id="judul-info">INFORMASI WISATA</h2>
             <p class="blok__sub"><?= e($destination['subtitle']) ?></p>
@@ -600,14 +563,12 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             </div>
         </section>
 
-        <!-- Lokasi wisata -->
         <section class="blok blok--lokasi" aria-labelledby="judul-lokasi">
             <h2 class="blok__judul" id="judul-lokasi">LOKASI WISATA</h2>
             <p class="blok__sub">Temukan lokasi <?= e(mb_strtolower($destination['title'], 'UTF-8')) ?> dengan mudah di peta/maps</p>
 
             <div class="lokasi-grid">
                 <?php if ($destination['map_ready']): ?>
-                    <!-- Iframe sengaja dibuat lebih tinggi lalu dipotong (lihat CSS) agar kartu putih "Buka di Maps" milik Google tidak tampil -->
                     <div class="peta">
                         <iframe
                             title="Peta lokasi <?= e($destination['title']) ?>"
@@ -640,7 +601,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             </div>
         </section>
 
-        <!-- Ulasan -->
         <section class="blok blok--ulasan" aria-labelledby="judul-ulasan">
             <h2 class="blok__judul" id="judul-ulasan">ULASAN</h2>
             <p class="blok__sub">Simak Pengalaman Pengunjung yang sudah datang ke tempat</p>
@@ -700,7 +660,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 <div class="notif notif--ulasan" role="status"><?= e($pesanUlasan) ?></div>
             <?php endif; ?>
 
-            <!-- Belum login -> diarahkan ke Login; sudah login -> buka formulir ulasan -->
             <button class="tombol-ulasan" type="button" id="tombol-ulasan"
                     data-login="<?= $sudahLogin ? '1' : '0' ?>" aria-haspopup="dialog">
                 Tambah Ulasan dan Rating
@@ -708,7 +667,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         </section>
     </main>
 
-    <!-- Formulir tambah ulasan -->
     <dialog class="dialog-ulasan" id="dialog-ulasan" aria-labelledby="judul-dialog">
         <form method="post" action="detail-wisata.php?id=<?= e(rawurlencode($destination['id'])) ?>">
             <input type="hidden" name="aksi" value="tambah_ulasan">
@@ -717,8 +675,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <h3 id="judul-dialog">Tambah Ulasan dan Rating</h3>
             <p class="dialog__sub">Bagikan pengalamanmu di <?= e($destination['title']) ?></p>
 
-            <!-- Rating setengah bintang: 0,5 / 1 / 1,5 / ... / 5.
-                 Setiap bintang terdiri dari 2 sisi (kiri = x,5 ; kanan = bulat). -->
             <fieldset class="bintang-input">
                 <legend>Rating</legend>
                 <div class="bintang-input__baris">
@@ -750,16 +706,16 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
     </dialog>
 
     <script>
-        // Dropdown kategori
         (function () {
             var toggle = document.getElementById('kategori-toggle');
             var menu = document.getElementById('kategori-menu');
+            var header = document.querySelector('.ep-navbar');
 
             function buka() {
-                var r = toggle.getBoundingClientRect();
-                menu.style.top = (r.bottom + 12) + 'px';
-                menu.style.left = r.left + 'px';
                 menu.classList.add('show');
+                var r = toggle.getBoundingClientRect();
+                menu.style.top = (header.getBoundingClientRect().bottom + 6) + 'px';
+                menu.style.left = (r.left + r.width * 0.15) + 'px';
                 toggle.classList.add('aktif');
                 toggle.setAttribute('aria-expanded', 'true');
             }
@@ -784,7 +740,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             window.addEventListener('scroll', tutup, { passive: true });
         })();
 
-        // Sembunyikan notifikasi setelah beberapa detik
         (function () {
             var daftar = document.querySelectorAll('.notif');
             daftar.forEach(function (n) {
@@ -792,7 +747,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             });
         })();
 
-        // Tombol "Tambah Ulasan dan Rating"
         (function () {
             var tombol = document.getElementById('tombol-ulasan');
             var dialog = document.getElementById('dialog-ulasan');
@@ -813,13 +767,11 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
             batal.addEventListener('click', function () { dialog.close(); });
 
-            // klik area gelap di luar kotak -> tutup
             dialog.addEventListener('click', function (e) {
                 if (e.target === dialog) dialog.close();
             });
         })();
 
-        // Tampilkan nilai rating terpilih (mis. "4,5 dari 5")
         (function () {
             var info = document.getElementById('nilai-rating');
             var radios = document.querySelectorAll('.bintang-input input[type="radio"]');
