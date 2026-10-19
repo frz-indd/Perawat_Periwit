@@ -26,6 +26,7 @@
     >
 
     <link rel="stylesheet" href="../CSS/auth.css?v=20261015-1">
+    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
 </head>
 
 <body>

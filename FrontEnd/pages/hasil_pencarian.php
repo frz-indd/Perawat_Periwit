@@ -139,6 +139,7 @@ function terpilih($daftar, $nilai)
     >
 
     <link rel="stylesheet" href="../CSS/hasil_pencarian.css">
+    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
 </head>
 
 <body>

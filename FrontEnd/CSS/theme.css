@@ -1,0 +1,557 @@
+:root {
+    color-scheme: light;
+    --theme-green: #166d5c;
+    --theme-green-dark: #105548;
+    --theme-green-soft: #edf5f1;
+    --theme-ink: #1e2925;
+    --theme-muted: #68746f;
+    --theme-border: #dce5e1;
+    --theme-surface: #fff;
+    --theme-page: #f7f9f8;
+    --theme-radius: 14px;
+    --theme-shadow: 0 8px 24px rgba(22, 55, 44, 0.09);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    color: var(--theme-ink);
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+    outline: 3px solid rgba(22, 109, 92, 0.35);
+    outline-offset: 3px;
+}
+
+.navbar,
+.site-header,
+.detail-header,
+.ep-navbar,
+.auth-header {
+    background-color: var(--theme-surface);
+    box-shadow: 0 2px 12px rgba(22, 55, 44, 0.09);
+}
+
+.navbar-logo,
+.brand,
+.detail-brand,
+.ep-logo,
+.brand-name {
+    color: var(--theme-green);
+}
+
+.navbar-logo:hover,
+.brand:hover,
+.detail-brand:hover,
+.ep-logo:hover,
+.brand-name:hover {
+    color: var(--theme-green-dark);
+}
+
+.navbar-menu a,
+.category-dropdown > summary,
+.nav-links a,
+.detail-nav-links a,
+.ep-menu a {
+    transition: color 160ms ease;
+}
+
+.navbar-menu a:hover,
+.navbar-menu a.active,
+.category-dropdown[open] > summary,
+.nav-links a:hover,
+.nav-links a[aria-current="page"],
+.detail-nav-links a:hover,
+.ep-menu a:hover,
+.ep-menu a:focus-visible,
+.ep-menu a.aktif {
+    color: var(--theme-green);
+}
+
+.navbar-icons,
+.nav-icons,
+.detail-nav-icons,
+.ep-ikon {
+    color: var(--theme-green);
+}
+
+.profile-icon,
+.nav-icon,
+.nav-icons a,
+.detail-nav-icons a,
+.ep-ikon {
+    color: var(--theme-green);
+}
+
+.profile-icon:hover,
+.nav-icon:hover,
+.nav-icons a:hover,
+.detail-nav-icons a:hover,
+.ep-ikon:hover {
+    color: var(--theme-green-dark);
+}
+
+.category-menu,
+.category-nav,
+.kat-menu {
+    border: 1px solid var(--theme-border);
+    border-radius: 10px;
+    background: var(--theme-surface);
+    box-shadow: var(--theme-shadow);
+}
+
+.category-menu a:hover,
+.category-nav a:hover,
+.category-nav a[aria-current="page"],
+.kat-menu a.kat-item:hover,
+.kat-menu a.kat-item:focus {
+    color: var(--theme-green);
+    background: var(--theme-green-soft);
+}
+
+.hero,
+.about-hero,
+.hero-wisata {
+    overflow: hidden;
+}
+
+.hero-content h1,
+.hero-copy h1,
+.about-hero-copy h1 {
+    line-height: 1.2;
+}
+
+.hero-content p,
+.hero-copy p,
+.about-hero-copy p {
+    line-height: 1.55;
+}
+
+.search-box {
+    border: 1px solid var(--theme-border);
+    border-radius: var(--theme-radius);
+    background: var(--theme-surface);
+    box-shadow: 0 6px 20px rgba(22, 55, 44, 0.1);
+}
+
+.search-box input,
+.search-box input[type="search"] {
+    color: var(--theme-ink);
+}
+
+.search-box input::placeholder {
+    color: var(--theme-muted);
+    opacity: 1;
+}
+
+.search-box button,
+.apply-filter,
+.auth-button,
+.auth-success-button {
+    background-color: var(--theme-green);
+}
+
+.search-box button:hover,
+.apply-filter:hover,
+.auth-button:hover,
+.auth-success-button:hover {
+    background-color: var(--theme-green-dark);
+}
+
+.main-content {
+    width: min(1200px, calc(100% - 48px));
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.destination-section h2,
+.category-content > h2,
+.results-heading h1,
+.filter-title,
+.konten__judul {
+    color: var(--theme-ink);
+}
+
+.destination-grid {
+    gap: clamp(14px, 2vw, 26px);
+}
+
+.destination-card,
+.kartu,
+.kartu-alamat,
+.ulasan,
+.ringkasan-ulasan,
+.information-card,
+.about-card,
+.benefit-card {
+    border-color: var(--theme-border);
+    border-radius: var(--theme-radius);
+    background-color: var(--theme-surface);
+    box-shadow: 0 3px 14px rgba(22, 55, 44, 0.07);
+}
+
+.destination-card {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.destination-card:hover {
+    box-shadow: var(--theme-shadow);
+}
+
+.card-content h2,
+.card-content h3,
+.kartu__judul a {
+    color: var(--theme-ink);
+}
+
+.card-content h2,
+.card-content h3 {
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.review,
+.review-count,
+.rating small,
+.rating__ulasan {
+    color: var(--theme-muted);
+}
+
+.distance,
+.konten__judul,
+.nama,
+.email {
+    color: var(--theme-green);
+}
+
+.search-header {
+    background: var(--theme-green);
+}
+
+.search-layout {
+    gap: 24px;
+}
+
+.filter-sidebar,
+.results-section {
+    border-color: var(--theme-border);
+    border-radius: var(--theme-radius);
+    background: var(--theme-surface);
+    box-shadow: 0 3px 14px rgba(22, 55, 44, 0.06);
+}
+
+.filter-option input {
+    accent-color: var(--theme-green);
+}
+
+.budget-inputs input,
+.auth-input,
+.ep-input {
+    border-color: var(--theme-border);
+    border-radius: 8px;
+}
+
+.reset-filter,
+.map-link,
+.tombol-maps {
+    color: var(--theme-green);
+}
+
+.detail,
+.konten,
+.about-content {
+    color: var(--theme-ink);
+}
+
+.kartu,
+.kartu-alamat,
+.ulasan,
+.ringkasan-ulasan,
+.information-card,
+.location-card,
+.review-summary-card,
+.review-card,
+.about-card,
+.benefit-card {
+    border: 1px solid var(--theme-border);
+    border-radius: var(--theme-radius);
+    background-color: var(--theme-surface);
+    box-shadow: 0 3px 14px rgba(22, 55, 44, 0.06);
+}
+
+.about-card h2,
+.about-benefits > h2,
+.tour-information > h2,
+.blok > h2,
+.konten__judul {
+    color: var(--theme-green);
+}
+
+.benefit-card i,
+.benefit-thumb-icon,
+.benefit-trust-icon {
+    color: var(--theme-green);
+    fill: var(--theme-green);
+    stroke: var(--theme-green);
+}
+
+.auth-form-section,
+.auth-success-dialog {
+    background: var(--theme-surface);
+}
+
+.auth-title {
+    color: var(--theme-green);
+}
+
+.form-group label,
+.remember-me label,
+.forgot-password,
+.switch-auth,
+.switch-auth a {
+    color: var(--theme-ink);
+}
+
+.auth-input:focus,
+.ep-input:focus {
+    border-color: var(--theme-green);
+    box-shadow: 0 0 0 3px rgba(22, 109, 92, 0.12);
+}
+
+.auth-input::placeholder {
+    color: #7b8782;
+    opacity: 1;
+}
+
+.auth-button {
+    border: 0;
+    border-radius: 8px;
+}
+
+.social-button {
+    border-color: var(--theme-border);
+    border-radius: 8px;
+    color: var(--theme-ink);
+}
+
+.switch-auth a {
+    color: var(--theme-green);
+}
+
+.remember-me input {
+    appearance: none;
+    display: grid;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    place-content: center;
+    margin: 0;
+    border: 1.5px solid #9aa9a3;
+    border-radius: 5px;
+    background: #fff;
+    cursor: pointer;
+    accent-color: var(--theme-green);
+}
+
+.remember-me input::before {
+    width: 9px;
+    height: 5px;
+    transform: rotate(-45deg) scale(0);
+    transform-origin: center;
+    border: solid #fff;
+    border-width: 0 0 2px 2px;
+    content: "";
+}
+
+.remember-me input:checked {
+    border-color: var(--theme-green);
+    background: var(--theme-green);
+}
+
+.remember-me input:checked::before {
+    transform: rotate(-45deg) scale(1);
+}
+
+.remember-me input:focus-visible {
+    outline: 3px solid rgba(22, 109, 92, 0.28);
+    outline-offset: 2px;
+}
+
+.avatar {
+    color: var(--theme-green);
+}
+
+.avatar > svg,
+.avatar > svg use,
+.ep-foto__lingkaran > svg,
+.ep-foto__lingkaran > svg use,
+.ep-ikon--profil > svg,
+.ulasan__avatar,
+.ulasan__avatar use {
+    color: var(--theme-green);
+}
+
+.avatar > svg use,
+.ep-foto__lingkaran > svg use,
+.ep-ikon--profil > svg use,
+.ulasan__avatar use {
+    fill: var(--theme-green);
+    stroke: var(--theme-green);
+}
+
+.avatar__foto,
+.ep-foto__lingkaran img {
+    border: 5px solid var(--theme-green);
+    border-radius: 50%;
+}
+
+.nama__edit,
+.menu-profil svg,
+.hapus,
+.ep-back__ikon {
+    color: var(--theme-green);
+}
+
+.nama__edit svg,
+.menu-profil svg,
+.hapus svg,
+.ep-back__ikon svg {
+    color: currentColor;
+}
+
+.ep-btn--utama,
+.tombol-ulasan,
+.tombol-maps {
+    background-color: var(--theme-green);
+    border-color: var(--theme-green);
+}
+
+.ep-btn--utama:hover,
+.tombol-ulasan:hover,
+.tombol-maps:hover {
+    background-color: var(--theme-green-dark);
+}
+
+@media (max-width: 900px) {
+    .main-content {
+        width: min(100% - 36px, 720px);
+    }
+
+    .search-layout {
+        width: calc(100% - 36px);
+    }
+
+    .destination-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .about-content {
+        width: min(100% - 36px, 720px);
+    }
+}
+
+@media (max-width: 767px) {
+    .navbar,
+    .site-header {
+        height: auto;
+        min-height: 62px;
+    }
+
+    .main-content,
+    .category-content,
+    .about-content {
+        width: calc(100% - 32px);
+    }
+
+    .main-content {
+        padding-top: 28px;
+        padding-bottom: 40px;
+    }
+
+    .search-layout {
+        display: flex;
+        flex-direction: column;
+        width: calc(100% - 32px);
+    }
+
+    .filter-sidebar,
+    .results-section {
+        padding: 18px;
+    }
+
+    .auth-wrapper {
+        height: auto;
+        min-height: 0;
+    }
+
+    .auth-image-section {
+        background-position: center 55%;
+    }
+
+    .about-purpose {
+        grid-template-columns: 1fr;
+    }
+
+    .about-card,
+    .benefit-card {
+        border-radius: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content,
+    .category-content,
+    .about-content {
+        width: calc(100% - 28px);
+    }
+
+    .destination-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .card-content {
+        padding: 10px 10px 34px;
+    }
+
+    .card-content h2,
+    .card-content h3 {
+        font-size: 14px;
+    }
+
+    .review,
+    .review-count,
+    .rating small {
+        font-size: 10px;
+    }
+
+    .location {
+        font-size: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}

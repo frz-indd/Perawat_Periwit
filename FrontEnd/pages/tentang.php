@@ -22,6 +22,7 @@ session_start();
     <!-- CSS utama (urutan penting: tentang.css paling akhir) -->
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261017">
     <link rel="stylesheet" href="../CSS/tentang.css?v=20261025">
+    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
 </head>
 <body class="about-page halaman-tentang">
 
@@ -30,11 +31,9 @@ session_start();
         <defs>
             <clipPath id="klip-avatar"><circle cx="110" cy="110" r="110"/></clipPath>
             <symbol id="ikon-profil" viewBox="0 0 220 220">
-                <g clip-path="url(#klip-avatar)" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="110" cy="89" r="31" stroke-width="14"/>
-                    <path d="M45 215 C45 172 62 143 90 141 Q110 156 130 141 C158 143 175 172 175 215"/>
-                </g>
-                <circle cx="110" cy="110" r="102.5" fill="none" stroke="currentColor" stroke-width="15"/>
+                <circle cx="110" cy="110" r="102.5" fill="none" stroke="#166d5c" stroke-width="15"/>
+                <circle cx="110" cy="83" r="31" fill="#166d5c"/>
+                <path d="M38 211c2-39 23-66 57-75 9 9 19 13 30 13s21-4 30-13c34 9 55 36 57 75z" fill="#166d5c"/>
             </symbol>
         </defs>
     </svg>

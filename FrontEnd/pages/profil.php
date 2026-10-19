@@ -198,6 +198,7 @@ if ($loginEmail) {
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261018">
     <link rel="stylesheet" href="../CSS/profil.css?v=11">
+    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
 </head>
 <body class="halaman-profil">
     <!-- Sprite ikon -->
@@ -205,11 +206,9 @@ if ($loginEmail) {
         <defs>
             <clipPath id="klip-avatar"><circle cx="110" cy="110" r="110"/></clipPath>
             <symbol id="ikon-profil" viewBox="0 0 220 220">
-                <g clip-path="url(#klip-avatar)" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="110" cy="89" r="31" stroke-width="14"/>
-                    <path d="M45 215 C45 172 62 143 90 141 Q110 156 130 141 C158 143 175 172 175 215"/>
-                </g>
-                <circle cx="110" cy="110" r="102.5" fill="none" stroke="currentColor" stroke-width="15"/>
+                <circle cx="110" cy="110" r="102.5" fill="none" stroke="#166d5c" stroke-width="15"/>
+                <circle cx="110" cy="83" r="31" fill="#166d5c"/>
+                <path d="M38 211c2-39 23-66 57-75 9 9 19 13 30 13s21-4 30-13c34 9 55 36 57 75z" fill="#166d5c"/>
             </symbol>
             <symbol id="i-bintang" viewBox="0 0 24 24">
                 <path d="M12 1.8l3.1 6.6 7.2.9-5.3 4.9 1.4 7.1L12 17.7l-6.4 3.6 1.4-7.1L1.7 9.3l7.2-.9L12 1.8z"/>
