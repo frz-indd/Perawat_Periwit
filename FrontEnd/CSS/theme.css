@@ -163,6 +163,18 @@ summary:focus-visible {
     color: var(--theme-green);
 }
 
+.profile-outline-icon,
+.profile-icon > svg {
+    display: block;
+    width: 32px;
+    height: 32px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 .profile-icon:hover,
 .nav-icon:hover,
 .nav-icons a:hover,
@@ -746,8 +758,8 @@ body.about-page .about-hero-copy h1 {
 .ep-foto__lingkaran > svg use,
 .ep-ikon--profil > svg use,
 .ulasan__avatar use {
-    fill: var(--theme-green);
-    stroke: var(--theme-green);
+    fill: none;
+    stroke: currentColor;
 }
 
 .avatar__foto,

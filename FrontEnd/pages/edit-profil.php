@@ -207,7 +207,7 @@ $srcTampil = $fotoSrc ?: $gravatar;
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../CSS/edit-profil.css?v=font-map-2">
-  <link rel="stylesheet" href="../CSS/theme.css?v=layout-fonts-4">
+  <link rel="stylesheet" href="../CSS/theme.css?v=profile-icon-1">
 </head>
 <body class="halaman-edit-profil">
 
@@ -215,9 +215,9 @@ $srcTampil = $fotoSrc ?: $gravatar;
     <defs>
       <clipPath id="klip-avatar"><circle cx="110" cy="110" r="110"/></clipPath>
       <symbol id="ikon-profil" viewBox="0 0 220 220">
-        <circle cx="110" cy="110" r="102.5" fill="none" stroke="#166d5c" stroke-width="15"/>
-        <circle cx="110" cy="83" r="31" fill="#166d5c"/>
-        <path d="M38 211c2-39 23-66 57-75 9 9 19 13 30 13s21-4 30-13c34 9 55 36 57 75z" fill="#166d5c"/>
+        <circle cx="110" cy="110" r="93.5" fill="none" stroke="#166d5c" stroke-width="11"/>
+        <circle cx="110" cy="82.5" r="27.5" fill="none" stroke="#166d5c" stroke-width="11"/>
+        <path d="M49.5 170.5c9.35-27.5 30.25-41.25 60.5-41.25s51.15 13.75 60.5 41.25" fill="none" stroke="#166d5c" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
       </symbol>
     </defs>
   </svg>

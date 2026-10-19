@@ -141,7 +141,7 @@ function terpilih($daftar, $nilai)
     >
 
     <link rel="stylesheet" href="../CSS/hasil_pencarian.css?v=font-map-2">
-    <link rel="stylesheet" href="../CSS/theme.css?v=layout-fonts-4">
+    <link rel="stylesheet" href="../CSS/theme.css?v=profile-icon-1">
 </head>
 
 <body>
@@ -166,7 +166,11 @@ function terpilih($daftar, $nilai)
             </a>
 
             <a href="../auth/Login.php" class="nav-icon" aria-label="Akun">
-                <i class="bi bi-person-circle"></i>
+                <svg class="profile-outline-icon" viewBox="0 0 40 40" aria-hidden="true">
+                    <circle cx="20" cy="20" r="17"></circle>
+                    <circle cx="20" cy="15" r="5"></circle>
+                    <path d="M9 31c1.7-5 5.5-7.5 11-7.5S29.3 26 31 31"></path>
+                </svg>
             </a>
         </div>
 
