@@ -11,64 +11,66 @@ $pesan = "";
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan'])) {
     $nama_baru = trim($_POST['nama_lengkap']);
     if (!empty($nama_baru)) {
-        $_SESSION['nama'] = htmlspecialchars($nama_baru);
+        $_SESSION['nama'] = $nama_baru;
         $pesan = "Perubahan berhasil disimpan!";
     }
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta charset="utf-8" />
-<title>Edit Profil - Explore Majaku</title>
-<link rel="stylesheet" href="../CSS/edit-profil.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <title>Edit Profil - Explore Majaku</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="../CSS/edit-profil.css">
+    <link rel="stylesheet" href="../CSS/site.css?v=20261019">
 </head>
-<body>
-<form action="" method="POST" class="edit-profil">
-    <?php if (!empty($pesan)): ?>
-        <div style="position: absolute; top: 90px; left: 124px; color: #166C5C; font-weight: bold; font-family: 'Poppins', sans-serif; z-index: 999;">
-            <?php echo $pesan; ?>
-        </div>
-    <?php endif; ?>
+<body class="edit-profile-page">
+    <header class="site-header edit-header">
+        <nav class="main-nav" aria-label="Navigasi utama">
+            <a class="edit-brand" href="../../index.php">Explore Majaku</a>
+            <div class="nav-links">
+                <a href="../../index.php">Beranda</a>
+                <a href="kategori.php?kategori=alam">Kategori</a>
+                <a href="tentang.php">Tentang</a>
+            </div>
+            <div class="nav-icons">
+                <a href="hasil_pencarian.php" aria-label="Cari"><i class="bi bi-search" aria-hidden="true"></i></a>
+                <a href="profil.php" aria-label="Profil"><i class="bi bi-person-circle" aria-hidden="true"></i></a>
+            </div>
+        </nav>
+    </header>
 
-    <div class="group-2">
-        <div class="group-3">
-            <div class="rectangle-2"></div>
-            <div class="text-wrapper-7">Explore Majaku</div>
-            <a href="index.php"><div class="img"></div></a>
-            <div class="vector-2"></div>
-        </div>
-        <div class="text-wrapper-8">Beranda</div>
-        <div class="text-wrapper-9">kategori</div>
-        <div class="tentang">Tentang</div>
-    </div>
+    <main class="edit-main">
+        <a href="profil.php" class="edit-back"><i class="bi bi-arrow-left" aria-hidden="true"></i> Kembali ke profil</a>
+        <form action="" method="POST" class="edit-card">
+            <div class="edit-avatar" aria-hidden="true"><i class="bi bi-person"></i></div>
+            <h1>Edit Profil</h1>
 
-    <a href="profil.php" class="frame">
-        <div class="eva-arrow-back-fill"></div>
-        <div class="text-wrapper-11">Back</div>
-    </a>
+            <?php if (!empty($pesan)): ?>
+                <p class="edit-message" role="status"><?= htmlspecialchars($pesan, ENT_QUOTES, 'UTF-8'); ?></p>
+            <?php endif; ?>
 
-    <div class="group">
-        <div class="ellipse"></div>
-        <div class="vector"></div>
-    </div>
-    <div class="text-wrapper-3">Ubah Foto Profil</div>
+            <div class="edit-field">
+                <label for="full-name">Nama lengkap</label>
+                <input id="full-name" type="text" name="nama_lengkap" value="<?= htmlspecialchars($_SESSION['nama'], ENT_QUOTES, 'UTF-8'); ?>" autocomplete="name" required>
+            </div>
 
-    <div class="text-wrapper-4">Nama Lengkap</div>
-    <div class="form-email">
-        <input type="text" name="nama_lengkap" class="email-or-no" value="<?php echo htmlspecialchars($_SESSION['nama']); ?>" required>
-    </div>
+            <div class="edit-field">
+                <span>Email</span>
+                <div class="edit-email"><?= htmlspecialchars($_SESSION['email'], ENT_QUOTES, 'UTF-8'); ?></div>
+                <p class="edit-hint">Email tidak dapat diubah karena digunakan sebagai identitas akun.</p>
+            </div>
 
-    <div class="text-wrapper-5">Email</div>
-    <div class="text-wrapper-6"><?php echo $_SESSION['email']; ?></div>
-    <p class="p">Email tidak dapat diubah karena digunakan sebagai identitas akun.</p>
-
-    <button type="submit" name="simpan" class="rectangle"></button>
-    <div class="text-wrapper">Simpan Perubahan</div>
-
-    <a href="profil.php" class="div"></a>
-    <div class="text-wrapper-2">Batal</div>
-</form>
+            <div class="edit-actions">
+                <a href="profil.php">Batal</a>
+                <button type="submit" name="simpan">Simpan perubahan</button>
+            </div>
+        </form>
+    </main>
 </body>
 </html>

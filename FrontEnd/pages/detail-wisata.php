@@ -77,6 +77,7 @@ $destination = [
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../CSS/detail-wisata.css?v=20261014-4">
+    <link rel="stylesheet" href="../CSS/site.css?v=20261019">
 </head>
 <body class="destination-detail-page">
     <div class="destination-detail-shell">

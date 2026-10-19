@@ -15,6 +15,7 @@ $favorites = $userId !== false && $userId > 0
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Profil | Explore Majaku</title>
     <link rel="stylesheet" href="../CSS/profil.css">
+    <link rel="stylesheet" href="../CSS/site.css?v=20261019">
 </head>
 <body>
 <main class="profil">
@@ -45,15 +46,15 @@ $favorites = $userId !== false && $userId > 0
                 <path class="avatar-body" d="M39 144c3-20 15-32 34-38l8-3c5 5 11 8 18 8s13-3 18-8l8 3c19 6 31 18 34 38-18 17-42 27-66 27s-48-10-66-27Z"></path>
             </svg>
         </div>
-        <h1 class="text-wrapper"><span id="profile-name">Memuat profil...</span> <span class="edit-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48">
+        <h1 class="text-wrapper"><span id="profile-name">Memuat profil...</span> <a class="edit-icon" href="edit-profil.php" aria-label="Edit profil">
+            <svg viewBox="0 0 48 48" aria-hidden="true">
                 <path d="M15 10h-3.5A4.5 4.5 0 0 0 7 14.5v22A4.5 4.5 0 0 0 11.5 41h22a4.5 4.5 0 0 0 4.5-4.5V33"></path>
                 <path d="m20 32 2.1-7.1L37.7 9.3a3.3 3.3 0 0 1 4.7 4.7L26.8 29.6 20 32Z"></path>
                 <path d="m34.8 12.2 4.7 4.7"></path>
                 <circle cx="1.5" cy="25" r="1.4"></circle>
                 <circle cx="45" cy="5" r="1.4"></circle>
             </svg>
-        </span></h1>
+        </a></h1>
         <p class="text-wrapper-2" id="profile-email"></p>
         <nav class="group" aria-label="Menu profil">
             <a class="text-wrapper-3" href="../../index.php">

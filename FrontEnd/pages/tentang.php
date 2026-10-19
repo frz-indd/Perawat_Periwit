@@ -10,32 +10,33 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/tentang.css?v=20261012-14">
+    <link rel="stylesheet" href="../CSS/site.css?v=20261019">
 </head>
 <body class="about-page">
     <header class="site-header">
         <nav class="navbar navbar-expand-md">
             <div class="container">
-                <a class="brand" href="../exploreMajaKu_skeleton/index.html">Explore Majaku</a>
+                <a class="brand" href="../../index.php">Explore Majaku</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Buka navigasi">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav mx-auto gap-lg-5">
-                        <li class="nav-item"><a class="nav-link" href="../exploreMajaKu_skeleton/index.html">Beranda</a></li>
+                        <li class="nav-item"><a class="nav-link" href="../../index.php">Beranda</a></li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="../exploreMajaKu_skeleton/pages/kategori-alam.html" role="button" data-bs-toggle="dropdown" aria-expanded="false">kategori</a>
+                            <a class="nav-link dropdown-toggle" href="kategori.php?kategori=alam" role="button" data-bs-toggle="dropdown" aria-expanded="false">Kategori</a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="../exploreMajaKu_skeleton/pages/kategori-alam.html">Alam</a></li>
-                                <li><a class="dropdown-item" href="../exploreMajaKu_skeleton/pages/kategori-air-curug.html">Air &amp; Curug</a></li>
-                                <li><a class="dropdown-item" href="../exploreMajaKu_skeleton/pages/kategori-buatan-kuliner.html">Buatan &amp; Kuliner</a></li>
-                                <li><a class="dropdown-item" href="../exploreMajaKu_skeleton/pages/kategori-sejarah-budaya.html">Sejarah &amp; Budaya</a></li>
+                                <li><a class="dropdown-item" href="kategori.php?kategori=alam">Alam</a></li>
+                                <li><a class="dropdown-item" href="kategori.php?kategori=air-curug">Air &amp; Curug</a></li>
+                                <li><a class="dropdown-item" href="kategori.php?kategori=buatan-kuliner">Buatan &amp; Kuliner</a></li>
+                                <li><a class="dropdown-item" href="kategori.php?kategori=sejarah-budaya">Sejarah &amp; Budaya</a></li>
                             </ul>
                         </li>
                         <li class="nav-item"><a class="nav-link active" href="/frontend/Perawat_Periwit/FrontEnd/pages/tentang.php" aria-current="page">Tentang</a></li>
                     </ul>
                     <div class="nav-icons">
-                        <a href="../exploreMajaKu_skeleton/pages/hasil-pencarian.html" aria-label="Cari"><i class="bi bi-search"></i></a>
-                        <a href="../exploreMajaKu_skeleton/pages/profil.html" aria-label="Profil"><i class="bi bi-person-circle"></i></a>
+                        <a href="hasil_pencarian.php" aria-label="Cari"><i class="bi bi-search"></i></a>
+                        <a href="../auth/Login.php" aria-label="Profil"><i class="bi bi-person-circle"></i></a>
                     </div>
                 </div>
             </div>
