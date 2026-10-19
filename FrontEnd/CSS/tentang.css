@@ -1,97 +1,38 @@
+/* =====================================================
+   HALAMAN TENTANG - Explore Majaku
+   Semua ukuran memakai satuan --u (1 --u = 1px pada kanvas desain 1440px),
+   sama seperti edit-profil.css, jadi tampilan mengikuti desain.
+   ===================================================== */
+
 * {
     box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    min-height: 100vh;
-    min-height: 100dvh;
-    display: flow-root;
-    color: #111111;
-    background: #ffffff;
-    font-family: 'Poppins', sans-serif;
 }
 
 a {
     text-decoration: none;
 }
 
-.about-page {
-    --green: #176f63;
-}
-
-.site-header,
-.about-page main {
-    width: 100%;
-}
-
-.site-header {
-    flex: none;
-    margin-top: 0;
-    background: #ffffff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    z-index: 20;
-}
-
-.about-page .navbar {
-    height: 48px;
-    min-height: 48px;
-    padding: 0;
-}
-
-.about-page .navbar .container {
-    max-width: 900px;
-}
-
-.brand {
-    color: var(--green);
-    font-family: 'Dancing Script', cursive;
-    font-size: 28px;
-    font-weight: 700;
-}
-
-.nav-link {
+body.halaman-tentang {
+    margin: 0;
+    display: block;
+    min-height: 100vh;
     color: #111111;
-    font-size: 15px;
-    font-weight: 500;
+    background: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    overflow-y: auto !important;
+    height: auto !important;
+    padding-top: calc(83 * var(--u));
 }
 
-.about-page .navbar .nav-link.active,
-.about-page .navbar .nav-link:hover {
-    color: var(--green);
+.about-page {
+    --green: var(--hijau, #166c5c);
 }
 
-@media (min-width: 992px) {
-    .about-page .navbar .container {
-        padding-left: 48px;
-    }
-
-    .about-page .navbar-nav {
-        margin-right: 85px !important;
-    }
-}
-
-.nav-icons {
-    display: flex;
-    gap: 16px;
-}
-
-.nav-icons i {
-    color: var(--green);
-    font-size: 24px;
-}
-
-.about-page main {
-    display: flex;
-    height: calc(100dvh - 48px);
-    min-height: 0;
-    flex-direction: column;
-}
-
+/* ---------- HERO (3 foto + gradasi + teks) ---------- */
 .about-hero {
-    height: clamp(150px, 25.45vh, 200px);
-    flex: none;
     position: relative;
+    width: 100%;
+    height: calc(262 * var(--u));
     overflow: hidden;
 }
 
@@ -99,7 +40,7 @@ a {
     display: grid;
     width: 100%;
     height: 100%;
-    grid-template-columns: 1fr 0.96fr 1.04fr;
+    grid-template-columns: 483fr 453fr 504fr;
     grid-template-rows: minmax(0, 1fr);
 }
 
@@ -108,13 +49,6 @@ a {
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-.about-hero-images img:first-child {
-    object-position: center;
-}
-
-.about-hero-images img:nth-child(2) {
     object-position: center;
 }
 
@@ -125,330 +59,448 @@ a {
 .about-hero-shade {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.25);
+    background: linear-gradient(90deg,
+        rgba(0, 0, 0, 0.38) 0%,
+        rgba(0, 0, 0, 0.28) 34%,
+        rgba(0, 0, 0, 0.12) 100%);
 }
 
 .about-hero-copy {
     position: absolute;
-    top: 50%;
-    left: 8.5%;
+    inset: 0;
     color: #ffffff;
-    transform: translateY(-50%);
 }
 
 .about-hero-copy h1 {
-    margin: 0 0 10px;
-    font: 700 24px Georgia, serif;
+    position: absolute;
+    left: calc(130 * var(--u));
+    top: calc(60 * var(--u));
+    height: calc(46 * var(--u));
+    margin: 0;
+    font-family: 'Noto Serif', Georgia, serif;
+    font-size: calc(37.3 * var(--u));
+    font-weight: 700;
+    line-height: calc(46 * var(--u));
+    white-space: nowrap;
 }
 
 .about-hero-copy p {
+    position: absolute;
+    left: calc(130 * var(--u));
+    top: calc(124 * var(--u));
     margin: 0;
-    font: 13px/1.25 'Courier New', monospace;
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: calc(20.5 * var(--u));
+    font-weight: 400;
+    line-height: calc(24 * var(--u));
+    white-space: nowrap;
 }
 
+/* ---------- KONTEN ---------- */
 .about-content {
-    display: flex;
-    width: min(83.6%, 1000px);
-    flex: 1;
-    flex-direction: column;
-    position: relative;
-    left: 7px;
-    min-height: 0;
-    margin: 0 auto;
-    padding: clamp(24px, 4.2vh, 36px) 0 clamp(24px, 5.5vh, 42px);
+    width: calc(1183 * var(--u));
+    margin: calc(47 * var(--u)) auto 0;
+    padding-bottom: calc(67 * var(--u));
     color: #111111;
-    font-family: Georgia, serif;
+    font-family: 'Noto Serif', Georgia, serif;
 }
 
 .about-card,
 .benefit-card {
-    border: 1px solid #c7ceca;
-    border-radius: 12px;
-    background: #EEF2EE;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+    background: #eef2ee;
+    border: calc(1 * var(--u)) solid #d3d9d5;
+    box-shadow: 0 calc(3 * var(--u)) calc(5 * var(--u)) rgba(0, 0, 0, 0.28);
 }
 
 .about-card {
-    padding: 10px 24px;
+    border-radius: calc(20 * var(--u));
     text-align: center;
 }
 
 .about-card h2 {
-    margin: 0 0 5px;
+    height: calc(36 * var(--u));
+    margin: 0 0 calc(6 * var(--u));
     color: var(--green);
-    font: bold 20px Georgia, serif;
+    font-family: 'Noto Serif', Georgia, serif;
+    font-size: calc(27.3 * var(--u));
+    font-weight: 700;
+    line-height: calc(36 * var(--u));
 }
 
 .about-card p {
     margin: 0;
-    font: 17px/1.3 Georgia, serif;
+    color: #111111;
+    font-family: 'Noto Serif', Georgia, serif;
+    font-weight: 400;
+    white-space: nowrap;
 }
 
+/* Tentang Kami: 1183 x 191 */
 .about-intro {
-    min-height: clamp(110px, 18.85vh, 145px);
-    padding: 10px 28px;
+    height: calc(191 * var(--u));
+    padding: calc(17 * var(--u)) 0 0;
 }
 
+.about-intro p {
+    font-size: calc(22.4 * var(--u));
+    line-height: calc(32 * var(--u));
+}
+
+/* Visi (582 x 173) & Misi (549 x 173) */
 .about-purpose {
     display: grid;
-    grid-template-columns: 1.06fr 1fr;
-    gap: clamp(16px, 3.35vw, 34px);
-    margin-top: 10px;
+    grid-template-columns: 582fr 549fr;
+    column-gap: calc(49 * var(--u));
+    width: calc(1180 * var(--u));
+    margin: calc(17 * var(--u)) auto 0;
 }
 
 .about-purpose .about-card {
-    display: flex;
-    min-height: clamp(100px, 17.2vh, 135px);
-    flex-direction: column;
-    justify-content: center;
-    padding: 10px 24px;
+    height: calc(173 * var(--u));
+    padding: calc(16 * var(--u)) 0 0;
 }
 
+.about-purpose .about-card h2 {
+    margin-bottom: calc(4 * var(--u));
+}
+
+.about-purpose .about-card p {
+    font-size: calc(20.4 * var(--u));
+    line-height: calc(30 * var(--u));
+}
+
+.about-misi {
+    padding-top: calc(15 * var(--u)) !important;
+}
+
+/* Kenapa Memilih Explore MajaKu? */
 .about-benefits {
-    margin-top: 13px;
+    margin-top: calc(18 * var(--u));
 }
 
 .about-benefits > h2 {
-    margin: 0 0 10px 8px;
+    height: calc(36 * var(--u));
+    margin: 0 auto calc(16 * var(--u));
+    width: calc(1181 * var(--u));
+    padding-left: calc(8 * var(--u));
     color: var(--green);
-    font: bold 20px Georgia, serif;
+    font-family: 'Noto Serif', Georgia, serif;
+    font-size: calc(27.3 * var(--u));
+    font-weight: 700;
+    line-height: calc(36 * var(--u));
 }
 
 .benefit-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
+    grid-template-columns: 388fr 389fr 370fr;
+    column-gap: calc(17 * var(--u));
+    width: calc(1181 * var(--u));
+    margin: 0 auto;
 }
 
 .benefit-card {
-    display: flex;
-    min-height: clamp(70px, 11.85vh, 90px);
-    align-items: center;
-    gap: 12px;
-    padding: 9px 14px;
+    position: relative;
+    height: calc(120 * var(--u));
+    border-radius: calc(18 * var(--u));
 }
 
-.benefit-card i {
-    flex: none;
+.benefit-text {
+    position: absolute;
+    white-space: nowrap;
+}
+
+.benefit-title {
+    display: block;
     color: var(--green);
-    font-size: 36px;
+    font-family: 'Noto Serif', Georgia, serif;
+    font-weight: 600;
+}
+
+.benefit-desc {
+    display: block;
+    color: #111111;
+    font-family: 'Noto Serif', Georgia, serif;
+    font-weight: 400;
+}
+
+/* Kartu 1: Informasi Lengkap */
+.bc-1 > i {
+    position: absolute;
+    left: calc(28 * var(--u));
+    top: calc(34 * var(--u));
+    color: var(--green);
+    font-size: calc(54 * var(--u));
     line-height: 1;
 }
 
+.bc-1 .benefit-text {
+    left: calc(94 * var(--u));
+    top: calc(22 * var(--u));
+}
+
+.bc-1 .benefit-title {
+    height: calc(30 * var(--u));
+    font-size: calc(27.3 * var(--u));
+    line-height: calc(30 * var(--u));
+}
+
+.bc-1 .benefit-desc {
+    margin-top: calc(-5 * var(--u));
+    font-size: calc(22.6 * var(--u));
+    line-height: calc(32 * var(--u));
+}
+
+/* Kartu 2: Mudah diakses */
 .benefit-thumb-icon {
-    flex: none;
-    width: 48px;
-    height: 48px;
+    position: absolute;
+    left: calc(38 * var(--u));
+    top: calc(27 * var(--u));
+    width: calc(52 * var(--u));
+    height: calc(58 * var(--u));
     fill: var(--green);
     transform: scaleX(-1);
 }
 
+.bc-2 .benefit-text {
+    left: calc(124 * var(--u));
+    top: calc(15 * var(--u));
+}
+
+.bc-2 .benefit-title {
+    height: calc(30 * var(--u));
+    font-size: calc(27.3 * var(--u));
+    line-height: calc(30 * var(--u));
+}
+
+.bc-2 .benefit-desc {
+    margin-top: calc(2 * var(--u));
+    font-size: calc(22.5 * var(--u));
+    line-height: calc(32 * var(--u));
+}
+
+/* Kartu 3: Terpercaya */
 .benefit-trust-icon {
-    flex: none;
-    width: 42px;
-    height: 42px;
+    position: absolute;
+    left: calc(32 * var(--u));
+    top: calc(33 * var(--u));
+    width: calc(56 * var(--u));
+    height: calc(56 * var(--u));
     fill: none;
     stroke: var(--green);
+    stroke-width: 5;
     stroke-linecap: round;
     stroke-linejoin: round;
-    stroke-width: 3.5;
 }
 
-.benefit-card p {
+.bc-3 .benefit-text {
+    left: calc(121 * var(--u));
+    top: calc(20 * var(--u));
+}
+
+.bc-3 .benefit-title {
+    height: calc(30 * var(--u));
+    font-size: calc(27.3 * var(--u));
+    line-height: calc(30 * var(--u));
+}
+
+.bc-3 .benefit-desc {
+    margin-top: calc(-4 * var(--u));
+    font-size: calc(20.8 * var(--u));
+    line-height: calc(30 * var(--u));
+}
+
+/* =====================================================
+   NAVBAR: kategori + dropdown
+   ===================================================== */
+
+/* Tulisan "kategori" jadi hijau saat disentuh / di-hover */
+.ep-menu__kategori:hover,
+.ep-menu__kategori:focus,
+.ep-menu__kategori:active {
+    color: var(--hijau) !important;
+}
+
+/* Pastikan link menu navbar bisa diklik */
+.ep-menu a {
+    z-index: 10;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* Dropdown kategori (menempel di bawah navbar, sesuai desain).
+   Posisi diatur lewat JavaScript. */
+.kat-menu {
+    display: none;
+    position: fixed;
+    z-index: 3000;
+    min-width: calc(230 * var(--u));
     margin: 0;
-    font: 17px/1.2 Georgia, serif;
+    padding: 0;
+    list-style: none;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0;
+    box-shadow: 0 calc(4 * var(--u)) calc(10 * var(--u)) rgba(0, 0, 0, 0.18);
 }
 
-.benefit-card strong {
-    color: var(--green);
-    font-size: 17px;
+.kat-menu.show {
+    display: block;
+}
+
+.kat-menu li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.kat-menu a.kat-item {
+    display: block;
+    position: static;
+    padding: calc(5 * var(--u)) calc(14 * var(--u));
+    font-family: var(--font-sans, 'Poppins', sans-serif);
+    font-size: calc(16 * var(--u));
+    font-weight: 400;
+    line-height: 1.4;
+    color: #000;
+    text-align: center;
     white-space: nowrap;
+    text-decoration: none;
 }
 
-.benefit-description-first-line {
-    white-space: nowrap;
+.kat-menu a.kat-item:hover,
+.kat-menu a.kat-item:focus,
+.kat-menu a.kat-item:active {
+    background: var(--hijau);
+    color: #fff;
+    outline: none;
 }
 
-@media (min-width: 768px) and (max-height: 680px) {
-    .about-page main {
-        height: auto;
-        min-height: calc(100dvh - 48px);
-    }
-
-    .about-hero {
-        height: clamp(150px, 25.45vh, 200px);
-    }
-
-    .about-content {
-        flex: 1 0 auto;
-        padding: 31px 0 47px;
-    }
-
-    .about-intro {
-        flex: none;
-        height: clamp(110px, 18.9vh, 145px);
-        min-height: 0;
-    }
-
-    .about-purpose {
-        flex: none;
-        height: clamp(100px, 17vh, 135px);
-    }
-
-    .about-purpose .about-card {
-        height: 100%;
-        min-height: 0;
-    }
-
-    .about-card p {
-        font-size: 16px;
-    }
-
-    .about-benefits {
-        flex: none;
-        margin-top: 16px;
-    }
-
-    .about-benefits > h2 {
-        margin-bottom: 5px;
-    }
-
-    .benefit-card {
-        height: 80px;
-        min-height: 80px;
-    }
-
-    .benefit-grid {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.95fr);
-    }
-
-    .benefit-card p {
-        font-size: 16px;
-    }
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-    .about-page .navbar .container {
-        max-width: 755px;
-    }
-
-    .about-page .navbar-nav {
-        gap: 32px;
-        margin-right: 110px !important;
-    }
-
-    .site-header {
-        position: relative;
-    }
-
-    .nav-icons {
-        position: absolute;
-        right: 58px;
-    }
-}
-
+/* =====================================================
+   HP (di bawah 768px): susunan ditumpuk, ukuran px biasa
+   ===================================================== */
 @media (max-width: 767px) {
-    body {
-        display: block;
-        min-height: 100vh;
-        min-height: 100dvh;
-        overflow: auto;
-        background: #ffffff;
-    }
-
-    .about-page .navbar {
-        height: auto;
-        min-height: 65px;
-        padding: 8px 0;
-    }
-
-    .about-page .navbar .container {
-        max-width: 100%;
-    }
-
-    .brand {
-        font-size: 27px;
-    }
-
-    .about-page main {
-        display: block;
-        height: auto;
-        min-height: 0;
-    }
-
-    .about-hero {
-        height: clamp(150px, 28vh, 210px);
-    }
-
-    .about-hero-copy {
-        right: 5%;
-        left: 6%;
-    }
-
-    .about-hero-copy h1 {
-        font-size: 21px;
-    }
-
-    .about-hero-copy p {
-        font-size: 12px;
-    }
-
-    .desktop-break {
+    .br-d {
         display: none;
     }
 
+    .about-hero {
+        height: 180px;
+    }
+
+    .about-hero-copy h1 {
+        left: 20px;
+        top: 40px;
+        height: auto;
+        font-size: 24px;
+        line-height: 32px;
+    }
+
+    .about-hero-copy p {
+        left: 20px;
+        right: 16px;
+        top: 82px;
+        font-size: 12px;
+        line-height: 18px;
+        white-space: normal;
+    }
+
     .about-content {
-        left: 0;
-        min-height: auto;
         width: calc(100% - 32px);
-        padding: 22px 0 28px;
+        margin: 24px 16px 0;
+        padding-bottom: 32px;
     }
 
-    .about-intro {
-        padding: 12px 16px;
+    .about-card {
+        border-radius: 16px;
     }
 
-    .about-card p {
+    .about-card h2,
+    .about-benefits > h2 {
+        height: auto;
+        margin: 0 0 6px;
+        font-size: 20px;
+        line-height: 1.3;
+    }
+
+    .about-card p,
+    .about-intro p,
+    .about-purpose .about-card p {
         font-size: 14px;
+        line-height: 1.5;
+        white-space: normal;
     }
 
-    .about-card h2 {
-        font-size: 18px;
+    .about-intro,
+    .about-purpose .about-card,
+    .about-misi {
+        height: auto;
+        padding: 16px !important;
     }
 
     .about-purpose {
         grid-template-columns: 1fr;
-        gap: 10px;
-        margin-top: 10px;
-    }
-
-    .about-purpose .about-card {
-        min-height: 90px;
+        row-gap: 12px;
+        width: 100%;
+        margin: 12px 0 0;
     }
 
     .about-benefits {
-        margin-top: 10px;
+        margin-top: 18px;
     }
 
     .about-benefits > h2 {
-        margin-left: 0;
-        font-size: 18px;
+        width: auto;
+        padding-left: 0;
+        margin: 0 0 10px;
     }
 
     .benefit-grid {
         grid-template-columns: 1fr;
-        gap: 9px;
+        row-gap: 10px;
+        width: 100%;
+        margin: 0;
     }
 
     .benefit-card {
-        min-height: 68px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        height: auto;
+        min-height: 80px;
+        padding: 12px 16px;
+        border-radius: 14px;
     }
 
-    .benefit-card p {
+    .benefit-card > i,
+    .benefit-card > svg,
+    .benefit-card .benefit-text {
+        position: static;
+    }
+
+    .bc-1 > i {
+        font-size: 40px;
+    }
+
+    .benefit-thumb-icon,
+    .benefit-trust-icon {
+        width: 44px;
+        height: 48px;
+        flex: none;
+    }
+
+    .benefit-card .benefit-title {
+        height: auto;
+        font-size: 16px;
+        line-height: 1.3;
+    }
+
+    .benefit-card .benefit-desc {
+        margin-top: 2px;
         font-size: 14px;
+        line-height: 1.4;
     }
 
-    .benefit-card strong {
-        font-size: 15px;
+    .benefit-text {
+        white-space: normal;
     }
 }

@@ -1,302 +1,421 @@
-@import url("https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css");
-@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=Kaushan+Script&family=Poppins:wght@400;500;600&display=swap');
+/* ===== edit-profil.css — Explore Majaku =====
+   Seluruh ukuran memakai satuan --u (skala desain 1440 x 1024),
+   sehingga tinggi mengikuti skala desain dan lebar isi mengikuti lebar layar dan muat di satu layar
+   tanpa scroll, berapa pun ukuran jendela browser. */
 
-* {
-  -webkit-font-smoothing: antialiased;
+:root {
+  --u: min(calc(100vw / 1440), calc(100vh / 1024));
+  --hijau: #166d5c;
+  --hijau-gelap: #115446;
+  --abu-avatar: #d9d9d9;
+  /* Jarak borang di tengah */
+  --mx: calc(260 * var(--u));
+  /* Jarak khas untuk Navbar & Back */
+  --mx-nav: calc(180 * var(--u));
+  --font-sans: "Poppins", Arial, sans-serif;
+  --font-serif: "Noto Serif", Georgia, serif;
+  --font-logo: "Kaushan Script", "Brush Script MT", cursive;
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 html,
-body {
+body.halaman-edit-profil {
+  height: 100%;
   margin: 0;
-  padding: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden !important;
-  position: fixed;
-  background: #FFFFFF;
+  overflow: hidden; /* tidak bisa di-scroll */
 }
 
-a {
+body.halaman-edit-profil {
+  position: relative;
+  background: #fff;
+  color: #000;
+  font-family: var(--font-serif);
+}
+
+/* ---------- Navbar ---------- */
+.ep-navbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(83 * var(--u));
+  background: #fff;
+  box-shadow: 0 calc(3 * var(--u)) calc(4 * var(--u)) rgba(0, 0, 0, 0.25);
+  z-index: 10;
+}
+
+.ep-navbar__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.ep-navbar a {
+  position: absolute;
+  display: block;
+  white-space: nowrap;
   text-decoration: none;
 }
 
-.edit-profil {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 1440px;
-  height: 1024px;
-  background: #FFFFFF;
-  overflow: hidden !important;
+.ep-logo {
+  left: var(--mx-nav);
+  top: calc(15 * var(--u));
+  font-family: var(--font-logo);
+  font-size: calc(40 * var(--u));
+  line-height: calc(56 * var(--u));
+  color: var(--hijau);
 }
 
-.group-2, .group-3, .rectangle-2 {
-  position: absolute;
-  width: 1440px;
-  height: 82px;
-  left: 0;
-  top: 0;
-}
-
-.rectangle-2 {
-  background: #FFFFFF;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
-}
-
-.text-wrapper-7 {
-  position: absolute;
-  left: 109px;
-  top: 12px;
-  font-family: 'Kaushan Script', cursive;
-  font-weight: 400;
-  font-size: 40px;
-  color: #166C5C;
-}
-
-.text-wrapper-8 {
-  position: absolute;
-  left: 449px;
-  top: 25px;
-  font-family: 'Poppins', sans-serif;
+.ep-menu a {
+  top: calc(27 * var(--u));
+  font-family: var(--font-sans);
+  font-size: calc(24 * var(--u));
+  line-height: calc(28 * var(--u));
   font-weight: 500;
-  font-size: 22px;
-  color: #000000;
-}
-
-.text-wrapper-9 {
-  position: absolute;
-  left: 582px;
-  top: 25px;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 500;
-  font-size: 22px;
-  color: #000000;
-}
-
-.tentang {
-  position: absolute;
-  left: 713px;
-  top: 25px;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 500;
-  font-size: 22px;
-  color: #000000;
-}
-
-.vector-2 {
-  position: absolute;
-  width: 28px;
-  height: 28px;
-  left: 1253px;
-  top: 27px;
-  background-color: #166C5C;
-  -webkit-mask: url('../img/vector.svg') no-repeat center;
-  mask: url('../img/vector.svg') no-repeat center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-}
-
-.img {
-  position: absolute;
-  width: 35px;
-  height: 35px;
-  left: 1309px;
-  top: 24px;
-  background-color: #166C5C;
-  -webkit-mask: url('../img/image.svg') no-repeat center;
-  mask: url('../img/image.svg') no-repeat center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-}
-
-.frame {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: absolute;
-  left: 48px;
-  top: 138px;
-}
-
-.eva-arrow-back-fill {
-  position: relative;
-  width: 24px;
-  height: 24px;
-  background-color: #166C5C;
-  -webkit-mask: url('../img/vector-2.svg') no-repeat center;
-  mask: url('../img/vector-2.svg') no-repeat center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-}
-
-.text-wrapper-11 {
-  font-family: 'Frank Ruhl Libre', serif;
-  font-weight: 500;
-  font-size: 25px;
-  color: #166C5C;
-}
-
-.group {
-  position: absolute;
-  width: 153px;
-  height: 153px;
-  left: 644px;
-  top: 126px;
-}
-
-.ellipse {
-  position: absolute;
-  width: 153px;
-  height: 153px;
-  left: 0;
-  top: 0;
-  background: #D9D9D9;
-  border-radius: 50%;
-  border: 5px solid #166C5C;
-}
-
-.vector {
-  position: absolute;
-  width: 46px;
-  height: 46px;
-  left: calc(50% - 23px);
-  top: calc(50% - 23px);
-  background-color: #166C5C;
-  -webkit-mask: url('../img/vector-3.svg') no-repeat center;
-  mask: url('../img/vector-3.svg') no-repeat center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-}
-
-.text-wrapper-3 {
-  position: absolute;
-  width: 100%;
-  text-align: center;
-  top: 295px;
-  left: 0;
-  font-family: 'Frank Ruhl Libre', serif;
-  font-weight: 400;
-  font-size: 32px;
-  color: #166C5C;
-}
-
-.text-wrapper-4 {
-  position: absolute;
-  left: 124px;
-  top: 375px;
-  font-family: 'Frank Ruhl Libre', serif;
-  font-weight: 500;
-  font-size: 22px;
-  color: #166C5C;
-}
-
-.form-email {
-  position: absolute;
-  width: 1192px;
-  height: 56px;
-  left: 124px;
-  top: 412px;
-  background: #FFFFFF;
-  border: 1px solid #166C5C;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-}
-
-.email-or-no {
-  width: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 400;
-  font-size: 18px;
-  color: #000000;
-}
-
-.text-wrapper-5 {
-  position: absolute;
-  left: 124px;
-  top: 485px;
-  font-family: 'Frank Ruhl Libre', serif;
-  font-weight: 500;
-  font-size: 22px;
-  color: #166C5C;
-}
-
-.text-wrapper-6 {
-  position: absolute;
-  left: 124px;
-  top: 518px;
-  font-family: 'Frank Ruhl Libre', serif;
-  font-weight: 700;
-  font-size: 22px;
-  color: #000000;
-}
-
-.p {
-  position: absolute;
-  left: 124px;
-  top: 550px;
-  font-family: 'Frank Ruhl Libre', serif;
-  font-weight: 400;
-  font-size: 16px;
-  color: #000000;
-}
-
-.text-wrapper-10, .label {
-  display: none;
-}
-
-.rectangle {
-  position: absolute;
-  width: 1192px;
-  height: 58px;
-  left: 124px;
-  top: 605px;
-  background: #166C5C;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  border-radius: 6px;
-  border: none;
+  color: #000;
+  z-index: 10;
+  pointer-events: auto;
   cursor: pointer;
 }
 
-.text-wrapper {
-  position: absolute;
-  width: 1192px;
-  text-align: center;
-  top: 622px;
-  left: 124px;
-  font-family: 'Frank Ruhl Libre', serif;
-  font-weight: 500;
-  font-size: 20px;
-  color: #FFFFFF;
-  pointer-events: none;
+.ep-menu__beranda { left: calc(50% - 100 * var(--u)); }
+.ep-menu__kategori { left: calc(50% + 80 * var(--u)); }
+.ep-menu__tentang { left: calc(50% + 250 * var(--u)); }
+
+/* Hijau saat disentuh / di-hover */
+.ep-menu a:hover,
+.ep-menu a:focus,
+.ep-menu a:active,
+.ep-menu a.aktif {
+  color: var(--hijau);
 }
 
-.div {
-  position: absolute;
-  width: 1192px;
-  height: 58px;
-  left: 124px;
-  top: 680px;
-  background: #FFFFFF;
-  border: 1px solid #166C5C;
-  border-radius: 6px;
+.ep-ikon {
+  top: calc(21 * var(--u));
+  width: calc(40 * var(--u));
+  height: calc(40 * var(--u));
+  color: var(--hijau);
+}
+
+.ep-ikon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ep-ikon--cari { right: calc(var(--mx-nav) + 58 * var(--u)); }
+.ep-ikon--profil { right: var(--mx-nav); top: calc(20 * var(--u)); }
+
+/* ---------- Dropdown kategori ----------
+   Tersembunyi sampai tulisan "kategori" diklik. Posisi diatur lewat JavaScript. */
+.kat-menu {
+  display: none;
+  position: fixed;
+  z-index: 3000;
+  min-width: calc(230 * var(--u));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0;
+  box-shadow: 0 calc(4 * var(--u)) calc(10 * var(--u)) rgba(0, 0, 0, 0.18);
+}
+
+.kat-menu.show {
   display: block;
 }
 
-.text-wrapper-2 {
-  position: absolute;
-  width: 1192px;
+.kat-menu li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kat-menu a.kat-item {
+  display: block;
+  position: static;
+  padding: calc(5 * var(--u)) calc(14 * var(--u));
+  font-family: var(--font-sans);
+  font-size: calc(16 * var(--u));
+  font-weight: 400;
+  line-height: 1.4;
+  color: #000;
   text-align: center;
-  top: 697px;
-  left: 124px;
-  font-family: 'Frank Ruhl Libre', serif;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.kat-menu a.kat-item:hover,
+.kat-menu a.kat-item:focus,
+.kat-menu a.kat-item:active {
+  background: var(--hijau);
+  color: #fff;
+  outline: none;
+}
+
+/* ---------- Konten ---------- */
+.ep-stage {
+  position: relative;
+  width: 100%;
+  height: calc(1024 * var(--u));
+}
+
+.ep-stage > * {
+  position: absolute;
+}
+
+/* Tombol Back: hanya ikon panah yang bisa diklik, tulisan hanya teks biasa */
+.ep-back {
+  left: var(--mx-nav);
+  top: calc(134 * var(--u));
+  display: flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  font-family: var(--font-serif);
+  font-size: calc(24 * var(--u));
+  line-height: calc(40 * var(--u));
   font-weight: 500;
-  font-size: 20px;
-  color: #166C5C;
+  color: var(--hijau);
+  z-index: 5;
+  cursor: default;
+}
+
+.ep-back__ikon {
+  display: inline-flex;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ep-back__ikon:hover {
+  color: var(--hijau-gelap);
+}
+
+.ep-back__teks {
+  cursor: default;
+  user-select: none;
+}
+
+.ep-back svg {
+  width: calc(28 * var(--u));
+  height: calc(28 * var(--u));
+}
+
+/* Foto profil */
+.ep-foto__lingkaran {
+  left: calc(50% - 110 * var(--u));
+  top: calc(131 * var(--u));
+  width: calc(220 * var(--u));
+  height: calc(220 * var(--u));
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.ep-foto__lingkaran svg,
+.ep-foto__lingkaran img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ep-foto__lingkaran img {
+  object-fit: cover;
+}
+
+.ep-foto__lingkaran img[hidden] {
+  display: none;
+}
+
+.ep-foto__lingkaran:focus-visible {
+  outline: calc(3 * var(--u)) solid var(--hijau);
+  outline-offset: calc(4 * var(--u));
+}
+
+.ep-foto__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
   pointer-events: none;
+}
+
+.ep-foto__label {
+  left: 0;
+  width: 100%;
+  top: calc(362 * var(--u));
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: calc(36 * var(--u));
+  line-height: calc(60 * var(--u));
+  font-weight: 400;
+  color: var(--hijau);
+  cursor: pointer;
+}
+
+/* Form */
+.ep-label {
+  left: var(--mx);
+  font-family: var(--font-serif);
+  font-size: calc(23 * var(--u));
+  line-height: calc(34 * var(--u));
+  font-weight: 500;
+  color: var(--hijau);
+}
+
+.ep-label--nama { top: calc(455 * var(--u)); }
+.ep-label--email { top: calc(588 * var(--u)); }
+
+.ep-input {
+  left: var(--mx);
+  top: calc(500 * var(--u));
+  width: calc(100% - 2 * var(--mx));
+  height: calc(68 * var(--u));
+  padding: 0 calc(20 * var(--u));
+  border: 1px solid var(--hijau);
+  border-radius: calc(6 * var(--u));
+  background: #fff;
+  font-family: var(--font-sans);
+  font-size: calc(20 * var(--u));
+  color: #000;
+}
+
+.ep-input::placeholder {
+  color: #000;
+  opacity: 1;
+}
+
+.ep-input:focus {
+  outline: 2px solid var(--hijau);
+  outline-offset: 1px;
+}
+
+.ep-email {
+  left: var(--mx);
+  top: calc(624 * var(--u));
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: calc(23 * var(--u));
+  line-height: calc(36 * var(--u));
+  font-weight: 500;
+  color: #000;
+}
+
+.ep-catatan {
+  left: var(--mx);
+  top: calc(662 * var(--u));
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: calc(16 * var(--u));
+  line-height: calc(24 * var(--u));
+  color: #000;
+}
+
+.ep-error {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: calc(14 * var(--u));
+  line-height: calc(20 * var(--u));
+  color: #b3261e;
+}
+
+.ep-error--nama {
+  left: var(--mx);
+  top: calc(571 * var(--u));
+}
+
+.ep-error--foto {
+  left: 0;
+  width: 100%;
+  text-align: center;
+  top: calc(420 * var(--u));
+}
+
+/* Notifikasi berhasil / gagal */
+.ep-alert {
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(96 * var(--u));
+  max-width: calc(100% - 2 * var(--mx));
+  padding: calc(6 * var(--u)) calc(20 * var(--u));
+  border: 1px solid var(--hijau);
+  border-radius: calc(6 * var(--u));
+  background: #eef6f4;
+  font-family: var(--font-sans);
+  font-size: calc(16 * var(--u));
+  line-height: calc(22 * var(--u));
+  text-align: center;
+  color: var(--hijau);
+  z-index: 5;
+}
+
+.ep-alert--sukses {
+  background: #e3f4ec;
+  color: var(--hijau);
+  border-color: var(--hijau);
+}
+
+.ep-alert--gagal {
+  background: #fdecea;
+  color: #b3261e;
+  border-color: #b3261e;
+}
+
+/* Tombol */
+.ep-btn {
+  left: var(--mx);
+  width: calc(100% - 2 * var(--mx));
+  height: calc(73 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--hijau);
+  border-radius: calc(6 * var(--u));
+  font-family: var(--font-serif);
+  font-size: calc(24 * var(--u));
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.ep-btn--utama {
+  padding-right: calc(11 * var(--u));
+  top: calc(728 * var(--u));
+  background: var(--hijau);
+  color: #fff;
+  box-shadow: 0 calc(3 * var(--u)) calc(4 * var(--u)) rgba(0, 0, 0, 0.25);
+}
+
+.ep-btn--utama:hover {
+  background: var(--hijau-gelap);
+}
+
+.ep-btn--batal {
+  top: calc(846 * var(--u));
+  background: #fff;
+  color: var(--hijau);
+}
+
+.ep-btn--batal:hover {
+  background: #eef6f4;
+}
+
+.ep-btn:focus-visible {
+  outline: calc(3 * var(--u)) solid var(--hijau);
+  outline-offset: calc(3 * var(--u));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ep-btn { transition: none; }
 }
