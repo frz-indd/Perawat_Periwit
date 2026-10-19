@@ -101,7 +101,6 @@ body {
 .category-dropdown > summary i {
     font-size: 15px;
 }
-
 .navbar-menu a:hover,
 .navbar-menu a.active,
 .category-dropdown[open] > summary,

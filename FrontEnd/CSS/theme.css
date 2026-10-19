@@ -287,6 +287,7 @@ summary:focus-visible {
 
 .home-page .hero-content h1 {
     margin-bottom: 10px;
+    font-family: var(--font-card-title);
     font-size: clamp(27px, 3vw, 36px);
 }
 
