@@ -46,6 +46,8 @@ try {
             'rating' => $row['rating'],
             'review_count' => $row['jumlah_ulasan'],
             'harga' => $row['harga_tiket'],
+            'latitude' => $row['latitude'],
+            'longitude' => $row['longitude'],
             'gambar' => $row['gambar']
         ];
     }
@@ -134,12 +136,12 @@ function terpilih($daftar, $nilai)
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link
-        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap"
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="../CSS/hasil_pencarian.css">
-    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
+    <link rel="stylesheet" href="../CSS/hasil_pencarian.css?v=font-map-2">
+    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-3">
 </head>
 
 <body>
@@ -164,7 +166,11 @@ function terpilih($daftar, $nilai)
             </a>
 
             <a href="../auth/Login.php" class="nav-icon" aria-label="Akun">
-                <i class="bi bi-person-circle"></i>
+                <svg class="profile-outline-icon" viewBox="0 0 40 40" aria-hidden="true">
+                    <circle cx="20" cy="20" r="17"></circle>
+                    <circle cx="20" cy="15" r="5"></circle>
+                    <path d="M9 31c1.7-5 5.5-7.5 11-7.5S29.3 26 31 31"></path>
+                </svg>
             </a>
         </div>
 
@@ -328,17 +334,24 @@ function terpilih($daftar, $nilai)
                             </div>
 
                             <div class="location">
-                                <i class="bi bi-geo-alt-fill"></i>
+                                <svg class="map-pin-icon" viewBox="0 0 40 44" aria-hidden="true">
+                                    <ellipse class="map-pin-ground" cx="20" cy="37" rx="14" ry="5"></ellipse>
+                                    <path class="map-pin-ground-right" d="M20 32a14 5 0 0 1 0 10z"></path>
+                                    <path class="map-pin-body" d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z"></path>
+                                    <circle class="map-pin-hole" cx="20" cy="13.5" r="4.8"></circle>
+                                </svg>
 
                                 <span>
                                     <?= htmlspecialchars($item['lokasi'], ENT_QUOTES, 'UTF-8') ?>
                                 </span>
                             </div>
 
-                            <span class="distance">
-                                <?= $item['harga'] > 0
-                                    ? 'Rp ' . number_format($item['harga'], 0, ',', '.')
-                                    : 'Harga belum tersedia' ?>
+                            <span
+                                class="distance"
+                                data-latitude="<?= htmlspecialchars((string) $item['latitude'], ENT_QUOTES, 'UTF-8') ?>"
+                                data-longitude="<?= htmlspecialchars((string) $item['longitude'], ENT_QUOTES, 'UTF-8') ?>"
+                            >
+                                Menghitung jarak...
                             </span>
 
                         </div>
@@ -383,6 +396,72 @@ function terpilih($daftar, $nilai)
             alert('Budget minimum tidak boleh lebih besar dari budget maksimum.');
         }
     });
+
+    const distanceElements = Array.from(
+        document.querySelectorAll('.distance[data-latitude][data-longitude]')
+    );
+    const destinationsWithCoordinates = distanceElements
+        .map(element => ({
+            element,
+            latitudeValue: element.dataset.latitude.trim(),
+            longitudeValue: element.dataset.longitude.trim(),
+            latitude: Number(element.dataset.latitude),
+            longitude: Number(element.dataset.longitude)
+        }))
+        .filter(destination =>
+            destination.latitudeValue !== '' &&
+            destination.longitudeValue !== '' &&
+            Number.isFinite(destination.latitude) &&
+            destination.latitude >= -90 && destination.latitude <= 90 &&
+            Number.isFinite(destination.longitude) &&
+            destination.longitude >= -180 && destination.longitude <= 180
+        );
+
+    distanceElements.forEach(element => {
+        if (!destinationsWithCoordinates.some(destination => destination.element === element)) {
+            element.textContent = 'Jarak tidak tersedia';
+        }
+    });
+
+    if (destinationsWithCoordinates.length > 0) {
+        if (!navigator.geolocation) {
+            destinationsWithCoordinates.forEach(({ element }) => {
+                element.textContent = 'Lokasi tidak didukung';
+            });
+        } else {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const toRadians = degrees => degrees * Math.PI / 180;
+                    const originLatitude = toRadians(position.coords.latitude);
+                    const originLongitude = toRadians(position.coords.longitude);
+
+                    destinationsWithCoordinates.forEach(destination => {
+                        const latitudeDifference =
+                            toRadians(destination.latitude) - originLatitude;
+                        const longitudeDifference =
+                            toRadians(destination.longitude) - originLongitude;
+                        const haversine =
+                            Math.sin(latitudeDifference / 2) ** 2 +
+                            Math.cos(originLatitude) *
+                            Math.cos(toRadians(destination.latitude)) *
+                            Math.sin(longitudeDifference / 2) ** 2;
+                        const distance = 6371 * 2 * Math.atan2(
+                            Math.sqrt(haversine),
+                            Math.sqrt(1 - haversine)
+                        );
+
+                        destination.element.textContent = `${distance.toFixed(2)} KM`;
+                    });
+                },
+                () => {
+                    destinationsWithCoordinates.forEach(({ element }) => {
+                        element.textContent = 'Jarak tidak tersedia';
+                    });
+                },
+                { maximumAge: 300000, timeout: 10000 }
+            );
+        }
+    }
 </script>
 
 </body>

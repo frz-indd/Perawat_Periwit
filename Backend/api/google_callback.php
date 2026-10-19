@@ -23,11 +23,15 @@ googleOauthStartSession();
 $expectedState = $_SESSION["google_oauth_state"] ?? "";
 $expectedNonce = $_SESSION["google_oauth_nonce"] ?? "";
 $codeVerifier = $_SESSION["google_oauth_code_verifier"] ?? "";
+$intent = $_SESSION["google_oauth_intent"] ?? "login";
 unset(
   $_SESSION["google_oauth_state"],
   $_SESSION["google_oauth_nonce"],
-  $_SESSION["google_oauth_code_verifier"]
+  $_SESSION["google_oauth_code_verifier"],
+  $_SESSION["google_oauth_intent"]
 );
+$intent = $intent === "register" ? "register" : "login";
+$authPage = $intent === "register" ? "Register.php" : "Login.php";
 
 $returnedState = $_GET["state"] ?? "";
 if (
@@ -41,7 +45,7 @@ if (
 }
 
 if (isset($_GET["error"])) {
-  header("Location: ../../FrontEnd/auth/Login.php?google=cancelled", true, 303);
+  header("Location: ../../FrontEnd/auth/$authPage?google=cancelled", true, 303);
   exit;
 }
 
@@ -131,6 +135,7 @@ try {
     $statement->bind_result($userId, $userName, $userEmail);
     $userFound = $statement->fetch();
     $statement->close();
+    $providerAccountFound = $userFound;
 
     if (!$userFound) {
       $statement = $conn->prepare(
@@ -141,7 +146,15 @@ try {
       $statement->bind_result($userId, $userName, $userEmail);
       $userFound = $statement->fetch();
       $statement->close();
+    }
 
+    if ($intent === "register" && $userFound) {
+      $conn->rollback();
+      header("Location: ../../FrontEnd/auth/Register.php?google=email_exists", true, 303);
+      exit;
+    }
+
+    if (!$providerAccountFound) {
       if (!$userFound) {
         $statement = $conn->prepare(
           "INSERT INTO `user` (Nama_user, Email, Password) VALUES (?, ?, NULL)"
@@ -175,7 +188,7 @@ try {
   $_SESSION["nama_user"] = $userName;
   $_SESSION["email"] = $userEmail;
 
-  header("Location: ../../FrontEnd/auth/Login.php?google=success", true, 303);
+  header("Location: ../../index.php", true, 303);
   exit;
 } catch (Throwable $exception) {
   error_log($exception->getMessage());

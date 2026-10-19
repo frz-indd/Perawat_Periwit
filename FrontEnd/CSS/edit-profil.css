@@ -8,7 +8,7 @@
 
   --mx-nav: calc(180 * var(--u));
   --font-sans: "Poppins", Arial, sans-serif;
-  --font-serif: "Noto Serif", Georgia, serif;
+  --font-serif: var(--font-card-title);
   --font-logo: "Kaushan Script", "Brush Script MT", cursive;
 }
 

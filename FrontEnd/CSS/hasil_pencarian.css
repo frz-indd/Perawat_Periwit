@@ -14,7 +14,7 @@ html {
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-main);
     background: #ffffff;
     color: #000000;
 }
@@ -42,7 +42,7 @@ body {
 }
 
 .navbar-logo {
-    font-family: 'Dancing Script', cursive;
+    font-family: var(--font-logo);
     font-size: 43px;
     font-weight: 700;
     color: #176f63;
@@ -122,7 +122,7 @@ body {
     border: none;
     outline: none;
     background: transparent;
-    font-family: monospace;
+    font-family: var(--font-mono);
     font-size: 24px;
     color: #111111;
 }
@@ -177,7 +177,7 @@ body {
 }
 
 .filter-title {
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--font-main);
     font-size: 30px;
     font-weight: 700;
     margin-bottom: 29px;
@@ -188,7 +188,7 @@ body {
 }
 
 .filter-group h3 {
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--font-main);
     font-size: 23px;
     font-weight: 700;
     margin-bottom: 7px;
@@ -200,7 +200,7 @@ body {
     gap: 22px;
     margin-bottom: 9px;
     cursor: pointer;
-    font-family: monospace;
+    font-family: var(--font-mono);
     font-size: 17px;
     line-height: 1.45;
 }
@@ -252,7 +252,7 @@ body {
 .budget-labels {
     display: flex;
     gap: 28px;
-    font-family: monospace;
+    font-family: var(--font-mono);
     font-size: 17px;
 }
 
@@ -276,7 +276,7 @@ body {
     padding: 2px 9px;
     background: #176f63;
     color: #ffffff;
-    font-family: monospace;
+    font-family: var(--font-mono);
     font-size: 12px;
 }
 
@@ -344,14 +344,14 @@ body {
 }
 
 .results-heading h1 {
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--font-main);
     font-size: 30px;
     font-weight: 700;
     margin-bottom: 4px;
 }
 
 .results-heading p {
-    font-family: monospace;
+    font-family: var(--font-mono);
     font-size: 18px;
     margin: 0;
 }
@@ -418,7 +418,7 @@ body {
 }
 
 .card-content h2 {
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--font-card-title);
     font-size: 20px;
     font-weight: 700;
     line-height: 1.35;
@@ -444,7 +444,7 @@ body {
     align-items: center;
     gap: 1px;
     color: #ffb800;
-    font-family: Arial, sans-serif;
+    font-family: var(--font-main);
     font-size: 20px;
     letter-spacing: 0;
     white-space: nowrap;
@@ -461,7 +461,7 @@ body {
 }
 
 .review-count {
-    font-family: monospace;
+    font-family: var(--font-mono);
     font-size: 13px;
 }
 
@@ -517,7 +517,7 @@ body {
 
 .empty-results h2 {
     margin: 15px 0 10px;
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--font-main);
     font-size: 25px;
     font-weight: 700;
 }

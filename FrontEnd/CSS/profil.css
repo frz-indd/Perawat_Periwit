@@ -9,8 +9,8 @@ body.halaman-profil {
     --p: min(calc(100vw / 1440), calc((100vh - 83 * var(--u)) / 941));
     --abu-garis: #d0d0d0;
     --bintang: #ffb800;
-    --font-serif: "Noto Serif", Georgia, serif;
-    --font-mono: "Courier Prime", "Courier New", monospace;
+    --font-serif: var(--font-card-title);
+    --font-mono: 'Fragment Mono', 'Courier New', monospace;
 
     margin: 0;
     padding-top: calc(83 * var(--u));
@@ -150,7 +150,12 @@ body.halaman-profil {
     padding-left: calc(103 * var(--p));
 }
 
+<<<<<<< HEAD
 .menu-profil__item {
+=======
+.menu-profil a,
+.menu-profil button {
+>>>>>>> 0032ba2c2e078cad44d663eb788851f4743b496f
     display: flex;
     align-items: center;
     gap: calc(23 * var(--p));
@@ -163,6 +168,7 @@ body.halaman-profil {
     user-select: none;
 }
 
+<<<<<<< HEAD
 .menu-profil__item--logout {
     color: #ff0000;
 }
@@ -172,6 +178,18 @@ body.halaman-profil {
     flex: none;
     width: calc(38 * var(--p));
     height: calc(38 * var(--p));
+=======
+.menu-profil button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+}
+
+.menu-profil a:hover,
+.menu-profil button:hover {
+>>>>>>> 0032ba2c2e078cad44d663eb788851f4743b496f
     color: var(--hijau);
     text-decoration: none;
     transition: opacity 0.15s, transform 0.1s;

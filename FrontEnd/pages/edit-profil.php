@@ -121,13 +121,7 @@ if ($loginEmail) {
 }
 
 $errors = [];
-$sukses = false;
 $gagal  = '';
-
-if (!empty($_SESSION['flash_profil'])) {
-    $sukses = true;
-    unset($_SESSION['flash_profil']);
-}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $namaBaru = trim($_POST['nama_lengkap'] ?? '');
@@ -178,8 +172,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user']['nama'] = $namaBaru;
                 $_SESSION['user']['foto_profil'] = $fotoBaru;
             }
-            $_SESSION['flash_profil'] = 1;
-            header('Location: edit-profil.php');
+            $_SESSION['pesan'] = 'Perubahan profil berhasil disimpan.';
+            header('Location: profil.php');
             exit;
         }
         if ($fileBaru && is_file($fileBaru)) @unlink($fileBaru);
@@ -211,9 +205,15 @@ $srcTampil = $fotoSrc ?: $gravatar;
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<<<<<<< HEAD
   <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261034">
   <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
+=======
+  <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../CSS/edit-profil.css?v=font-map-2">
+  <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-3">
+>>>>>>> 0032ba2c2e078cad44d663eb788851f4743b496f
 </head>
 <body class="halaman-edit-profil">
 
@@ -221,9 +221,9 @@ $srcTampil = $fotoSrc ?: $gravatar;
     <defs>
       <clipPath id="klip-avatar"><circle cx="110" cy="110" r="110"/></clipPath>
       <symbol id="ikon-profil" viewBox="0 0 220 220">
-        <circle cx="110" cy="110" r="102.5" fill="none" stroke="#166d5c" stroke-width="15"/>
-        <circle cx="110" cy="83" r="31" fill="#166d5c"/>
-        <path d="M38 211c2-39 23-66 57-75 9 9 19 13 30 13s21-4 30-13c34 9 55 36 57 75z" fill="#166d5c"/>
+        <circle cx="110" cy="110" r="93.5" fill="none" stroke="#166d5c" stroke-width="11"/>
+        <circle cx="110" cy="82.5" r="27.5" fill="none" stroke="#166d5c" stroke-width="11"/>
+        <path d="M49.5 170.5c9.35-27.5 30.25-41.25 60.5-41.25s51.15 13.75 60.5 41.25" fill="none" stroke="#166d5c" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
       </symbol>
       <symbol id="i-pensil" viewBox="0 0 48 48">
         <path d="M23 7H12A6 6 0 0 0 6 13V36A6 6 0 0 0 12 42H35A6 6 0 0 0 41 36V26" fill="none" stroke="currentColor" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -262,10 +262,10 @@ $srcTampil = $fotoSrc ?: $gravatar;
     </div>
 
     <ul class="kat-menu" id="kategori-menu">
-      <li><a class="kat-item" href="kategori.php?jenis=alam">Wisata Alam &amp; pegunungan</a></li>
-      <li><a class="kat-item" href="kategori.php?jenis=air-curug">Wisata Air &amp; Curug</a></li>
-      <li><a class="kat-item" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-      <li><a class="kat-item" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
+      <li><a class="kat-item" href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a></li>
+      <li><a class="kat-item" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
+      <li><a class="kat-item" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
+      <li><a class="kat-item" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
     </ul>
   </header>
 
@@ -322,7 +322,7 @@ $srcTampil = $fotoSrc ?: $gravatar;
       <p class="ep-email"><?= e($email) ?></p>
       <p class="ep-catatan">Email tidak dapat diubah karena digunakan sebagai identitas akun.</p>
 
-      <button type="submit" class="ep-btn ep-btn--utama">Simpan Perubahan</button>
+      <button href "eksplorMajaKu/FrontEnd/pages/profil.php" type="submit" class="ep-btn ep-btn--utama">Simpan Perubahan</button>
       <a href="profil.php" class="ep-btn ep-btn--batal">Batal</a>
     </main>
   </form>

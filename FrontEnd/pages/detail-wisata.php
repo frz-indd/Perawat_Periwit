@@ -326,12 +326,19 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+<<<<<<< HEAD
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/detail-wisata.css?v=17">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
+=======
+    <!-- edit-profil.css dulu (navbar), detail-wisata.css terakhir -->
+    <link rel="stylesheet" href="../CSS/edit-profil.css?v=font-map-2">
+    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=font-map-2">
+    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-3">
+>>>>>>> 0032ba2c2e078cad44d663eb788851f4743b496f
 </head>
 <body class="halaman-detail">
 
@@ -339,9 +346,9 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         <defs>
             <clipPath id="klip-avatar"><circle cx="110" cy="110" r="110"/></clipPath>
             <symbol id="ikon-profil" viewBox="0 0 220 220">
-                <circle cx="110" cy="110" r="102.5" fill="none" stroke="#166d5c" stroke-width="15"/>
-                <circle cx="110" cy="83" r="31" fill="#166d5c"/>
-                <path d="M38 211c2-39 23-66 57-75 9 9 19 13 30 13s21-4 30-13c34 9 55 36 57 75z" fill="#166d5c"/>
+                <circle cx="110" cy="110" r="93.5" fill="none" stroke="#166d5c" stroke-width="11"/>
+                <circle cx="110" cy="82.5" r="27.5" fill="none" stroke="#166d5c" stroke-width="11"/>
+                <path d="M49.5 170.5c9.35-27.5 30.25-41.25 60.5-41.25s51.15 13.75 60.5 41.25" fill="none" stroke="#166d5c" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
             </symbol>
 
             <symbol id="i-bintang" viewBox="0 0 24 24">
@@ -349,8 +356,9 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             </symbol>
 
             <symbol id="i-lokasi" viewBox="0 0 40 44">
-                <ellipse cx="20" cy="36" rx="13" ry="5" fill="#2fbf6b"/>
-                <path d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z" fill="#f2301d"/>
+                <ellipse cx="20" cy="37" rx="14" ry="5" fill="#45d84f"/>
+                <path d="M20 32a14 5 0 0 1 0 10z" fill="#10b981"/>
+                <path d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z" fill="#ed2118"/>
                 <circle cx="20" cy="13.5" r="4.8" fill="#fff"/>
             </symbol>
 
@@ -442,10 +450,17 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         </div>
 
         <ul class="kat-menu" id="kategori-menu">
+<<<<<<< HEAD
             <li><a class="kat-item" href="kategori.php?jenis=alam">Wisata Alam &amp; pegunungan</a></li>
             <li><a class="kat-item" href="kategori.php?jenis=air-curug">Wisata Air &amp; Curug</a></li>
             <li><a class="kat-item" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
             <li><a class="kat-item" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
+=======
+            <li><a class="kat-item" href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a></li>
+            <li><a class="kat-item" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
+            <li><a class="kat-item" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
+            <li><a class="kat-item" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
+>>>>>>> 0032ba2c2e078cad44d663eb788851f4743b496f
         </ul>
     </header>
 

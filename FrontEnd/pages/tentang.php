@@ -10,6 +10,7 @@ session_start();
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<<<<<<< HEAD
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
@@ -48,6 +49,53 @@ session_start();
             <li><a class="kat-item" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
             <li><a class="kat-item" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
         </ul>
+=======
+    <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Bootstrap CSS & Icons (untuk ikon konten) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- CSS utama (urutan penting: tentang.css paling akhir) -->
+    <link rel="stylesheet" href="../CSS/edit-profil.css?v=font-map-2">
+    <link rel="stylesheet" href="../CSS/tentang.css?v=font-map-2">
+    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-3">
+</head>
+<body class="about-page halaman-tentang">
+
+    <header class="navbar">
+        <div class="navbar-container">
+            <a class="navbar-logo" href="../../index.php">Explore Majaku</a>
+
+            <nav class="navbar-menu" aria-label="Menu utama">
+                <a href="../../index.php">Beranda</a>
+                <details class="category-dropdown">
+                    <summary>Kategori <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+                    <div class="category-menu">
+                        <a href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a>
+                        <a href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a>
+                        <a href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a>
+                        <a href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a>
+                    </div>
+                </details>
+                <a href="tentang.php" class="active" aria-current="page">Tentang</a>
+            </nav>
+
+            <div class="navbar-icons">
+                <a class="profile-icon" href="hasil_pencarian.php" aria-label="Cari">
+                    <i class="bi bi-search nav-search-icon" aria-hidden="true"></i>
+                </a>
+                <a class="profile-icon" href="profil.php" aria-label="Profil">
+                    <svg class="profile-outline-icon" viewBox="0 0 40 40" aria-hidden="true">
+                        <circle cx="20" cy="20" r="17"></circle>
+                        <circle cx="20" cy="15" r="5"></circle>
+                        <path d="M9 31c1.7-5 5.5-7.5 11-7.5S29.3 26 31 31"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+>>>>>>> 0032ba2c2e078cad44d663eb788851f4743b496f
     </header>
 
     <main>
@@ -59,7 +107,7 @@ session_start();
             </div>
             <div class="about-hero-shade"></div>
             <div class="about-hero-copy">
-                <h1>EXPLORE MAJAKU</h1>
+                <h1>Explore MajaKu</h1>
                 <p>Solusi Terbaik untuk menemukan destinasi wisata menarik di wilayah<br class="br-d">majalengka dan kuningan</p>
             </div>
         </section>
@@ -114,6 +162,7 @@ session_start();
             </section>
         </section>
     </main>
+<<<<<<< HEAD
 
     <script>
         (function () {
@@ -151,5 +200,7 @@ session_start();
             window.addEventListener('scroll', tutup, { passive: true });
         })();
     </script>
+=======
+>>>>>>> 0032ba2c2e078cad44d663eb788851f4743b496f
 </body>
 </html>

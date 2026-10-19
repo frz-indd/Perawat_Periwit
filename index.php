@@ -22,17 +22,17 @@ $destinasiLain = array_slice($wisata, 4, 4);
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <!-- CSS Beranda -->
-    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=20261016">
-    <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=20261019-2">
+    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=font-map-2">
+    <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=shared-layout-3">
 </head>
 
-<body>
+<body class="home-page">
 
     <!-- HEADER -->
     <header class="navbar">
@@ -47,10 +47,10 @@ $destinasiLain = array_slice($wisata, 4, 4);
                 <details class="category-dropdown">
                     <summary>Kategori <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
                     <div class="category-menu">
-                        <a href="FrontEnd/pages/kategori.php?kategori=alam">Alam</a>
-                        <a href="FrontEnd/pages/kategori.php?kategori=air-curug">Air &amp; Curug</a>
-                        <a href="FrontEnd/pages/kategori.php?kategori=buatan-kuliner">Buatan &amp; Kuliner</a>
-                        <a href="FrontEnd/pages/kategori.php?kategori=sejarah-budaya">Sejarah &amp; Budaya</a>
+                        <a href="FrontEnd/pages/kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a>
+                        <a href="FrontEnd/pages/kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a>
+                        <a href="FrontEnd/pages/kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a>
+                        <a href="FrontEnd/pages/kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a>
                     </div>
                 </details>
                 <a href="FrontEnd/pages/tentang.php">Tentang</a>
@@ -61,7 +61,11 @@ $destinasiLain = array_slice($wisata, 4, 4);
                 <a href="<?= $isLoggedIn ? 'FrontEnd/pages/profil.php' : 'FrontEnd/auth/Login.php' ?>"
                    class="profile-icon"
                    aria-label="<?= $isLoggedIn ? 'Profil' : 'Login' ?>">
-                    <i class="bi bi-person-circle"></i>
+                    <svg class="profile-outline-icon" viewBox="0 0 40 40" aria-hidden="true">
+                        <circle cx="20" cy="20" r="17"></circle>
+                        <circle cx="20" cy="15" r="5"></circle>
+                        <path d="M9 31c1.7-5 5.5-7.5 11-7.5S29.3 26 31 31"></path>
+                    </svg>
                 </a>
 
                 <?php if (!$isLoggedIn): ?>
@@ -138,13 +142,20 @@ $destinasiLain = array_slice($wisata, 4, 4);
                                 <?php endif; ?>
                             </div>
                             <div class="location">
-                                <i class="bi bi-geo-alt-fill"></i>
+                                <svg class="map-pin-icon" viewBox="0 0 40 44" aria-hidden="true">
+                                    <ellipse class="map-pin-ground" cx="20" cy="37" rx="14" ry="5"></ellipse>
+                                    <path class="map-pin-ground-right" d="M20 32a14 5 0 0 1 0 10z"></path>
+                                    <path class="map-pin-body" d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z"></path>
+                                    <circle class="map-pin-hole" cx="20" cy="13.5" r="4.8"></circle>
+                                </svg>
                                 <span><?= htmlspecialchars($destination['wilayah'], ENT_QUOTES, 'UTF-8'); ?></span>
                             </div>
-                            <span class="distance">
-                                <?= $destination['harga_tiket'] > 0
-                                    ? 'Rp ' . number_format($destination['harga_tiket'], 0, ',', '.')
-                                    : 'Harga belum tersedia'; ?>
+                            <span
+                                class="distance"
+                                data-latitude="<?= htmlspecialchars((string) ($destination['latitude'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                                data-longitude="<?= htmlspecialchars((string) ($destination['longitude'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                            >
+                                Menghitung jarak...
                             </span>
                         </div>
                     </a>
@@ -173,13 +184,20 @@ $destinasiLain = array_slice($wisata, 4, 4);
                                 <?php endif; ?>
                             </div>
                             <div class="location">
-                                <i class="bi bi-geo-alt-fill"></i>
+                                <svg class="map-pin-icon" viewBox="0 0 40 44" aria-hidden="true">
+                                    <ellipse class="map-pin-ground" cx="20" cy="37" rx="14" ry="5"></ellipse>
+                                    <path class="map-pin-ground-right" d="M20 32a14 5 0 0 1 0 10z"></path>
+                                    <path class="map-pin-body" d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z"></path>
+                                    <circle class="map-pin-hole" cx="20" cy="13.5" r="4.8"></circle>
+                                </svg>
                                 <span><?= htmlspecialchars($destination['wilayah'], ENT_QUOTES, 'UTF-8'); ?></span>
                             </div>
-                            <span class="distance">
-                                <?= $destination['harga_tiket'] > 0
-                                    ? 'Rp ' . number_format($destination['harga_tiket'], 0, ',', '.')
-                                    : 'Harga belum tersedia'; ?>
+                            <span
+                                class="distance"
+                                data-latitude="<?= htmlspecialchars((string) ($destination['latitude'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                                data-longitude="<?= htmlspecialchars((string) ($destination['longitude'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                            >
+                                Menghitung jarak...
                             </span>
                         </div>
                     </a>
@@ -201,6 +219,74 @@ $destinasiLain = array_slice($wisata, 4, 4);
                 searchInput.focus();
             }
         });
+
+        const distanceElements = Array.from(
+            document.querySelectorAll('.distance[data-latitude][data-longitude]')
+        );
+        const destinationsWithCoordinates = distanceElements
+            .map(element => ({
+                element,
+                latitude: Number(element.dataset.latitude),
+                longitude: Number(element.dataset.longitude)
+            }))
+            .filter(destination =>
+                elementHasCoordinates(destination.element) &&
+                Number.isFinite(destination.latitude) &&
+                destination.latitude >= -90 && destination.latitude <= 90 &&
+                Number.isFinite(destination.longitude) &&
+                destination.longitude >= -180 && destination.longitude <= 180
+            );
+
+        distanceElements.forEach(element => {
+            if (!destinationsWithCoordinates.some(destination => destination.element === element)) {
+                element.textContent = 'Jarak tidak tersedia';
+            }
+        });
+
+        function elementHasCoordinates(element) {
+            return element.dataset.latitude.trim() !== '' &&
+                element.dataset.longitude.trim() !== '';
+        }
+
+        if (destinationsWithCoordinates.length > 0) {
+            if (!navigator.geolocation) {
+                destinationsWithCoordinates.forEach(({ element }) => {
+                    element.textContent = 'Lokasi tidak didukung';
+                });
+            } else {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const toRadians = degrees => degrees * Math.PI / 180;
+                        const originLatitude = toRadians(position.coords.latitude);
+                        const originLongitude = toRadians(position.coords.longitude);
+
+                        destinationsWithCoordinates.forEach(destination => {
+                            const latitudeDifference =
+                                toRadians(destination.latitude) - originLatitude;
+                            const longitudeDifference =
+                                toRadians(destination.longitude) - originLongitude;
+                            const haversine =
+                                Math.sin(latitudeDifference / 2) ** 2 +
+                                Math.cos(originLatitude) *
+                                Math.cos(toRadians(destination.latitude)) *
+                                Math.sin(longitudeDifference / 2) ** 2;
+                            const distance = 6371 * 2 * Math.atan2(
+                                Math.sqrt(haversine),
+                                Math.sqrt(1 - haversine)
+                            );
+
+                            destination.element.textContent = `${distance.toFixed(2)} KM`;
+                        });
+                    },
+                    () => {
+                        destinationsWithCoordinates.forEach(({ element }) => {
+                            element.textContent = 'Jarak tidak tersedia';
+                        });
+                    },
+                    { maximumAge: 300000, timeout: 10000 }
+                );
+            }
+        }
     </script>
 
 </body>

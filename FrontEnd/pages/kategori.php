@@ -8,13 +8,25 @@ $categoryRoutes = [
     "buatan-kuliner" => 3,
     "sejarah-budaya" => 2
 ];
-$categorySlugs = array_flip($categoryRoutes);
+$categoryDisplayNames = [
+    1 => "Wisata Alam & Pegunungan",
+    4 => "Wisata Air & Curug",
+    3 => "Wisata Buatan & Kuliner",
+    2 => "Wisata Sejarah & Budaya"
+];
+$categoryHeroNames = [
+    1 => "Wisata Alam dan Pegunungan",
+    4 => "Wisata Air dan Curug",
+    3 => "Wisata Buatan dan Kuliner",
+    2 => "Wisata Sejarah dan Budaya"
+];
 $categoryKey = $_GET["kategori"] ?? "alam";
 if (!is_string($categoryKey) || !isset($categoryRoutes[$categoryKey])) {
     $categoryKey = "alam";
 }
 
 $categories = fetchActiveCategories($conn);
+$availableCategoryIds = array_map('intval', array_column($categories, "Id_kategori"));
 $categoryId = $categoryRoutes[$categoryKey];
 $category = null;
 $keyword = isset($_GET["keyword"]) && is_string($_GET["keyword"])
@@ -45,6 +57,8 @@ if ($category === null) {
         "id_kategori" => $categoryId
     ]);
 }
+$categoryName = $categoryDisplayNames[$categoryId] ?? $category["nama_kategori"];
+$categoryHeroName = $categoryHeroNames[$categoryId] ?? $categoryName;
 
 $heroImageFallbacks = [
     1 => [
@@ -97,13 +111,13 @@ function escapeHtml(string $value): string
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= escapeHtml($category['nama_kategori']); ?> | Explore Majaku</title>
+    <title><?= escapeHtml($categoryName); ?> | Explore Majaku</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../CSS/kategori.css?v=20261016">
-    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
+    <link rel="stylesheet" href="../CSS/kategori.css?v=category-fonts-2">
+    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-3">
 </head>
 <body>
     <header class="site-header">
@@ -114,11 +128,10 @@ function escapeHtml(string $value): string
                 <details class="category-dropdown">
                     <summary class="active">kategori <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
                     <div class="category-nav">
-                        <?php foreach ($categories as $navigationCategory): ?>
-                            <?php $slug = $categorySlugs[$navigationCategory["Id_kategori"]] ?? null; ?>
-                            <?php if ($slug !== null): ?>
+                        <?php foreach ($categoryRoutes as $slug => $navigationCategoryId): ?>
+                            <?php if (in_array($navigationCategoryId, $availableCategoryIds, true)): ?>
                                 <a href="kategori.php?kategori=<?= escapeHtml($slug); ?>"<?= $categoryKey === $slug ? ' aria-current="page"' : ''; ?>>
-                                    <?= escapeHtml($navigationCategory["nama_kategori"]); ?>
+                                    <?= escapeHtml($categoryDisplayNames[$navigationCategoryId]); ?>
                                 </a>
                             <?php endif; ?>
                         <?php endforeach; ?>
@@ -134,7 +147,7 @@ function escapeHtml(string $value): string
     </header>
 
     <main>
-        <section class="hero" aria-label="<?= escapeHtml($category['nama_kategori']); ?>">
+        <section class="hero" aria-label="<?= escapeHtml($categoryName); ?>">
             <div class="hero-images" aria-hidden="true">
                 <?php foreach ($heroImages as $heroImage): ?>
                     <img src="../../<?= escapeHtml($heroImage); ?>" alt="">
@@ -142,7 +155,7 @@ function escapeHtml(string $value): string
             </div>
             <div class="hero-shade"></div>
             <div class="hero-copy">
-                <h1><?= escapeHtml(mb_strtoupper($category['nama_kategori'], 'UTF-8')); ?></h1>
+                <h1><?= escapeHtml(mb_strtoupper($categoryHeroName, 'UTF-8')); ?></h1>
                 <p><?= escapeHtml($category['deskripsi'] ?? ''); ?></p>
             </div>
         </section>
@@ -161,7 +174,7 @@ function escapeHtml(string $value): string
                 <button type="submit" aria-label="Cari"><i class="bi bi-search" aria-hidden="true"></i></button>
             </form>
 
-            <h2><?= escapeHtml($category['nama_kategori']); ?></h2>
+            <h2><?= escapeHtml($categoryName); ?></h2>
             <?php if ($destinations !== []): ?>
                 <div class="destination-grid">
                     <?php foreach ($destinations as $destination): ?>
@@ -183,7 +196,12 @@ function escapeHtml(string $value): string
                                     <?php endif; ?>
                                 </div>
                                 <p class="location">
-                                    <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
+                                    <svg class="map-pin-icon" viewBox="0 0 40 44" aria-hidden="true">
+                                        <ellipse class="map-pin-ground" cx="20" cy="37" rx="14" ry="5"></ellipse>
+                                        <path class="map-pin-ground-right" d="M20 32a14 5 0 0 1 0 10z"></path>
+                                        <path class="map-pin-body" d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z"></path>
+                                        <circle class="map-pin-hole" cx="20" cy="13.5" r="4.8"></circle>
+                                    </svg>
                                     <span><?= escapeHtml($destination['wilayah']); ?></span>
                                 </p>
                                 <small class="distance">
