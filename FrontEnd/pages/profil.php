@@ -234,32 +234,19 @@ if ($loginEmail) {
     <title>Profil | Explore Majaku</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<<<<<<< HEAD
-    <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261018">
-    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-    <link rel="stylesheet" href="../CSS/profil.css?v=18">
-=======
     <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../CSS/edit-profil.css?v=font-map-2">
-    <link rel="stylesheet" href="../CSS/profil.css?v=font-map-2">
-    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-3">
->>>>>>> 0032ba2c2e078cad44d663eb788851f4743b496f
+    <link rel="stylesheet" href="../CSS/edit-profil.css?v=shared-layout-4">
+    <link rel="stylesheet" href="../CSS/profil.css?v=shared-layout-4">
+    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
 </head>
 <body class="halaman-profil">
     <svg class="sprite" aria-hidden="true">
         <defs>
             <clipPath id="klip-dalam"><circle cx="110" cy="110" r="103"/></clipPath>
             <symbol id="ikon-profil" viewBox="0 0 220 220">
-<<<<<<< HEAD
-                <circle cx="110" cy="110" r="102.5" fill="none" stroke="#166d5c" stroke-width="15"/>
-                <circle cx="110" cy="89" r="31" fill="none" stroke="#166d5c" stroke-width="14"/>
-                <path d="M38 215c2-39 23-66 57-75 9 9 19 13 30 13s21-4 30-13c34 9 55 36 57 75z" fill="none" stroke="#166d5c" stroke-width="14" stroke-linejoin="round" clip-path="url(#klip-dalam)"/>
-=======
                 <circle cx="110" cy="110" r="93.5" fill="none" stroke="#166d5c" stroke-width="11"/>
                 <circle cx="110" cy="82.5" r="27.5" fill="none" stroke="#166d5c" stroke-width="11"/>
                 <path d="M49.5 170.5c9.35-27.5 30.25-41.25 60.5-41.25s51.15 13.75 60.5 41.25" fill="none" stroke="#166d5c" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
->>>>>>> 0032ba2c2e078cad44d663eb788851f4743b496f
             </symbol>
             <symbol id="i-bintang" viewBox="0 0 24 24">
                 <path d="M12 1.8l3.1 6.6 7.2.9-5.3 4.9 1.4 7.1L12 17.7l-6.4 3.6 1.4-7.1L1.7 9.3l7.2-.9L12 1.8z"/>
@@ -315,17 +302,10 @@ if ($loginEmail) {
             </a>
         </div>
         <ul class="kat-menu" id="kategori-menu">
-<<<<<<< HEAD
-            <li><a class="kat-item" href="kategori.php?jenis=alam">Wisata Alam &amp; pegunungan</a></li>
-            <li><a class="kat-item" href="kategori.php?jenis=air-curug">Wisata Air &amp; Curug</a></li>
-            <li><a class="kat-item" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-            <li><a class="kat-item" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
-=======
             <li><a class="kat-item" href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a></li>
             <li><a class="kat-item" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
             <li><a class="kat-item" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
             <li><a class="kat-item" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
->>>>>>> 0032ba2c2e078cad44d663eb788851f4743b496f
         </ul>
     </header>
 

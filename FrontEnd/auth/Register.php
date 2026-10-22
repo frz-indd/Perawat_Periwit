@@ -25,8 +25,8 @@
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="../CSS/auth.css?v=font-map-2">
-    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-3">
+    <link rel="stylesheet" href="../CSS/auth.css?v=shared-layout-4">
+    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
 </head>
 
 <body>

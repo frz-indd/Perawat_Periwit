@@ -22,11 +22,7 @@ body.halaman-tentang {
     font-family: var(--font-main);
     overflow-y: auto !important;
     height: auto !important;
-<<<<<<< HEAD
-    padding-top: calc(82 * var(--u));
-=======
-    padding-top: 0;
->>>>>>> 0032ba2c2e078cad44d663eb788851f4743b496f
+    padding-top: var(--compact-header-height, 68px);
 }
 
 .about-page {
@@ -445,12 +441,6 @@ body.halaman-tentang .kat-menu a.kat-item:focus {
     line-height: calc(30 * var(--u));
 }
 
-<<<<<<< HEAD
-=======
-/* =====================================================
-   HP (di bawah 768px): susunan ditumpuk, ukuran px biasa
-   ===================================================== */
->>>>>>> 0032ba2c2e078cad44d663eb788851f4743b496f
 @media (max-width: 767px) {
     .br-d {
         display: none;

@@ -10,6 +10,7 @@
     --theme-page: #f7f9f8;
     --theme-radius: 14px;
     --theme-shadow: 0 8px 24px rgba(22, 55, 44, 0.09);
+    --compact-header-height: 68px;
     --font-logo: 'Kaushan Script', cursive;
     --font-main: 'Poppins', Arial, sans-serif;
     --font-form: 'Inter', Arial, sans-serif;
@@ -17,6 +18,15 @@
     --font-card-title: 'Frank Ruhl Libre', Georgia, serif;
     --font-sans: var(--font-main);
     --font-serif: var(--font-card-title);
+    --primary: var(--theme-green);
+    --button: var(--theme-green);
+    --button-hover: var(--theme-green-dark);
+    --text: var(--theme-ink);
+    --green: var(--theme-green);
+    --hijau: var(--theme-green);
+    --hijau-gelap: var(--theme-green-dark);
+    --hijau-tua: var(--theme-green);
+    --hijau-tombol: var(--theme-green);
 }
 
 html {
@@ -923,6 +933,15 @@ body.about-page .about-hero-copy h1 {
         min-height: 0;
     }
 
+    body.halaman-tentang,
+    body.halaman-detail {
+        padding-top: var(--compact-header-height);
+    }
+
+    body.halaman-detail .hero-wisata {
+        top: var(--compact-header-height);
+    }
+
     .auth-image-section {
         background-position: center 55%;
     }
@@ -1057,5 +1076,423 @@ body.about-page .about-hero-copy h1 {
     *::after {
         scroll-behavior: auto !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+.auth-header {
+    height: 68px;
+}
+
+.brand-name {
+    font-size: clamp(27px, 2.3vw, 32px);
+}
+
+.auth-wrapper {
+    height: calc(100vh - 68px);
+}
+
+.auth-input {
+    border-color: var(--theme-border);
+    border-radius: 8px;
+    color: var(--theme-ink);
+}
+
+.auth-input::placeholder {
+    color: var(--theme-muted);
+}
+
+.ep-navbar {
+    position: fixed;
+    height: 68px;
+    box-shadow: 0 2px 12px rgba(22, 55, 44, 0.09);
+}
+
+.ep-navbar__inner {
+    display: flex;
+    align-items: center;
+    width: min(1200px, calc(100% - 48px));
+    margin: 0 auto;
+}
+
+.ep-navbar a {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.ep-logo {
+    font-size: clamp(27px, 2.3vw, 32px);
+    line-height: 1.2;
+}
+
+.ep-menu {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    gap: clamp(22px, 3vw, 44px);
+    margin-left: auto;
+}
+
+.ep-menu a {
+    font-family: var(--font-main);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.ep-menu__beranda,
+.ep-menu__kategori,
+.ep-menu__tentang {
+    left: auto;
+}
+
+.ep-ikon {
+    top: auto;
+    width: 32px;
+    height: 32px;
+    margin-left: 16px;
+}
+
+body.halaman-tentang {
+    padding-top: 68px;
+}
+
+body.halaman-profil {
+    padding-top: 68px;
+    height: 100vh !important;
+}
+
+body.halaman-profil .halaman {
+    height: calc(100vh - 68px);
+}
+
+body.halaman-detail {
+    padding-top: 68px;
+    --halaman-bg: var(--theme-page);
+    --hijau-tua: var(--theme-green);
+    --hijau-tombol: var(--theme-green);
+}
+
+body.halaman-detail .hero-wisata {
+    top: 68px;
+}
+
+@media (max-width: 767px) {
+    :root {
+        --compact-header-height: 88px;
+    }
+
+    .navbar,
+    .site-header {
+        height: auto;
+        min-height: 68px;
+    }
+
+    .auth-header {
+        height: 68px;
+        min-height: 68px;
+    }
+
+    .ep-navbar {
+        height: auto;
+        min-height: var(--compact-header-height);
+    }
+
+    .navbar-container,
+    .main-nav,
+    .ep-navbar__inner {
+        width: calc(100% - 32px);
+    }
+
+    .main-nav {
+        min-height: 68px;
+        height: auto;
+        flex-wrap: wrap;
+        row-gap: 6px;
+        padding: 10px 0;
+    }
+
+    .main-nav .brand {
+        order: 0;
+    }
+
+    .main-nav .nav-icons {
+        order: 2;
+        margin-left: auto;
+    }
+
+    .main-nav .nav-links {
+        order: 3;
+        width: 100%;
+        height: auto;
+        justify-content: center;
+        gap: 18px;
+        margin-left: 0;
+    }
+
+    .ep-navbar__inner {
+        min-height: var(--compact-header-height);
+        flex-wrap: wrap;
+        row-gap: 8px;
+        padding: 8px 0;
+    }
+
+    .ep-logo {
+        order: 0;
+    }
+
+    .ep-menu {
+        order: 3;
+        width: 100%;
+        height: auto;
+        justify-content: center;
+        gap: 18px;
+        margin-left: 0;
+    }
+
+    .ep-ikon {
+        order: 2;
+        width: 28px;
+        height: 28px;
+        margin-left: 12px;
+    }
+
+    .auth-wrapper {
+        height: auto;
+        min-height: 0;
+    }
+
+    body.halaman-profil {
+        height: auto !important;
+        min-height: 100vh;
+        padding-top: var(--compact-header-height);
+        overflow: visible !important;
+    }
+
+    body.halaman-profil .halaman {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr);
+        height: auto;
+        min-height: calc(100vh - var(--compact-header-height));
+    }
+
+    body.halaman-profil .sidebar {
+        min-height: 0;
+        padding: 22px 18px 20px;
+        overflow: visible;
+    }
+
+    body.halaman-profil .sidebar::after {
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: auto;
+        height: 1px;
+    }
+
+    body.halaman-profil .avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    body.halaman-profil .nama {
+        margin-top: 10px;
+        font-size: 24px;
+    }
+
+    body.halaman-profil .email {
+        margin-top: 4px;
+        font-size: 14px;
+    }
+
+    body.halaman-profil .menu-profil {
+        flex-direction: row;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 18px;
+        padding-left: 0;
+    }
+
+    body.halaman-profil .menu-profil__item {
+        gap: 8px;
+        font-size: 13px;
+    }
+
+    body.halaman-profil .menu-profil__ikon {
+        width: 24px;
+        height: 24px;
+    }
+
+    body.halaman-profil .konten {
+        height: auto;
+        padding: 24px 16px 36px;
+        overflow: visible;
+    }
+
+    body.halaman-profil .konten__judul {
+        margin: 0 0 18px;
+        font-size: 26px;
+    }
+
+    body.halaman-profil .kartu {
+        height: auto;
+        min-height: 126px;
+        gap: 14px;
+        margin-bottom: 16px;
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    body.halaman-profil .kartu__tautan,
+    body.halaman-profil .kartu__foto {
+        width: 112px;
+        height: 100px;
+        flex-basis: 112px;
+        border-radius: 9px;
+    }
+
+    body.halaman-profil .kartu__isi {
+        padding-top: 4px;
+    }
+
+    body.halaman-profil .kartu__judul {
+        font-size: 17px;
+        white-space: normal;
+    }
+
+    body.halaman-profil .rating__ulasan,
+    body.halaman-profil .lokasi p {
+        font-size: 11px;
+    }
+
+    body.halaman-profil .rating {
+        height: auto;
+        gap: 6px;
+        margin-top: 6px;
+    }
+
+    body.halaman-profil .bintang {
+        gap: 4px;
+    }
+
+    body.halaman-profil .bintang svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    body.halaman-profil .bintang svg.setengah {
+        width: 8px;
+    }
+
+    body.halaman-profil .rating__ulasan {
+        font-size: 11px;
+    }
+
+    body.halaman-profil .lokasi {
+        gap: 6px;
+        margin-top: 6px;
+    }
+
+    body.halaman-profil .lokasi__ikon {
+        width: 18px;
+        height: 20px;
+    }
+
+    body.halaman-profil .lokasi p {
+        line-height: 1.3;
+    }
+
+    body.halaman-profil .hapus-form {
+        top: 10px;
+        right: 10px;
+        width: 22px;
+        height: 22px;
+    }
+
+    body.halaman-edit-profil {
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    body.halaman-edit-profil form {
+        padding-top: var(--compact-header-height);
+    }
+
+    body.halaman-edit-profil .ep-stage {
+        display: flex;
+        width: min(100%, 560px);
+        height: auto;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        margin: 0 auto;
+        padding: 18px 16px 36px;
+    }
+
+    body.halaman-edit-profil .ep-stage > * {
+        position: static;
+        transform: none;
+    }
+
+    body.halaman-edit-profil .ep-foto__input {
+        display: none;
+    }
+
+    body.halaman-edit-profil .ep-back {
+        align-self: flex-start;
+        font-size: 15px;
+    }
+
+    body.halaman-edit-profil .ep-alert {
+        width: 100%;
+        max-width: none;
+    }
+
+    body.halaman-edit-profil .ep-foto__lingkaran {
+        width: 132px;
+        height: 132px;
+        align-self: center;
+        margin-top: 8px;
+    }
+
+    body.halaman-edit-profil .ep-foto__label {
+        width: auto;
+        height: auto;
+        font-size: 20px;
+        line-height: 1.4;
+    }
+
+    body.halaman-edit-profil .ep-label {
+        font-size: 15px;
+        line-height: 1.4;
+    }
+
+    body.halaman-edit-profil .ep-input {
+        width: 100%;
+        height: 46px;
+        padding: 0 12px;
+        font-size: 15px;
+    }
+
+    body.halaman-edit-profil .ep-email,
+    body.halaman-edit-profil .ep-catatan,
+    body.halaman-edit-profil .ep-error {
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    body.halaman-edit-profil .ep-btn {
+        width: 100%;
+        height: 48px;
+        margin-top: 8px;
+        font-size: 15px;
     }
 }

@@ -30,17 +30,10 @@ body.halaman-detail {
     --kartu-garis: #e3e7e3;
     --bar-track: #dbdcdb;
     --bintang: #ffc107;
-<<<<<<< HEAD
     --foto-kosong: #d9d9d9;
-    --halaman-bg: #fff;
-    --font-serif: "Noto Serif", Georgia, serif;
-    --font-mono: "Courier Prime", "Courier New", monospace;
-=======
-    --foto-kosong: #d9d9d9;                /* latar foto belum tersedia */
-    --halaman-bg: #f5f5f5;
+    --halaman-bg: var(--theme-page);
     --font-serif: var(--font-card-title);
     --font-mono: 'Fragment Mono', 'Courier New', monospace;
->>>>>>> 0032ba2c2e078cad44d663eb788851f4743b496f
 
     --t-body: clamp(14px, 1.55vw, 17px);
     --t-sub: clamp(13px, 1.45vw, 16px);

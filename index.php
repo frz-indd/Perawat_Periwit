@@ -29,7 +29,7 @@ $destinasiLain = array_slice($wisata, 4, 4);
 
     <!-- CSS Beranda -->
     <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=font-map-2">
-    <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=shared-layout-3">
+    <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=shared-layout-4">
 </head>
 
 <body class="home-page">
