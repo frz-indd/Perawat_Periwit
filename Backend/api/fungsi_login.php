@@ -35,8 +35,89 @@ if (($_SERVER["REQUEST_METHOD"] ?? "") !== "POST") {
 
 /* INPUT */
 
+$role = strtolower(trim((string) ($_POST["role"] ?? "user")));
 $identity = trim((string) ($_POST["email"] ?? $_POST["Email"] ?? ""));
+$username = trim((string) ($_POST["username"] ?? $_POST["Username"] ?? ""));
 $password = $_POST["password"] ?? $_POST["Password"] ?? null;
+
+/* LOGIN ADMIN */
+
+if ($role === "admin") {
+    if ($username === "") {
+        $respond(422, ["status" => "validation_error", "message" => "Username wajib diisi."]);
+    }
+    if (strlen($username) > 255) {
+        $respond(422, ["status" => "validation_error", "message" => "Username tidak valid."]);
+    }
+    if (!is_string($password) || $password === "") {
+        $respond(422, ["status" => "validation_error", "message" => "Password wajib diisi."]);
+    }
+
+    try {
+        require_once __DIR__ . "/../database/koneksi.php";
+        $statement = $conn->prepare(
+            "SELECT Id_admin, Nama_admin, Username, Password
+             FROM `admin` WHERE Username = ? LIMIT 1"
+        );
+        $statement->bind_param("s", $username);
+        $statement->execute();
+        $statement->bind_result($adminId, $adminName, $storedUsername, $passwordHash);
+        $foundAdmin = $statement->fetch();
+        $statement->close();
+
+        if (!$foundAdmin) {
+            $respond(401, ["status" => "invalid_credentials", "message" => "Username atau password salah."]);
+        }
+
+        $passwordInfo = is_string($passwordHash) ? password_get_info($passwordHash) : ["algo" => null];
+        $isPasswordHash = !empty($passwordInfo["algo"]);
+        $passwordMatches = $isPasswordHash
+            ? password_verify($password, $passwordHash)
+            : (is_string($passwordHash) && hash_equals($passwordHash, $password));
+        if (!$passwordMatches) {
+            $respond(401, ["status" => "invalid_credentials", "message" => "Username atau password salah."]);
+        }
+
+        // Migrasi password lama berbentuk teks biasa menjadi hash setelah login berhasil.
+        if (!$isPasswordHash || password_needs_rehash($passwordHash, PASSWORD_DEFAULT)) {
+            $newHash = password_hash($password, PASSWORD_DEFAULT);
+            if ($newHash !== false) {
+                $upgrade = $conn->prepare("UPDATE `admin` SET Password = ? WHERE Id_admin = ?");
+                $upgrade->bind_param("si", $newHash, $adminId);
+                $upgrade->execute();
+                $upgrade->close();
+            }
+        }
+
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_set_cookie_params([
+                "lifetime" => 0, "path" => "/",
+                "secure" => (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off"),
+                "httponly" => true, "samesite" => "Lax"
+            ]);
+            session_start();
+        }
+        session_regenerate_id(true);
+        unset($_SESSION["id_user"], $_SESSION["nama_user"], $_SESSION["email"]);
+        $_SESSION["id_admin"] = (int) $adminId;
+        $_SESSION["nama_admin"] = $adminName;
+        $_SESSION["username_admin"] = $storedUsername;
+        $_SESSION["role"] = "admin";
+
+        $respond(200, [
+            "status" => "success", "message" => "Login admin berhasil.",
+            "data" => ["id_admin" => (int) $adminId, "nama" => $adminName,
+                "username" => $storedUsername, "role" => "admin"]
+        ]);
+    } catch (Throwable $exception) {
+        error_log("Admin login error: " . $exception->getMessage());
+        $respond(500, ["status" => "server_error", "message" => "Terjadi kesalahan pada server. Silakan coba lagi."]);
+    }
+}
+
+if ($role !== "user") {
+    $respond(422, ["status" => "validation_error", "message" => "Role login tidak valid."]);
+}
 
 if ($identity === "" && (!is_string($password) || trim($password) === "")) {
     $respond(422, [
@@ -191,9 +272,11 @@ try {
 
     session_regenerate_id(true);
 
+    unset($_SESSION["id_admin"], $_SESSION["nama_admin"], $_SESSION["username_admin"]);
     $_SESSION["id_user"] = (int) $userId;
     $_SESSION["nama_user"] = $name;
     $_SESSION["email"] = $storedEmail;
+    $_SESSION["role"] = "user";
 
     $respond(200, [
         "status" => "success",
