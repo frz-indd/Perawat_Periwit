@@ -95,17 +95,18 @@ $destinasiLain = array_slice($wisata, 4, 4);
 
             <form
                 class="search-box"
-                action="FrontEnd/pages/hasil_pencarian.php"
+                action="search"
                 method="GET"
                 id="searchForm"
             >
 
                 <input
                     type="text"
-                    name="keyword"
+                    name="q"
                     id="searchInput"
                     placeholder="Cari destinasi,kata kunci atau lokasi"
                     aria-label="Cari destinasi wisata"
+                    minlength="2"
                     required
                 >
 
@@ -117,6 +118,18 @@ $destinasiLain = array_slice($wisata, 4, 4);
 
         </div>
     </section>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function (event) {
+            const input = document.getElementById('searchInput');
+            if (input.value.trim().length < 2) {
+                event.preventDefault();
+                input.setCustomValidity('Masukkan minimal 2 karakter untuk mencari.');
+                input.reportValidity();
+                input.addEventListener('input', () => input.setCustomValidity(''), { once: true });
+            }
+        });
+    </script>
 
 
     <!-- KONTEN UTAMA -->

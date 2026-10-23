@@ -160,6 +160,22 @@ ID nonpositif atau bukan bilangan bulat menghasilkan `400 invalid_category_id`. 
 
 Collection Postman yang sama juga menguji `GET /categories`, filter wisata, format ID invalid, serta `GET /Backend/api/wisata.php` untuk memastikan ID dan foto ikut dikirim; request kategori tidak memerlukan autentikasi.
 
+## API Pencarian Destinasi
+
+Halaman pencarian tersedia di `/search?q=...` dan mengambil hasil dari endpoint berikut:
+
+```text
+GET /api/destinations/search?q=...
+```
+
+Contoh URL lokal: `http://localhost/eksplorMajaKu/api/destinations/search?q=curug`.
+Parameter `q` wajib berisi minimal 2 karakter. Respons sukses menggunakan format
+`{"status":"success","data":[...]}`; jika tidak ada kecocokan, `data` berupa array kosong.
+Kata kunci dicocokkan dengan nama, deskripsi, alamat, domisili, dan kategori wisata.
+
+Halaman `/search` juga menerima parameter filter `wilayah[]`, `kategori[]`, `min`, dan `max`.
+Kotak pencarian memvalidasi panjang kata kunci di browser sebelum membuka halaman hasil.
+
 ## Seed Data Wisata
 
 Data destinasi statis pada halaman kategori dan pencarian disatukan menjadi 27 wisata unik di `Backend/database/wisata_seed.sql`. Path gambar yang memang tersedia di `FrontEnd/assets/images` disimpan pada tabel `foto_wisata`; endpoint wisata mengirim path foto pertama sebagai field `gambar`. Jalankan script ini setelah schema dan kategori tersedia:

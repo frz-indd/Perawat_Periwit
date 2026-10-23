@@ -2,9 +2,19 @@
 <?php
 session_start();
 
-$keyword = isset($_GET['keyword']) && is_string($_GET['keyword'])
-    ? trim($_GET['keyword'])
-    : '';
+$keyword = isset($_GET['q']) && is_string($_GET['q'])
+    ? trim($_GET['q'])
+    : (isset($_GET['keyword']) && is_string($_GET['keyword'])
+        ? trim($_GET['keyword'])
+        : '');
+$requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+$requestPath = is_string($requestPath) ? $requestPath : '/';
+$appRoot = preg_replace(
+    '~/(?:search|FrontEnd/pages/hasil_pencarian\.php)/?$~',
+    '',
+    $requestPath
+);
+$pageBasePath = rtrim($appRoot ?? '', '/') . '/FrontEnd/pages/';
 
 $wilayahDipilih = is_array($_GET['wilayah'] ?? null) ? $_GET['wilayah'] : [];
 $kategoriDipilih = is_array($_GET['kategori'] ?? null) ? $_GET['kategori'] : [];
@@ -27,7 +37,6 @@ try {
     require_once __DIR__ . '/../../Backend/database/koneksi.php';
     require_once __DIR__ . '/../../Backend/database/wisata_repository.php';
     $allDatabaseTourism = fetchTourismRows($conn);
-    $databaseTourism = fetchTourismRows($conn, ['keyword' => $keyword]);
     $filterCategories = fetchActiveCategories($conn);
 
     foreach ($allDatabaseTourism as $row) {
@@ -119,6 +128,7 @@ function terpilih($daftar, $nilai)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="<?= htmlspecialchars($pageBasePath, ENT_QUOTES, 'UTF-8') ?>">
 
     <title>Hasil Pencarian | Explore Majaku</title>
 
@@ -180,14 +190,15 @@ function terpilih($daftar, $nilai)
 
 <!-- SEARCH BAR -->
 <section class="search-header">
-    <form action="hasil_pencarian.php" method="GET" class="search-box">
+    <form action="../../search" method="GET" class="search-box">
 
         <input
-            type="text"
-            name="keyword"
+            type="search"
+            name="q"
             placeholder="Cari destinasi,kata kunci atau lokasi"
             value="<?= htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8') ?>"
             aria-label="Cari destinasi"
+            minlength="2"
         >
 
         <button type="submit" aria-label="Cari">
@@ -204,11 +215,11 @@ function terpilih($daftar, $nilai)
     <!-- FILTER SIDEBAR -->
     <aside class="filter-sidebar">
 
-        <form action="hasil_pencarian.php" method="GET" id="filterForm">
+        <form action="../../search" method="GET" id="filterForm">
 
             <input
                 type="hidden"
-                name="keyword"
+                name="q"
                 value="<?= htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8') ?>"
             >
 
@@ -279,7 +290,7 @@ function terpilih($daftar, $nilai)
                 Terapkan Filter
             </button>
 
-            <a href="hasil_pencarian.php" class="reset-filter">
+            <a href="../../search" class="reset-filter">
                 Reset Filter
             </a>
 
@@ -371,7 +382,7 @@ function terpilih($daftar, $nilai)
                         Coba ubah kata kunci atau filter pencarianmu.
                     </p>
 
-                    <a href="hasil_pencarian.php">
+                    <a href="../../search">
                         Tampilkan Semua Destinasi
                     </a>
                 </div>
@@ -385,9 +396,24 @@ function terpilih($daftar, $nilai)
 </main>
 
 <script>
-    // Filter diterapkan saat tombol Terapkan Filter diklik.
-    // Enter pada kolom pencarian juga menjalankan pencarian.
-    document.getElementById('filterForm').addEventListener('submit', function (event) {
+    const filterForm = document.getElementById('filterForm');
+    const searchForm = document.querySelector('.search-box');
+    const searchInput = searchForm.querySelector('input[name="q"]');
+    const resultsGrid = document.querySelector('.destination-grid');
+    const resultsCount = document.querySelector('.results-heading p');
+
+    searchForm.addEventListener('submit', function (event) {
+        if (searchInput.value.trim().length < 2) {
+            event.preventDefault();
+            searchInput.setCustomValidity('Masukkan minimal 2 karakter untuk mencari.');
+            searchInput.reportValidity();
+        }
+    });
+    searchInput.addEventListener('input', function () {
+        searchInput.setCustomValidity('');
+    });
+
+    filterForm.addEventListener('submit', function (event) {
         const min = document.getElementById('minBudget').value;
         const max = document.getElementById('maxBudget').value;
 
@@ -397,33 +423,36 @@ function terpilih($daftar, $nilai)
         }
     });
 
-    const distanceElements = Array.from(
-        document.querySelectorAll('.distance[data-latitude][data-longitude]')
-    );
-    const destinationsWithCoordinates = distanceElements
-        .map(element => ({
-            element,
-            latitudeValue: element.dataset.latitude.trim(),
-            longitudeValue: element.dataset.longitude.trim(),
-            latitude: Number(element.dataset.latitude),
-            longitude: Number(element.dataset.longitude)
-        }))
-        .filter(destination =>
-            destination.latitudeValue !== '' &&
-            destination.longitudeValue !== '' &&
-            Number.isFinite(destination.latitude) &&
-            destination.latitude >= -90 && destination.latitude <= 90 &&
-            Number.isFinite(destination.longitude) &&
-            destination.longitude >= -180 && destination.longitude <= 180
+    function updateDistances() {
+        const distanceElements = Array.from(
+            resultsGrid.querySelectorAll('.distance[data-latitude][data-longitude]')
         );
+        const destinationsWithCoordinates = distanceElements
+            .map(element => ({
+                element,
+                latitudeValue: element.dataset.latitude.trim(),
+                longitudeValue: element.dataset.longitude.trim(),
+                latitude: Number(element.dataset.latitude),
+                longitude: Number(element.dataset.longitude)
+            }))
+            .filter(destination =>
+                destination.latitudeValue !== '' &&
+                destination.longitudeValue !== '' &&
+                Number.isFinite(destination.latitude) &&
+                destination.latitude >= -90 && destination.latitude <= 90 &&
+                Number.isFinite(destination.longitude) &&
+                destination.longitude >= -180 && destination.longitude <= 180
+            );
 
-    distanceElements.forEach(element => {
-        if (!destinationsWithCoordinates.some(destination => destination.element === element)) {
-            element.textContent = 'Jarak tidak tersedia';
+        distanceElements.forEach(element => {
+            if (!destinationsWithCoordinates.some(destination => destination.element === element)) {
+                element.textContent = 'Jarak tidak tersedia';
+            }
+        });
+
+        if (destinationsWithCoordinates.length === 0) {
+            return;
         }
-    });
-
-    if (destinationsWithCoordinates.length > 0) {
         if (!navigator.geolocation) {
             destinationsWithCoordinates.forEach(({ element }) => {
                 element.textContent = 'Lokasi tidak didukung';
@@ -462,6 +491,185 @@ function terpilih($daftar, $nilai)
             );
         }
     }
+
+    function showEmptyState(message, title = 'Destinasi tidak ditemukan') {
+        const emptyState = document.createElement('div');
+        emptyState.className = 'empty-results';
+
+        const icon = document.createElement('i');
+        icon.className = 'bi bi-search';
+        icon.setAttribute('aria-hidden', 'true');
+
+        const heading = document.createElement('h2');
+        heading.textContent = title;
+
+        const description = document.createElement('p');
+        description.textContent = message;
+
+        const resetLink = document.createElement('a');
+        resetLink.href = '../../search';
+        resetLink.textContent = 'Tampilkan Semua Destinasi';
+
+        emptyState.append(icon, heading, description, resetLink);
+        resultsGrid.replaceChildren(emptyState);
+    }
+
+    function createDestinationCard(destination) {
+        const card = document.createElement('a');
+        card.href = `detail-wisata.php?id=${encodeURIComponent(destination.id_wisata)}`;
+        card.className = 'destination-card';
+
+        const image = document.createElement('img');
+        image.src = destination.gambar
+            ? `../../${destination.gambar}`
+            : '../../FrontEnd/assets/images/img.png';
+        image.alt = destination.nama_wisata;
+        image.loading = 'lazy';
+        image.addEventListener('error', function () {
+            image.onerror = null;
+            image.src = '../assets/images/img.png';
+        });
+        card.append(image);
+
+        const content = document.createElement('div');
+        content.className = 'card-content';
+
+        const name = document.createElement('h2');
+        name.textContent = destination.nama_wisata;
+        content.append(name);
+
+        const rating = document.createElement('div');
+        rating.className = 'rating';
+        if (destination.rating !== null && Number(destination.jumlah_ulasan) > 0) {
+            const stars = document.createElement('span');
+            stars.className = 'stars';
+            stars.textContent = `★ ${Number(destination.rating).toFixed(1).replace('.', ',')}/5`;
+
+            const reviewCount = document.createElement('span');
+            reviewCount.className = 'review-count';
+            reviewCount.textContent = `(${Number(destination.jumlah_ulasan)} ulasan)`;
+            rating.append(stars, reviewCount);
+        } else {
+            const noReviews = document.createElement('span');
+            noReviews.className = 'review-count';
+            noReviews.textContent = 'Belum ada ulasan';
+            rating.append(noReviews);
+        }
+        content.append(rating);
+
+        const location = document.createElement('div');
+        location.className = 'location';
+        const mapPin = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        mapPin.setAttribute('class', 'map-pin-icon');
+        mapPin.setAttribute('viewBox', '0 0 40 44');
+        mapPin.setAttribute('aria-hidden', 'true');
+
+        const ground = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        ground.setAttribute('class', 'map-pin-ground');
+        ground.setAttribute('cx', '20');
+        ground.setAttribute('cy', '37');
+        ground.setAttribute('rx', '14');
+        ground.setAttribute('ry', '5');
+
+        const groundShade = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        groundShade.setAttribute('class', 'map-pin-ground-right');
+        groundShade.setAttribute('d', 'M20 32a14 5 0 0 1 0 10z');
+
+        const pinBody = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        pinBody.setAttribute('class', 'map-pin-body');
+        pinBody.setAttribute('d', 'M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z');
+
+        const pinHole = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        pinHole.setAttribute('class', 'map-pin-hole');
+        pinHole.setAttribute('cx', '20');
+        pinHole.setAttribute('cy', '13.5');
+        pinHole.setAttribute('r', '4.8');
+
+        mapPin.append(ground, groundShade, pinBody, pinHole);
+        location.append(mapPin);
+        const locationText = document.createElement('span');
+        locationText.textContent = destination.wilayah || '';
+        location.append(locationText);
+        content.append(location);
+
+        const distance = document.createElement('span');
+        distance.className = 'distance';
+        distance.dataset.latitude = destination.latitude ?? '';
+        distance.dataset.longitude = destination.longitude ?? '';
+        distance.textContent = 'Menghitung jarak...';
+        content.append(distance);
+
+        card.append(content);
+        return card;
+    }
+
+    function filterDestinations(destinations) {
+        const selectedRegions = Array.from(
+            filterForm.querySelectorAll('input[name="wilayah[]"]:checked')
+        ).map(input => input.value);
+        const selectedCategories = Array.from(
+            filterForm.querySelectorAll('input[name="kategori[]"]:checked')
+        ).map(input => input.value);
+        const minimum = Number(document.getElementById('minBudget').value || 0);
+        const maximum = Number(document.getElementById('maxBudget').value || 1000000);
+
+        return destinations.filter(destination => {
+            const mappedRegion = (destination.wilayah || '').toLowerCase().includes('majalengka')
+                ? 'Majalengka'
+                : 'Kuningan';
+            const matchesRegion = selectedRegions.length === 0 ||
+                selectedRegions.includes(mappedRegion);
+            const matchesCategory = selectedCategories.length === 0 ||
+                selectedCategories.includes(String(destination.id_kategori));
+            const price = Number(destination.harga_tiket);
+            const matchesBudget = price >= minimum && price <= maximum;
+
+            return matchesRegion && matchesCategory && matchesBudget;
+        });
+    }
+
+    async function loadSearchResults() {
+        const query = searchInput.value.trim();
+        if (query === '') {
+            updateDistances();
+            return;
+        }
+
+        if (query.length < 2) {
+            resultsCount.textContent = 'Kata kunci minimal 2 karakter.';
+            showEmptyState('Masukkan minimal 2 karakter untuk mencari.', 'Kata kunci terlalu pendek');
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `../../api/destinations/search?q=${encodeURIComponent(query)}`,
+                { headers: { Accept: 'application/json' } }
+            );
+            const payload = await response.json();
+            if (!response.ok || payload.status !== 'success' || !Array.isArray(payload.data)) {
+                throw new Error(payload.message || 'Respons pencarian tidak valid.');
+            }
+
+            const filteredResults = filterDestinations(payload.data);
+            resultsCount.textContent = `${filteredResults.length} Destinasi Ditemukan`;
+            if (filteredResults.length === 0) {
+                showEmptyState('Coba ubah kata kunci atau filter pencarianmu.');
+                return;
+            }
+
+            resultsGrid.replaceChildren(
+                ...filteredResults.map(createDestinationCard)
+            );
+            updateDistances();
+        } catch (error) {
+            console.error('Gagal memuat hasil pencarian:', error);
+            resultsCount.textContent = 'Hasil pencarian gagal dimuat.';
+            showEmptyState('Terjadi masalah saat mengambil data. Silakan muat ulang halaman.', 'Pencarian gagal');
+        }
+    }
+
+    loadSearchResults();
 </script>
 
 </body>
