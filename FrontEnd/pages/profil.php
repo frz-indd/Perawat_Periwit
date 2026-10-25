@@ -13,6 +13,11 @@ function e($s): string
     return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
 }
 
+function formatRating(float $nilai): string
+{
+    return number_format($nilai, 1, ',', '.');
+}
+
 function bintangHtml(float $nilai): string
 {
     $nilai    = max(0.0, min(5.0, $nilai));
@@ -24,16 +29,6 @@ function bintangHtml(float $nilai): string
         $html .= '<svg class="setengah" viewBox="0 0 12 24"><use href="#i-bintang" width="24" height="24"/></svg>';
     }
     return $html;
-}
-
-function formatJumlah(int $n): string
-{
-    if ($n < 1000) {
-        return (string) $n;
-    }
-    $k    = $n / 1000;
-    $teks = number_format($k, $k < 10 ? 1 : 0, ',', '');
-    return preg_replace('/,0$/', '', $teks) . 'k';
 }
 
 function wilayahHtml(string $wilayah): string
@@ -51,12 +46,20 @@ function srcGambar(string $path): string
     if (preg_match('#^https?://#i', $path) === 1) {
         return $path;
     }
-    return is_file(__DIR__ . '/../../' . $path) ? '../../' . $path : '';
+    return is_file(__DIR__ . '/../../' . ltrim($path, '/')) ? '../../' . ltrim($path, '/') : '';
 }
 
 $pesan      = '';
 $favorites  = [];
 $fotoProfil = '';
+
+$fotoEmail = trim((string) (
+    $_SESSION['foto_google']
+    ?? ($_SESSION['picture']
+    ?? ($_SESSION['avatar_url']
+    ?? ($_SESSION['user']['foto_google']
+    ?? ($_SESSION['user']['picture'] ?? ''))))
+));
 
 if ($modePreview) {
     $namaUser       = 'Nama User';
@@ -166,15 +169,19 @@ if ($modePreview) {
 
     function ambilFotoProfil(mysqli $conn, int $userId): string
     {
+        $dariDb = ambilKolomUser($conn, $userId, ['foto_profil', 'foto', 'avatar']);
+        if ($dariDb !== '') {
+            return $dariDb;
+        }
         foreach (['foto_profil', 'foto'] as $kunci) {
             if (!empty($_SESSION[$kunci]) && is_string($_SESSION[$kunci])) {
-                return $_SESSION[$kunci];
+                return trim($_SESSION[$kunci]);
             }
         }
         if (!empty($_SESSION['user']['foto_profil']) && is_string($_SESSION['user']['foto_profil'])) {
-            return $_SESSION['user']['foto_profil'];
+            return trim($_SESSION['user']['foto_profil']);
         }
-        return ambilKolomUser($conn, $userId, ['foto_profil', 'foto', 'avatar']);
+        return '';
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'hapus_favorit') {
@@ -211,19 +218,14 @@ unset($_SESSION['pesan']);
 
 $namaUser   = (string) $namaUser;
 $emailUser  = trim((string) $emailUser);
-$loginEmail = filter_var($identitasLogin, FILTER_VALIDATE_EMAIL) !== false;
-$inisial    = '';
-$srcFoto    = '';
+$emailFoto  = filter_var($emailUser, FILTER_VALIDATE_EMAIL) !== false ? $emailUser : (filter_var($identitasLogin, FILTER_VALIDATE_EMAIL) !== false ? $identitasLogin : '');
 
-if ($loginEmail) {
-    $bagianLokal = (string) strstr($identitasLogin, '@', true);
-    if (preg_match('/[\p{L}\p{N}]/u', $bagianLokal, $cocok) === 1) {
-        $inisial = mb_strtoupper($cocok[0], 'UTF-8');
-    }
-    $srcFoto = srcGambar((string) $fotoProfil);
-    if ($srcFoto === '') {
-        $srcFoto = 'https://www.gravatar.com/avatar/' . hash('sha256', strtolower($identitasLogin)) . '?s=440&d=404';
-    }
+$srcFoto = srcGambar((string) $fotoProfil);
+if ($srcFoto === '' && preg_match('#^https://#i', $fotoEmail) === 1) {
+    $srcFoto = $fotoEmail;
+}
+if ($srcFoto === '' && $emailFoto !== '') {
+    $srcFoto = 'https://www.gravatar.com/avatar/' . hash('sha256', strtolower($emailFoto)) . '?s=440&d=404';
 }
 ?>
 <!DOCTYPE html>
@@ -234,27 +236,26 @@ if ($loginEmail) {
     <title>Profil | Explore Majaku</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../CSS/edit-profil.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/profil.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
+    <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
+    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
+    <link rel="stylesheet" href="../CSS/profil.css?v=24">
 </head>
 <body class="halaman-profil">
     <svg class="sprite" aria-hidden="true">
         <defs>
             <clipPath id="klip-dalam"><circle cx="110" cy="110" r="103"/></clipPath>
             <symbol id="ikon-profil" viewBox="0 0 220 220">
-                <circle cx="110" cy="110" r="93.5" fill="none" stroke="#166d5c" stroke-width="11"/>
-                <circle cx="110" cy="82.5" r="27.5" fill="none" stroke="#166d5c" stroke-width="11"/>
-                <path d="M49.5 170.5c9.35-27.5 30.25-41.25 60.5-41.25s51.15 13.75 60.5 41.25" fill="none" stroke="#166d5c" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="110" cy="110" r="102" fill="none" stroke="#166d5c" stroke-width="15"/>
+                <circle cx="110" cy="91" r="26" fill="none" stroke="#166d5c" stroke-width="13"/>
+                <path d="M30 222C30 176 56 146 92 140C99 150 121 150 128 140C164 146 190 176 190 222" fill="none" stroke="#166d5c" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#klip-dalam)"/>
             </symbol>
             <symbol id="i-bintang" viewBox="0 0 24 24">
                 <path d="M12 1.8l3.1 6.6 7.2.9-5.3 4.9 1.4 7.1L12 17.7l-6.4 3.6 1.4-7.1L1.7 9.3l7.2-.9L12 1.8z"/>
             </symbol>
             <symbol id="i-lokasi" viewBox="0 0 40 44">
-                <ellipse cx="20" cy="37" rx="14" ry="5" fill="#45d84f"/>
-                <path d="M20 32a14 5 0 0 1 0 10z" fill="#10b981"/>
-                <path d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z" fill="#ed2118"/>
+                <ellipse cx="20" cy="36" rx="13" ry="5" fill="#2fbf6b"/>
+                <path d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z" fill="#f2301d"/>
                 <circle cx="20" cy="13.5" r="4.8" fill="#fff"/>
             </symbol>
             <symbol id="i-pensil" viewBox="0 0 48 48">
@@ -281,18 +282,21 @@ if ($loginEmail) {
     <header class="ep-navbar">
         <div class="ep-navbar__inner">
             <a class="ep-logo" href="../../index.php">Explore Majaku</a>
+
             <nav class="ep-menu" aria-label="Menu utama">
                 <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
-                <a class="ep-menu__kategori" href="#" id="kategori-toggle"
-                   aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">kategori</a>
+                <a class="ep-menu__kategori" href="#kategori" id="kategori-toggle"
+                   role="button" aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">Kategori</a>
                 <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
             </nav>
+
             <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
                 <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" aria-hidden="true">
                     <circle cx="16.5" cy="16.5" r="11.5"/>
                     <line x1="25" y1="25" x2="36" y2="36"/>
                 </svg>
             </a>
+
             <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
                 <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="20" cy="20" r="17.5"/>
@@ -301,27 +305,23 @@ if ($loginEmail) {
                 </svg>
             </a>
         </div>
-        <ul class="kat-menu" id="kategori-menu">
-            <li><a class="kat-item" href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
-        </ul>
     </header>
+
+    <ul class="dd-kategori" id="kategori-menu" role="menu" aria-label="Kategori wisata">
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=alam">Wisata Alam &amp; pegunungan</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=air-curug">Wisata Air &amp; Curug</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
+    </ul>
 
     <div class="halaman">
         <aside class="sidebar" aria-label="Informasi profil">
             <div class="avatar" aria-hidden="true">
-                <svg viewBox="0 0 220 220">
+                <svg id="avatar-default" viewBox="0 0 220 220">
                     <circle cx="110" cy="110" r="110" fill="#d9d9d9"/>
-                    <?php if ($loginEmail && $inisial !== ''): ?>
-                        <circle cx="110" cy="110" r="102.5" fill="none" stroke="currentColor" stroke-width="15"/>
-                        <text class="avatar__inisial" x="110" y="113" text-anchor="middle" dominant-baseline="central" fill="currentColor"><?= e($inisial) ?></text>
-                    <?php else: ?>
-                        <use href="#ikon-profil"/>
-                    <?php endif; ?>
+                    <use href="#ikon-profil"/>
                 </svg>
-                <?php if ($loginEmail && $srcFoto !== ''): ?>
+                <?php if ($srcFoto !== ''): ?>
                     <img class="avatar__foto" src="<?= e($srcFoto) ?>" alt="" referrerpolicy="no-referrer" onerror="this.remove()">
                 <?php endif; ?>
             </div>
@@ -359,12 +359,13 @@ if ($loginEmail) {
             <?php endif; ?>
             <?php if ($favorites !== []): ?>
                 <?php foreach ($favorites as $f):
-                    $idWisata  = (string) ($f['id_wisata'] ?? '');
-                    $nama      = (string) ($f['nama_wisata'] ?? '');
-                    $srcKartu  = srcGambar((string) ($f['gambar'] ?? ''));
-                    $rating    = (float) ($f['rating'] ?? 0);
-                    $jumlah    = (int) ($f['jumlah_ulasan'] ?? 0);
-                    $urlDetail = $idWisata !== '' ? 'detail-wisata.php?id=' . rawurlencode($idWisata) : '';
+                    $idWisata    = (string) ($f['id_wisata'] ?? '');
+                    $nama        = (string) ($f['nama_wisata'] ?? '');
+                    $srcKartu    = srcGambar((string) ($f['gambar'] ?? ''));
+                    $rating      = (float) ($f['rating'] ?? 0);
+                    $jumlah      = (int) ($f['jumlah_ulasan'] ?? 0);
+                    $jumlahLabel = number_format($jumlah, 0, ',', '.');
+                    $urlDetail   = $idWisata !== '' ? 'detail-wisata.php?id=' . rawurlencode($idWisata) : '';
                 ?>
                     <article class="kartu" aria-label="<?= e($nama) ?>">
                         <span class="kartu__tautan">
@@ -387,10 +388,10 @@ if ($loginEmail) {
                             </h3>
                             <div class="rating">
                                 <?php if ($rating > 0): ?>
-                                    <span class="bintang" role="img" aria-label="Rating <?= e(number_format($rating, 1, ',', '.')) ?> dari 5"><?= bintangHtml($rating) ?></span>
-                                    <span class="rating__ulasan">(<?= e(formatJumlah($jumlah)) ?> ulasan)</span>
+                                    <span class="bintang" aria-hidden="true"><?= bintangHtml($rating) ?></span>
+                                    <span class="rating__ulasan"><?= e(formatRating($rating)) ?> (<?= e($jumlahLabel) ?> ulasan)</span>
                                 <?php else: ?>
-                                    <span class="rating__ulasan">Belum ada ulasan</span>
+                                    <span class="rating__ulasan">(<?= e($jumlahLabel) ?> ulasan)</span>
                                 <?php endif; ?>
                             </div>
                             <div class="lokasi">
@@ -419,20 +420,44 @@ if ($loginEmail) {
             var toggle = document.getElementById('kategori-toggle');
             var menu = document.getElementById('kategori-menu');
             var header = document.querySelector('.ep-navbar');
+            if (!toggle || !menu) return;
+
+            document.body.appendChild(menu);
+
+            function terbuka() {
+                return menu.classList.contains('show');
+            }
+
+            function posisi() {
+                var r = toggle.getBoundingClientRect();
+                var dasar = header ? header.getBoundingClientRect().bottom : r.bottom;
+                var lebar = menu.offsetWidth;
+                var kiri;
+                if (window.innerWidth <= 900) {
+                    kiri = (window.innerWidth - lebar) / 2;
+                } else {
+                    kiri = r.left + r.width * 0.15;
+                }
+                kiri = Math.max(8, Math.min(kiri, window.innerWidth - lebar - 8));
+                menu.style.top = Math.round(dasar + 6) + 'px';
+                menu.style.left = Math.round(kiri) + 'px';
+            }
 
             function buka() {
                 menu.classList.add('show');
-
-                var r = toggle.getBoundingClientRect();
-                menu.style.top = (header.getBoundingClientRect().bottom + 6) + 'px';
-                menu.style.left = (r.left + r.width * 0.15) + 'px';
-
+                menu.style.setProperty('display', 'block', 'important');
+                menu.style.setProperty('visibility', 'visible', 'important');
+                menu.style.setProperty('opacity', '1', 'important');
+                posisi();
                 toggle.classList.add('aktif');
                 toggle.setAttribute('aria-expanded', 'true');
             }
 
             function tutup() {
                 menu.classList.remove('show');
+                menu.style.removeProperty('display');
+                menu.style.removeProperty('visibility');
+                menu.style.removeProperty('opacity');
                 toggle.classList.remove('aktif');
                 toggle.setAttribute('aria-expanded', 'false');
             }
@@ -440,15 +465,23 @@ if ($loginEmail) {
             toggle.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                menu.classList.contains('show') ? tutup() : buka();
+                if (terbuka()) { tutup(); } else { buka(); }
             });
+
             document.addEventListener('click', function (e) {
-                if (!menu.contains(e.target)) tutup();
+                if (terbuka() && !menu.contains(e.target) && !toggle.contains(e.target)) tutup();
             });
+
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') tutup();
+                if (e.key === 'Escape' && terbuka()) {
+                    tutup();
+                    toggle.focus();
+                }
             });
-            window.addEventListener('resize', tutup);
+
+            window.addEventListener('resize', function () {
+                if (terbuka()) posisi();
+            });
         })();
 
         document.querySelectorAll('.hapus-form').forEach(function (form) {

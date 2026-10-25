@@ -14,25 +14,28 @@ session_start();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=shared-layout-4">
     <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/tentang.css?v=shared-layout-4">
+    <link rel="stylesheet" href="../CSS/tentang.css?v=shared-layout-5">
 </head>
 <body class="about-page halaman-tentang">
 
     <header class="ep-navbar">
         <div class="ep-navbar__inner">
             <a class="ep-logo" href="../../index.php">Explore Majaku</a>
+
             <nav class="ep-menu" aria-label="Menu utama">
                 <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
-                <a class="ep-menu__kategori" href="#" id="kategori-toggle"
-                   aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">kategori</a>
+                <a class="ep-menu__kategori" href="#kategori" id="kategori-toggle"
+                   role="button" aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">Kategori</a>
                 <a class="ep-menu__tentang" href="tentang.php" aria-current="page">Tentang</a>
             </nav>
+
             <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
                 <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" aria-hidden="true">
                     <circle cx="16.5" cy="16.5" r="11.5"/>
                     <line x1="25" y1="25" x2="36" y2="36"/>
                 </svg>
             </a>
+
             <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
                 <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="20" cy="20" r="17.5"/>
@@ -41,13 +44,14 @@ session_start();
                 </svg>
             </a>
         </div>
-        <ul class="kat-menu" id="kategori-menu">
-            <li><a class="kat-item" href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
-        </ul>
     </header>
+
+    <ul class="dd-kategori" id="kategori-menu" role="menu" aria-label="Kategori wisata">
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
+    </ul>
 
     <main>
         <section class="about-hero" aria-label="Tentang Explore Majaku">
@@ -113,23 +117,50 @@ session_start();
             </section>
         </section>
     </main>
+
     <script>
         (function () {
             var toggle = document.getElementById('kategori-toggle');
             var menu = document.getElementById('kategori-menu');
             var header = document.querySelector('.ep-navbar');
+            if (!toggle || !menu) return;
+
+            document.body.appendChild(menu);
+
+            function terbuka() {
+                return menu.classList.contains('show');
+            }
+
+            function posisi() {
+                var r = toggle.getBoundingClientRect();
+                var dasar = header ? header.getBoundingClientRect().bottom : r.bottom;
+                var lebar = menu.offsetWidth;
+                var kiri;
+                if (window.innerWidth <= 900) {
+                    kiri = (window.innerWidth - lebar) / 2;
+                } else {
+                    kiri = r.left + r.width * 0.15;
+                }
+                kiri = Math.max(8, Math.min(kiri, window.innerWidth - lebar - 8));
+                menu.style.top = Math.round(dasar + 6) + 'px';
+                menu.style.left = Math.round(kiri) + 'px';
+            }
 
             function buka() {
                 menu.classList.add('show');
-                var r = toggle.getBoundingClientRect();
-                menu.style.top = (header.getBoundingClientRect().bottom + 6) + 'px';
-                menu.style.left = (r.left + r.width * 0.15) + 'px';
+                menu.style.setProperty('display', 'block', 'important');
+                menu.style.setProperty('visibility', 'visible', 'important');
+                menu.style.setProperty('opacity', '1', 'important');
+                posisi();
                 toggle.classList.add('aktif');
                 toggle.setAttribute('aria-expanded', 'true');
             }
 
             function tutup() {
                 menu.classList.remove('show');
+                menu.style.removeProperty('display');
+                menu.style.removeProperty('visibility');
+                menu.style.removeProperty('opacity');
                 toggle.classList.remove('aktif');
                 toggle.setAttribute('aria-expanded', 'false');
             }
@@ -137,16 +168,23 @@ session_start();
             toggle.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                menu.classList.contains('show') ? tutup() : buka();
+                if (terbuka()) { tutup(); } else { buka(); }
             });
+
             document.addEventListener('click', function (e) {
-                if (!menu.contains(e.target)) tutup();
+                if (terbuka() && !menu.contains(e.target) && !toggle.contains(e.target)) tutup();
             });
+
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') tutup();
+                if (e.key === 'Escape' && terbuka()) {
+                    tutup();
+                    toggle.focus();
+                }
             });
-            window.addEventListener('resize', tutup);
-            window.addEventListener('scroll', tutup, { passive: true });
+
+            window.addEventListener('resize', function () {
+                if (terbuka()) posisi();
+            });
         })();
     </script>
 </body>

@@ -32,6 +32,10 @@ function formatRating(float $nilai): string {
     return number_format($nilai, 1, ',', '.');
 }
 
+function formatJam($jam): string {
+    return str_replace(':', '.', substr((string) $jam, 0, 5));
+}
+
 function bintangHtml(float $nilai): string {
     $nilai    = max(0.0, min(5.0, $nilai));
     $dibulat  = round($nilai * 2) / 2;
@@ -68,6 +72,19 @@ function fetchTourismParking(mysqli $conn, string $tourismId): array {
     return $baris;
 }
 
+function fetchUlasanSaya(mysqli $conn, int $userId, string $tourismId): array {
+    try {
+        $stmt = $conn->prepare('SELECT rating, komentar FROM ulasan WHERE Id_user = ? AND Id_wisata = ? LIMIT 1');
+        $stmt->bind_param('is', $userId, $tourismId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc() ?: [];
+        $stmt->close();
+        return $row;
+    } catch (Throwable $e) {
+        return [];
+    }
+}
+
 function simpanUlasan(mysqli $conn, int $userId, string $tourismId, float $rating, string $komentar): bool
 {
     try {
@@ -91,6 +108,7 @@ function simpanUlasan(mysqli $conn, int $userId, string $tourismId, float $ratin
         $stmt->close();
         return $ok;
     } catch (Throwable $e) {
+        error_log('ulasan: ' . $e->getMessage());
         return false;
     }
 }
@@ -161,17 +179,51 @@ $userId = filter_var($_SESSION['id_user'] ?? null, FILTER_VALIDATE_INT);
 $sudahLogin = $userId !== false && $userId > 0;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'toggle_favorit') {
+    $lewatFetch = ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'fetch';
+
     if (!$sudahLogin) {
+        if ($lewatFetch) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['status' => 'login']);
+            exit;
+        }
         header('Location: ../auth/Login.php');
         exit;
     }
 
-    if (isTourismFavorite($conn, (int) $userId, $tourismId)) {
-        removeTourismFavorite($conn, (int) $userId, $tourismId);
-        $_SESSION['pesan'] = 'Dihapus dari destinasi favorit.';
-    } else {
-        addTourismFavorite($conn, (int) $userId, $tourismId);
-        $_SESSION['pesan'] = 'Berhasil ditambahkan ke destinasi favorit.';
+    $csrfFavorit = isset($_POST['csrf'], $_SESSION['csrf']) && hash_equals($_SESSION['csrf'], (string) $_POST['csrf']);
+    if (!$csrfFavorit) {
+        http_response_code(403);
+        if ($lewatFetch) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['status' => 'error', 'tersimpan' => false]);
+            exit;
+        }
+        exit('Sesi tidak valid.');
+    }
+
+    $tersimpan = false;
+    $berhasil  = true;
+    try {
+        if (isTourismFavorite($conn, (int) $userId, $tourismId)) {
+            removeTourismFavorite($conn, (int) $userId, $tourismId);
+            $_SESSION['pesan'] = 'Dihapus dari destinasi favorit.';
+        } else {
+            addTourismFavorite($conn, (int) $userId, $tourismId);
+            $tersimpan = true;
+            $_SESSION['pesan'] = 'Berhasil ditambahkan ke destinasi favorit.';
+        }
+    } catch (Throwable $e) {
+        error_log('favorit: ' . $e->getMessage());
+        $berhasil = false;
+        $_SESSION['pesan'] = 'Gagal memperbarui destinasi favorit.';
+    }
+
+    if ($lewatFetch) {
+        unset($_SESSION['pesan']);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['status' => $berhasil ? 'ok' : 'error', 'tersimpan' => $tersimpan]);
+        exit;
     }
 
     header('Location: detail-wisata.php?id=' . rawurlencode($tourismId));
@@ -186,19 +238,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'tambah_
 
     $csrfOk = isset($_POST['csrf'], $_SESSION['csrf']) && hash_equals($_SESSION['csrf'], (string) $_POST['csrf']);
 
-    $ratingMentah = str_replace(',', '.', trim((string) ($_POST['rating'] ?? '')));
-    $ratingIn     = filter_var($ratingMentah, FILTER_VALIDATE_FLOAT);
-    $ratingValid  = $ratingIn !== false
-        && $ratingIn >= 0.5
-        && $ratingIn <= 5
-        && abs($ratingIn * 2 - round($ratingIn * 2)) < 0.0001;
+    $ratingIn = filter_var(
+        trim((string) ($_POST['rating'] ?? '')),
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 1, 'max_range' => 5]]
+    );
+    $ratingValid = $ratingIn !== false;
 
     $komentarIn = mb_substr(trim((string) ($_POST['komentar'] ?? '')), 0, 500, 'UTF-8');
 
     if (!$csrfOk) {
         $_SESSION['pesan_ulasan'] = 'Sesi tidak valid. Silakan coba lagi.';
     } elseif (!$ratingValid) {
-        $_SESSION['pesan_ulasan'] = 'Pilih rating 0,5 sampai 5 bintang.';
+        $_SESSION['pesan_ulasan'] = 'Pilih rating 1 sampai 5 bintang.';
     } elseif ($komentarIn === '') {
         $_SESSION['pesan_ulasan'] = 'Ulasan tidak boleh kosong.';
     } elseif (simpanUlasan($conn, (int) $userId, $tourismId, (float) $ratingIn, $komentarIn)) {
@@ -253,12 +305,17 @@ if (count($reviewRows) > 0) {
     $nilaiRating  = round($total / $jumlahUlasan, 1);
 } else {
     $jumlahUlasan = (int) ($tourism['jumlah_ulasan'] ?? 0);
-    $nilaiRating  = $tourism['rating'] !== null ? (float) $tourism['rating'] : 0.0;
+    $nilaiRating  = ($tourism['rating'] ?? null) !== null ? (float) $tourism['rating'] : 0.0;
 }
 
 $parkir = fetchTourismParking($conn, $tourismId);
 
+$namaWisata     = (string) $tourism['nama_wisata'];
 $alamat         = trim((string) ($tourism['alamat'] ?? ''));
+$alamatTampil   = $alamat;
+if ($alamat !== '' && mb_stripos($alamat, $namaWisata, 0, 'UTF-8') !== 0) {
+    $alamatTampil = $namaWisata . "\n" . $alamat;
+}
 $lat            = $tourism['latitude'] ?? null;
 $lng            = $tourism['longitude'] ?? null;
 $punyaKoordinat = is_numeric($lat) && is_numeric($lng);
@@ -280,6 +337,24 @@ $mapsUrl = $linkMapsValid
 $gambar  = trim((string) ($tourism['gambar'] ?? ''));
 $adaFoto = $gambar !== '' && is_file(__DIR__ . '/../../' . $gambar);
 
+$jamBuka  = trim((string) ($tourism['jam_buka'] ?? ''));
+$jamTutup = trim((string) ($tourism['jam_tutup'] ?? ''));
+$hariBuka = '';
+foreach (['hari_operasional', 'hari_buka', 'hari'] as $kolomHari) {
+    $nilaiHari = trim((string) ($tourism[$kolomHari] ?? ''));
+    if ($nilaiHari !== '') {
+        $hariBuka = $nilaiHari;
+        break;
+    }
+}
+$jamOperasional = '';
+if ($jamBuka !== '' && $jamTutup !== '') {
+    $jamOperasional = formatJam($jamBuka) . ' - ' . formatJam($jamTutup) . ' WIB';
+    if ($hariBuka !== '') {
+        $jamOperasional = $hariBuka . ', ' . $jamOperasional;
+    }
+}
+
 $destination = [
     'id'           => $tourismId,
     'gambar'       => $gambar,
@@ -288,20 +363,18 @@ $destination = [
     'review_label' => number_format($jumlahUlasan, 0, ',', '.'),
     'review_count' => $jumlahUlasan,
     'rating'       => $nilaiRating,
-    'has_rating'   => $nilaiRating > 0,
+    'has_rating'   => $nilaiRating > 0 && $jumlahUlasan > 0,
     'location'     => $tourism['wilayah'],
     'subtitle'     => 'Temukan Informasi ' . $tourism['nama_wisata'] . ' dengan lebih detail',
     'description'  => trim((string) ($tourism['deskripsi'] ?? '')),
     'facilities'   => $facilities,
-    'ticket_price' => $tourism['harga_tiket'] > 0
-        ? 'Rp ' . number_format($tourism['harga_tiket'], 0, ',', '.') . '/orang'
+    'ticket_price' => ($tourism['harga_tiket'] ?? 0) > 0
+        ? 'Rp ' . number_format((float) $tourism['harga_tiket'], 0, ',', '.') . '/orang'
         : '',
     'parking'      => $parkir,
-    'hours'        => $tourism['jam_buka'] !== null && $tourism['jam_tutup'] !== null
-        ? str_replace(':', '.', substr($tourism['jam_buka'], 0, 5)) . ' - ' . str_replace(':', '.', substr($tourism['jam_tutup'], 0, 5)) . ' WIB'
-        : '',
+    'hours'        => $jamOperasional,
     'has_address'  => $alamat !== '',
-    'address'      => $alamat,
+    'address'      => $alamatTampil,
     'maps_url'     => $mapsUrl,
     'map_query'    => $mapQuery,
     'map_ready'    => $petaTersedia,
@@ -310,6 +383,10 @@ $destination = [
 ];
 
 $sudahFavorit = $sudahLogin && isTourismFavorite($conn, (int) $userId, $tourismId);
+$ulasanSaya   = $sudahLogin ? fetchUlasanSaya($conn, (int) $userId, $tourismId) : [];
+$ratingSaya   = isset($ulasanSaya['rating']) ? (int) round((float) $ulasanSaya['rating']) : 0;
+$komentarSaya = (string) ($ulasanSaya['komentar'] ?? '');
+
 $pesan = $_SESSION['pesan'] ?? '';
 unset($_SESSION['pesan']);
 $pesanUlasan = $_SESSION['pesan_ulasan'] ?? '';
@@ -330,14 +407,13 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=shared-layout-4">
+    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=shared-layout-15">
     <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
 </head>
 <body class="halaman-detail">
 
     <svg class="sprite" aria-hidden="true">
         <defs>
-            <clipPath id="klip-avatar"><circle cx="110" cy="110" r="110"/></clipPath>
             <symbol id="ikon-profil" viewBox="0 0 220 220">
                 <circle cx="110" cy="110" r="93.5" fill="none" stroke="#166d5c" stroke-width="11"/>
                 <circle cx="110" cy="82.5" r="27.5" fill="none" stroke="#166d5c" stroke-width="11"/>
@@ -348,6 +424,11 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 <path d="M12 1.8l3.1 6.6 7.2.9-5.3 4.9 1.4 7.1L12 17.7l-6.4 3.6 1.4-7.1L1.7 9.3l7.2-.9L12 1.8z"/>
             </symbol>
 
+            <symbol id="i-ulang" viewBox="0 0 24 24">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+            </symbol>
+
             <symbol id="i-lokasi" viewBox="0 0 40 44">
                 <ellipse cx="20" cy="37" rx="14" ry="5" fill="#45d84f"/>
                 <path d="M20 32a14 5 0 0 1 0 10z" fill="#10b981"/>
@@ -355,15 +436,10 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 <circle cx="20" cy="13.5" r="4.8" fill="#fff"/>
             </symbol>
 
-            <symbol id="i-hati" viewBox="0 0 28 28">
-                <path d="M14 24S3 17.2 3 9.8A5.8 5.8 0 0 1 14 7.2a5.8 5.8 0 0 1 11 2.6C25 17.2 14 24 14 24Z"
-                      stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            </symbol>
-
             <symbol id="i-pin-hijau" viewBox="0 0 40 46">
-                <path d="M20 3C12.3 3 6.5 8.8 6.5 16c0 8 13.5 20 13.5 20s13.5-12 13.5-20C33.5 8.8 27.7 3 20 3Z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="20" cy="16" r="5" fill="none" stroke="currentColor" stroke-width="3.2"/>
-                <path d="M10 31.5C5 33 2.5 35.5 4 38.5c3 5 29 5 32 0 1.5-3-1-5.5-6-7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M20 2.5C13.2 2.5 8 7.8 8 14.4c0 7.2 8.2 13.6 12 18.6 3.8-5 12-11.4 12-18.6C32 7.8 26.8 2.5 20 2.5Z" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linejoin="round"/>
+                <circle cx="20" cy="14" r="3.2" fill="currentColor"/>
+                <path d="M11.5 30.5C6.6 31.6 3.8 33.6 3.8 36.2c0 3.8 7.2 6.6 16.2 6.6s16.2-2.8 16.2-6.6c0-2.6-2.8-4.6-7.7-5.7" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
             </symbol>
 
             <symbol id="i-pin-coret" viewBox="0 0 40 46">
@@ -379,7 +455,8 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             </symbol>
 
             <symbol id="i-titik" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="7.5" fill="#fff" stroke="currentColor" stroke-width="3.6"/>
+                <circle cx="12" cy="12" r="11" fill="#41c19e"/>
+                <path transform="translate(5.2 5.2) scale(.57)" fill="#fff" d="M12 1.8l3.1 6.6 7.2.9-5.3 4.9 1.4 7.1L12 17.7l-6.4 3.6 1.4-7.1L1.7 9.3l7.2-.9L12 1.8z"/>
             </symbol>
 
             <symbol id="i-parkir" viewBox="0 0 32 28">
@@ -421,8 +498,8 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
             <nav class="ep-menu" aria-label="Menu utama">
                 <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
-                <a class="ep-menu__kategori" href="#" id="kategori-toggle"
-                   aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">kategori</a>
+                <a class="ep-menu__kategori" href="#kategori" id="kategori-toggle"
+                   role="button" aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">Kategori</a>
                 <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
             </nav>
 
@@ -441,14 +518,14 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 </svg>
             </a>
         </div>
-
-        <ul class="kat-menu" id="kategori-menu">
-            <li><a class="kat-item" href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-            <li><a class="kat-item" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
-        </ul>
     </header>
+
+    <ul class="dd-kategori" id="kategori-menu" role="menu" aria-label="Kategori wisata">
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=alam">Wisata Alam &amp; pegunungan</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
+    </ul>
 
     <div class="hero-wisata<?= $destination['has_photo'] ? '' : ' tanpa-foto' ?>" id="hero-wisata">
         <?php if ($destination['has_photo']): ?>
@@ -487,11 +564,12 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 </p>
             </div>
 
-            <form method="post" action="detail-wisata.php?id=<?= e(rawurlencode($destination['id'])) ?>">
+            <form method="post" id="form-favorit" action="detail-wisata.php?id=<?= e(rawurlencode($destination['id'])) ?>">
                 <input type="hidden" name="aksi" value="toggle_favorit">
+                <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
                 <button class="tombol-favorit<?= $sudahFavorit ? ' aktif' : '' ?>" type="submit" id="tombol-favorit"
                         aria-pressed="<?= $sudahFavorit ? 'true' : 'false' ?>">
-                    <svg viewBox="0 0 28 28" aria-hidden="true"><use href="#i-hati"/></svg>
+                    <i class="bi <?= $sudahFavorit ? 'bi-heart-fill' : 'bi-heart' ?>" aria-hidden="true"></i>
                     <span><?= $sudahFavorit ? 'Tersimpan Di Favorit' : 'Simpan Favorit' ?></span>
                 </button>
             </form>
@@ -518,7 +596,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                                         'Area parkir' => '<svg class="ikon-fas ikon-parkir" viewBox="0 0 32 28" aria-hidden="true"><use href="#i-parkir"/></svg>',
                                         'Toilet Umum' => '<svg class="ikon-fas ikon-toilet" viewBox="0 0 32 28" aria-hidden="true"><use href="#i-toilet"/></svg>',
                                         'Mushola'     => '<svg class="ikon-fas ikon-masjid" viewBox="0 0 28 28" aria-hidden="true"><use href="#i-masjid"/></svg>',
-                                        'Spot Foto'   => '<span class="ikon-fas" aria-hidden="true"><i class="bi bi-camera-fill"></i></span>',
+                                        'Spot Foto'   => '<span class="ikon-fas ikon-kamera" aria-hidden="true"><i class="bi bi-camera-fill"></i></span>',
                                         default       => '<span class="ikon-fas" aria-hidden="true"><i class="bi bi-check-square-fill"></i></span>',
                                     };
                                     ?>
@@ -568,13 +646,12 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <h2 class="blok__judul" id="judul-lokasi">LOKASI WISATA</h2>
             <p class="blok__sub">Temukan lokasi <?= e(mb_strtolower($destination['title'], 'UTF-8')) ?> dengan mudah di peta/maps</p>
 
-            <div class="lokasi-grid">
+            <div class="lokasi-grid<?= $destination['map_ready'] ? '' : ' lokasi-grid--kosong' ?>">
                 <?php if ($destination['map_ready']): ?>
                     <div class="peta">
                         <iframe
                             title="Peta lokasi <?= e($destination['title']) ?>"
                             src="https://maps.google.com/maps?q=<?= rawurlencode($destination['map_query']) ?>&amp;hl=id&amp;z=15&amp;output=embed"
-                            loading="lazy"
                             allowfullscreen
                             referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
@@ -586,13 +663,13 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                     </div>
                 <?php endif; ?>
 
-                <article class="kartu-alamat">
+                <article class="kartu-alamat<?= $destination['has_address'] ? '' : ' kartu-alamat--kosong' ?>">
                     <svg class="kartu-alamat__ikon" viewBox="0 0 40 46" aria-hidden="true"><use href="#i-pin-hijau"/></svg>
-                    <h3><?= $destination['has_address'] ? 'Alamat tersedia' : 'Alamat belum tersedia' ?></h3>
+                    <h3><?= $destination['has_address'] ? 'Alamat tersedia' : 'Alamat Belum tersedia' ?></h3>
                     <?php if ($destination['has_address']): ?>
-                        <p><?= e($destination['address']) ?></p>
+                        <p><?= nl2br(e($destination['address'])) ?></p>
                     <?php else: ?>
-                        <p class="belum">Lokasi akan diperbarui segera.</p>
+                        <p class="belum">Lokasi Akan Di perbarui Segera</p>
                     <?php endif; ?>
                     <a class="tombol-maps" href="<?= e($destination['maps_url']) ?>" target="_blank" rel="noopener noreferrer">
                         <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
@@ -606,6 +683,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <h2 class="blok__judul" id="judul-ulasan">ULASAN</h2>
             <p class="blok__sub">Simak Pengalaman Pengunjung yang sudah datang ke tempat</p>
 
+            <?php if ($destination['review_count'] > 0): ?>
             <div class="ringkasan-ulasan">
                 <div class="ringkasan-ulasan__skor"><?= e($ratingText) ?></div>
 
@@ -613,14 +691,10 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                     <?php if ($destination['has_rating']): ?>
                         <span class="bintang bintang--besar" aria-hidden="true"><?= bintangHtml($destination['rating']) ?></span>
                     <?php endif; ?>
-                    <span class="ringkasan-ulasan__jumlah">
-                        <?= $destination['review_count'] > 0
-                            ? 'Dari ' . e($destination['review_label']) . ' ulasan'
-                            : 'Belum ada ulasan' ?>
-                    </span>
+                    <span class="ringkasan-ulasan__jumlah">Dari <?= e($destination['review_label']) ?> ulasan</span>
                 </div>
 
-                <?php if ($destination['has_rating']): ?>
+                <?php if ($destination['has_rating'] && $reviewRows !== []): ?>
                     <div class="sebaran" aria-label="Sebaran rating pengunjung">
                         <?php foreach ($destination['distribution'] as $baris): ?>
                             <div class="sebaran__baris">
@@ -657,6 +731,10 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 <?php endif; ?>
             </div>
 
+            <?php else: ?>
+            <div class="ulasan-kosong"><p>Belum ada ulasan</p></div>
+            <?php endif; ?>
+
             <?php if ($pesanUlasan !== ''): ?>
                 <div class="notif notif--ulasan" role="status"><?= e($pesanUlasan) ?></div>
             <?php endif; ?>
@@ -669,7 +747,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
     </main>
 
     <dialog class="dialog-ulasan" id="dialog-ulasan" aria-labelledby="judul-dialog">
-        <form method="post" action="detail-wisata.php?id=<?= e(rawurlencode($destination['id'])) ?>">
+        <form method="post" id="form-ulasan" novalidate action="detail-wisata.php?id=<?= e(rawurlencode($destination['id'])) ?>">
             <input type="hidden" name="aksi" value="tambah_ulasan">
             <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
 
@@ -677,27 +755,32 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <p class="dialog__sub">Bagikan pengalamanmu di <?= e($destination['title']) ?></p>
 
             <fieldset class="bintang-input">
-                <legend>Rating</legend>
-                <div class="bintang-input__baris">
-                    <?php for ($n = 10; $n >= 1; $n--):
-                        $nilai = $n / 2;
-                        $teks  = str_replace('.', ',', (string) $nilai);
-                        $sisi  = $n % 2 === 1 ? 'sisi-kiri' : 'sisi-kanan';
-                    ?>
-                        <input type="radio" name="rating" id="rating-<?= $n ?>" value="<?= e((string) $nilai) ?>" required>
-                        <label for="rating-<?= $n ?>" class="<?= $sisi ?>" title="<?= e($teks) ?> bintang">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bintang"/></svg>
-                            <span class="sr-only"><?= e($teks) ?> bintang</span>
-                        </label>
-                    <?php endfor; ?>
+                <legend class="sr-only">Rating</legend>
+                <div class="bintang-input__rate">
+                    <div class="bintang-input__baris">
+                        <?php for ($n = 5; $n >= 1; $n--): ?>
+                            <input type="radio" name="rating" id="rating-<?= $n ?>" value="<?= $n ?>"<?= $ratingSaya === $n ? ' checked' : '' ?>>
+                            <label for="rating-<?= $n ?>" title="<?= $n ?> bintang">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bintang"/></svg>
+                                <span class="sr-only"><?= $n ?> bintang</span>
+                            </label>
+                        <?php endfor; ?>
+                    </div>
+                    <span class="bintang-input__nilai" id="nilai-rating" aria-live="polite">
+                        <span class="nilai__angka">Rate</span><span class="nilai__skala" hidden>/5</span>
+                    </span>
+                    <button type="button" class="bintang-input__reset" id="reset-rating" aria-label="Atur ulang rating" hidden>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-ulang"/></svg>
+                    </button>
                 </div>
-                <p class="bintang-input__nilai" id="nilai-rating" aria-live="polite">Pilih rating</p>
             </fieldset>
 
             <label class="dialog__label" for="komentar">Ulasan</label>
-            <textarea id="komentar" name="komentar" rows="5" maxlength="500" required
-                      placeholder="Ceritakan pengalamanmu di sini..."></textarea>
+            <textarea id="komentar" name="komentar" rows="5" maxlength="500"
+                      placeholder="Ceritakan pengalamanmu di sini..."><?= e($komentarSaya) ?></textarea>
             <p class="dialog__catatan">Jika kamu sudah pernah mengulas destinasi ini, ulasan lamamu akan diperbarui.</p>
+
+            <p class="dialog__error" id="error-ulasan" role="alert" hidden></p>
 
             <div class="dialog__aksi">
                 <button type="button" class="btn-batal" id="batal-ulasan">Batal</button>
@@ -711,17 +794,44 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             var toggle = document.getElementById('kategori-toggle');
             var menu = document.getElementById('kategori-menu');
             var header = document.querySelector('.ep-navbar');
+            if (!toggle || !menu) return;
+
+            document.body.appendChild(menu);
+
+            function terbuka() {
+                return menu.classList.contains('show');
+            }
+
+            function posisi() {
+                var r = toggle.getBoundingClientRect();
+                var dasar = header ? header.getBoundingClientRect().bottom : r.bottom;
+                var lebar = menu.offsetWidth;
+                var kiri;
+                if (window.innerWidth <= 900) {
+                    kiri = (window.innerWidth - lebar) / 2;
+                } else {
+                    kiri = r.left + r.width * 0.15;
+                }
+                kiri = Math.max(8, Math.min(kiri, window.innerWidth - lebar - 8));
+                menu.style.top = Math.round(dasar + 6) + 'px';
+                menu.style.left = Math.round(kiri) + 'px';
+            }
 
             function buka() {
                 menu.classList.add('show');
-                var r = toggle.getBoundingClientRect();
-                menu.style.top = (header.getBoundingClientRect().bottom + 6) + 'px';
-                menu.style.left = (r.left + r.width * 0.15) + 'px';
+                menu.style.setProperty('display', 'block', 'important');
+                menu.style.setProperty('visibility', 'visible', 'important');
+                menu.style.setProperty('opacity', '1', 'important');
+                posisi();
                 toggle.classList.add('aktif');
                 toggle.setAttribute('aria-expanded', 'true');
             }
+
             function tutup() {
                 menu.classList.remove('show');
+                menu.style.removeProperty('display');
+                menu.style.removeProperty('visibility');
+                menu.style.removeProperty('opacity');
                 toggle.classList.remove('aktif');
                 toggle.setAttribute('aria-expanded', 'false');
             }
@@ -729,22 +839,29 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             toggle.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                menu.classList.contains('show') ? tutup() : buka();
+                if (terbuka()) { tutup(); } else { buka(); }
             });
+
             document.addEventListener('click', function (e) {
-                if (!menu.contains(e.target)) tutup();
+                if (terbuka() && !menu.contains(e.target) && !toggle.contains(e.target)) tutup();
             });
+
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') tutup();
+                if (e.key === 'Escape' && terbuka()) {
+                    tutup();
+                    toggle.focus();
+                }
             });
-            window.addEventListener('resize', tutup);
-            window.addEventListener('scroll', tutup, { passive: true });
+
+            window.addEventListener('resize', function () {
+                if (terbuka()) posisi();
+            });
         })();
 
         (function () {
-            var daftar = document.querySelectorAll('.notif');
-            daftar.forEach(function (n) {
+            document.querySelectorAll('.notif').forEach(function (n) {
                 setTimeout(function () { n.classList.add('hilang'); }, 4000);
+                setTimeout(function () { n.style.display = 'none'; }, 4500);
             });
         })();
 
@@ -766,21 +883,134 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 }
             });
 
-            batal.addEventListener('click', function () { dialog.close(); });
+            batal.addEventListener('click', function () {
+                if (typeof dialog.close === 'function') {
+                    dialog.close();
+                } else {
+                    dialog.removeAttribute('open');
+                }
+            });
 
             dialog.addEventListener('click', function (e) {
-                if (e.target === dialog) dialog.close();
+                if (e.target === dialog && typeof dialog.close === 'function') dialog.close();
             });
         })();
 
         (function () {
             var info = document.getElementById('nilai-rating');
+            var reset = document.getElementById('reset-rating');
+            var baris = document.querySelector('.bintang-input__baris');
+            if (!info || !reset || !baris) return;
+
+            var angka = info.querySelector('.nilai__angka');
+            var skala = info.querySelector('.nilai__skala');
             var radios = document.querySelectorAll('.bintang-input input[type="radio"]');
-            if (!info) return;
+            var bisaHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+
+            function terpilih() {
+                var r = document.querySelector('.bintang-input input[type="radio"]:checked');
+                return r ? r.value : '';
+            }
+
+            function tampil(nilai, pratinjau) {
+                var ada = nilai !== '';
+                angka.textContent = ada ? nilai : 'Rate';
+                skala.hidden = !ada;
+                info.classList.toggle('terpilih', ada && !pratinjau);
+                info.classList.toggle('pratinjau', ada && pratinjau);
+            }
+
+            function segarkan() {
+                var nilai = terpilih();
+                tampil(nilai, false);
+                reset.hidden = nilai === '';
+            }
+
             radios.forEach(function (r) {
-                r.addEventListener('change', function () {
-                    info.textContent = r.value.replace('.', ',') + ' dari 5';
+                r.addEventListener('change', segarkan);
+            });
+
+            reset.addEventListener('click', function () {
+                radios.forEach(function (r) { r.checked = false; });
+                segarkan();
+            });
+
+            if (bisaHover) {
+                baris.querySelectorAll('label').forEach(function (l) {
+                    l.addEventListener('mouseenter', function () {
+                        tampil(l.getAttribute('for').replace('rating-', ''), true);
+                    });
                 });
+                baris.addEventListener('mouseleave', segarkan);
+            }
+
+            segarkan();
+        })();
+
+        (function () {
+            var form = document.getElementById('form-ulasan');
+            var galat = document.getElementById('error-ulasan');
+            if (!form) return;
+            form.addEventListener('submit', function (e) {
+                var rating = form.querySelector('input[name="rating"]:checked');
+                var komentar = form.querySelector('textarea[name="komentar"]');
+                var pesan = '';
+                if (!rating) {
+                    pesan = 'Pilih rating terlebih dahulu.';
+                } else if (komentar.value.trim() === '') {
+                    pesan = 'Ulasan tidak boleh kosong.';
+                }
+                if (pesan !== '') {
+                    e.preventDefault();
+                    galat.textContent = pesan;
+                    galat.hidden = false;
+                    return;
+                }
+                galat.hidden = true;
+                var kirim = form.querySelector('.btn-kirim');
+                if (kirim) kirim.disabled = true;
+            });
+        })();
+
+        (function () {
+            var form = document.getElementById('form-favorit');
+            var tombol = document.getElementById('tombol-favorit');
+            if (!form || !tombol || !window.fetch) return;
+            var sibuk = false;
+
+            function tampilkan(tersimpan) {
+                tombol.classList.toggle('aktif', tersimpan);
+                tombol.setAttribute('aria-pressed', tersimpan ? 'true' : 'false');
+                tombol.querySelector('i').className = 'bi ' + (tersimpan ? 'bi-heart-fill' : 'bi-heart');
+                tombol.querySelector('span').textContent = tersimpan ? 'Tersimpan Di Favorit' : 'Simpan Favorit';
+            }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (sibuk) return;
+                sibuk = true;
+                tombol.disabled = true;
+                fetch(form.getAttribute('action'), {
+                    method: 'POST',
+                    body: new FormData(form),
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'fetch' }
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) {
+                        sibuk = false;
+                        tombol.disabled = false;
+                        if (d.status === 'login') {
+                            window.location.href = '../auth/Login.php';
+                        } else if (d.status === 'ok') {
+                            tampilkan(d.tersimpan === true);
+                        }
+                    })
+                    .catch(function () {
+                        sibuk = false;
+                        tombol.disabled = false;
+                        form.submit();
+                    });
             });
         })();
     </script>

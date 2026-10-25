@@ -14,15 +14,20 @@ html.html-tentang {
 }
 
 body.halaman-tentang {
+    --nav: calc(83 * var(--u));
+    --font-serif: "Frank Ruhl Libre", Georgia, "Times New Roman", serif;
+    --font-mono: "Fragment Mono", "Courier New", monospace;
+    --kartu-gradasi: linear-gradient(180deg, #dde6e0 0%, #e8efea 30%, #f2f6f3 100%);
+
     margin: 0;
     display: block;
     min-height: 100vh;
+    padding-top: var(--nav);
     color: #111111;
     background: #ffffff;
-    font-family: var(--font-main);
-    overflow-y: auto !important;
+    font-family: var(--font-serif);
+    overflow: visible !important;
     height: auto !important;
-    padding-top: var(--compact-header-height, 68px);
 }
 
 .about-page {
@@ -38,20 +43,9 @@ body.halaman-tentang .ep-navbar {
     background: #fff;
 }
 
-.ep-menu a {
-    z-index: 10;
-    pointer-events: auto;
-    cursor: pointer;
-}
-
-body.halaman-tentang .ep-menu a.ep-menu__tentang,
-body.halaman-tentang .ep-menu a.ep-menu__tentang:hover {
-    color: var(--hijau);
-}
-
 body.halaman-tentang .ep-ikon--cari,
 body.halaman-tentang .ep-ikon--profil {
-    color: var(--hijau);
+    color: var(--hijau, var(--green));
 }
 
 body.halaman-tentang .ep-ikon--profil svg,
@@ -61,17 +55,42 @@ body.halaman-tentang .ep-ikon--cari svg {
     height: 100%;
 }
 
-body.halaman-tentang .ep-menu__kategori {
+body.halaman-tentang .ep-menu {
+    display: flex;
+    align-items: center;
+    gap: calc(64 * var(--u));
+}
+
+body.halaman-tentang .ep-menu > a {
+    position: static;
+    margin: 0;
+    padding: 0;
+    transform: none;
     white-space: nowrap;
+    z-index: 10;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+body.halaman-tentang .ep-menu a.ep-menu__tentang,
+body.halaman-tentang .ep-menu a.ep-menu__tentang:hover {
+    color: var(--hijau, var(--green));
+}
+
+body.halaman-tentang .ep-menu__kategori {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(10 * var(--u));
+    text-transform: none;
 }
 
 body.halaman-tentang .ep-menu__kategori::after {
     content: "";
-    display: inline-block;
+    display: block;
+    flex: none;
     width: calc(21 * var(--u));
     height: calc(12 * var(--u));
-    margin-left: calc(12 * var(--u));
-    vertical-align: middle;
+    margin: 0;
     background: currentColor;
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 14'%3E%3Cpath d='M2 2l10 10L22 2' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 14'%3E%3Cpath d='M2 2l10 10L22 2' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
@@ -87,16 +106,19 @@ body.halaman-tentang .ep-menu__kategori[aria-expanded="true"]::after {
 
 body.halaman-tentang .ep-menu__kategori:hover,
 body.halaman-tentang .ep-menu__kategori.aktif {
-    color: var(--hijau);
+    color: var(--hijau, var(--green));
 }
 
-body.halaman-tentang .kat-menu {
+body.halaman-tentang .dd-kategori {
     display: none;
     position: fixed;
+    top: 0;
+    left: 0;
     z-index: 3000;
     box-sizing: border-box;
     width: max-content;
     min-width: 0;
+    max-width: calc(100vw - 16px);
     margin: 0;
     padding: 0;
     overflow: hidden;
@@ -107,40 +129,38 @@ body.halaman-tentang .kat-menu {
     box-shadow: 0 calc(2 * var(--u)) calc(5 * var(--u)) rgba(0, 0, 0, 0.2);
 }
 
-body.halaman-tentang .kat-menu.show {
+body.halaman-tentang .dd-kategori.show {
     display: block;
 }
 
-body.halaman-tentang .kat-menu li {
+body.halaman-tentang .dd-kategori li {
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-body.halaman-tentang .kat-menu a.kat-item {
+body.halaman-tentang .dd-kategori a.dd-kategori__item {
     display: block;
     position: static;
     box-sizing: border-box;
     width: 100%;
-    padding: 0 calc(4 * var(--u));
-    overflow: hidden;
+    padding: 0 calc(13 * var(--u));
     background: transparent;
     color: #000;
-    font-family: "Poppins", sans-serif;
-    font-size: max(9px, calc(12 * var(--u)));
-    font-weight: 400 !important;
-    line-height: calc(21 * var(--u));
+    font-family: "Poppins", Arial, sans-serif;
+    font-size: max(11px, calc(12 * var(--u)));
+    font-weight: 400;
+    line-height: max(24px, calc(25 * var(--u)));
     text-align: center;
-    white-space: nowrap;
-    text-overflow: ellipsis;
     text-decoration: none;
+    white-space: nowrap;
 }
 
-body.halaman-tentang .kat-menu a.kat-item:hover,
-body.halaman-tentang .kat-menu a.kat-item:focus {
-    background: var(--hijau);
+body.halaman-tentang .dd-kategori a.dd-kategori__item:hover,
+body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
+    background: var(--hijau, var(--green));
     color: #fff;
-    font-weight: 400 !important;
+    font-weight: 400;
     outline: none;
 }
 
@@ -192,10 +212,11 @@ body.halaman-tentang .kat-menu a.kat-item:focus {
     top: calc(60 * var(--u));
     height: calc(46 * var(--u));
     margin: 0;
-    font-family: var(--font-main);
+    font-family: var(--font-serif);
     font-size: calc(37.3 * var(--u));
     font-weight: 700;
     line-height: calc(46 * var(--u));
+    text-transform: uppercase;
     white-space: nowrap;
 }
 
@@ -216,17 +237,19 @@ body.halaman-tentang .kat-menu a.kat-item:focus {
     margin: calc(48 * var(--u)) 0 0 calc(50% - 580 * var(--u));
     padding-bottom: calc(40 * var(--u));
     color: #111111;
-    font-family: var(--font-main);
+    font-family: var(--font-serif);
 }
 
 .about-card,
 .benefit-card {
-    background: #eef2ee;
+    background-color: #eef2ee;
+    background-image: var(--kartu-gradasi);
     border: calc(1 * var(--u)) solid #d3d9d5;
     box-shadow: 0 calc(3 * var(--u)) calc(5 * var(--u)) rgba(0, 0, 0, 0.28);
 }
 
 .about-card {
+    overflow: hidden;
     border-radius: calc(20 * var(--u));
     text-align: center;
 }
@@ -235,7 +258,7 @@ body.halaman-tentang .kat-menu a.kat-item:focus {
     height: calc(36 * var(--u));
     margin: 0 0 calc(6 * var(--u));
     color: var(--green);
-    font-family: var(--font-main);
+    font-family: var(--font-serif);
     font-size: calc(27.3 * var(--u));
     font-weight: 700;
     line-height: calc(36 * var(--u));
@@ -244,13 +267,13 @@ body.halaman-tentang .kat-menu a.kat-item:focus {
 .about-card p {
     margin: 0;
     color: #111111;
-    font-family: var(--font-main);
+    font-family: var(--font-serif);
     font-weight: 400;
     white-space: nowrap;
 }
 
 .about-intro {
-    height: calc(191 * var(--u));
+    min-height: calc(191 * var(--u));
     padding: calc(17 * var(--u)) 0 0;
 }
 
@@ -275,7 +298,7 @@ body.halaman-tentang .kat-menu a.kat-item:focus {
 }
 
 .about-purpose .about-card {
-    height: calc(173 * var(--u));
+    min-height: calc(173 * var(--u));
     padding: calc(16 * var(--u)) 0 0;
 }
 
@@ -313,12 +336,11 @@ body.halaman-tentang .kat-menu a.kat-item:focus {
 
 .about-benefits > h2 {
     height: calc(36 * var(--u));
-    margin: 0 0 calc(16 * var(--u));
     width: calc(1181 * var(--u));
-    margin-left: calc(2 * var(--u));
+    margin: 0 0 calc(16 * var(--u)) calc(2 * var(--u));
     padding-left: calc(8 * var(--u));
     color: var(--green);
-    font-family: var(--font-main);
+    font-family: var(--font-serif);
     font-size: calc(27.3 * var(--u));
     font-weight: 700;
     line-height: calc(36 * var(--u));
@@ -335,6 +357,7 @@ body.halaman-tentang .kat-menu a.kat-item:focus {
 .benefit-card {
     position: relative;
     height: calc(120 * var(--u));
+    overflow: hidden;
     border-radius: calc(18 * var(--u));
 }
 
@@ -346,14 +369,14 @@ body.halaman-tentang .kat-menu a.kat-item:focus {
 .benefit-title {
     display: block;
     color: var(--green);
-    font-family: var(--font-main);
+    font-family: var(--font-serif);
     font-weight: 600;
 }
 
 .benefit-desc {
     display: block;
     color: #111111;
-    font-family: var(--font-main);
+    font-family: var(--font-serif);
     font-weight: 400;
 }
 
@@ -441,27 +464,102 @@ body.halaman-tentang .kat-menu a.kat-item:focus {
     line-height: calc(30 * var(--u));
 }
 
-@media (max-width: 767px) {
+@media (max-width: 900px) {
+    body.halaman-tentang {
+        --u: calc(100vw / 600);
+        --nav: 0px;
+    }
+
+    body.halaman-tentang .ep-navbar {
+        position: sticky;
+        top: 0;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+
+    body.halaman-tentang .ep-navbar__inner {
+        box-sizing: border-box;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px 12px;
+        width: 100%;
+        height: auto;
+        padding: 10px 16px 8px;
+    }
+
+    body.halaman-tentang .ep-logo {
+        position: static;
+        flex: 1 1 auto;
+        order: 1;
+        margin: 0;
+        font-size: clamp(22px, 6.5vw, 30px);
+        line-height: 1.2;
+    }
+
+    body.halaman-tentang .ep-ikon {
+        position: static;
+        display: flex;
+        flex: none;
+        order: 2;
+        width: 30px;
+        height: 30px;
+        margin: 0;
+    }
+
+    body.halaman-tentang .ep-ikon svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    body.halaman-tentang .ep-menu {
+        position: static;
+        order: 3;
+        flex: 0 0 100%;
+        justify-content: center;
+        gap: 28px;
+        margin: 0;
+        padding: 4px 0 2px;
+        font-size: clamp(14px, 4vw, 16px);
+    }
+
+    body.halaman-tentang .ep-menu__kategori {
+        gap: 6px;
+    }
+
+    body.halaman-tentang .ep-menu__kategori::after {
+        width: 14px;
+        height: 8px;
+    }
+
+    body.halaman-tentang .dd-kategori a.dd-kategori__item {
+        padding: 0 22px;
+        font-size: 14px;
+        line-height: 42px;
+    }
+
     .br-d {
         display: none;
     }
 
     .about-hero {
-        height: 180px;
+        height: 190px;
     }
 
     .about-hero-copy h1 {
         left: 20px;
+        right: 16px;
         top: 40px;
         height: auto;
         font-size: 24px;
         line-height: 32px;
+        white-space: normal;
     }
 
     .about-hero-copy p {
         left: 20px;
         right: 16px;
-        top: 82px;
+        top: 84px;
         font-size: 12px;
         line-height: 18px;
         white-space: normal;
@@ -496,15 +594,16 @@ body.halaman-tentang .kat-menu a.kat-item:focus {
     .about-card p,
     .about-intro p,
     .about-purpose .about-card p {
-        font-size: 14px;
+        font-size: 15px;
         line-height: 1.5;
         white-space: normal;
+        overflow-wrap: break-word;
     }
 
     .about-intro,
     .about-purpose .about-card,
     .about-misi {
-        height: auto;
+        min-height: 0;
         padding: 16px !important;
     }
 
@@ -561,13 +660,14 @@ body.halaman-tentang .kat-menu a.kat-item:focus {
 
     .benefit-card .benefit-title {
         height: auto;
-        font-size: 16px;
+        font-size: 17px;
         line-height: 1.3;
     }
 
     .benefit-card .benefit-desc {
         margin-top: 2px;
-        font-size: 14px;
+        padding-left: 0;
+        font-size: 15px;
         line-height: 1.4;
     }
 

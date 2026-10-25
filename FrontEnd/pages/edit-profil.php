@@ -5,6 +5,13 @@ function e($s): string {
     return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
 }
 
+function srcGambar(string $path): string {
+    $path = trim($path);
+    if ($path === '') return '';
+    if (preg_match('#^https?://#i', $path) === 1) return $path;
+    return is_file(__DIR__ . '/../../' . ltrim($path, '/')) ? '../../' . ltrim($path, '/') : '';
+}
+
 require_once __DIR__ . '/../../Backend/database/koneksi.php';
 
 $userId = filter_var($_SESSION['id_user'] ?? null, FILTER_VALIDATE_INT);
@@ -105,25 +112,41 @@ if ($nama === '' || strcasecmp($nama, 'Nama User') === 0) {
 }
 
 $foto = $info ? nilai_pertama($row, $info, ['foto_profil', 'foto', 'avatar']) : '';
-if ($foto === '') $foto = trim((string) ($_SESSION['foto_profil'] ?? ($_SESSION['foto'] ?? '')));
+if ($foto === '') $foto = trim((string) ($_SESSION['foto_profil'] ?? ($_SESSION['foto'] ?? ($_SESSION['user']['foto_profil'] ?? ''))));
+
+$fotoEmail = trim((string) (
+    $_SESSION['foto_google']
+    ?? ($_SESSION['picture']
+    ?? ($_SESSION['avatar_url']
+    ?? ($_SESSION['user']['foto_google']
+    ?? ($_SESSION['user']['picture'] ?? ''))))
+));
 
 $gravatar = filter_var($email, FILTER_VALIDATE_EMAIL)
     ? 'https://www.gravatar.com/avatar/' . hash('sha256', strtolower($email)) . '?s=440&d=404'
     : '';
 
-$loginEmail = filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
-$inisial    = '';
-if ($loginEmail) {
-    $bagianLokal = (string) strstr($email, '@', true);
-    if (preg_match('/[\p{L}\p{N}]/u', $bagianLokal, $cocok) === 1) {
-        $inisial = mb_strtoupper($cocok[0], 'UTF-8');
-    }
+$srcTampil = srcGambar($foto);
+if ($srcTampil === '' && preg_match('#^https://#i', $fotoEmail) === 1) {
+    $srcTampil = $fotoEmail;
+}
+if ($srcTampil === '') {
+    $srcTampil = $gravatar;
 }
 
-$errors = [];
-$gagal  = '';
+$sukses = !empty($_SESSION['flash_profil']);
+unset($_SESSION['flash_profil']);
+
+$gagal = false;
+$detailGagal = '';
+if (!empty($_SESSION['flash_gagal'])) {
+    $gagal = true;
+    $detailGagal = (string) ($_SESSION['flash_gagal']['detail'] ?? '');
+}
+unset($_SESSION['flash_gagal']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $errors   = [];
     $namaBaru = trim($_POST['nama_lengkap'] ?? '');
     $fotoBaru = $foto;
     $fileBaru = null;
@@ -138,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $izin = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
 
         if ($_FILES['foto']['error'] !== UPLOAD_ERR_OK) {
-            $errors['foto'] = 'Foto gagal diunggah. Coba lagi.';
+            $errors['foto'] = 'Foto gagal diunggah.';
         } else {
             $tipe = mime_content_type($_FILES['foto']['tmp_name']);
             if (!isset($izin[$tipe])) {
@@ -159,42 +182,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if (!$errors) {
-        if ($info && simpan_profil_db($conn, $info, $userId, $namaBaru, $fotoBaru)) {
-            if ($fileBaru && strpos($foto, 'uploads/profil/') === 0) {
-                $lama = __DIR__ . '/../../uploads/profil/' . basename($foto);
-                if (is_file($lama)) @unlink($lama);
-            }
-            $_SESSION['nama'] = $namaBaru;
-            $_SESSION['foto'] = $fotoBaru;
-            $_SESSION['foto_profil'] = $fotoBaru;
-            if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
-                $_SESSION['user']['nama'] = $namaBaru;
-                $_SESSION['user']['foto_profil'] = $fotoBaru;
-            }
-            $_SESSION['pesan'] = 'Perubahan profil berhasil disimpan.';
-            header('Location: profil.php');
-            exit;
+    $berhasil = false;
+    if (!$errors && $info) {
+        $berhasil = simpan_profil_db($conn, $info, $userId, $namaBaru, $fotoBaru);
+    }
+
+    if ($berhasil) {
+        if ($fileBaru && strpos($foto, 'uploads/profil/') === 0) {
+            $lama = __DIR__ . '/../../uploads/profil/' . basename($foto);
+            if (is_file($lama)) @unlink($lama);
         }
-        if ($fileBaru && is_file($fileBaru)) @unlink($fileBaru);
-        $gagal = 'Perubahan gagal disimpan karena terjadi kesalahan pada server. Silakan coba lagi.';
-    } else {
-        if ($fileBaru && is_file($fileBaru)) @unlink($fileBaru);
-        $gagal = 'Perubahan gagal disimpan. Periksa kembali isian Anda.';
+        $_SESSION['nama'] = $namaBaru;
+        $_SESSION['foto'] = $fotoBaru;
+        $_SESSION['foto_profil'] = $fotoBaru;
+        if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
+            $_SESSION['user']['nama'] = $namaBaru;
+            $_SESSION['user']['foto_profil'] = $fotoBaru;
+        }
+        $_SESSION['flash_profil'] = 1;
+        header('Location: edit-profil.php');
+        exit;
     }
 
-    $nama = $namaBaru;
+    if ($fileBaru && is_file($fileBaru)) @unlink($fileBaru);
+    $_SESSION['flash_gagal'] = ['detail' => $errors ? (string) reset($errors) : ''];
+    header('Location: edit-profil.php');
+    exit;
 }
-
-$fotoSrc = '';
-if ($foto !== '') {
-    if (preg_match('#^https?://#i', $foto)) {
-        $fotoSrc = $foto;
-    } elseif (is_file(__DIR__ . '/../../' . $foto)) {
-        $fotoSrc = '../../' . ltrim($foto, '/');
-    }
-}
-$srcTampil = $fotoSrc ?: $gravatar;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -205,19 +219,19 @@ $srcTampil = $fotoSrc ?: $gravatar;
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../CSS/edit-profil.css?v=shared-layout-4">
-  <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
+  <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261055">
+  <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
 </head>
 <body class="halaman-edit-profil">
 
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
-      <clipPath id="klip-avatar"><circle cx="110" cy="110" r="110"/></clipPath>
+      <clipPath id="klip-dalam"><circle cx="110" cy="110" r="103"/></clipPath>
       <symbol id="ikon-profil" viewBox="0 0 220 220">
-        <circle cx="110" cy="110" r="93.5" fill="none" stroke="#166d5c" stroke-width="11"/>
-        <circle cx="110" cy="82.5" r="27.5" fill="none" stroke="#166d5c" stroke-width="11"/>
-        <path d="M49.5 170.5c9.35-27.5 30.25-41.25 60.5-41.25s51.15 13.75 60.5 41.25" fill="none" stroke="#166d5c" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="110" cy="110" r="102" fill="none" stroke="#166d5c" stroke-width="15"/>
+        <circle cx="110" cy="91" r="26" fill="none" stroke="#166d5c" stroke-width="13"/>
+        <path d="M30 222C30 176 56 146 92 140C99 150 121 150 128 140C164 146 190 176 190 222" fill="none" stroke="#166d5c" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#klip-dalam)"/>
       </symbol>
       <symbol id="i-pensil" viewBox="0 0 48 48">
         <path d="M23 7H12A6 6 0 0 0 6 13V36A6 6 0 0 0 12 42H35A6 6 0 0 0 41 36V26" fill="none" stroke="currentColor" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -235,8 +249,8 @@ $srcTampil = $fotoSrc ?: $gravatar;
 
       <nav class="ep-menu" aria-label="Menu utama">
         <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
-        <a class="ep-menu__kategori" href="#" id="kategori-toggle"
-           aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">kategori</a>
+        <a class="ep-menu__kategori" href="#kategori" id="kategori-toggle"
+            role="button" aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">Kategori</a>
         <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
       </nav>
 
@@ -246,6 +260,7 @@ $srcTampil = $fotoSrc ?: $gravatar;
           <line x1="25" y1="25" x2="36" y2="36"/>
         </svg>
       </a>
+
       <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
         <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="20" cy="20" r="17.5"/>
@@ -254,14 +269,14 @@ $srcTampil = $fotoSrc ?: $gravatar;
         </svg>
       </a>
     </div>
-
-    <ul class="kat-menu" id="kategori-menu">
-      <li><a class="kat-item" href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a></li>
-      <li><a class="kat-item" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
-      <li><a class="kat-item" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-      <li><a class="kat-item" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
-    </ul>
   </header>
+
+  <ul class="dd-kategori" id="kategori-menu" role="menu" aria-label="Kategori wisata">
+    <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=alam">Wisata Alam &amp; pegunungan</a></li>
+    <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=air-curug">Wisata Air &amp; Curug</a></li>
+    <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
+    <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
+  </ul>
 
   <form action="" method="post" enctype="multipart/form-data" novalidate>
     <main class="ep-stage">
@@ -276,21 +291,12 @@ $srcTampil = $fotoSrc ?: $gravatar;
         <span class="ep-back__teks">Back</span>
       </div>
 
-      <?php if ($gagal !== ''): ?>
-        <div class="ep-alert ep-alert--gagal" role="alert"><?= e($gagal) ?></div>
-      <?php endif; ?>
-
       <input class="ep-foto__input" type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/webp">
 
       <div class="ep-foto__lingkaran" id="foto-tampil">
         <svg viewBox="0 0 220 220" id="avatar-default" aria-hidden="true">
           <circle cx="110" cy="110" r="110" fill="#d9d9d9"/>
-          <?php if ($loginEmail && $inisial !== ''): ?>
-            <circle cx="110" cy="110" r="102.5" fill="none" stroke="#166d5c" stroke-width="15"/>
-            <text class="ep-inisial" x="110" y="113" text-anchor="middle" dominant-baseline="central" fill="#166d5c"><?= e($inisial) ?></text>
-          <?php else: ?>
-            <use href="#ikon-profil" style="color:#166d5c"/>
-          <?php endif; ?>
+          <use href="#ikon-profil"/>
         </svg>
         <img id="preview-foto" alt="Foto profil" referrerpolicy="no-referrer" hidden<?= $srcTampil !== '' ? ' src="' . e($srcTampil) . '"' : '' ?>>
       </div>
@@ -301,22 +307,16 @@ $srcTampil = $fotoSrc ?: $gravatar;
           <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-pensil"/></svg>
         </button>
       </div>
-      <?php if (isset($errors['foto'])): ?>
-        <p class="ep-error ep-error--foto"><?= e($errors['foto']) ?></p>
-      <?php endif; ?>
 
       <label class="ep-label ep-label--nama" for="nama_lengkap">Nama Lengkap</label>
       <input class="ep-input" type="text" id="nama_lengkap" name="nama_lengkap"
              value="<?= e($nama) ?>" placeholder="Nama User" maxlength="100" autocomplete="name" required>
-      <?php if (isset($errors['nama'])): ?>
-        <p class="ep-error ep-error--nama"><?= e($errors['nama']) ?></p>
-      <?php endif; ?>
 
       <span class="ep-label ep-label--email">Email</span>
       <p class="ep-email"><?= e($email) ?></p>
       <p class="ep-catatan">Email tidak dapat diubah karena digunakan sebagai identitas akun.</p>
 
-      <button href "eksplorMajaKu/FrontEnd/pages/profil.php" type="submit" class="ep-btn ep-btn--utama">Simpan Perubahan</button>
+      <button type="submit" class="ep-btn ep-btn--utama">Simpan Perubahan</button>
       <a href="profil.php" class="ep-btn ep-btn--batal">Batal</a>
     </main>
   </form>
@@ -330,8 +330,24 @@ $srcTampil = $fotoSrc ?: $gravatar;
           </svg>
         </div>
         <h2 class="ep-modal__judul" id="modal-judul">Edit Profil Berhasil!</h2>
-        <p class="ep-modal__isi" id="modal-isi">Perubahan profil berhasil disimpan.</p>
-        <a class="ep-modal__ok" href="profil.php" id="modal-ok">OK</a>
+        <p class="ep-modal__isi" id="modal-isi">Perubahan profil berhasil disimpan</p>
+        <a class="ep-modal__ok" href="profil.php" id="modal-aksi">OK</a>
+      </div>
+    </div>
+  <?php elseif ($gagal): ?>
+    <div class="ep-modal" role="alertdialog" aria-modal="true" aria-labelledby="modal-judul" aria-describedby="modal-isi">
+      <div class="ep-modal__kotak ep-modal__kotak--gagal">
+        <div class="ep-modal__ikon ep-modal__ikon--gagal">
+          <svg viewBox="0 0 176 176" aria-hidden="true">
+            <path d="M47 47l82 82M129 47l-82 82" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h2 class="ep-modal__judul ep-modal__judul--gagal" id="modal-judul">Edit Profil Gagal!</h2>
+        <p class="ep-modal__isi ep-modal__isi--gagal" id="modal-isi">Perubahan profil gagal disimpan</p>
+        <?php if ($detailGagal !== ''): ?>
+          <p class="ep-modal__detail"><?= e($detailGagal) ?></p>
+        <?php endif; ?>
+        <a class="ep-modal__ok" href="edit-profil.php" id="modal-aksi">Coba Lagi</a>
       </div>
     </div>
   <?php endif; ?>
@@ -341,15 +357,29 @@ $srcTampil = $fotoSrc ?: $gravatar;
       var toggle = document.getElementById('kategori-toggle');
       var menu = document.getElementById('kategori-menu');
       var header = document.querySelector('.ep-navbar');
+      if (!toggle || !menu) return;
+
+      function posisi() {
+        var r = toggle.getBoundingClientRect();
+        var dasar = header ? header.getBoundingClientRect().bottom : r.bottom;
+        var lebar = menu.offsetWidth;
+        var kiri = r.left + (r.width / 2) - (lebar / 2);
+        kiri = Math.max(8, Math.min(kiri, window.innerWidth - lebar - 8));
+        menu.style.top = Math.round(dasar) + 'px';
+        menu.style.left = Math.round(kiri) + 'px';
+      }
+
+      function terbuka() {
+        return menu.classList.contains('show');
+      }
 
       function buka() {
         menu.classList.add('show');
-        var r = toggle.getBoundingClientRect();
-        menu.style.top = (header.getBoundingClientRect().bottom + 6) + 'px';
-        menu.style.left = (r.left + r.width * 0.15) + 'px';
+        posisi();
         toggle.classList.add('aktif');
         toggle.setAttribute('aria-expanded', 'true');
       }
+
       function tutup() {
         menu.classList.remove('show');
         toggle.classList.remove('aktif');
@@ -359,50 +389,63 @@ $srcTampil = $fotoSrc ?: $gravatar;
       toggle.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        menu.classList.contains('show') ? tutup() : buka();
+        if (terbuka()) { tutup(); } else { buka(); }
       });
+
       document.addEventListener('click', function (e) {
-        if (!menu.contains(e.target)) tutup();
+        if (terbuka() && !menu.contains(e.target) && !toggle.contains(e.target)) tutup();
       });
+
       document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') tutup();
+        if (e.key === 'Escape' && terbuka()) {
+          tutup();
+          toggle.focus();
+        }
       });
-      window.addEventListener('resize', tutup);
+
+      window.addEventListener('resize', function () {
+        if (terbuka()) posisi();
+      });
     })();
 
-    const input = document.getElementById('foto');
-    const preview = document.getElementById('preview-foto');
-    const avatarDefault = document.getElementById('avatar-default');
+    (function () {
+      var input         = document.getElementById('foto');
+      var preview       = document.getElementById('preview-foto');
+      var avatarDefault = document.getElementById('avatar-default');
+      var urlLokal      = null;
 
-    function tampilkanFoto() {
-      preview.hidden = false;
-      avatarDefault.style.display = 'none';
-    }
-
-    function tampilkanDefault() {
-      preview.hidden = true;
-      avatarDefault.style.display = '';
-    }
-
-    if (preview.getAttribute('src')) {
-      if (preview.complete && preview.naturalWidth > 0) {
-        tampilkanFoto();
-      } else {
-        preview.addEventListener('load', tampilkanFoto, { once: true });
-        preview.addEventListener('error', tampilkanDefault, { once: true });
+      function tampilkanFoto() {
+        preview.hidden = false;
+        avatarDefault.style.display = 'none';
       }
-    }
+      function tampilkanDefault() {
+        preview.hidden = true;
+        avatarDefault.style.display = '';
+      }
 
-    document.getElementById('btn-foto').addEventListener('click', () => input.click());
-    input.addEventListener('change', () => {
-      const file = input.files[0];
-      if (!file) return;
-      preview.src = URL.createObjectURL(file);
-      tampilkanFoto();
-    });
+      if (preview.getAttribute('src')) {
+        preview.addEventListener('load', tampilkanFoto);
+        preview.addEventListener('error', tampilkanDefault);
+        if (preview.complete) {
+          preview.naturalWidth > 0 ? tampilkanFoto() : tampilkanDefault();
+        }
+      }
 
-    const tombolOk = document.getElementById('modal-ok');
-    if (tombolOk) tombolOk.focus();
+      document.getElementById('btn-foto').addEventListener('click', function () { input.click(); });
+      input.addEventListener('change', function () {
+        var file = input.files[0];
+        if (!file) return;
+        if (urlLokal) URL.revokeObjectURL(urlLokal);
+        urlLokal = URL.createObjectURL(file);
+        preview.src = urlLokal;
+        tampilkanFoto();
+      });
+    })();
+
+    (function () {
+      var aksi = document.getElementById('modal-aksi');
+      if (aksi) aksi.focus();
+    })();
   </script>
 </body>
 </html>
