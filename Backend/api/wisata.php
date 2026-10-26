@@ -115,11 +115,18 @@ try {
       "nama" => $row["nama_kategori"],
       "deskripsi" => $row["deskripsi_kategori"]
     ];
+    $latitude = $row["latitude"] === null ? null : (float) $row["latitude"];
+    $longitude = $row["longitude"] === null ? null : (float) $row["longitude"];
+    $coordinatesComplete = $latitude !== null && $longitude !== null
+      && is_finite($latitude) && is_finite($longitude)
+      && $latitude >= -90 && $latitude <= 90
+      && $longitude >= -180 && $longitude <= 180;
     $row["lokasi"] = [
       "alamat" => $row["alamat"],
       "domisili" => $row["wilayah"],
-      "latitude" => $row["latitude"] === null ? null : (float) $row["latitude"],
-      "longitude" => $row["longitude"] === null ? null : (float) $row["longitude"]
+      "latitude" => $coordinatesComplete ? $latitude : null,
+      "longitude" => $coordinatesComplete ? $longitude : null,
+      "koordinat_lengkap" => $coordinatesComplete
     ];
     $row["jarak_km"] = null;
     if (

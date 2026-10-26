@@ -103,11 +103,12 @@ if ($role === "admin") {
         $_SESSION["nama_admin"] = $adminName;
         $_SESSION["username_admin"] = $storedUsername;
         $_SESSION["role"] = "admin";
+        $_SESSION["csrf"] = bin2hex(random_bytes(32));
 
         $respond(200, [
             "status" => "success", "message" => "Login admin berhasil.",
             "data" => ["id_admin" => (int) $adminId, "nama" => $adminName,
-                "username" => $storedUsername, "role" => "admin"]
+                "username" => $storedUsername, "role" => "admin", "csrf" => $_SESSION["csrf"]]
         ]);
     } catch (Throwable $exception) {
         error_log("Admin login error: " . $exception->getMessage());
@@ -277,6 +278,7 @@ try {
     $_SESSION["nama_user"] = $name;
     $_SESSION["email"] = $storedEmail;
     $_SESSION["role"] = "user";
+    $_SESSION["csrf"] = bin2hex(random_bytes(32));
 
     $respond(200, [
         "status" => "success",
@@ -285,7 +287,8 @@ try {
         "data" => [
             "id_user" => (int) $userId,
             "nama" => $name,
-            "email" => $storedEmail
+            "email" => $storedEmail,
+            "csrf" => $_SESSION["csrf"]
         ]
     ]);
 

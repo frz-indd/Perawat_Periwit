@@ -32,6 +32,22 @@
     {
       "key": "categoryId",
       "value": ""
+    },
+    {
+      "key": "adminUsername",
+      "value": ""
+    },
+    {
+      "key": "adminPassword",
+      "value": ""
+    },
+    {
+      "key": "destinationId",
+      "value": "K00001"
+    },
+    {
+      "key": "adminCsrf",
+      "value": ""
     }
   ],
   "item": [
@@ -210,6 +226,113 @@
               "        pm.expect(item.id_wisata).to.match(/^[KM][0-9]{5,}$/);",
               "        pm.expect(item.gambar).to.be.a('string').and.not.empty;",
               "    });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET lokasi destinasi menangani koordinat kosong atau lengkap",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/destinations/{{destinationId}}/location"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Location response has address and coordinate fields', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const location = pm.response.json().data;",
+              "    pm.expect(location).to.have.property('alamat');",
+              "    pm.expect(location).to.have.property('latitude');",
+              "    pm.expect(location).to.have.property('longitude');",
+              "    pm.expect(location.koordinat_lengkap).to.be.a('boolean');",
+              "    if (location.koordinat_lengkap) {",
+              "        pm.expect(location.latitude).to.be.a('number').within(-90, 90);",
+              "        pm.expect(location.longitude).to.be.a('number').within(-180, 180);",
+              "    } else {",
+              "        pm.expect(location.latitude).to.eql(null);",
+              "        pm.expect(location.longitude).to.eql(null);",
+              "    }",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin untuk uji validasi lokasi",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "role", "value": "admin", "type": "text" },
+            { "key": "username", "value": "{{adminUsername}}", "type": "text" },
+            { "key": "password", "value": "{{adminPassword}}", "type": "text" }
+          ]
+        },
+        "url": "{{baseUrl}}/Backend/api/fungsi_login.php"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Admin login returns a CSRF token', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const data = pm.response.json().data;",
+              "    pm.expect(data.role).to.eql('admin');",
+              "    pm.expect(data.csrf).to.be.a('string').and.not.empty;",
+              "    pm.collectionVariables.set('adminCsrf', data.csrf);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT lokasi menolak koordinat tidak lengkap",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" },
+          { "key": "X-CSRF-Token", "value": "{{adminCsrf}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"alamat\":\"Alamat uji\",\"latitude\":-6.9,\"longitude\":null}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/destinations/{{destinationId}}/location"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Incomplete coordinate pair returns 422', function () {",
+              "    pm.response.to.have.status(422);",
+              "    pm.expect(pm.response.json().status).to.eql('incomplete_coordinates');",
               "});"
             ]
           }

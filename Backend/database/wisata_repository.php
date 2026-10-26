@@ -134,8 +134,21 @@ function fetchTourismRows(mysqli $connection, array $filters = []): array
         $row["harga_tiket"] = (float) $row["harga_tiket"];
         $row["rating"] = $row["rating"] === null ? null : (float) $row["rating"];
         $row["jumlah_ulasan"] = (int) $row["jumlah_ulasan"];
-        $row["latitude"] = $row["latitude"] === null ? null : (float) $row["latitude"];
-        $row["longitude"] = $row["longitude"] === null ? null : (float) $row["longitude"];
+        $latitude = $row["latitude"] === null ? null : (float) $row["latitude"];
+        $longitude = $row["longitude"] === null ? null : (float) $row["longitude"];
+        $coordinatesComplete = $latitude !== null && $longitude !== null
+            && is_finite($latitude) && is_finite($longitude)
+            && $latitude >= -90 && $latitude <= 90
+            && $longitude >= -180 && $longitude <= 180;
+        $row["latitude"] = $coordinatesComplete ? $latitude : null;
+        $row["longitude"] = $coordinatesComplete ? $longitude : null;
+        $row["lokasi"] = [
+            "alamat" => $row["alamat"],
+            "wilayah" => $row["wilayah"],
+            "latitude" => $row["latitude"],
+            "longitude" => $row["longitude"],
+            "koordinat_lengkap" => $coordinatesComplete
+        ];
     }
     unset($row);
 

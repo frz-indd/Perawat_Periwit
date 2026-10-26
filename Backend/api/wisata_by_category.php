@@ -90,6 +90,12 @@ try {
 
     $tourism = [];
     while ($tourismStatement->fetch()) {
+        $numericLatitude = $latitude === null ? null : (float) $latitude;
+        $numericLongitude = $longitude === null ? null : (float) $longitude;
+        $coordinatesComplete = $numericLatitude !== null && $numericLongitude !== null
+            && is_finite($numericLatitude) && is_finite($numericLongitude)
+            && $numericLatitude >= -90 && $numericLatitude <= 90
+            && $numericLongitude >= -180 && $numericLongitude <= 180;
         $tourism[] = [
             "id_wisata" => $tourismId,
             "id_kategori" => (int) $categoryId,
@@ -101,8 +107,15 @@ try {
             "harga_tiket" => (float) $ticketPrice,
             "jam_buka" => $openingTime,
             "jam_tutup" => $closingTime,
-            "latitude" => $latitude === null ? null : (float) $latitude,
-            "longitude" => $longitude === null ? null : (float) $longitude
+            "latitude" => $coordinatesComplete ? $numericLatitude : null,
+            "longitude" => $coordinatesComplete ? $numericLongitude : null,
+            "lokasi" => [
+                "alamat" => $address,
+                "wilayah" => $region,
+                "latitude" => $coordinatesComplete ? $numericLatitude : null,
+                "longitude" => $coordinatesComplete ? $numericLongitude : null,
+                "koordinat_lengkap" => $coordinatesComplete
+            ]
         ];
     }
 
