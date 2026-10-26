@@ -116,8 +116,8 @@ function escapeHtml(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../CSS/kategori.css?v=category-fonts-2">
     <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
+    <link rel="stylesheet" href="../CSS/kategori.css?v=category-fonts-2">
 </head>
 <body>
     <header class="site-header">
@@ -214,7 +214,15 @@ function escapeHtml(string $value): string
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
-                <p class="empty-state">Destinasi tidak ditemukan. Coba kata pencarian yang lain.</p>
+                <div class="category-empty-state">
+                    <span class="empty-search-icon" aria-hidden="true">
+                        <i class="bi bi-search"></i>
+                        <span>×</span>
+                    </span>
+                    <h3>Wisata Tidak Di Temukan</h3>
+                    <p>Maaf, tidak ada destinasi wisata yang sesuai<br class="desktop-break"> dengan kata kunci pencarianmu dalam kategori ini</p>
+                    <a href="../../search">Lihat semua wisata</a>
+                </div>
             <?php endif; ?>
         </section>
     </main>

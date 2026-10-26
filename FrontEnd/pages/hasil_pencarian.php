@@ -18,6 +18,9 @@ $pageBasePath = rtrim($appRoot ?? '', '/') . '/FrontEnd/pages/';
 
 $wilayahDipilih = is_array($_GET['wilayah'] ?? null) ? $_GET['wilayah'] : [];
 $kategoriDipilih = is_array($_GET['kategori'] ?? null) ? $_GET['kategori'] : [];
+$jarakDipilih = is_array($_GET['distance'] ?? null)
+    ? array_values(array_filter($_GET['distance'], 'is_string'))
+    : [];
 
 $budgetMin = isset($_GET['min']) && $_GET['min'] !== ''
     ? max(0, (int) $_GET['min']) : 0;
@@ -150,8 +153,8 @@ function terpilih($daftar, $nilai)
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="../CSS/hasil_pencarian.css?v=font-map-2">
     <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
+    <link rel="stylesheet" href="../CSS/hasil_pencarian.css?v=font-map-3">
 </head>
 
 <body>
@@ -225,6 +228,23 @@ function terpilih($daftar, $nilai)
 
             <h2 class="filter-title">Filter</h2>
 
+            <!-- DISTANCE -->
+            <div class="filter-group distance-filter">
+                <h3>Jarak</h3>
+                <?php foreach ([
+                    '0-5' => '5 Km',
+                    '5-10' => '5 - 10 Km',
+                    '10-20' => '10 - 20 Km',
+                    '20-30' => '20 - 30 Km'
+                ] as $distanceValue => $distanceLabel): ?>
+                    <label class="filter-option">
+                        <input type="checkbox" name="distance[]" value="<?= $distanceValue ?>"
+                            <?= terpilih($jarakDipilih, $distanceValue) ?>>
+                        <span><?= htmlspecialchars($distanceLabel, ENT_QUOTES, 'UTF-8') ?></span>
+                    </label>
+                <?php endforeach; ?>
+            </div>
+
             <!-- WILAYAH -->
             <div class="filter-group">
                 <h3>Wilayah</h3>
@@ -256,34 +276,29 @@ function terpilih($daftar, $nilai)
             <div class="filter-group budget-group">
                 <h3>Budget</h3>
 
-                <div class="budget-labels">
-                    <label for="minBudget">Min</label>
-                    <label for="maxBudget">Max</label>
-                </div>
-
-                <div class="budget-inputs">
+                <div class="budget-field">
+                    <label for="minBudget">Minimum Rp</label>
                     <input
                         type="number"
                         id="minBudget"
                         name="min"
                         min="0"
-                        placeholder="0"
+                        placeholder="contoh : 10.000"
                         value="<?= $budgetMin > 0 ? $budgetMin : '' ?>"
                     >
+                </div>
 
-                    <span>-</span>
-
+                <div class="budget-field">
+                    <label for="maxBudget">Maximum Rp</label>
                     <input
                         type="number"
                         id="maxBudget"
                         name="max"
                         min="0"
-                        placeholder="1000000"
+                        placeholder="contoh : 10.000"
                         value="<?= isset($_GET['max']) ? $budgetMax : '' ?>"
                     >
                 </div>
-
-                <p class="budget-hint">Harga tiket masuk (Rp)</p>
             </div>
 
             <button type="submit" class="apply-filter">
@@ -374,17 +389,19 @@ function terpilih($daftar, $nilai)
             <?php else: ?>
 
                 <div class="empty-results">
-                    <i class="bi bi-search"></i>
+                    <span class="empty-search-icon" aria-hidden="true">
+                        <i class="bi bi-search"></i>
+                        <span>×</span>
+                    </span>
 
-                    <h2>Destinasi tidak ditemukan</h2>
+                    <h2>Wisata Tidak Di Temukan</h2>
 
                     <p>
-                        Coba ubah kata kunci atau filter pencarianmu.
+                        Maaf, tidak ada destinasi wisata yang sesuai<br>
+                        dengan kata kunci pencarianmu
                     </p>
 
-                    <a href="../../search">
-                        Tampilkan Semua Destinasi
-                    </a>
+                    <a href="../../search">Cari yang lain</a>
                 </div>
 
             <?php endif; ?>
@@ -401,6 +418,7 @@ function terpilih($daftar, $nilai)
     const searchInput = searchForm.querySelector('input[name="q"]');
     const resultsGrid = document.querySelector('.destination-grid');
     const resultsCount = document.querySelector('.results-heading p');
+    const selectedDistanceRanges = <?= json_encode($jarakDipilih, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
     searchForm.addEventListener('submit', function (event) {
         if (searchInput.value.trim().length < 2) {
@@ -451,12 +469,14 @@ function terpilih($daftar, $nilai)
         });
 
         if (destinationsWithCoordinates.length === 0) {
+            applyDistanceFilters();
             return;
         }
         if (!navigator.geolocation) {
             destinationsWithCoordinates.forEach(({ element }) => {
                 element.textContent = 'Lokasi tidak didukung';
             });
+            applyDistanceFilters();
         } else {
             navigator.geolocation.getCurrentPosition(
                 position => {
@@ -480,25 +500,34 @@ function terpilih($daftar, $nilai)
                         );
 
                         destination.element.textContent = `${distance.toFixed(2)} KM`;
+                        destination.element.dataset.distanceKm = String(distance);
                     });
+                    applyDistanceFilters();
                 },
                 () => {
                     destinationsWithCoordinates.forEach(({ element }) => {
                         element.textContent = 'Jarak tidak tersedia';
                     });
+                    applyDistanceFilters();
                 },
                 { maximumAge: 300000, timeout: 10000 }
             );
         }
     }
 
-    function showEmptyState(message, title = 'Destinasi tidak ditemukan') {
+    function showEmptyState(message, title = 'Wisata Tidak Di Temukan') {
         const emptyState = document.createElement('div');
         emptyState.className = 'empty-results';
 
+        const iconWrapper = document.createElement('span');
+        iconWrapper.className = 'empty-search-icon';
+        iconWrapper.setAttribute('aria-hidden', 'true');
+
         const icon = document.createElement('i');
         icon.className = 'bi bi-search';
-        icon.setAttribute('aria-hidden', 'true');
+        const cross = document.createElement('span');
+        cross.textContent = '×';
+        iconWrapper.append(icon, cross);
 
         const heading = document.createElement('h2');
         heading.textContent = title;
@@ -508,9 +537,9 @@ function terpilih($daftar, $nilai)
 
         const resetLink = document.createElement('a');
         resetLink.href = '../../search';
-        resetLink.textContent = 'Tampilkan Semua Destinasi';
+        resetLink.textContent = 'Cari yang lain';
 
-        emptyState.append(icon, heading, description, resetLink);
+        emptyState.append(iconWrapper, heading, description, resetLink);
         resultsGrid.replaceChildren(emptyState);
     }
 
@@ -626,6 +655,31 @@ function terpilih($daftar, $nilai)
 
             return matchesRegion && matchesCategory && matchesBudget;
         });
+    }
+
+    function applyDistanceFilters() {
+        if (selectedDistanceRanges.length === 0) {
+            return;
+        }
+
+        const cards = Array.from(resultsGrid.querySelectorAll('.destination-card'));
+        let visibleCount = 0;
+        cards.forEach(card => {
+            const distance = Number(card.querySelector('.distance')?.dataset.distanceKm);
+            const matches = !Number.isFinite(distance) || selectedDistanceRanges.some(range => {
+                const [minimum, maximum] = range.split('-').map(Number);
+                return Number.isFinite(distance) && distance >= minimum && distance <= maximum;
+            });
+            card.hidden = !matches;
+            if (matches) {
+                visibleCount++;
+            }
+        });
+
+        resultsCount.textContent = `${visibleCount} Destinasi Ditemukan`;
+        if (visibleCount === 0) {
+            showEmptyState('Maaf, tidak ada destinasi wisata yang sesuai dengan kata kunci pencarianmu');
+        }
     }
 
     async function loadSearchResults() {
