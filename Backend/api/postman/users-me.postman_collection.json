@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Explore MajaKu - User Profile",
-    "description": "API checks for GET and PUT /users/me. Configure loginEmail and loginPassword locally before running the full collection.",
+    "name": "Explore MajaKu - Backend API",
+    "description": "Backend API smoke checks. Authenticated paths run when valid user and admin credentials are configured; otherwise the collection verifies unauthenticated and validation responses.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -271,7 +271,7 @@
       ]
     },
     {
-      "name": "Login admin untuk uji validasi lokasi",
+      "name": "POST login admin (kredensial opsional)",
       "request": {
         "method": "POST",
         "header": [
@@ -292,16 +292,30 @@
       },
       "event": [
         {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.unset('adminCsrf');"
+            ]
+          }
+        },
+        {
           "listen": "test",
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('Admin login returns a CSRF token', function () {",
-              "    pm.response.to.have.status(200);",
-              "    const data = pm.response.json().data;",
-              "    pm.expect(data.role).to.eql('admin');",
-              "    pm.expect(data.csrf).to.be.a('string').and.not.empty;",
-              "    pm.collectionVariables.set('adminCsrf', data.csrf);",
+              "const adminLoginSucceeded = pm.response.code === 200;",
+              "pm.test('Admin login succeeds or validates missing credentials', function () {",
+              "    pm.response.to.have.status(adminLoginSucceeded ? 200 : 422);",
+              "    if (adminLoginSucceeded) {",
+              "        const data = pm.response.json().data;",
+              "        pm.expect(data.role).to.eql('admin');",
+              "        pm.expect(data.csrf).to.be.a('string').and.not.empty;",
+              "        pm.collectionVariables.set('adminCsrf', data.csrf);",
+              "    } else {",
+              "        pm.expect(pm.response.json().status).to.eql('validation_error');",
+              "    }",
               "});"
             ]
           }
@@ -309,7 +323,7 @@
       ]
     },
     {
-      "name": "PUT lokasi menolak koordinat tidak lengkap",
+      "name": "PUT lokasi memvalidasi session admin dan koordinat",
       "request": {
         "method": "PUT",
         "header": [
@@ -330,9 +344,10 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('Incomplete coordinate pair returns 422', function () {",
-              "    pm.response.to.have.status(422);",
-              "    pm.expect(pm.response.json().status).to.eql('incomplete_coordinates');",
+              "const hasAdminSession = Boolean(pm.collectionVariables.get('adminCsrf'));",
+              "pm.test('Location update validates session and coordinate pair', function () {",
+              "    pm.response.to.have.status(hasAdminSession ? 422 : 401);",
+              "    pm.expect(pm.response.json().status).to.eql(hasAdminSession ? 'incomplete_coordinates' : 'unauthenticated');",
               "});"
             ]
           }
@@ -380,7 +395,7 @@
       ]
     },
     {
-      "name": "Login",
+      "name": "POST login pengguna (kredensial opsional)",
       "request": {
         "method": "POST",
         "header": [
@@ -408,13 +423,30 @@
       },
       "event": [
         {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.unset('userAuthenticated');",
+              "pm.collectionVariables.unset('profileName');",
+              "pm.collectionVariables.unset('profileEmail');"
+            ]
+          }
+        },
+        {
           "listen": "test",
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('Login succeeds', function () {",
-              "    pm.response.to.have.status(200);",
-              "    pm.expect(pm.response.json().status).to.eql('success');",
+              "const userLoginSucceeded = pm.response.code === 200;",
+              "pm.test('User login succeeds or validates missing credentials', function () {",
+              "    pm.response.to.have.status(userLoginSucceeded ? 200 : 422);",
+              "    if (userLoginSucceeded) {",
+              "        pm.expect(pm.response.json().status).to.eql('success');",
+              "        pm.collectionVariables.set('userAuthenticated', 'true');",
+              "    } else {",
+              "        pm.expect(pm.response.json().status).to.eql('validation_error');",
+              "    }",
               "});"
             ]
           }
@@ -422,7 +454,7 @@
       ]
     },
     {
-      "name": "GET /users/me terautentikasi",
+      "name": "GET /users/me mengikuti status login",
       "request": {
         "method": "GET",
         "header": [
@@ -439,14 +471,19 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('Authenticated GET returns profile fields', function () {",
-              "    pm.response.to.have.status(200);",
-              "    const data = pm.response.json().data;",
-              "    pm.expect(data.id_user).to.be.a('number');",
-              "    pm.expect(data.nama).to.be.a('string').and.not.empty;",
-              "    pm.expect(data.email).to.be.a('string').and.not.empty;",
-              "    pm.collectionVariables.set('profileName', data.nama);",
-              "    pm.collectionVariables.set('profileEmail', data.email);",
+              "const userAuthenticated = pm.collectionVariables.get('userAuthenticated') === 'true';",
+              "pm.test('Profile access matches login state', function () {",
+              "    pm.response.to.have.status(userAuthenticated ? 200 : 401);",
+              "    if (userAuthenticated) {",
+              "        const data = pm.response.json().data;",
+              "        pm.expect(data.id_user).to.be.a('number');",
+              "        pm.expect(data.nama).to.be.a('string').and.not.empty;",
+              "        pm.expect(data.email).to.be.a('string').and.not.empty;",
+              "        pm.collectionVariables.set('profileName', data.nama);",
+              "        pm.collectionVariables.set('profileEmail', data.email);",
+              "    } else {",
+              "        pm.expect(pm.response.json().status).to.eql('unauthenticated');",
+              "    }",
               "});"
             ]
           }
@@ -454,7 +491,7 @@
       ]
     },
     {
-      "name": "PUT /users/me menolak data tidak valid",
+      "name": "PUT /users/me menolak payload tidak valid",
       "request": {
         "method": "PUT",
         "header": [
@@ -484,9 +521,10 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('Invalid profile data returns 422', function () {",
-              "    pm.response.to.have.status(422);",
-              "    pm.expect(pm.response.json().status).to.eql('validation_error');",
+              "const userAuthenticated = pm.collectionVariables.get('userAuthenticated') === 'true';",
+              "pm.test('Invalid profile payload returns the expected status', function () {",
+              "    pm.response.to.have.status(userAuthenticated ? 422 : 401);",
+              "    pm.expect(pm.response.json().status).to.eql(userAuthenticated ? 'validation_error' : 'unauthenticated');",
               "});"
             ]
           }
@@ -494,17 +532,14 @@
       ]
     },
     {
-      "name": "PUT /users/me tanpa mengubah nilai profil",
+      "name": "PUT /users/me mempertahankan profil saat terautentikasi",
       "event": [
         {
           "listen": "prerequest",
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.collectionVariables.set('profileUpdateBody', JSON.stringify({",
-              "    nama: pm.collectionVariables.get('profileName'),",
-              "    email: pm.collectionVariables.get('profileEmail')",
-              "}));"
+              "pm.collectionVariables.set('profileUpdateBody', JSON.stringify({ nama: pm.collectionVariables.get('profileName'), email: pm.collectionVariables.get('profileEmail') }));"
             ]
           }
         },
@@ -513,11 +548,16 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('Valid PUT returns updated profile', function () {",
-              "    pm.response.to.have.status(200);",
-              "    const data = pm.response.json().data;",
-              "    pm.expect(data.nama).to.eql(pm.collectionVariables.get('profileName'));",
-              "    pm.expect(data.email).to.eql(pm.collectionVariables.get('profileEmail'));",
+              "const userAuthenticated = pm.collectionVariables.get('userAuthenticated') === 'true';",
+              "pm.test('Profile update matches authentication state', function () {",
+              "    pm.response.to.have.status(userAuthenticated ? 200 : 401);",
+              "    if (userAuthenticated) {",
+              "        const data = pm.response.json().data;",
+              "        pm.expect(data.nama).to.eql(pm.collectionVariables.get('profileName'));",
+              "        pm.expect(data.email).to.eql(pm.collectionVariables.get('profileEmail'));",
+              "    } else {",
+              "        pm.expect(pm.response.json().status).to.eql('unauthenticated');",
+              "    }",
               "});"
             ]
           }
