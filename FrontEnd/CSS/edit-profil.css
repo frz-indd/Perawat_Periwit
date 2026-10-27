@@ -39,6 +39,7 @@ body.halaman-edit-profil textarea {
   font-family: var(--font-serif);
 }
 
+
 .ep-navbar {
   position: absolute;
   top: 0;
@@ -84,7 +85,6 @@ body.halaman-edit-profil textarea {
   cursor: pointer;
 }
 
-/* Jarak antarmenu presisi dan seimbang */
 .ep-menu__beranda { left: calc(50% - 150 * var(--u)); }
 .ep-menu__kategori { left: calc(50% + 10 * var(--u)); }
 .ep-menu__tentang { left: calc(50% + 210 * var(--u)); }
@@ -111,18 +111,127 @@ body.halaman-edit-profil textarea {
 .ep-ikon--cari { right: calc(var(--mx-nav) + 58 * var(--u)); }
 .ep-ikon--profil { right: var(--mx-nav); top: calc(20 * var(--u)); }
 
-.ep-navbar .ep-menu a.ep-menu__kategori::after {
-  content: "";
-  display: inline-block;
-  width: calc(21 * var(--u));
-  height: calc(12 * var(--u));
-  margin-left: calc(12 * var(--u));
-  vertical-align: middle;
-  background: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 14'%3E%3Cpath d='M2 2l10 10L22 2' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 14'%3E%3Cpath d='M2 2l10 10L22 2' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
-  transform: none !important;
-  transition: none;
+
+@media (min-width: 901px) {
+  body.halaman-edit-profil .ep-navbar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    box-sizing: border-box !important;
+    height: calc(83 * var(--u)) !important;
+    background: #fff !important;
+    box-shadow: 0 calc(2 * var(--u)) calc(4 * var(--u)) rgba(0, 0, 0, 0.25) !important;
+  }
+
+  body.halaman-edit-profil .ep-navbar__inner {
+    position: relative !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 calc(42 * var(--u)) 0 calc(43 * var(--u)) !important;
+  }
+
+  body.halaman-edit-profil .ep-logo {
+    position: static !important;
+    flex: none !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    white-space: nowrap !important;
+  }
+
+  body.halaman-edit-profil .ep-menu {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
+    align-items: center !important;
+    column-gap: calc(135 * var(--u)) !important;
+    width: max-content !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  body.halaman-edit-profil .ep-menu > a {
+    position: relative !important;
+    inset: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    white-space: nowrap !important;
+  }
+
+  body.halaman-edit-profil .ep-menu__beranda {
+    grid-column: 1 !important;
+    justify-self: end !important;
+  }
+
+  body.halaman-edit-profil .ep-menu__kategori {
+    grid-column: 2 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    text-transform: none !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+  }
+
+  body.halaman-edit-profil .ep-menu__tentang {
+    grid-column: 3 !important;
+    justify-self: start !important;
+  }
+
+  body.halaman-edit-profil .ep-aksi {
+    position: static !important;
+    flex: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: calc(20 * var(--u)) !important;
+    margin: 0 0 0 auto !important;
+    padding: 0 !important;
+  }
+
+  body.halaman-edit-profil .ep-ikon {
+    position: static !important;
+    display: flex !important;
+    flex: none !important;
+    width: calc(40 * var(--u)) !important;
+    height: calc(40 * var(--u)) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  body.halaman-edit-profil .ep-ikon svg {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  body.halaman-edit-profil .ep-ikon--cari {
+    width: calc(36 * var(--u)) !important;
+    height: calc(36 * var(--u)) !important;
+  }
+
+  body.halaman-edit-profil .ep-navbar .ep-menu a.ep-menu__kategori::after {
+    left: calc(100% + 10 * var(--u));
+    width: calc(21 * var(--u));
+    height: calc(12 * var(--u));
+  }
 }
 
 body.halaman-edit-profil .ep-ikon--cari,
@@ -130,16 +239,19 @@ body.halaman-edit-profil .ep-ikon--profil {
   color: var(--hijau, #166c5c);
 }
 
-body.halaman-edit-profil .ep-menu__kategori {
-  white-space: nowrap;
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-body.halaman-edit-profil .ep-menu__kategori.aktif::after,
-body.halaman-edit-profil .ep-menu__kategori:hover::after,
-body.halaman-edit-profil .ep-menu__kategori[aria-expanded="true"]::after {
+body.halaman-edit-profil .ep-navbar .ep-menu a.ep-menu__kategori::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: block;
+  margin: auto 0;
+  vertical-align: baseline;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 14'%3E%3Cpath d='M2 2l10 10L22 2' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 14'%3E%3Cpath d='M2 2l10 10L22 2' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
   transform: none !important;
+  transition: none;
 }
 
 body.halaman-edit-profil .ep-menu__kategori:hover,
@@ -147,7 +259,6 @@ body.halaman-edit-profil .ep-menu__kategori.aktif {
   color: var(--hijau, #166c5c);
 }
 
-/* Dropdown Kategori */
 body.halaman-edit-profil .dd-kategori {
   display: none;
   position: fixed;
@@ -203,6 +314,7 @@ body.halaman-edit-profil .dd-kategori a.dd-kategori__item:focus-visible {
   outline: none;
 }
 
+
 .ep-stage {
   position: relative;
   width: 100%;
@@ -213,42 +325,6 @@ body.halaman-edit-profil .dd-kategori a.dd-kategori__item:focus-visible {
   position: absolute;
 }
 
-.ep-back {
-  left: var(--mx-nav);
-  top: calc(134 * var(--u));
-  display: flex;
-  align-items: center;
-  gap: calc(8 * var(--u));
-  font-family: var(--font-serif);
-  font-size: calc(24 * var(--u));
-  line-height: calc(40 * var(--u));
-  font-weight: 600;
-  color: var(--hijau);
-  z-index: 5;
-  cursor: default;
-}
-
-.ep-back__ikon {
-  display: inline-flex;
-  color: inherit;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.ep-back__ikon:hover {
-  color: var(--hijau-gelap);
-}
-
-.ep-back__teks {
-  cursor: default;
-  user-select: none;
-}
-
-.ep-back svg {
-  width: calc(28 * var(--u));
-  height: calc(28 * var(--u));
-}
-
 .ep-foto__lingkaran {
   left: calc(50% - 110 * var(--u));
   top: calc(131 * var(--u));
@@ -257,25 +333,25 @@ body.halaman-edit-profil .dd-kategori a.dd-kategori__item:focus-visible {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--abu-avatar);
   overflow: hidden;
   color: var(--hijau);
   cursor: default;
 }
 
-.ep-foto__lingkaran svg,
-.ep-foto__lingkaran img {
+.ep-foto__lingkaran svg {
   display: block;
   width: 100%;
   height: 100%;
-}
-
-.ep-foto__lingkaran svg {
   color: var(--hijau);
 }
 
 .ep-foto__lingkaran img {
+  position: absolute;
+  inset: 0;
+  display: block;
   box-sizing: border-box;
+  width: 100%;
+  height: 100%;
   border: calc(15 * var(--u)) solid var(--hijau);
   border-radius: 50%;
   background: var(--abu-avatar);
@@ -303,25 +379,32 @@ body.halaman-edit-profil .dd-kategori a.dd-kategori__item:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: calc(10 * var(--u));
-  font-family: var(--font-serif);
-  font-size: calc(36 * var(--u));
-  line-height: calc(60 * var(--u));
-  font-weight: 400;
   color: var(--hijau);
   cursor: default;
 }
 
+.ep-foto__grup {
+  position: relative;
+  display: block;
+}
+
 .ep-foto__teks {
+  display: block;
   font-family: var(--font-serif);
+  font-size: calc(38 * var(--u));
+  line-height: calc(60 * var(--u));
   font-weight: 400;
+  color: var(--hijau);
+  white-space: nowrap;
   user-select: none;
 }
 
 .ep-foto__edit {
+  position: absolute;
+  left: calc(100% + 10 * var(--u));
+  top: calc(50% - 26 * var(--u));
   display: block;
-  flex: none;
-  width: calc(44 * var(--u));
+  width: calc(45 * var(--u));
   height: calc(44 * var(--u));
   padding: 0;
   border: 0;
@@ -354,7 +437,7 @@ body.halaman-edit-profil .dd-kategori a.dd-kategori__item:focus-visible {
 .ep-label {
   left: var(--mx);
   font-family: var(--font-serif);
-  font-size: calc(23 * var(--u));
+  font-size: calc(24 * var(--u));
   line-height: calc(34 * var(--u));
   font-weight: 600;
   color: var(--hijau);
@@ -363,7 +446,7 @@ body.halaman-edit-profil .dd-kategori a.dd-kategori__item:focus-visible {
 .ep-label--nama { top: calc(455 * var(--u)); }
 .ep-label--email { top: calc(588 * var(--u)); }
 
-.ep-input {
+body.halaman-edit-profil .ep-input {
   left: var(--mx);
   top: calc(500 * var(--u));
   width: calc(100% - 2 * var(--mx));
@@ -372,8 +455,8 @@ body.halaman-edit-profil .dd-kategori a.dd-kategori__item:focus-visible {
   border: 1px solid var(--hijau);
   border-radius: calc(6 * var(--u));
   background: #fff;
-  font-family: var(--font-serif);
-  font-size: calc(22 * var(--u));
+  font-family: var(--font-sans);
+  font-size: calc(21 * var(--u));
   font-weight: 400;
   color: #000;
 }
@@ -395,7 +478,7 @@ body.halaman-edit-profil .dd-kategori a.dd-kategori__item:focus-visible {
   font-family: var(--font-serif);
   font-size: calc(23 * var(--u));
   line-height: calc(36 * var(--u));
-  font-weight: 400;
+  font-weight: 600;
   color: #000;
 }
 
@@ -429,7 +512,6 @@ body.halaman-edit-profil .dd-kategori a.dd-kategori__item:focus-visible {
 }
 
 .ep-btn--utama {
-  padding-right: calc(11 * var(--u));
   top: calc(728 * var(--u));
   background: #166c5c;
   color: #ffffff !important;
@@ -571,61 +653,175 @@ body.halaman-edit-profil .dd-kategori a.dd-kategori__item:focus-visible {
   .ep-modal__ok { transition: none; }
 }
 
-/* Penyesuaian Responsif Layar Kecil / HP */
-@media (max-width: 768px) {
+
+@media (max-width: 900px) {
   html, body.halaman-edit-profil {
     overflow-y: auto;
   }
-  .ep-navbar {
+
+  body.halaman-edit-profil .ep-navbar {
+    position: sticky;
+    top: 0;
+    height: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  }
+
+  body.halaman-edit-profil .ep-navbar__inner {
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 12px;
+    width: 100%;
+    height: auto;
+    padding: 10px 16px 8px;
+  }
+
+  body.halaman-edit-profil .ep-logo {
+    position: static;
+    flex: 1 1 auto;
+    order: 1;
+    margin: 0;
+    font-size: clamp(22px, 6.5vw, 30px);
+    line-height: 1.2;
+  }
+
+  body.halaman-edit-profil .ep-aksi {
+    display: flex;
+    align-items: center;
+    flex: none;
+    order: 2;
+    gap: 12px;
+  }
+
+  body.halaman-edit-profil .ep-ikon,
+  body.halaman-edit-profil .ep-ikon--cari {
+    position: static;
+    display: flex;
+    width: 30px;
+    height: 30px;
+  }
+
+  body.halaman-edit-profil .ep-menu {
+    position: static;
+    inset: auto;
+    order: 3;
+    display: flex;
+    flex: 0 0 100%;
+    justify-content: center;
+    gap: 28px;
+    width: auto;
+    margin: 0;
+    padding: 4px 0 2px;
+    transform: none;
+  }
+
+  body.halaman-edit-profil .ep-menu > a {
     position: relative;
-    height: 70px;
-  }
-  .ep-logo {
-    left: 16px;
-    top: 15px;
-    font-size: 24px;
-    line-height: 32px;
-  }
-  .ep-menu {
-    top: 22px;
-    gap: 20px;
-  }
-  .ep-menu a {
-    font-size: 15px;
+    inset: auto;
+    font-size: clamp(14px, 4vw, 16px);
     line-height: 20px;
   }
-  .ep-ikon--cari { right: 54px; top: 18px; }
-  .ep-ikon--profil { right: 16px; top: 18px; }
-  .ep-ikon { width: 28px; height: 28px; }
+
+  body.halaman-edit-profil .ep-navbar .ep-menu a.ep-menu__kategori::after {
+    left: calc(100% + 6px);
+    width: 14px;
+    height: 8px;
+  }
+
+  body.halaman-edit-profil .dd-kategori a.dd-kategori__item {
+    padding: 0 22px;
+    font-size: 14px;
+    line-height: 42px;
+  }
 
   .ep-stage {
     position: relative;
     height: auto;
     display: flex;
     flex-direction: column;
-    padding: 20px 16px 40px;
-    gap: 16px;
+    padding: 24px 16px 40px;
+    gap: 14px;
   }
+
   .ep-stage > * {
     position: relative !important;
     left: auto !important;
     top: auto !important;
     width: 100% !important;
   }
+
+  .ep-foto__input {
+    position: absolute !important;
+    width: 1px !important;
+  }
+
   .ep-foto__lingkaran {
     margin: 0 auto;
-    width: 140px;
+    width: 140px !important;
     height: 140px;
   }
+
+  .ep-foto__lingkaran img {
+    border-width: 9px;
+  }
+
   .ep-foto__label {
-    font-size: 24px;
     height: auto;
   }
-  .ep-input, .ep-btn {
+
+  .ep-foto__teks {
+    font-size: 24px;
+    line-height: 36px;
+  }
+
+  .ep-foto__edit {
+    width: 30px;
+    height: 30px;
+    left: calc(100% + 8px);
+    top: calc(50% - 17px);
+  }
+
+  .ep-label {
+    font-size: 18px;
+    line-height: 26px;
+  }
+
+  body.halaman-edit-profil .ep-input {
+    height: 52px;
+    font-size: 16px;
+    padding: 0 14px;
+  }
+
+  .ep-email {
+    font-size: 18px;
+    line-height: 28px;
+  }
+
+  .ep-catatan {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .ep-btn {
     height: 52px;
     font-size: 16px;
   }
-  .ep-email {
-    font-size: 18px;
+
+  .ep-modal__kotak {
+    width: 320px;
+    padding: 32px 24px 24px;
   }
+
+  .ep-modal__ikon {
+    width: 90px;
+    height: 90px;
+  }
+
+  .ep-modal__judul { font-size: 22px; margin-top: 20px; }
+  .ep-modal__isi { font-size: 15px; margin-top: 10px; }
+  .ep-modal__isi--gagal { max-width: none; }
+  .ep-modal__ok { height: 46px; font-size: 17px; margin-top: 28px; }
+  .ep-modal__kotak--gagal .ok { margin-top: 24px; }
 }

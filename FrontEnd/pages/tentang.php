@@ -10,11 +10,10 @@ session_start();
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../CSS/edit-profil.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/tentang.css?v=shared-layout-5">
+    <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
+    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
+    <link rel="stylesheet" href="../CSS/tentang.css?v=shared-layout-13">
 </head>
 <body class="about-page halaman-tentang">
 
@@ -26,31 +25,33 @@ session_start();
                 <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
                 <a class="ep-menu__kategori" href="#kategori" id="kategori-toggle"
                    role="button" aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">Kategori</a>
-                <a class="ep-menu__tentang" href="tentang.php" aria-current="page">Tentang</a>
+                <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
             </nav>
 
-            <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
-                <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" aria-hidden="true">
-                    <circle cx="16.5" cy="16.5" r="11.5"/>
-                    <line x1="25" y1="25" x2="36" y2="36"/>
-                </svg>
-            </a>
+            <div class="ep-aksi">
+                <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
+                    <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
+                        <circle cx="13.5" cy="13.5" r="11.7"/>
+                        <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
+                    </svg>
+                </a>
 
-            <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
-                <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="20" cy="20" r="17.5"/>
-                    <circle cx="20" cy="16" r="5.8"/>
-                    <path d="M9 31.5c1.5-5.8 5.6-8.8 11-8.8s9.5 3 11 8.8"/>
-                </svg>
-            </a>
+                <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
+                    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="20" cy="20" r="18.2"/>
+                        <circle cx="20" cy="16.2" r="5.8"/>
+                        <path d="M9 33.5C9.7 29.2 12.2 26 15.2 25.2C17 26.6 23 26.6 24.8 25.2C27.8 26 30.3 29.2 31 33.5"/>
+                    </svg>
+                </a>
+            </div>
         </div>
     </header>
 
     <ul class="dd-kategori" id="kategori-menu" role="menu" aria-label="Kategori wisata">
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=alam">Wisata Alam &amp; pegunungan</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=air-curug">Wisata Air &amp; Curug</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
     </ul>
 
     <main>
@@ -88,15 +89,20 @@ session_start();
                 <h2>Kenapa Memilih Explore MajaKu?</h2>
                 <div class="benefit-grid">
                     <article class="benefit-card bc-1">
-                        <i class="bi bi-clipboard-check-fill" aria-hidden="true"></i>
+                        <svg class="benefit-clip-icon" viewBox="0 0 44 53" aria-hidden="true">
+                            <rect x="0" y="6" width="44" height="47" rx="8" fill="currentColor"></rect>
+                            <rect x="13" y="1.5" width="18" height="12" rx="4.5" fill="currentColor" stroke="#eef2ee" stroke-width="3" paint-order="stroke"></rect>
+                            <path d="M11.5 33.5L19.5 41.5L33 26" fill="none" stroke="#eef2ee" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
                         <div class="benefit-text">
                             <strong class="benefit-title">Informasi Lengkap</strong>
                             <span class="benefit-desc">Semua Kebutuhan Wisata<br>dalam satu platform</span>
                         </div>
                     </article>
                     <article class="benefit-card bc-2">
-                        <svg class="benefit-thumb-icon" viewBox="1 1 22 20" preserveAspectRatio="none" aria-hidden="true">
-                            <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"></path>
+                        <svg class="benefit-thumb-icon" viewBox="50 56 249 235" aria-hidden="true">
+                            <path d="M50 157H126V82Q126 62 140 58Q146 56 150 57C163 90 185 140 220 160V262L150 290H95C65 262 50 215 50 157Z"></path>
+                            <path d="M245 142H298V282H245Q235 282 235 272V152Q235 142 245 142Z"></path>
                         </svg>
                         <div class="benefit-text">
                             <strong class="benefit-title">Mudah diakses</strong>
@@ -104,9 +110,9 @@ session_start();
                         </div>
                     </article>
                     <article class="benefit-card bc-3">
-                        <svg class="benefit-trust-icon" viewBox="0 0 56 56" aria-hidden="true">
-                            <path d="M4 4H52V42H36L28 52L20 42H4Z"></path>
-                            <path d="M14 22L24 32L42 14"></path>
+                        <svg class="benefit-trust-icon" viewBox="0 0 54 58" aria-hidden="true">
+                            <path d="M3 3H51V42H35L27 53L19 42H3Z"></path>
+                            <path d="M15 22L24 31L39 14"></path>
                         </svg>
                         <div class="benefit-text">
                             <strong class="benefit-title">Terpercaya</strong>

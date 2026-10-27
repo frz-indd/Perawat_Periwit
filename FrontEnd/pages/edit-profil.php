@@ -1,6 +1,10 @@
 <?php
 session_start();
 
+if (empty($_SESSION['csrf'])) {
+    $_SESSION['csrf'] = bin2hex(random_bytes(16));
+}
+
 function e($s): string {
     return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
 }
@@ -20,6 +24,10 @@ if ($userId === false || $userId <= 0) {
     exit;
 }
 $userId = (int) $userId;
+
+$basePath = rtrim(str_replace('\\', '/', dirname(dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '')))), '/');
+if ($basePath === '.' || $basePath === '/') $basePath = '';
+$apiProfil = $basePath . '/users/me';
 
 function info_tabel_user(mysqli $conn): ?array {
     foreach (['user', 'users', 'pengguna'] as $t) {
@@ -157,7 +165,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['nama'] = 'Nama lengkap maksimal 100 karakter.';
     }
 
-    if (!empty($_FILES['foto']['name'])) {
+    if (($_POST['api_status'] ?? '') === 'gagal') {
+        $pesanApi = trim((string) ($_POST['api_pesan'] ?? ''));
+        $errors['api'] = $pesanApi !== '' ? mb_substr($pesanApi, 0, 150) : 'Profil gagal diperbarui.';
+    }
+
+    if (!$errors && !empty($_FILES['foto']['name'])) {
         $izin = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
 
         if ($_FILES['foto']['error'] !== UPLOAD_ERR_OK) {
@@ -220,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261055">
+  <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261058">
   <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
 </head>
 <body class="halaman-edit-profil">
@@ -233,11 +246,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <circle cx="110" cy="91" r="26" fill="none" stroke="#166d5c" stroke-width="13"/>
         <path d="M30 222C30 176 56 146 92 140C99 150 121 150 128 140C164 146 190 176 190 222" fill="none" stroke="#166d5c" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#klip-dalam)"/>
       </symbol>
-      <symbol id="i-pensil" viewBox="0 0 48 48">
-        <path d="M23 7H12A6 6 0 0 0 6 13V36A6 6 0 0 0 12 42H35A6 6 0 0 0 41 36V26" fill="none" stroke="currentColor" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
-        <g transform="translate(27.5 20.5) rotate(45)">
-          <path d="M-5 -19a5 5 0 0 1 10 0V15L0 26-5 15Z" fill="currentColor" stroke="#fff" stroke-width="3.4" stroke-linejoin="round" paint-order="stroke"/>
-          <path d="M-5 -12H5" fill="none" stroke="#fff" stroke-width="2.2"/>
+      <symbol id="i-pensil" viewBox="0 0 45 44">
+        <path d="M19 9.7H7.4A5.7 5.7 0 0 0 1.7 15.4V36.3A5.7 5.7 0 0 0 7.4 42H28.8A5.7 5.7 0 0 0 34.5 36.3V25" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <g transform="translate(33.2 11.3) rotate(45)" fill="currentColor">
+          <path d="M-5.3 0H5.3V26C5.3 30 2.4 34.6 0.9 37Q0 38.3-0.9 37C-2.4 34.6-5.3 30-5.3 26Z"/>
+          <path d="M-5.3-3.5V-8.1A5.3 5.3 0 0 1 5.3-8.1V-3.5Z"/>
         </g>
       </symbol>
     </defs>
@@ -250,24 +263,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <nav class="ep-menu" aria-label="Menu utama">
         <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
         <a class="ep-menu__kategori" href="#kategori" id="kategori-toggle"
-            role="button" aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">Kategori</a>
+           role="button" aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">Kategori</a>
         <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
       </nav>
 
-      <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
-        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" aria-hidden="true">
-          <circle cx="16.5" cy="16.5" r="11.5"/>
-          <line x1="25" y1="25" x2="36" y2="36"/>
-        </svg>
-      </a>
+      <div class="ep-aksi">
+        <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
+          <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
+            <circle cx="13.5" cy="13.5" r="11.7"/>
+            <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
+          </svg>
+        </a>
 
-      <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
-        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="20" cy="20" r="17.5"/>
-          <circle cx="20" cy="16" r="5.8"/>
-          <path d="M9 31.5c1.5-5.8 5.6-8.8 11-8.8s9.5 3 11 8.8"/>
-        </svg>
-      </a>
+        <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="20" cy="20" r="18.2"/>
+            <circle cx="20" cy="16.2" r="5.8"/>
+            <path d="M9 33.5C9.7 29.2 12.2 26 15.2 25.2C17 26.6 23 26.6 24.8 25.2C27.8 26 30.3 29.2 31 33.5"/>
+          </svg>
+        </a>
+      </div>
     </div>
   </header>
 
@@ -278,18 +293,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
   </ul>
 
-  <form action="" method="post" enctype="multipart/form-data" novalidate>
-    <main class="ep-stage">
+  <form id="form-profil" action="" method="post" enctype="multipart/form-data" novalidate
+        data-api="<?= e($apiProfil) ?>"
+        data-csrf="<?= e($_SESSION['csrf']) ?>"
+        data-email="<?= e($email) ?>">
+    <input type="hidden" name="api_status" id="api-status" value="">
+    <input type="hidden" name="api_pesan" id="api-pesan" value="">
 
-      <div class="ep-back">
-        <a class="ep-back__ikon" href="profil.php" aria-label="Kembali ke profil">
-          <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="26" y1="14" x2="2" y2="14"/>
-            <polyline points="13,3 2,14 13,25"/>
-          </svg>
-        </a>
-        <span class="ep-back__teks">Back</span>
-      </div>
+    <main class="ep-stage">
 
       <input class="ep-foto__input" type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/webp">
 
@@ -302,10 +313,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
 
       <div class="ep-foto__label">
-        <span class="ep-foto__teks">Ubah Foto Profil</span>
-        <button type="button" class="ep-foto__edit" id="btn-foto" aria-label="Ubah foto profil">
-          <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-pensil"/></svg>
-        </button>
+        <span class="ep-foto__grup">
+          <span class="ep-foto__teks">Ubah Foto Profil</span>
+          <button type="button" class="ep-foto__edit" id="btn-foto" aria-label="Ubah foto profil">
+            <svg viewBox="0 0 45 44" aria-hidden="true"><use href="#i-pensil"/></svg>
+          </button>
+        </span>
       </div>
 
       <label class="ep-label ep-label--nama" for="nama_lengkap">Nama Lengkap</label>
@@ -313,7 +326,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
              value="<?= e($nama) ?>" placeholder="Nama User" maxlength="100" autocomplete="name" required>
 
       <span class="ep-label ep-label--email">Email</span>
-      <p class="ep-email"><?= e($email) ?></p>
+      <p class="ep-email" id="email-tampil"><?= e($email) ?></p>
       <p class="ep-catatan">Email tidak dapat diubah karena digunakan sebagai identitas akun.</p>
 
       <button type="submit" class="ep-btn ep-btn--utama">Simpan Perubahan</button>
@@ -359,22 +372,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       var header = document.querySelector('.ep-navbar');
       if (!toggle || !menu) return;
 
-      function posisi() {
-        var r = toggle.getBoundingClientRect();
-        var dasar = header ? header.getBoundingClientRect().bottom : r.bottom;
-        var lebar = menu.offsetWidth;
-        var kiri = r.left + (r.width / 2) - (lebar / 2);
-        kiri = Math.max(8, Math.min(kiri, window.innerWidth - lebar - 8));
-        menu.style.top = Math.round(dasar) + 'px';
-        menu.style.left = Math.round(kiri) + 'px';
-      }
+      document.body.appendChild(menu);
 
       function terbuka() {
         return menu.classList.contains('show');
       }
 
+      function posisi() {
+        var r = toggle.getBoundingClientRect();
+        var dasar = header ? header.getBoundingClientRect().bottom : r.bottom;
+        var lebar = menu.offsetWidth;
+        var kiri;
+        if (window.innerWidth <= 900) {
+          kiri = (window.innerWidth - lebar) / 2;
+        } else {
+          kiri = r.left + r.width * 0.15;
+        }
+        kiri = Math.max(8, Math.min(kiri, window.innerWidth - lebar - 8));
+        menu.style.top = Math.round(dasar + 6) + 'px';
+        menu.style.left = Math.round(kiri) + 'px';
+      }
+
       function buka() {
         menu.classList.add('show');
+        menu.style.setProperty('display', 'block', 'important');
+        menu.style.setProperty('visibility', 'visible', 'important');
+        menu.style.setProperty('opacity', '1', 'important');
         posisi();
         toggle.classList.add('aktif');
         toggle.setAttribute('aria-expanded', 'true');
@@ -382,6 +405,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       function tutup() {
         menu.classList.remove('show');
+        menu.style.removeProperty('display');
+        menu.style.removeProperty('visibility');
+        menu.style.removeProperty('opacity');
         toggle.classList.remove('aktif');
         toggle.setAttribute('aria-expanded', 'false');
       }
@@ -439,6 +465,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         urlLokal = URL.createObjectURL(file);
         preview.src = urlLokal;
         tampilkanFoto();
+      });
+    })();
+
+    (function () {
+      var form      = document.getElementById('form-profil');
+      var inpNama   = document.getElementById('nama_lengkap');
+      var emailEl   = document.getElementById('email-tampil');
+      var fStatus   = document.getElementById('api-status');
+      var fPesan    = document.getElementById('api-pesan');
+      var apiUrl    = form.getAttribute('data-api');
+      var csrf      = form.getAttribute('data-csrf') || '';
+      var polaEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      inpNama.addEventListener('input', function () { inpNama.setAttribute('data-diubah', '1'); });
+
+      fetch(apiUrl, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) {
+          if (!j || j.status !== 'success' || !j.data) return;
+          if (j.data.nama && !inpNama.getAttribute('data-diubah')) inpNama.value = j.data.nama;
+          if (j.data.email) {
+            emailEl.textContent = j.data.email;
+            form.setAttribute('data-email', j.data.email);
+          }
+        })
+        .catch(function () {});
+
+      form.addEventListener('submit', function (e) {
+        var nama  = inpNama.value.trim();
+        var email = form.getAttribute('data-email') || '';
+
+        if (nama === '' || nama.length > 100 || !polaEmail.test(email)) return;
+
+        e.preventDefault();
+
+        function lanjut(status, pesan) {
+          fStatus.value = status;
+          fPesan.value = pesan || '';
+          form.submit();
+        }
+
+        fetch(apiUrl, {
+          method: 'PUT',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-Token': csrf
+          },
+          body: JSON.stringify({ nama: nama, email: email })
+        })
+          .then(function (r) {
+            return r.json().catch(function () { return {}; }).then(function (j) {
+              if (r.ok && j.status === 'success') {
+                lanjut('ok', '');
+              } else {
+                lanjut('gagal', (j && j.message) || 'Profil gagal diperbarui.');
+              }
+            });
+          })
+          .catch(function () {
+            lanjut('gagal', 'Tidak dapat menghubungi server.');
+          });
       });
     })();
 

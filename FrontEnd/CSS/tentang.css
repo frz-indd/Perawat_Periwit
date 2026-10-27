@@ -1,3 +1,9 @@
+:root {
+    --u: min(calc(100vw / 1440), calc(100vh / 1024));
+    --hijau: #166c5c;
+    --hijau-gelap: #115446;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -15,9 +21,12 @@ html.html-tentang {
 
 body.halaman-tentang {
     --nav: calc(83 * var(--u));
-    --font-serif: "Frank Ruhl Libre", Georgia, "Times New Roman", serif;
+    --font-serif: "Noto Serif", Georgia, "Times New Roman", serif;
+    --font-judul: "Noto Serif", Georgia, "Times New Roman", serif;
+    --font-sans: "Poppins", Arial, sans-serif;
     --font-mono: "Fragment Mono", "Courier New", monospace;
-    --kartu-gradasi: linear-gradient(180deg, #dde6e0 0%, #e8efea 30%, #f2f6f3 100%);
+    --font-logo: "Kaushan Script", "Brush Script MT", cursive;
+    --kartu-gradasi: linear-gradient(180deg, #e8eee9 0%, #eef2ee 50%, #f0f4f0 100%);
 
     margin: 0;
     display: block;
@@ -34,63 +43,139 @@ body.halaman-tentang {
     --green: #166d5c;
 }
 
+/* ============ NAVBAR ============ */
 body.halaman-tentang .ep-navbar {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
+    box-sizing: border-box;
+    height: var(--nav);
     background: #fff;
+    box-shadow: 0 calc(2 * var(--u)) calc(4 * var(--u)) rgba(0, 0, 0, 0.25);
 }
 
-body.halaman-tentang .ep-ikon--cari,
-body.halaman-tentang .ep-ikon--profil {
-    color: var(--hijau, var(--green));
+body.halaman-tentang .ep-navbar__inner {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+    padding: 0 calc(42 * var(--u)) 0 calc(43 * var(--u));
 }
 
-body.halaman-tentang .ep-ikon--profil svg,
-body.halaman-tentang .ep-ikon--cari svg {
+body.halaman-tentang .ep-logo {
+    position: static;
+    flex: none;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    transform: none;
+    white-space: nowrap;
+}
+
+body.halaman-tentang .ep-menu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    column-gap: calc(135 * var(--u));
+    width: max-content;
+    margin: 0;
+    padding: 0;
+    transform: translate(-50%, -50%);
+}
+
+body.halaman-tentang .ep-menu > a {
+    position: relative;
+    inset: auto;
+    width: auto;
+    min-width: 0;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    transform: none;
+    white-space: nowrap;
+}
+
+body.halaman-tentang .ep-menu__beranda {
+    grid-column: 1;
+    justify-self: end;
+}
+
+body.halaman-tentang .ep-menu__kategori {
+    grid-column: 2;
+}
+
+body.halaman-tentang .ep-menu__tentang {
+    grid-column: 3;
+    justify-self: start;
+}
+
+body.halaman-tentang .ep-menu > a.ep-menu__tentang {
+    color: var(--hijau, #166c5c) !important;
+}
+
+body.halaman-tentang .ep-aksi {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: calc(20 * var(--u));
+}
+
+body.halaman-tentang .ep-ikon {
+    position: static;
+    display: flex;
+    flex: none;
+    width: calc(40 * var(--u));
+    height: calc(40 * var(--u));
+    margin: 0;
+    padding: 0;
+    transform: none;
+}
+
+body.halaman-tentang .ep-ikon svg {
     display: block;
     width: 100%;
     height: 100%;
 }
 
-body.halaman-tentang .ep-menu {
-    display: flex;
-    align-items: center;
-    gap: calc(64 * var(--u));
+body.halaman-tentang .ep-ikon--cari {
+    width: calc(36 * var(--u));
+    height: calc(36 * var(--u));
 }
 
-body.halaman-tentang .ep-menu > a {
-    position: static;
-    margin: 0;
-    padding: 0;
-    transform: none;
-    white-space: nowrap;
-    z-index: 10;
-    pointer-events: auto;
-    cursor: pointer;
-}
-
-body.halaman-tentang .ep-menu a.ep-menu__tentang,
-body.halaman-tentang .ep-menu a.ep-menu__tentang:hover {
-    color: var(--hijau, var(--green));
+body.halaman-tentang .ep-ikon--cari,
+body.halaman-tentang .ep-ikon--profil {
+    color: var(--hijau, #166c5c);
 }
 
 body.halaman-tentang .ep-menu__kategori {
     display: inline-flex;
     align-items: center;
-    gap: calc(10 * var(--u));
     text-transform: none;
+    cursor: pointer;
+    pointer-events: auto;
 }
 
 body.halaman-tentang .ep-menu__kategori::after {
     content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(100% + 10 * var(--u));
     display: block;
-    flex: none;
     width: calc(21 * var(--u));
     height: calc(12 * var(--u));
-    margin: 0;
+    margin: auto 0;
     background: currentColor;
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 14'%3E%3Cpath d='M2 2l10 10L22 2' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 14'%3E%3Cpath d='M2 2l10 10L22 2' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
@@ -106,7 +191,7 @@ body.halaman-tentang .ep-menu__kategori[aria-expanded="true"]::after {
 
 body.halaman-tentang .ep-menu__kategori:hover,
 body.halaman-tentang .ep-menu__kategori.aktif {
-    color: var(--hijau, var(--green));
+    color: var(--hijau, #166c5c);
 }
 
 body.halaman-tentang .dd-kategori {
@@ -158,16 +243,17 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item {
 
 body.halaman-tentang .dd-kategori a.dd-kategori__item:hover,
 body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
-    background: var(--hijau, var(--green));
+    background: var(--hijau, #166c5c);
     color: #fff;
     font-weight: 400;
     outline: none;
 }
 
+/* ============ HERO ============ */
 .about-hero {
     position: relative;
     width: 100%;
-    height: calc(262 * var(--u));
+    height: calc(261 * var(--u));
     overflow: hidden;
 }
 
@@ -212,9 +298,10 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
     top: calc(60 * var(--u));
     height: calc(46 * var(--u));
     margin: 0;
-    font-family: var(--font-serif);
-    font-size: calc(37.3 * var(--u));
-    font-weight: 700;
+    font-family: "Noto Serif", Georgia, "Times New Roman", serif !important;
+    font-size: calc(36.6 * var(--u));
+    font-weight: 700 !important;
+    letter-spacing: 0;
     line-height: calc(46 * var(--u));
     text-transform: uppercase;
     white-space: nowrap;
@@ -223,21 +310,33 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
 .about-hero-copy p {
     position: absolute;
     left: calc(130 * var(--u));
-    top: calc(124 * var(--u));
+    top: calc(129 * var(--u));
     margin: 0;
     font-family: var(--font-mono);
     font-size: calc(20.5 * var(--u));
     font-weight: 400;
-    line-height: calc(24 * var(--u));
+    letter-spacing: 0;
+    line-height: calc(25 * var(--u));
     white-space: nowrap;
 }
 
+/* ============ KONTEN ============ */
 .about-content {
-    width: calc(1183 * var(--u));
-    margin: calc(48 * var(--u)) 0 0 calc(50% - 580 * var(--u));
+    width: calc(1185 * var(--u));
+    margin: calc(48 * var(--u)) 0 0 calc(50% - 590 * var(--u));
     padding-bottom: calc(40 * var(--u));
     color: #111111;
     font-family: var(--font-serif);
+}
+
+.about-card,
+.about-card h2,
+.about-card p,
+.about-benefits > h2,
+.benefit-card,
+.benefit-card .benefit-title,
+.benefit-card .benefit-desc {
+    font-family: "Noto Serif", Georgia, "Times New Roman", serif !important;
 }
 
 .about-card,
@@ -258,7 +357,6 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
     height: calc(36 * var(--u));
     margin: 0 0 calc(6 * var(--u));
     color: var(--green);
-    font-family: var(--font-serif);
     font-size: calc(27.3 * var(--u));
     font-weight: 700;
     line-height: calc(36 * var(--u));
@@ -267,13 +365,13 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
 .about-card p {
     margin: 0;
     color: #111111;
-    font-family: var(--font-serif);
     font-weight: 400;
     white-space: nowrap;
 }
 
 .about-intro {
-    min-height: calc(191 * var(--u));
+    width: calc(1185 * var(--u));
+    height: calc(192 * var(--u));
     padding: calc(17 * var(--u)) 0 0;
 }
 
@@ -290,15 +388,15 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
 }
 
 .about-purpose {
-    display: grid;
-    grid-template-columns: 582fr 550fr;
-    column-gap: calc(49 * var(--u));
-    width: calc(1181 * var(--u));
-    margin: calc(17 * var(--u)) 0 0 calc(2 * var(--u));
+    display: flex;
+    align-items: flex-start;
+    width: calc(1177 * var(--u));
+    margin: calc(16 * var(--u)) 0 0 calc(-2 * var(--u));
 }
 
 .about-purpose .about-card {
-    min-height: calc(173 * var(--u));
+    flex: none;
+    height: calc(173 * var(--u));
     padding: calc(16 * var(--u)) 0 0;
 }
 
@@ -311,23 +409,34 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
     line-height: calc(30 * var(--u));
 }
 
+.about-visi {
+    width: calc(583 * var(--u));
+}
+
 .about-visi h2 {
     position: relative;
-    left: calc(4.5 * var(--u));
+    left: calc(9 * var(--u));
 }
 
 .about-visi p {
     position: relative;
-    left: calc(-6 * var(--u));
+    left: calc(-1.5 * var(--u));
 }
 
 .about-misi {
+    width: calc(550 * var(--u));
+    margin-left: calc(44 * var(--u));
     padding-top: calc(15 * var(--u)) !important;
 }
 
 .about-misi h2 {
     position: relative;
-    left: calc(-9.5 * var(--u));
+    left: calc(-1 * var(--u));
+}
+
+.about-misi p {
+    position: relative;
+    left: calc(8 * var(--u));
 }
 
 .about-benefits {
@@ -336,30 +445,33 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
 
 .about-benefits > h2 {
     height: calc(36 * var(--u));
-    width: calc(1181 * var(--u));
-    margin: 0 0 calc(16 * var(--u)) calc(2 * var(--u));
-    padding-left: calc(8 * var(--u));
+    width: calc(1185 * var(--u));
+    margin: 0 0 calc(16 * var(--u));
+    padding-left: calc(6 * var(--u));
     color: var(--green);
-    font-family: var(--font-serif);
     font-size: calc(27.3 * var(--u));
     font-weight: 700;
     line-height: calc(36 * var(--u));
 }
 
 .benefit-grid {
-    display: grid;
-    grid-template-columns: 388fr 389fr 370fr;
-    column-gap: calc(17 * var(--u));
-    width: calc(1181 * var(--u));
-    margin: 0 0 0 calc(2 * var(--u));
+    display: flex;
+    align-items: flex-start;
+    width: calc(1182 * var(--u));
+    margin: 0 0 0 calc(3 * var(--u));
 }
 
 .benefit-card {
     position: relative;
+    flex: none;
     height: calc(120 * var(--u));
     overflow: hidden;
     border-radius: calc(18 * var(--u));
 }
+
+.bc-1 { width: calc(388 * var(--u)); }
+.bc-2 { width: calc(389 * var(--u)); margin-left: calc(16 * var(--u)); }
+.bc-3 { width: calc(371 * var(--u)); margin-left: calc(18 * var(--u)); }
 
 .benefit-text {
     position: absolute;
@@ -369,24 +481,22 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
 .benefit-title {
     display: block;
     color: var(--green);
-    font-family: var(--font-serif);
     font-weight: 600;
 }
 
 .benefit-desc {
     display: block;
     color: #111111;
-    font-family: var(--font-serif);
     font-weight: 400;
 }
 
-.bc-1 > i {
+.benefit-clip-icon {
     position: absolute;
-    left: calc(28 * var(--u));
+    left: calc(27 * var(--u));
     top: calc(34 * var(--u));
+    width: calc(44 * var(--u));
+    height: calc(53 * var(--u));
     color: var(--green);
-    font-size: calc(54 * var(--u));
-    line-height: 1;
 }
 
 .bc-1 .benefit-text {
@@ -408,12 +518,11 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
 
 .benefit-thumb-icon {
     position: absolute;
-    left: calc(38 * var(--u));
-    top: calc(27 * var(--u));
-    width: calc(52 * var(--u));
-    height: calc(58 * var(--u));
-    fill: var(--green);
-    transform: scaleX(-1);
+    left: calc(28 * var(--u));
+    top: calc(29 * var(--u));
+    width: calc(63 * var(--u));
+    height: calc(60 * var(--u));
+    fill: #166c5c;
 }
 
 .bc-2 .benefit-text {
@@ -435,10 +544,10 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
 
 .benefit-trust-icon {
     position: absolute;
-    left: calc(32 * var(--u));
+    left: calc(24 * var(--u));
     top: calc(33 * var(--u));
-    width: calc(56 * var(--u));
-    height: calc(56 * var(--u));
+    width: calc(54 * var(--u));
+    height: calc(58 * var(--u));
     fill: none;
     stroke: var(--green);
     stroke-width: 5;
@@ -447,7 +556,7 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
 }
 
 .bc-3 .benefit-text {
-    left: calc(121 * var(--u));
+    left: calc(120 * var(--u));
     top: calc(20 * var(--u));
 }
 
@@ -458,12 +567,13 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
 }
 
 .bc-3 .benefit-desc {
-    padding-left: calc(4 * var(--u));
+    padding-left: calc(3 * var(--u));
     margin-top: calc(-4 * var(--u));
     font-size: calc(20.8 * var(--u));
     line-height: calc(30 * var(--u));
 }
 
+/* ============ RESPONSIF ============ */
 @media (max-width: 900px) {
     body.halaman-tentang {
         --u: calc(100vw / 600);
@@ -473,6 +583,7 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
     body.halaman-tentang .ep-navbar {
         position: sticky;
         top: 0;
+        height: auto;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
     }
 
@@ -497,37 +608,34 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
         line-height: 1.2;
     }
 
-    body.halaman-tentang .ep-ikon {
-        position: static;
-        display: flex;
+    body.halaman-tentang .ep-aksi {
         flex: none;
         order: 2;
-        width: 30px;
-        height: 30px;
-        margin: 0;
+        gap: 12px;
     }
 
-    body.halaman-tentang .ep-ikon svg {
-        width: 100%;
-        height: 100%;
+    body.halaman-tentang .ep-ikon {
+        width: 30px;
+        height: 30px;
     }
 
     body.halaman-tentang .ep-menu {
         position: static;
+        inset: auto;
         order: 3;
+        display: flex;
         flex: 0 0 100%;
         justify-content: center;
         gap: 28px;
+        width: auto;
         margin: 0;
         padding: 4px 0 2px;
+        transform: none;
         font-size: clamp(14px, 4vw, 16px);
     }
 
-    body.halaman-tentang .ep-menu__kategori {
-        gap: 6px;
-    }
-
     body.halaman-tentang .ep-menu__kategori::after {
+        left: calc(100% + 6px);
         width: 14px;
         height: 8px;
     }
@@ -579,7 +687,8 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
     .about-intro p,
     .about-visi h2,
     .about-visi p,
-    .about-misi h2 {
+    .about-misi h2,
+    .about-misi p {
         left: 0;
     }
 
@@ -603,13 +712,16 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
     .about-intro,
     .about-purpose .about-card,
     .about-misi {
+        width: 100%;
+        height: auto;
         min-height: 0;
+        margin-left: 0;
         padding: 16px !important;
     }
 
     .about-purpose {
-        grid-template-columns: 1fr;
-        row-gap: 12px;
+        flex-direction: column;
+        gap: 12px;
         width: 100%;
         margin: 12px 0 0;
     }
@@ -625,32 +737,33 @@ body.halaman-tentang .dd-kategori a.dd-kategori__item:focus-visible {
     }
 
     .benefit-grid {
-        grid-template-columns: 1fr;
-        row-gap: 10px;
+        flex-direction: column;
+        gap: 10px;
         width: 100%;
         margin: 0;
     }
 
-    .benefit-card {
+    .benefit-card,
+    .bc-1,
+    .bc-2,
+    .bc-3 {
         display: flex;
         align-items: center;
         gap: 14px;
+        width: 100%;
         height: auto;
         min-height: 80px;
+        margin-left: 0;
         padding: 12px 16px;
         border-radius: 14px;
     }
 
-    .benefit-card > i,
     .benefit-card > svg,
     .benefit-card .benefit-text {
         position: static;
     }
 
-    .bc-1 > i {
-        font-size: 40px;
-    }
-
+    .benefit-clip-icon,
     .benefit-thumb-icon,
     .benefit-trust-icon {
         width: 44px;

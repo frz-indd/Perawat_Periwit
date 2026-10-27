@@ -107,9 +107,11 @@ if ($modePreview) {
         if ($t === null) {
             return [0.0, 0];
         }
+        $nilai  = $t['average_rating'] ?? ($t['rating'] ?? null);
+        $jumlah = $t['review_count'] ?? ($t['jumlah_ulasan'] ?? 0);
         return [
-            ($t['rating'] ?? null) !== null ? (float) $t['rating'] : 0.0,
-            (int) ($t['jumlah_ulasan'] ?? 0),
+            $nilai !== null ? (float) $nilai : 0.0,
+            (int) $jumlah,
         ];
     }
 
@@ -239,7 +241,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-    <link rel="stylesheet" href="../CSS/profil.css?v=24">
+    <link rel="stylesheet" href="../CSS/profil.css?v=25">
 </head>
 <body class="halaman-profil">
     <svg class="sprite" aria-hidden="true">
@@ -253,23 +255,26 @@ if ($srcFoto === '' && $emailFoto !== '') {
             <symbol id="i-bintang" viewBox="0 0 24 24">
                 <path d="M12 1.8l3.1 6.6 7.2.9-5.3 4.9 1.4 7.1L12 17.7l-6.4 3.6 1.4-7.1L1.7 9.3l7.2-.9L12 1.8z"/>
             </symbol>
-            <symbol id="i-lokasi" viewBox="0 0 40 44">
-                <ellipse cx="20" cy="36" rx="13" ry="5" fill="#2fbf6b"/>
-                <path d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z" fill="#f2301d"/>
-                <circle cx="20" cy="13.5" r="4.8" fill="#fff"/>
+            <symbol id="i-lokasi" viewBox="0 0 30 34">
+                <ellipse cx="15" cy="28.2" rx="15" ry="5.5" fill="#61de56"/>
+                <path d="M15 22.7A15 5.5 0 0 1 15 33.7Z" fill="#13c37b"/>
+                <path d="M15 30.7 5.87 17.14A11 11 0 1 1 24.13 17.14Z" fill="#fd3018"/>
+                <path d="M15 0A11 11 0 0 1 24.13 17.14L15 30.7Z" fill="#e61e14"/>
+                <circle cx="15" cy="11" r="5" fill="#fff"/>
             </symbol>
-            <symbol id="i-pensil" viewBox="0 0 48 48">
-                <path d="M23 7H12A6 6 0 0 0 6 13V36A6 6 0 0 0 12 42H35A6 6 0 0 0 41 36V26" fill="none" stroke="currentColor" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
-                <g transform="translate(27.5 20.5) rotate(45)">
-                    <path d="M-5 -19a5 5 0 0 1 10 0V15L0 26-5 15Z" fill="currentColor" stroke="#fff" stroke-width="3.4" stroke-linejoin="round" paint-order="stroke"/>
-                    <path d="M-5 -12H5" fill="none" stroke="#fff" stroke-width="2.2"/>
+            <symbol id="i-pensil" viewBox="0 0 45 44">
+                <path d="M19 9.7H7.4A5.7 5.7 0 0 0 1.7 15.4V36.3A5.7 5.7 0 0 0 7.4 42H28.8A5.7 5.7 0 0 0 34.5 36.3V25" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+                <g transform="translate(33.2 11.3) rotate(45)" fill="currentColor">
+                    <path d="M-5.3 0H5.3V26C5.3 30 2.4 34.6 0.9 37Q0 38.3-0.9 37C-2.4 34.6-5.3 30-5.3 26Z"/>
+                    <path d="M-5.3-3.5V-8.1A5.3 5.3 0 0 1 5.3-8.1V-3.5Z"/>
                 </g>
             </symbol>
-            <symbol id="i-sampah" viewBox="0 0 32 32">
-                <rect x="11.5" y="1" width="9" height="3.6" rx="1.2" fill="currentColor"/>
-                <rect x="2.5" y="5" width="27" height="4.6" rx="1.3" fill="currentColor"/>
-                <path d="M5.5 11.3h21v16.2a3 3 0 0 1-3 3h-15a3 3 0 0 1-3-3z" fill="currentColor"/>
-                <path d="M12 15v11.5M20 15v11.5" fill="none" stroke="#fff" stroke-width="2.4"/>
+            <symbol id="i-sampah" viewBox="0 0 34 34">
+                <path fill="currentColor" fill-rule="evenodd" d="M12 0h10a1 1 0 0 1 1 1v5H11V1a1 1 0 0 1 1-1zM13.2 2.6h7.6v3.4h-7.6z"/>
+                <rect x="0" y="4.8" width="33.8" height="2.5" rx="1.25" fill="currentColor"/>
+                <path d="M3.8 6h26.2v25.6a1.7 1.7 0 0 1-1.7 1.7H5.5a1.7 1.7 0 0 1-1.7-1.7z" fill="currentColor"/>
+                <rect x="11.5" y="11.8" width="3" height="14.8" rx="1.5" fill="#fff"/>
+                <rect x="19" y="11.8" width="3" height="14.8" rx="1.5" fill="#fff"/>
             </symbol>
             <symbol id="i-foto" viewBox="0 0 64 56">
                 <rect x="3" y="3" width="58" height="50" rx="8" fill="none" stroke="currentColor" stroke-width="6"/>
@@ -290,20 +295,22 @@ if ($srcFoto === '' && $emailFoto !== '') {
                 <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
             </nav>
 
-            <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
-                <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" aria-hidden="true">
-                    <circle cx="16.5" cy="16.5" r="11.5"/>
-                    <line x1="25" y1="25" x2="36" y2="36"/>
-                </svg>
-            </a>
+            <div class="ep-aksi">
+                <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
+                    <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
+                        <circle cx="13.5" cy="13.5" r="11.7"/>
+                        <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
+                    </svg>
+                </a>
 
-            <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
-                <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="20" cy="20" r="17.5"/>
-                    <circle cx="20" cy="16" r="5.8"/>
-                    <path d="M9 31.5c1.5-5.8 5.6-8.8 11-8.8s9.5 3 11 8.8"/>
-                </svg>
-            </a>
+                <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
+                    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="20" cy="20" r="18.2"/>
+                        <circle cx="20" cy="16.2" r="5.8"/>
+                        <path d="M9 33.5C9.7 29.2 12.2 26 15.2 25.2C17 26.6 23 26.6 24.8 25.2C27.8 26 30.3 29.2 31 33.5"/>
+                    </svg>
+                </a>
+            </div>
         </div>
     </header>
 
@@ -328,27 +335,40 @@ if ($srcFoto === '' && $emailFoto !== '') {
             <h1 class="nama">
                 <span class="nama__teks" id="profile-name"><?= e($namaUser) ?></span>
                 <a class="nama__edit" href="edit-profil.php" aria-label="Edit profil" title="Edit profil">
-                    <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-pensil"/></svg>
+                    <svg viewBox="0 0 45 44" aria-hidden="true"><use href="#i-pensil"/></svg>
                 </a>
             </h1>
             <p class="email" id="profile-email"><?= e($emailUser) ?></p>
             <nav class="menu-profil" aria-label="Menu profil">
                 <div class="menu-profil__item">
                     <a class="menu-profil__ikon" href="../../index.php" aria-label="Beranda" title="Beranda">
-                        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="m2 13 12-10 12 10M5 11v14h18V11M11 25v-9h6v9"/>
+                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="miter" aria-hidden="true">
+                            <path d="M2.2 20.6 20 2.8 37.8 20.6"/>
+                            <path d="M4.6 18.2V38.4H35.6V18.2"/>
+                            <path d="M16.9 38.4V26H23.3V38.4"/>
                         </svg>
                     </a>
                     <span>Beranda</span>
                 </div>
-                <div class="menu-profil__item menu-profil__item--logout">
-                    <a class="menu-profil__ikon" href="../auth/Login.php" aria-label="Logout" title="Logout">
-                        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M12 3 2 14l10 11v-6.5h14v-9H12V3Z"/>
+                <div class="menu-profil__item">
+                    <a class="menu-profil__ikon" href="Edit-Password.php" aria-label="Ubah Password" title="Ubah Password">
+                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="6.45" y="19.6" width="27.1" height="17.5" rx="3.8"/>
+                            <path d="M11.2 19.6V11.7A8.8 8.8 0 0 1 28.8 11.7V19.6"/>
+                            <path d="M20 25.3V31.4"/>
                         </svg>
                     </a>
-                    <span>Logout</span>
+                    <span>Ubah Password</span>
                 </div>
+                <form class="menu-profil__item menu-profil__item--logout" method="post" action="../../Backend/api/logout.php">
+                    <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
+                    <button type="submit" class="menu-profil__ikon" aria-label="Logout" title="Logout">
+                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3.5 19.4 17.7 5.5V13.2H35.8Q36.6 13.2 36.6 14V24.3Q36.6 25.1 35.8 25.1H17.7V33.8Z"/>
+                        </svg>
+                    </button>
+                    <span>Logout</span>
+                </form>
             </nav>
         </aside>
 
@@ -387,15 +407,17 @@ if ($srcFoto === '' && $emailFoto !== '') {
                                 <?php endif; ?>
                             </h3>
                             <div class="rating">
-                                <?php if ($rating > 0): ?>
+                                <?php if ($jumlah > 0 && $rating > 0): ?>
                                     <span class="bintang" aria-hidden="true"><?= bintangHtml($rating) ?></span>
                                     <span class="rating__ulasan"><?= e(formatRating($rating)) ?> (<?= e($jumlahLabel) ?> ulasan)</span>
-                                <?php else: ?>
+                                <?php elseif ($jumlah > 0): ?>
                                     <span class="rating__ulasan">(<?= e($jumlahLabel) ?> ulasan)</span>
+                                <?php else: ?>
+                                    <span class="rating__ulasan">Belum ada ulasan</span>
                                 <?php endif; ?>
                             </div>
                             <div class="lokasi">
-                                <svg class="lokasi__ikon" viewBox="0 0 40 44" aria-hidden="true"><use href="#i-lokasi"/></svg>
+                                <svg class="lokasi__ikon" viewBox="0 0 30 34" aria-hidden="true"><use href="#i-lokasi"/></svg>
                                 <p><?= wilayahHtml((string) ($f['wilayah'] ?? '')) ?></p>
                             </div>
                         </div>
@@ -404,7 +426,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
                             <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
                             <input type="hidden" name="id_wisata" value="<?= e($idWisata) ?>">
                             <button type="submit" class="hapus" aria-label="Hapus <?= e($nama) ?> dari favorit" title="Hapus dari favorit">
-                                <svg viewBox="0 0 32 32" aria-hidden="true"><use href="#i-sampah"/></svg>
+                                <svg viewBox="0 0 34 34" aria-hidden="true"><use href="#i-sampah"/></svg>
                             </button>
                         </form>
                     </article>
