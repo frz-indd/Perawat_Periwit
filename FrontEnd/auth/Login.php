@@ -208,7 +208,7 @@
         </section>
     </div>
 
-    <script src="../js/auth.js?v=20261015-1"></script>
+    <script src="../js/auth.js?v=20261027-1"></script>
 
 </body>
 </html>

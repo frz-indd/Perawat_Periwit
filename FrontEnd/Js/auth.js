@@ -68,22 +68,45 @@ function isValidPhone(value) {
 }
 
 async function sendForm(form) {
-    const response = await fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: {
-            Accept: 'application/json'
-        },
-        credentials: 'same-origin'
-    });
+    const endpoint = new URL(form.action, window.location.href).pathname;
+
+    console.info(`[API Request] POST ${endpoint}`);
+
+    let response;
+
+    try {
+        response = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                Accept: 'application/json'
+            },
+            credentials: 'same-origin'
+        });
+    } catch (error) {
+        console.error(`[API Error] ${endpoint}`, error);
+        throw error;
+    }
 
     let result;
 
     try {
         result = await response.json();
-    } catch {
+    } catch (error) {
+        console.info(`[API Response] ${endpoint}`, {
+            httpStatus: response.status,
+            ok: response.ok
+        });
+        console.error(`[API Error] ${endpoint}`, error);
         throw new Error('server_error');
     }
+
+    console.info(`[API Response] ${endpoint}`, {
+        httpStatus: response.status,
+        ok: response.ok,
+        status: result.status,
+        message: result.message
+    });
 
     if (!response.ok && !result.status) {
         throw new Error('server_error');
