@@ -1,0 +1,22 @@
+$kind: http-request
+name: GET /categories aktif
+url: "{{baseUrl}}/categories"
+method: GET
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Active categories include ID, name, and image', function () {
+          pm.response.to.have.status(200);
+          const categories = pm.response.json().data;
+          pm.expect(categories).to.be.an('array').that.is.not.empty;
+          categories.forEach(function (category) {
+              pm.expect(category.id_kategori).to.be.a('number');
+              pm.expect(category.nama).to.be.a('string').and.not.empty;
+              pm.expect(category).to.have.property('gambar');
+          });
+          pm.collectionVariables.set('categoryId', categories[0].id_kategori);
+      });
+    language: text/javascript
+order: 2000

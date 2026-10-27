@@ -1,0 +1,19 @@
+$kind: http-request
+name: PUT /users/me tanpa login
+url: "{{baseUrl}}/users/me"
+method: PUT
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: '{"nama":"Nama Uji","email":"uji@example.com"}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Anonymous PUT returns 401', function () {
+          pm.response.to.have.status(401);
+          pm.expect(pm.response.json().status).to.eql('unauthenticated');
+      });
+    language: text/javascript
+order: 10000

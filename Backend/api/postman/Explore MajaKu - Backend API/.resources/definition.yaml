@@ -1,0 +1,14 @@
+$kind: collection
+description: Backend API smoke checks. Authenticated paths run when valid user and admin credentials are configured; otherwise the collection verifies unauthenticated and validation responses.
+variables:
+  baseUrl: http://localhost/Perawat_Periwit
+  loginEmail: ""
+  loginPassword: ""
+  profileName: ""
+  profileEmail: ""
+  profileUpdateBody: "{}"
+  categoryId: ""
+  adminUsername: ""
+  adminPassword: ""
+  destinationId: K00001
+  adminCsrf: ""

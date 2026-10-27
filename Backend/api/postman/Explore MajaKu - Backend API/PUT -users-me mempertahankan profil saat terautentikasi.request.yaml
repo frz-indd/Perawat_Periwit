@@ -1,0 +1,29 @@
+$kind: http-request
+name: PUT /users/me mempertahankan profil saat terautentikasi
+url: "{{baseUrl}}/users/me"
+method: PUT
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: "{{profileUpdateBody}}"
+scripts:
+  - type: beforeRequest
+    code: "pm.collectionVariables.set('profileUpdateBody', JSON.stringify({ nama: pm.collectionVariables.get('profileName'), email: pm.collectionVariables.get('profileEmail') }));"
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      const userAuthenticated = pm.collectionVariables.get('userAuthenticated') === 'true';
+      pm.test('Profile update matches authentication state', function () {
+          pm.response.to.have.status(userAuthenticated ? 200 : 401);
+          if (userAuthenticated) {
+              const data = pm.response.json().data;
+              pm.expect(data.nama).to.eql(pm.collectionVariables.get('profileName'));
+              pm.expect(data.email).to.eql(pm.collectionVariables.get('profileEmail'));
+          } else {
+              pm.expect(pm.response.json().status).to.eql('unauthenticated');
+          }
+      });
+    language: text/javascript
+order: 14000
