@@ -1,0 +1,756 @@
+openapi: 3.0.3
+info:
+  title: Explore MajaKu Backend API
+  version: 1.0.0
+  description: >-
+    Kontrak API untuk aplikasi Perawat_Periwit. Endpoint autentikasi memakai
+    session PHP (cookie PHPSESSID). Endpoint perubahan data yang dilindungi
+    juga membutuhkan token CSRF sesuai dokumentasi endpoint. Implementasi
+    PUT /users/me saat ini memvalidasi session pengguna; PUT lokasi dan POST
+    ulasan juga memvalidasi X-CSRF-Token. Terapkan
+    destination_location_migration.sql dan destination_reviews_migration.sql
+    sebelum menggunakan fitur lokasi/ulasan pada database lama.
+servers:
+  - url: http://localhost/Perawat_Periwit
+    description: Instalasi lokal XAMPP
+tags:
+  - name: Auth
+  - name: Profil
+  - name: Wisata
+  - name: Kategori
+  - name: Destinasi
+  - name: Ulasan
+paths:
+  /Backend/api/fungsi_login.php:
+    post:
+      tags: [Auth]
+      summary: Login pengguna atau admin
+      description: >-
+        Kirim form-urlencoded atau multipart/form-data. Sukses menetapkan
+        cookie PHPSESSID; simpan cookie tersebut untuk request selanjutnya.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              user:
+                value: { role: user, email: pengguna@example.com, password: password-rahasia }
+              admin:
+                value: { role: admin, username: admin, password: password-rahasia }
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login berhasil; session cookie dibuat.
+          headers:
+            Set-Cookie:
+              description: Cookie session PHPSESSID.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/UserLoginResponse'
+                  - $ref: '#/components/schemas/AdminLoginResponse'
+        '401':
+          description: Kredensial salah.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '404':
+          description: Akun pengguna tidak ditemukan.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '422':
+          description: Input atau role tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /Backend/api/fungsi_register.php:
+    post:
+      tags: [Auth]
+      summary: Registrasi pengguna
+      description: Password minimal 8 karakter. Nama kosong akan diisi dari bagian email sebelum @.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Pengguna berhasil dibuat; session login tidak dibuat.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data: { $ref: '#/components/schemas/RegisteredUser' }
+        '409':
+          description: Email telah digunakan.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '422':
+          description: Input tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /Backend/api/google_login.php:
+    get:
+      tags: [Auth]
+      summary: Mulai login atau registrasi Google
+      description: Browser dialihkan ke Google OAuth atau kembali ke halaman auth jika OAuth belum dikonfigurasi.
+      parameters:
+        - name: intent
+          in: query
+          required: false
+          schema: { type: string, enum: [login, register], default: login }
+      responses:
+        '302':
+          description: Redirect ke Google OAuth.
+          headers:
+            Location:
+              schema: { type: string, format: uri }
+        '303':
+          description: OAuth belum dikonfigurasi; redirect ke halaman login/registrasi.
+          headers:
+            Location:
+              schema: { type: string }
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          description: Gagal memulai OAuth.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /Backend/api/google_callback.php:
+    get:
+      tags: [Auth]
+      summary: Callback OAuth Google
+      description: Callback Google; state terikat pada session dan hanya dapat dipakai sekali.
+      parameters:
+        - name: code
+          in: query
+          required: false
+          schema: { type: string }
+        - name: state
+          in: query
+          required: true
+          schema: { type: string }
+        - name: error
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '303':
+          description: OAuth selesai, dibatalkan, atau berakhir dengan redirect.
+          headers:
+            Location: { schema: { type: string } }
+        '400':
+          description: State atau kode otorisasi tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401':
+          description: Kode/token identitas ditolak atau tidak valid oleh Google.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '503':
+          description: OAuth belum dikonfigurasi.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          description: Login Google gagal.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /users/me:
+    get:
+      tags: [Profil]
+      summary: Ambil profil pengguna yang sedang login
+      security:
+        - PhpSession: []
+      responses:
+        '200':
+          description: Profil pengguna.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data: { $ref: '#/components/schemas/UserProfile' }
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          description: Pengguna tidak ditemukan.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Profil]
+      summary: Perbarui nama dan email pengguna
+      security:
+        - PhpSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nama, email]
+              properties:
+                nama: { type: string, minLength: 1, maxLength: 255, example: Nama Baru }
+                email: { type: string, format: email, maxLength: 255, example: baru@example.com }
+      responses:
+        '200':
+          description: Profil berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string }
+                  data: { $ref: '#/components/schemas/UserProfile' }
+        '400':
+          description: JSON tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          description: Pengguna tidak ditemukan.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '409':
+          description: Email telah dipakai pengguna lain.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '415':
+          description: Content-Type harus application/json.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '422':
+          description: Nama/email tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /Backend/api/wisata.php:
+    get:
+      tags: [Wisata]
+      summary: Daftar wisata
+      parameters:
+        - $ref: '#/components/parameters/Latitude'
+        - $ref: '#/components/parameters/Longitude'
+      responses:
+        '200':
+          description: Daftar wisata dengan informasi kategori dan lokasi.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Tourism' }
+        '422':
+          description: Koordinat pengguna tidak lengkap, bukan angka, atau di luar rentang.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /categories:
+    get:
+      tags: [Kategori]
+      summary: Daftar kategori aktif
+      responses:
+        '200':
+          description: Kategori aktif.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Category' }
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /categories/{id}/wisata:
+    get:
+      tags: [Kategori, Wisata]
+      summary: Wisata dalam kategori aktif
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200':
+          description: Kategori beserta wisata; array wisata dapat kosong.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data:
+                    type: object
+                    properties:
+                      kategori: { $ref: '#/components/schemas/Category' }
+                      wisata:
+                        type: array
+                        items: { $ref: '#/components/schemas/CategoryTourism' }
+        '400':
+          description: ID kategori bukan bilangan bulat positif.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '404':
+          description: Kategori tidak ditemukan atau tidak aktif.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/destinations/search:
+    get:
+      tags: [Destinasi]
+      summary: Cari destinasi wisata
+      description: Pencarian mencocokkan nama, deskripsi, alamat, domisili, dan kategori.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 2 }
+          example: pantai
+      responses:
+        '200':
+          description: Hasil pencarian berisi informasi lokasi.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Tourism' }
+        '400':
+          description: Parameter q tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '422':
+          description: Kata kunci kurang dari dua karakter.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/destinations/{id}/location:
+    parameters:
+      - $ref: '#/components/parameters/DestinationId'
+    get:
+      tags: [Destinasi]
+      summary: Ambil alamat dan koordinat destinasi
+      responses:
+        '200':
+          description: Informasi lokasi; koordinat tidak lengkap dikembalikan null.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data: { $ref: '#/components/schemas/DestinationLocation' }
+        '400':
+          description: ID destinasi tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '404':
+          description: Destinasi tidak ditemukan.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Destinasi]
+      summary: Perbarui alamat dan koordinat destinasi (admin)
+      security:
+        - PhpSession: []
+          CsrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLocationRequest'
+      responses:
+        '200':
+          description: Lokasi diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string }
+                  data: { $ref: '#/components/schemas/DestinationLocation' }
+        '400':
+          description: JSON atau ID destinasi tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Token CSRF tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '404':
+          description: Destinasi tidak ditemukan.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '415':
+          description: Content-Type harus application/json.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '422':
+          description: Alamat atau koordinat tidak valid/tidak berpasangan.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/destinations/{id}/reviews:
+    parameters:
+      - $ref: '#/components/parameters/DestinationId'
+    post:
+      tags: [Ulasan]
+      summary: Tambahkan ulasan destinasi (pengguna)
+      description: Field `komentar` dapat dipakai sebagai alias untuk `text`.
+      security:
+        - PhpSession: []
+          CsrfHeader: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewRequest'
+      responses:
+        '201':
+          description: Ulasan tersimpan dan rating agregat diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string }
+                  data: { $ref: '#/components/schemas/Review' }
+        '400':
+          description: JSON atau ID tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Token CSRF tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '404':
+          description: Destinasi tidak ditemukan.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '415':
+          description: Content-Type harus application/json.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '422':
+          description: Rating atau teks ulasan tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /Backend/api/logout.php:
+    post:
+      tags: [Auth]
+      summary: Logout dan hapus session
+      description: Endpoint mengembalikan redirect, bukan JSON.
+      security:
+        - PhpSession: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [csrf]
+              properties:
+                csrf: { type: string, description: Token CSRF dari session login }
+      responses:
+        '303':
+          description: Session dihapus; redirect ke halaman login.
+          headers:
+            Location: { schema: { type: string } }
+        '403':
+          description: Session atau token CSRF tidak valid.
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+components:
+  securitySchemes:
+    PhpSession:
+      type: apiKey
+      in: cookie
+      name: PHPSESSID
+      description: Cookie session yang diterima saat login.
+    CsrfHeader:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+      description: Token CSRF dari respons login/session pengguna.
+  parameters:
+    Latitude:
+      name: latitude
+      in: query
+      required: false
+      schema: { type: number, minimum: -90, maximum: 90 }
+      description: Wajib dipasangkan dengan longitude.
+    Longitude:
+      name: longitude
+      in: query
+      required: false
+      schema: { type: number, minimum: -180, maximum: 180 }
+      description: Wajib dipasangkan dengan latitude.
+    DestinationId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, minLength: 1, maxLength: 16, pattern: '^[A-Za-z0-9_-]+$' }
+  responses:
+    Unauthenticated:
+      description: Session login yang sesuai tidak tersedia.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    MethodNotAllowed:
+      description: Metode HTTP tidak didukung.
+      headers:
+        Allow: { schema: { type: string } }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    ServerError:
+      description: Kesalahan server.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        status: { type: string, example: validation_error }
+        message: { type: string, example: Input tidak valid. }
+    LoginRequest:
+      type: object
+      properties:
+        role: { type: string, enum: [user, admin], default: user }
+        email: { type: string, description: Email atau nomor telepon pengguna }
+        username: { type: string, description: Username admin }
+        password: { type: string, format: password }
+    UserProfile:
+      type: object
+      required: [id_user, nama, email]
+      properties:
+        id_user: { type: integer, example: 7 }
+        nama: { type: string, example: Nama Pengguna }
+        email: { type: string, format: email, example: pengguna@example.com }
+    UserLoginResponse:
+      type: object
+      properties:
+        status: { type: string, example: success }
+        data:
+          allOf:
+            - $ref: '#/components/schemas/UserProfile'
+            - type: object
+              properties:
+                csrf: { type: string }
+    AdminLoginResponse:
+      type: object
+      properties:
+        status: { type: string, example: success }
+        data:
+          type: object
+          properties:
+            id_admin: { type: integer }
+            nama: { type: string }
+            username: { type: string }
+            role: { type: string, enum: [admin] }
+            csrf: { type: string }
+    RegisterRequest:
+      type: object
+      required: [email, password, confirmPassword]
+      properties:
+        nama: { type: string, maxLength: 255 }
+        email: { type: string, format: email, maxLength: 255 }
+        password: { type: string, format: password, minLength: 8 }
+        confirmPassword: { type: string, format: password, minLength: 8 }
+    RegisteredUser:
+      type: object
+      properties:
+        id_user: { type: integer }
+        nama: { type: string }
+        email: { type: string, format: email }
+    Category:
+      type: object
+      properties:
+        id_kategori: { type: integer }
+        nama: { type: string }
+        gambar: { type: string, nullable: true }
+    Location:
+      type: object
+      properties:
+        alamat: { type: string, nullable: true }
+        domisili: { type: string, nullable: true }
+        wilayah: { type: string, nullable: true }
+        latitude: { type: number, nullable: true, minimum: -90, maximum: 90 }
+        longitude: { type: number, nullable: true, minimum: -180, maximum: 180 }
+        koordinat_lengkap: { type: boolean }
+    Tourism:
+      type: object
+      properties:
+        id_wisata: { type: string }
+        id_kategori: { type: integer }
+        nama_wisata: { type: string }
+        gambar: { type: string, nullable: true }
+        gambar_kategori: { type: string, nullable: true }
+        deskripsi: { type: string, nullable: true }
+        harga_tiket: { type: number, nullable: true }
+        wilayah: { type: string, nullable: true }
+        alamat: { type: string, nullable: true }
+        jam_buka: { type: string, nullable: true }
+        jam_tutup: { type: string, nullable: true }
+        kategori:
+          description: Objek kategori pada daftar wisata; nama kategori berupa string pada pencarian.
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/CategorySummary'
+            - type: string
+        lokasi: { $ref: '#/components/schemas/Location' }
+        jarak_km: { type: number, nullable: true }
+        Maps_Wisata: { type: string, nullable: true }
+        rating: { type: number, nullable: true }
+        jumlah_ulasan: { type: integer }
+    CategorySummary:
+      type: object
+      properties:
+        id_kategori: { type: integer }
+        nama: { type: string }
+        deskripsi: { type: string, nullable: true }
+    CategoryTourism:
+      allOf:
+        - $ref: '#/components/schemas/Tourism'
+        - type: object
+          properties:
+            id_kategori: { type: integer }
+            latitude: { type: number, nullable: true }
+            longitude: { type: number, nullable: true }
+    DestinationLocation:
+      type: object
+      properties:
+        id_wisata: { type: string }
+        nama_wisata: { type: string }
+        alamat: { type: string, nullable: true }
+        latitude: { type: number, nullable: true, minimum: -90, maximum: 90 }
+        longitude: { type: number, nullable: true, minimum: -180, maximum: 180 }
+        koordinat_lengkap: { type: boolean }
+    UpdateLocationRequest:
+      type: object
+      required: [alamat, latitude, longitude]
+      properties:
+        alamat: { type: string, maxLength: 255 }
+        latitude: { type: number, nullable: true, minimum: -90, maximum: 90 }
+        longitude: { type: number, nullable: true, minimum: -180, maximum: 180 }
+      description: Kirim latitude dan longitude bersama-sama atau keduanya null.
+    CreateReviewRequest:
+      type: object
+      required: [rating]
+      properties:
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        text: { type: string, minLength: 1, maxLength: 500 }
+        komentar: { type: string, minLength: 1, maxLength: 500, description: Alias text }
+      description: Salah satu dari text atau komentar wajib diisi.
+    Review:
+      type: object
+      properties:
+        id_review: { type: integer }
+        destination_id: { type: string }
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        text: { type: string }
+        average_rating: { type: number, nullable: true, format: double }
+        review_count: { type: integer }

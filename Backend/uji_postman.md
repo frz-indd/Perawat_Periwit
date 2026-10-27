@@ -1,4 +1,4 @@
-# Bukti Uji API dengan Postman
+﻿# Bukti Uji API dengan Postman
 
 Tanggal uji: 27 Oktober 2026  
 Alat: Postman CLI 1.77.0  
@@ -17,14 +17,14 @@ postman collection run "Backend/api/postman/Explore MajaKu - Backend API" --repo
 
 Assertion di bawah menggunakan JavaScript Postman Sandbox (`pm.test`, `pm.response`). Skrip per request lengkap juga tersimpan pada file `.request.yaml` di folder koleksi tersebut.
 
-**GET profil tanpa login — harapkan `401`:**
+**GET profil tanpa login â€” harapkan `401`:**
 ```javascript
 pm.test('Anonymous GET returns 401', function () {
     pm.response.to.have.status(401);
     pm.expect(pm.response.json().status).to.eql('unauthenticated');
 });
 ```
-**GET kategori aktif — harapkan `200` dan struktur data valid:**
+**GET kategori aktif â€” harapkan `200` dan struktur data valid:**
 ```javascript
 pm.test('Active categories include ID, name, and image', function () {
     pm.response.to.have.status(200);
@@ -39,7 +39,7 @@ pm.test('Active categories include ID, name, and image', function () {
 });
 ```
 
-**GET kategori dengan ID tidak valid — harapkan `400`:**
+**GET kategori dengan ID tidak valid â€” harapkan `400`:**
 ```javascript
 pm.test('Malformed category ID returns 400', function () {
     pm.response.to.have.status(400);
@@ -47,7 +47,7 @@ pm.test('Malformed category ID returns 400', function () {
 });
 ```
 
-**Login tanpa kredensial — harapkan validasi `422`:**
+**Login tanpa kredensial â€” harapkan validasi `422`:**
 
 ```javascript
 pm.test('Login validates missing credentials', function () {
@@ -55,3 +55,12 @@ pm.test('Login validates missing credentials', function () {
     pm.expect(pm.response.json().status).to.eql('validation_error');
 });
 ```
+
+
+## File koleksi untuk diimpor
+
+Di Postman Desktop, pilih **Import → File**, lalu pilih koleksi JSON berikut:
+
+[`Perawat_Periwit.postman_collection.json`](api/postman/Perawat_Periwit.postman_collection.json)
+
+Koleksi ini memuat 14 request beserta test script. Variabel `baseUrl` sudah diarahkan ke `http://localhost/Perawat_Periwit`. Isi variabel kredensial di Postman hanya jika ingin menguji login sukses.

@@ -1,0 +1,555 @@
+{
+  "info": {
+    "name": "Perawat_Periwit - Backend API Tests",
+    "description": "Koleksi uji API lokal. Isi kredensial hanya di variables Postman untuk menjalankan jalur login berhasil.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET /users/me tanpa login",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/me"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Anonymous GET returns 401', function () {",
+              "  pm.response.to.have.status(401);",
+              "  pm.expect(pm.response.json().status).to.eql('unauthenticated');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /categories aktif",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/categories"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Active categories include ID, name, and image', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const categories = pm.response.json().data;",
+              "  pm.expect(categories).to.be.an('array').that.is.not.empty;",
+              "  categories.forEach(function (c) { pm.expect(c.id_kategori).to.be.a('number'); pm.expect(c.nama).to.be.a('string').and.not.empty; pm.expect(c).to.have.property('gambar'); });",
+              "  pm.collectionVariables.set('categoryId', categories[0].id_kategori);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET wisata berdasarkan kategori",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/categories/{{categoryId}}/wisata"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Tourism is returned for selected category', function () {",
+              "  pm.response.to.have.status(200); const d = pm.response.json().data;",
+              "  pm.expect(d.kategori.id_kategori).to.eql(Number(pm.collectionVariables.get('categoryId'))); pm.expect(d.wisata).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET wisata menolak ID kategori invalid",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/categories/not-a-number/wisata"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Malformed category ID returns 400', function () { pm.response.to.have.status(400); pm.expect(pm.response.json().status).to.eql('invalid_category_id'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET wisata menangani kategori tidak ditemukan",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/categories/999999/wisata"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Unknown category ID returns 404', function () { pm.response.to.have.status(404); pm.expect(pm.response.json().status).to.eql('category_not_found'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /wisata menyertakan foto",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Backend/api/wisata.php"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Tourism rows include IDs and photos', function () { pm.response.to.have.status(200); const rows=pm.response.json().data; pm.expect(rows).to.be.an('array').that.is.not.empty; rows.forEach(x => {pm.expect(x.id_wisata).to.match(/^[KM][0-9]{5,}$/); pm.expect(x.gambar).to.be.a('string').and.not.empty;}); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET lokasi destinasi",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/destinations/{{destinationId}}/location"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Location returns valid coordinate fields', function () { pm.response.to.have.status(200); const d=pm.response.json().data; pm.expect(d).to.have.property('alamat'); pm.expect(d.koordinat_lengkap).to.be.a('boolean'); if(d.koordinat_lengkap){pm.expect(d.latitude).to.be.within(-90,90);pm.expect(d.longitude).to.be.within(-180,180);}else{pm.expect(d.latitude).to.eql(null);pm.expect(d.longitude).to.eql(null);} });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST login admin (kredensial opsional)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Backend/api/fungsi_login.php"
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "role",
+              "value": "admin",
+              "type": "text"
+            },
+            {
+              "key": "username",
+              "value": "{{adminUsername}}",
+              "type": "text"
+            },
+            {
+              "key": "password",
+              "value": "{{adminPassword}}",
+              "type": "text"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.unset('adminCsrf');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const ok=pm.response.code===200; pm.test('Admin login succeeds or validates missing credentials',function(){pm.response.to.have.status(ok?200:422);if(ok){const d=pm.response.json().data;pm.expect(d.role).to.eql('admin');pm.expect(d.csrf).to.be.a('string').and.not.empty;pm.collectionVariables.set('adminCsrf',d.csrf);}else{pm.expect(pm.response.json().status).to.eql('validation_error');}});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT lokasi memvalidasi session admin dan koordinat",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "X-CSRF-Token",
+            "value": "{{adminCsrf}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/destinations/{{destinationId}}/location"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"alamat\":\"Alamat uji\",\"latitude\":-6.9,\"longitude\":null}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const has=Boolean(pm.collectionVariables.get('adminCsrf')); pm.test('Location update validates session and coordinate pair',function(){pm.response.to.have.status(has?422:401);pm.expect(pm.response.json().status).to.eql(has?'incomplete_coordinates':'unauthenticated');});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT /users/me tanpa login",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/me"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"nama\":\"Nama Uji\",\"email\":\"uji@example.com\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Anonymous PUT returns 401',function(){pm.response.to.have.status(401);pm.expect(pm.response.json().status).to.eql('unauthenticated');});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST login pengguna (kredensial opsional)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Backend/api/fungsi_login.php"
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "email",
+              "value": "{{loginEmail}}",
+              "type": "text"
+            },
+            {
+              "key": "password",
+              "value": "{{loginPassword}}",
+              "type": "text"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.unset('userAuthenticated');",
+              "pm.collectionVariables.unset('profileName');",
+              "pm.collectionVariables.unset('profileEmail');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const ok=pm.response.code===200; pm.test('User login succeeds or validates missing credentials',function(){pm.response.to.have.status(ok?200:422);if(ok){pm.expect(pm.response.json().status).to.eql('success');pm.collectionVariables.set('userAuthenticated','true');}else{pm.expect(pm.response.json().status).to.eql('validation_error');}});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /users/me mengikuti status login",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/me"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const auth=pm.collectionVariables.get('userAuthenticated')==='true';pm.test('Profile access matches login state',function(){pm.response.to.have.status(auth?200:401);if(auth){const d=pm.response.json().data;pm.expect(d.id_user).to.be.a('number');pm.expect(d.nama).to.be.a('string').and.not.empty;pm.expect(d.email).to.be.a('string').and.not.empty;pm.collectionVariables.set('profileName',d.nama);pm.collectionVariables.set('profileEmail',d.email);}else{pm.expect(pm.response.json().status).to.eql('unauthenticated');}});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT /users/me menolak payload tidak valid",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/me"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"nama\":\"\",\"email\":\"bukan-email\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const auth=pm.collectionVariables.get('userAuthenticated')==='true';pm.test('Invalid profile payload returns expected status',function(){pm.response.to.have.status(auth?422:401);pm.expect(pm.response.json().status).to.eql(auth?'validation_error':'unauthenticated');});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT /users/me mempertahankan profil saat terautentikasi",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/me"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{{profileUpdateBody}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('profileUpdateBody',JSON.stringify({nama:pm.collectionVariables.get('profileName'),email:pm.collectionVariables.get('profileEmail')}));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const auth=pm.collectionVariables.get('userAuthenticated')==='true';pm.test('Profile update matches authentication state',function(){pm.response.to.have.status(auth?200:401);if(auth){const d=pm.response.json().data;pm.expect(d.nama).to.eql(pm.collectionVariables.get('profileName'));pm.expect(d.email).to.eql(pm.collectionVariables.get('profileEmail'));}else{pm.expect(pm.response.json().status).to.eql('unauthenticated');}});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost/Perawat_Periwit"
+    },
+    {
+      "key": "loginEmail",
+      "value": ""
+    },
+    {
+      "key": "loginPassword",
+      "value": ""
+    },
+    {
+      "key": "adminUsername",
+      "value": ""
+    },
+    {
+      "key": "adminPassword",
+      "value": ""
+    },
+    {
+      "key": "destinationId",
+      "value": "K00001"
+    },
+    {
+      "key": "categoryId",
+      "value": ""
+    },
+    {
+      "key": "adminCsrf",
+      "value": ""
+    },
+    {
+      "key": "userAuthenticated",
+      "value": ""
+    },
+    {
+      "key": "profileName",
+      "value": ""
+    },
+    {
+      "key": "profileEmail",
+      "value": ""
+    },
+    {
+      "key": "profileUpdateBody",
+      "value": "{}"
+    }
+  ]
+}
