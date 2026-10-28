@@ -241,7 +241,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-    <link rel="stylesheet" href="../CSS/profil.css?v=25">
+    <link rel="stylesheet" href="../CSS/profil.css?v=26">
 </head>
 <body class="halaman-profil">
     <svg class="sprite" aria-hidden="true">
@@ -360,9 +360,9 @@ if ($srcFoto === '' && $emailFoto !== '') {
                     </a>
                     <span>Ubah Password</span>
                 </div>
-                <form class="menu-profil__item menu-profil__item--logout" method="post" action="../../Backend/api/logout.php">
+                <form class="menu-profil__item menu-profil__item--logout" id="logout-form" method="post" action="../../Backend/api/logout.php">
                     <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
-                    <button type="submit" class="menu-profil__ikon" aria-label="Logout" title="Logout">
+                    <button type="button" class="menu-profil__ikon logout-trigger" aria-label="Logout" title="Logout" aria-haspopup="dialog" aria-controls="logout-dialog">
                         <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M3.5 19.4 17.7 5.5V13.2H35.8Q36.6 13.2 36.6 14V24.3Q36.6 25.1 35.8 25.1H17.7V33.8Z"/>
                         </svg>
@@ -437,7 +437,58 @@ if ($srcFoto === '' && $emailFoto !== '') {
         </section>
     </div>
 
+    <dialog class="logout-modal" id="logout-dialog" aria-labelledby="logout-title" aria-describedby="logout-description">
+        <div class="logout-modal__ikon" aria-hidden="true">
+            <svg viewBox="0 0 88 88" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M48 22H24v44h24"/>
+                <path d="M43 44h30m-12-12 12 12-12 12"/>
+            </svg>
+        </div>
+        <h2 class="logout-modal__judul" id="logout-title">Apakah Anda yakin<br>ingin keluar?</h2>
+        <p class="logout-modal__deskripsi" id="logout-description">Anda akan keluar dari akun dan harus login kembali untuk mengakses fitur lainnya</p>
+        <div class="logout-modal__aksi">
+            <button class="logout-modal__tombol logout-modal__tombol--keluar" type="button" id="logout-confirm">Keluar</button>
+            <button class="logout-modal__tombol logout-modal__tombol--batal" type="button" id="logout-cancel" autofocus>Batal</button>
+        </div>
+    </dialog>
+
     <script>
+        (function () {
+            var logoutForm = document.getElementById('logout-form');
+            var logoutTrigger = document.querySelector('.logout-trigger');
+            var logoutDialog = document.getElementById('logout-dialog');
+            var logoutConfirm = document.getElementById('logout-confirm');
+            var logoutCancel = document.getElementById('logout-cancel');
+
+            if (!logoutForm || !logoutTrigger || !logoutDialog || !logoutConfirm || !logoutCancel) return;
+
+            logoutTrigger.addEventListener('click', function () {
+                logoutDialog.showModal();
+            });
+
+            logoutCancel.addEventListener('click', function () {
+                logoutDialog.close();
+            });
+
+            logoutDialog.addEventListener('click', function (event) {
+                if (event.target === logoutDialog) logoutDialog.close();
+            });
+
+            logoutDialog.addEventListener('close', function () {
+                logoutTrigger.focus();
+            });
+
+            logoutConfirm.addEventListener('click', function () {
+                try {
+                    window.localStorage.removeItem('token');
+                } catch (error) {
+                    console.error('Token lokal tidak dapat dihapus sebelum logout.', error);
+                }
+
+                logoutForm.requestSubmit();
+            });
+        })();
+
         (function () {
             var toggle = document.getElementById('kategori-toggle');
             var menu = document.getElementById('kategori-menu');

@@ -35,5 +35,5 @@ if (ini_get("session.use_cookies")) {
 
 session_destroy();
 
-header("Location: ../../FrontEnd/auth/Login.php", true, 303);
+header("Location: ../../index.php", true, 303);
 exit;
