@@ -40,7 +40,10 @@ try {
     require_once __DIR__ . "/../database/koneksi.php";
     require_once __DIR__ . "/../database/wisata_repository.php";
 
-    $destinations = fetchTourismRows($conn, ["keyword" => $query]);
+    $destinations = fetchTourismRows($conn, [
+        "keyword" => $query,
+        "name_description_only" => true
+    ]);
     $respond(200, [
         "status" => "success",
         "data" => $destinations

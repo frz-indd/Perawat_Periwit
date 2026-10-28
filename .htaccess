@@ -1,6 +1,7 @@
 RewriteEngine On
 RewriteRule ^search/?$ FrontEnd/pages/hasil_pencarian.php [QSA,L]
 RewriteRule ^api/destinations/search/?$ Backend/api/destinations_search.php [QSA,L]
+RewriteRule ^api/favorites/?$ Backend/api/favorites.php [QSA,L]
 RewriteRule ^api/destinations/([^/]+)/reviews/?$ Backend/api/destination_reviews.php?id=$1 [B,QSA,L]
 RewriteRule ^api/destinations/([^/]+)/location/?$ Backend/api/destination_location.php?id=$1 [B,QSA,L]
 RewriteRule ^users/me/?$ Backend/api/users_me.php [QSA,L]

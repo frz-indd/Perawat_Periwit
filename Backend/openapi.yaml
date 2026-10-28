@@ -20,6 +20,7 @@ tags:
   - name: Kategori
   - name: Destinasi
   - name: Ulasan
+  - name: Favorit
 paths:
   /Backend/api/fungsi_login.php:
     post:
@@ -430,8 +431,8 @@ paths:
   /api/destinations/search:
     get:
       tags: [Destinasi]
-      summary: Cari destinasi wisata
-      description: Pencarian mencocokkan nama, deskripsi, alamat, domisili, dan kategori.
+      summary: Cari destinasi wisata berdasarkan nama dan deskripsi
+      description: Pencarian mencocokkan q dengan pola LIKE %q% pada kolom nama_wisata dan deskripsi. Jalankan destination_search_indexes.sql untuk menambahkan index kolom pencarian.
       parameters:
         - name: q
           in: query
@@ -457,6 +458,75 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
         '422':
           description: Kata kunci kurang dari dua karakter.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/favorites:
+    post:
+      tags: [Favorit]
+      summary: Tambahkan atau hapus favorit destinasi
+      description: Menyisipkan atau menghapus relasi favorit untuk pengguna yang sedang login. Backend menggunakan tabel favorit (Id_user, Id_wisata) yang memetakan user_id dan destination_id.
+      security:
+        - PhpSession: []
+      parameters:
+        - name: X-CSRF-Token
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [destination_id, action]
+              properties:
+                destination_id: { type: string, maxLength: 16, example: DEST001 }
+                action: { type: string, enum: [add, remove] }
+      responses:
+        '200':
+          description: Relasi favorit diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data:
+                    type: object
+                    properties:
+                      destination_id: { type: string }
+                      is_favorite: { type: boolean }
+                      changed: { type: boolean }
+        '400':
+          description: JSON tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Token CSRF tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '404':
+          description: Destinasi tidak ditemukan atau tidak aktif.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '415':
+          description: Content-Type harus application/json.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '422':
+          description: ID destinasi atau action tidak valid.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }

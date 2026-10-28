@@ -175,7 +175,22 @@ pengguna; 403 CSRF tidak valid; 404 destinasi tidak ditemukan; 405 metode
 tidak didukung; 415 Content-Type salah; 422 payload tidak valid; 500
 kesalahan server.
 
-10. Logout
+10. Favorit destinasi
+---------------------
+POST /api/favorites
+Content-Type: application/json
+X-CSRF-Token: <token-session-user>
+Cookie: PHPSESSID=<session-user>
+  Memerlukan session pengguna. Body untuk menambah favorit:
+  {"destination_id":"DEST001","action":"add"}
+  Ganti action menjadi "remove" untuk menghapus favorit. destination_id
+  merujuk ke wisata.id_wisata; identitas user diambil dari session, bukan body.
+  Implementasi menyimpan relasi pada tabel favorit (Id_user, Id_wisata).
+  Status: 200 berhasil; 400 JSON tidak valid; 401 belum login; 403 CSRF tidak
+  valid; 404 destinasi tidak ditemukan; 405 metode tidak didukung; 415
+  Content-Type salah; 422 payload tidak valid; 500 kesalahan server.
+
+11. Logout
 ----------
 POST /Backend/api/logout.php
 Content-Type: application/x-www-form-urlencoded

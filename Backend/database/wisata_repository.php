@@ -37,12 +37,18 @@ function fetchTourismRows(mysqli $connection, array $filters = []): array
     }
 
     if (isset($filters["keyword"]) && is_string($filters["keyword"]) && trim($filters["keyword"]) !== "") {
-        $conditions[] = "(
-            w.nama_wisata LIKE ? OR w.deskripsi LIKE ? OR w.alamat LIKE ?
-            OR w.domisili LIKE ? OR k.nama_kategori LIKE ?
-        )";
         $searchTerm = "%" . trim($filters["keyword"]) . "%";
-        for ($index = 0; $index < 5; $index++) {
+        if (!empty($filters["name_description_only"])) {
+            $conditions[] = "(w.nama_wisata LIKE ? OR w.deskripsi LIKE ?)";
+            $searchFields = 2;
+        } else {
+            $conditions[] = "(
+                w.nama_wisata LIKE ? OR w.deskripsi LIKE ? OR w.alamat LIKE ?
+                OR w.domisili LIKE ? OR k.nama_kategori LIKE ?
+            )";
+            $searchFields = 5;
+        }
+        for ($index = 0; $index < $searchFields; $index++) {
             $parameters[] = $searchTerm;
             $parameterTypes .= "s";
         }
