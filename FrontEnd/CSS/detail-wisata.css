@@ -69,32 +69,113 @@ body.halaman-detail .ep-navbar {
     left: 0;
     right: 0;
     z-index: 1000;
+    box-sizing: border-box;
+    height: var(--nav-h);
     background: #fff;
+    box-shadow: 0 calc(2 * var(--u)) calc(4 * var(--u)) rgba(0, 0, 0, 0.25);
 }
 
-body.halaman-detail .ep-ikon--cari,
-body.halaman-detail .ep-ikon--profil {
-    color: var(--hijau, var(--hijau-tua));
-}
-
-body.halaman-detail .ep-menu {
+body.halaman-detail .ep-navbar__inner {
+    position: relative;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
-    gap: calc(64 * var(--u));
+    justify-content: space-between;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+    padding: 0 calc(42 * var(--u)) 0 calc(43 * var(--u));
 }
 
-body.halaman-detail .ep-menu > a {
+body.halaman-detail .ep-logo {
     position: static;
+    flex: none;
+    width: auto;
+    height: auto;
     margin: 0;
     padding: 0;
     transform: none;
     white-space: nowrap;
 }
 
+body.halaman-detail .ep-menu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    column-gap: calc(135 * var(--u));
+    width: max-content;
+    margin: 0;
+    padding: 0;
+    transform: translate(-50%, -50%);
+}
+
+body.halaman-detail .ep-menu > a {
+    position: relative;
+    inset: auto;
+    width: auto;
+    min-width: 0;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    transform: none;
+    white-space: nowrap;
+}
+
+body.halaman-detail .ep-menu__beranda {
+    grid-column: 1;
+    justify-self: end;
+}
+
+body.halaman-detail .ep-menu__kategori {
+    grid-column: 2;
+}
+
+body.halaman-detail .ep-menu__tentang {
+    grid-column: 3;
+    justify-self: start;
+}
+
+body.halaman-detail .ep-aksi {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: calc(20 * var(--u));
+}
+
+body.halaman-detail .ep-ikon {
+    position: static;
+    display: flex;
+    flex: none;
+    width: calc(40 * var(--u));
+    height: calc(40 * var(--u));
+    margin: 0;
+    padding: 0;
+    transform: none;
+}
+
+body.halaman-detail .ep-ikon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+body.halaman-detail .ep-ikon--cari {
+    width: calc(36 * var(--u));
+    height: calc(36 * var(--u));
+}
+
+body.halaman-detail .ep-ikon--cari,
+body.halaman-detail .ep-ikon--profil {
+    color: var(--hijau, #166c5c);
+}
+
 body.halaman-detail .ep-menu__kategori {
     display: inline-flex;
     align-items: center;
-    gap: calc(10 * var(--u));
     text-transform: none;
     cursor: pointer;
     pointer-events: auto;
@@ -102,11 +183,14 @@ body.halaman-detail .ep-menu__kategori {
 
 body.halaman-detail .ep-menu__kategori::after {
     content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(100% + 10 * var(--u));
     display: block;
-    flex: none;
     width: calc(21 * var(--u));
     height: calc(12 * var(--u));
-    margin: 0;
+    margin: auto 0;
     background: currentColor;
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 14'%3E%3Cpath d='M2 2l10 10L22 2' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 14'%3E%3Cpath d='M2 2l10 10L22 2' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
@@ -122,7 +206,7 @@ body.halaman-detail .ep-menu__kategori[aria-expanded="true"]::after {
 
 body.halaman-detail .ep-menu__kategori:hover,
 body.halaman-detail .ep-menu__kategori.aktif {
-    color: var(--hijau, var(--hijau-tua));
+    color: var(--hijau, #166c5c);
 }
 
 body.halaman-detail .dd-kategori {
@@ -174,7 +258,7 @@ body.halaman-detail .dd-kategori a.dd-kategori__item {
 
 body.halaman-detail .dd-kategori a.dd-kategori__item:hover,
 body.halaman-detail .dd-kategori a.dd-kategori__item:focus-visible {
-    background: var(--hijau, var(--hijau-tua));
+    background: var(--hijau, #166c5c);
     color: #fff;
     font-weight: 400;
     outline: none;
@@ -340,7 +424,7 @@ body.halaman-detail .ikon-tiket { fill: #000 !important; }
     height: max(24px, calc(36 * var(--s)));
 }
 
-.ringkasan form {
+.ringkasan__aksi {
     position: absolute;
     top: calc(75 * var(--s));
     right: 0;
@@ -458,8 +542,29 @@ body.halaman-detail .ikon-tiket { fill: #000 !important; }
     text-align: left;
 }
 
+.kartu--deskripsi.kartu--kosong h3 {
+    padding-right: 0;
+}
+
+.kartu--deskripsi.kartu--kosong p {
+    margin: calc(24.5 * var(--s)) calc(55 * var(--s)) 0;
+    text-align: center;
+}
+
 .kartu--fasilitas h3 {
     padding-right: calc(17 * var(--s));
+}
+
+.kartu--fasilitas.kartu--kosong h3 {
+    padding-right: 0;
+}
+
+.fasilitas__kosong {
+    margin: calc(24.5 * var(--s)) calc(55 * var(--s)) 0;
+    font-size: max(14px, calc(18 * var(--s)));
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: center;
 }
 
 .kartu--fasilitas ul {
@@ -925,10 +1030,14 @@ svg.ikon-fas {
     line-height: 1.3;
 }
 
-.kosong {
-    grid-column: 1 / -1;
-    text-align: center;
-    font-size: max(14px, calc(16 * var(--s)));
+.ulasan-kosong p::before {
+    content: "";
+    display: inline-block;
+    width: max(20px, calc(38 * var(--s)));
+    height: max(6px, calc(10 * var(--s)));
+    margin-right: max(14px, calc(31 * var(--s)));
+    background: var(--hijau-tua);
+    vertical-align: middle;
 }
 
 .notif {
@@ -943,6 +1052,8 @@ svg.ikon-fas {
     transition: opacity 0.4s;
 }
 
+.notif[hidden] { display: none; }
+
 .notif--ulasan {
     width: min(62%, 694px);
     box-sizing: border-box;
@@ -954,15 +1065,145 @@ svg.ikon-fas {
     opacity: 0;
 }
 
+.popup {
+    box-sizing: border-box;
+    width: min(420px, calc(100% - 32px));
+    max-width: none;
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    padding: 30px 32px 24px;
+    overflow-y: auto;
+    border: 0;
+    border-radius: 16px;
+    background: #fff;
+    color: var(--hijau-tua);
+    font-family: "Poppins", Arial, sans-serif;
+    text-align: center;
+}
+
+.popup::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.popup__ikon {
+    display: grid;
+    place-items: center;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+}
+
+.popup__ikon--gembok {
+    background: #d9d9d9;
+    color: #ff0000;
+}
+
+.popup__ikon--hati {
+    background: #c9d6ce;
+    color: var(--hijau-tua);
+}
+
+.popup__ikon--gembok svg {
+    display: block;
+    width: 34px;
+    height: 34px;
+}
+
+.popup__ikon--hati svg {
+    display: block;
+    width: 36px;
+    height: 32px;
+}
+
+.popup__judul {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.popup__judul--merah {
+    color: #ff0000;
+}
+
+.popup__judul--hijau {
+    color: var(--hijau-tua);
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.popup__isi {
+    margin: 10px 0 22px;
+    color: var(--hijau-tua);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.popup__aksi {
+    display: grid;
+    gap: 10px;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+.popup__aksi--tunggal {
+    max-width: 200px;
+}
+
+.popup__tombol {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 42px;
+    padding: 8px 16px;
+    border: 1px solid var(--hijau-tua);
+    border-radius: 8px;
+    font-family: "Poppins", Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.3;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.popup__tombol--isi {
+    background: var(--hijau-tua);
+    color: #fff;
+}
+
+.popup__tombol--isi:hover {
+    background: #115446;
+}
+
+.popup__tombol--garis {
+    background: #fff;
+    color: var(--hijau-tua);
+}
+
+.popup__tombol--garis:hover {
+    background: #eef6f4;
+}
+
+.popup__tombol:focus-visible {
+    outline: 3px solid rgba(22, 108, 92, 0.35);
+    outline-offset: 3px;
+}
+
 .dialog-ulasan {
     box-sizing: border-box;
-    width: min(92vw, 640px);
+    width: min(92vw, 500px);
     max-height: 92vh;
     max-height: 92dvh;
     overflow: auto;
-    padding: 36px clamp(22px, 7.5%, 48px) 30px;
+    padding: 26px clamp(20px, 7%, 38px) 22px;
     border: 0;
-    border-radius: 20px;
+    border-radius: 16px;
     background: #eeeeee;
     color: #000;
     font-family: "Poppins", Arial, sans-serif;
@@ -974,15 +1215,15 @@ svg.ikon-fas {
 .dialog-ulasan h3 {
     margin: 0;
     color: var(--hijau-tua);
-    font-size: clamp(20px, 2.4vw, 26px);
+    font-size: clamp(18px, 2vw, 22px);
     font-weight: 600;
     line-height: 1.3;
     text-align: center;
 }
 
 .dialog__sub {
-    margin: 6px 0 22px;
-    font-size: clamp(13px, 1.3vw, 14px);
+    margin: 4px 0 16px;
+    font-size: 13px;
     font-weight: 400;
     line-height: 1.5;
     text-align: center;
@@ -990,7 +1231,7 @@ svg.ikon-fas {
 
 .bintang-input {
     min-width: 0;
-    margin: 0 0 34px;
+    margin: 0 0 24px;
     padding: 0;
     border: 0;
     text-align: center;
@@ -1001,7 +1242,7 @@ svg.ikon-fas {
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 8px 14px;
+    gap: 6px 12px;
 }
 
 .bintang-input__baris {
@@ -1021,9 +1262,9 @@ svg.ikon-fas {
 .bintang-input label {
     display: block;
     box-sizing: border-box;
-    width: 34px;
-    height: 30px;
-    padding: 0 3px;
+    width: 30px;
+    height: 27px;
+    padding: 0 2px;
     cursor: pointer;
     line-height: 0;
     -webkit-tap-highlight-color: transparent;
@@ -1067,9 +1308,9 @@ svg.ikon-fas {
 .bintang-input__nilai {
     display: inline-flex;
     align-items: baseline;
-    min-width: 3.6em;
+    min-width: 3.4em;
     color: var(--abu);
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 400;
     line-height: 1.2;
     text-align: left;
@@ -1100,8 +1341,8 @@ svg.ikon-fas {
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    width: 54px;
-    height: 30px;
+    width: 46px;
+    height: 27px;
     padding: 0;
     border: 1.5px solid var(--abu);
     border-radius: 999px;
@@ -1121,8 +1362,8 @@ svg.ikon-fas {
 }
 
 .bintang-input__reset svg {
-    width: 19px;
-    height: 19px;
+    width: 17px;
+    height: 17px;
     fill: none;
     stroke: currentColor;
     stroke-width: 2.4;
@@ -1132,9 +1373,9 @@ svg.ikon-fas {
 
 .dialog__label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: #000;
-    font-size: clamp(14px, 1.4vw, 16px);
+    font-size: 14px;
     font-weight: 600;
 }
 
@@ -1142,14 +1383,14 @@ svg.ikon-fas {
     box-sizing: border-box;
     display: block;
     width: 100%;
-    min-height: 150px;
-    padding: 14px 20px;
+    min-height: 116px;
+    padding: 12px 16px;
     border: 0;
     border-radius: 10px;
     background: #fff;
     color: #000;
     font-family: "Poppins", Arial, sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.5;
     resize: vertical;
 }
@@ -1163,16 +1404,16 @@ svg.ikon-fas {
 }
 
 .dialog__catatan {
-    margin-top: 8px;
+    margin-top: 6px;
     color: #000;
-    font-size: 12.5px;
+    font-size: 11.5px;
     line-height: 1.4;
 }
 
 .dialog__error {
-    margin: 12px 0 0;
+    margin: 10px 0 0;
     color: #b3261e;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
 }
 
@@ -1180,30 +1421,30 @@ svg.ikon-fas {
 
 .dialog__aksi {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     justify-content: flex-end;
-    margin-top: 16px;
+    margin-top: 14px;
 }
 
 .dialog__aksi button {
-    min-height: 48px;
-    padding: 0 22px;
+    min-height: 40px;
+    padding: 0 18px;
     border-radius: 8px;
     font-family: "Poppins", Arial, sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
 }
 
 .btn-batal {
-    min-width: 100px;
+    min-width: 88px;
     border: 1px solid var(--hijau-tua);
     background: #fff;
     color: var(--hijau-tua);
 }
 
 .btn-kirim {
-    min-width: 160px;
+    min-width: 140px;
     border: 1px solid var(--hijau-tua);
     background: var(--hijau-tua);
     color: #fff;
@@ -1352,7 +1593,7 @@ svg.ikon-fas {
         margin-left: 0;
     }
 
-    .ringkasan form {
+    .ringkasan__aksi {
         position: static;
         margin-top: 18px;
     }
@@ -1409,7 +1650,14 @@ svg.ikon-fas {
 
     .kartu--harga h3:not(.jam-judul) { padding-right: 0; }
 
-    .kartu--deskripsi p {
+    .kartu--deskripsi p,
+    .kartu--deskripsi.kartu--kosong p {
+        margin: 14px 0 0;
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .fasilitas__kosong {
         margin: 14px 0 0;
         font-size: 15px;
         line-height: 1.6;
@@ -1639,8 +1887,6 @@ svg.ikon-fas {
         line-height: 1.55;
     }
 
-    .kosong { font-size: 14px; }
-
     .ulasan-kosong {
         width: auto;
         min-height: 96px;
@@ -1654,6 +1900,12 @@ svg.ikon-fas {
     .ulasan-kosong p {
         font-size: 18px;
         line-height: 1.4;
+    }
+
+    .ulasan-kosong p::before {
+        width: 22px;
+        height: 6px;
+        margin-right: 14px;
     }
 
     .tombol-ulasan,
@@ -1688,6 +1940,7 @@ svg.ikon-fas {
     body.halaman-detail .ep-navbar {
         position: sticky;
         top: 0;
+        height: auto;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
     }
 
@@ -1712,37 +1965,34 @@ svg.ikon-fas {
         line-height: 1.2;
     }
 
-    body.halaman-detail .ep-ikon {
-        position: static;
-        display: flex;
+    body.halaman-detail .ep-aksi {
         flex: none;
         order: 2;
-        width: 30px;
-        height: 30px;
-        margin: 0;
+        gap: 12px;
     }
 
-    body.halaman-detail .ep-ikon svg {
-        width: 100%;
-        height: 100%;
+    body.halaman-detail .ep-ikon {
+        width: 30px;
+        height: 30px;
     }
 
     body.halaman-detail .ep-menu {
         position: static;
+        inset: auto;
         order: 3;
+        display: flex;
         flex: 0 0 100%;
         justify-content: center;
         gap: 28px;
+        width: auto;
         margin: 0;
         padding: 4px 0 2px;
+        transform: none;
         font-size: clamp(14px, 4vw, 16px);
     }
 
-    body.halaman-detail .ep-menu__kategori {
-        gap: 6px;
-    }
-
     body.halaman-detail .ep-menu__kategori::after {
+        left: calc(100% + 6px);
         width: 14px;
         height: 8px;
     }
@@ -1754,44 +2004,87 @@ svg.ikon-fas {
     }
 }
 
-@media (max-width: 520px) {
-    .dialog-ulasan {
-        width: calc(100vw - 24px);
-        padding: 28px 20px 22px;
-        border-radius: 18px;
+@media (max-width: 700px) {
+    .popup {
+        padding: 26px 20px 20px;
+        border-radius: 14px;
     }
 
-    .dialog__sub { margin-bottom: 18px; }
+    .popup__ikon {
+        width: 68px;
+        height: 68px;
+        margin-bottom: 14px;
+    }
 
-    .bintang-input { margin-bottom: 26px; }
+    .popup__ikon--gembok svg {
+        width: 30px;
+        height: 30px;
+    }
 
-    .bintang-input__rate { gap: 8px 8px; }
+    .popup__ikon--hati svg {
+        width: 32px;
+        height: 28px;
+    }
+
+    .popup__judul,
+    .popup__judul--hijau {
+        font-size: 18px;
+        line-height: 1.35;
+    }
+
+    .popup__isi {
+        margin: 8px 0 18px;
+        font-size: 13px;
+    }
+
+    .popup__aksi {
+        gap: 8px;
+    }
+
+    .popup__tombol {
+        min-height: 40px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 520px) {
+    .dialog-ulasan {
+        width: calc(100vw - 32px);
+        padding: 22px 18px 18px;
+        border-radius: 14px;
+    }
+
+    .dialog__sub { margin-bottom: 14px; }
+
+    .bintang-input { margin-bottom: 20px; }
+
+    .bintang-input__rate { gap: 6px 6px; }
 
     .bintang-input label {
-        width: 30px;
-        height: 28px;
+        width: 28px;
+        height: 26px;
         padding: 0 2px;
     }
 
     .bintang-input__nilai {
-        min-width: 3.2em;
-        font-size: 18px;
+        min-width: 3em;
+        font-size: 16px;
     }
 
     .bintang-input__reset {
-        width: 46px;
-        height: 28px;
+        width: 42px;
+        height: 26px;
     }
 
     .bintang-input__reset svg {
-        width: 17px;
-        height: 17px;
+        width: 16px;
+        height: 16px;
     }
 
     .dialog__aksi button {
         flex: 1 1 0;
         min-width: 0;
-        min-height: 46px;
+        min-height: 40px;
         padding: 0 12px;
     }
 }
@@ -1810,16 +2103,16 @@ svg.ikon-fas {
 
 @media (max-width: 380px) {
     .bintang-input label {
-        width: 27px;
+        width: 25px;
         padding: 0 1px;
     }
 
     .bintang-input__nilai {
-        min-width: 2.9em;
-        font-size: 17px;
+        min-width: 2.7em;
+        font-size: 15px;
     }
 
     .bintang-input__reset {
-        width: 42px;
+        width: 38px;
     }
 }

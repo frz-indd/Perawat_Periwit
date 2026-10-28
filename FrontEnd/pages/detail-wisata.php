@@ -49,32 +49,45 @@ function bintangHtml(float $nilai): string {
     return $html;
 }
 
+function jenisFasilitas(string $nama): string {
+    $n = mb_strtolower($nama, 'UTF-8');
+    if (str_contains($n, 'parkir')) return 'parkir';
+    if (preg_match('/toilet|wc|kamar mandi/u', $n) === 1) return 'toilet';
+    if (preg_match('/mushola|musholla|musala|masjid|ibadah/u', $n) === 1) return 'masjid';
+    if (preg_match('/foto|kamera|selfie/u', $n) === 1) return 'kamera';
+    return 'umum';
+}
+
 require_once __DIR__ . '/../../Backend/database/koneksi.php';
 require_once __DIR__ . '/../../Backend/database/wisata_repository.php';
 
-function fetchTourismParking(mysqli $conn, string $tourismId): array {
+function fetchTourismExtra(mysqli $conn, string $tourismId): array {
+    $diinginkan = ['parkir_motor', 'parkir_mobil', 'hari_operasional', 'hari_buka', 'hari'];
     try {
-        $stmt = $conn->prepare('SELECT parkir_motor, parkir_mobil FROM wisata WHERE id_wisata = ? LIMIT 1');
+        $kolomAda = [];
+        $hasil = $conn->query('SHOW COLUMNS FROM wisata');
+        while ($k = $hasil->fetch_assoc()) {
+            $kolomAda[] = $k['Field'];
+        }
+        $pilih = array_values(array_intersect($diinginkan, $kolomAda));
+        if ($pilih === []) {
+            return [];
+        }
+        $sql  = 'SELECT `' . implode('`, `', $pilih) . '` FROM wisata WHERE id_wisata = ? LIMIT 1';
+        $stmt = $conn->prepare($sql);
         $stmt->bind_param('s', $tourismId);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc() ?: [];
         $stmt->close();
+        return $row;
     } catch (Throwable $e) {
         return [];
     }
-    $baris = [];
-    if (!empty($row['parkir_motor'])) {
-        $baris[] = 'Rp ' . number_format((int) $row['parkir_motor'], 0, ',', '.') . '/Motor';
-    }
-    if (!empty($row['parkir_mobil'])) {
-        $baris[] = 'Rp ' . number_format((int) $row['parkir_mobil'], 0, ',', '.') . '/Mobil';
-    }
-    return $baris;
 }
 
 function fetchUlasanSaya(mysqli $conn, int $userId, string $tourismId): array {
     try {
-        $stmt = $conn->prepare('SELECT rating, komentar FROM ulasan WHERE Id_user = ? AND Id_wisata = ? LIMIT 1');
+        $stmt = $conn->prepare('SELECT rating, komentar FROM ulasan WHERE Id_user = ? AND Id_wisata = ? ORDER BY Id_ulasan DESC LIMIT 1');
         $stmt->bind_param('is', $userId, $tourismId);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc() ?: [];
@@ -85,10 +98,10 @@ function fetchUlasanSaya(mysqli $conn, int $userId, string $tourismId): array {
     }
 }
 
-function simpanUlasan(mysqli $conn, int $userId, string $tourismId, float $rating, string $komentar): bool
+function simpanUlasan(mysqli $conn, int $userId, string $tourismId, int $rating, string $komentar): bool
 {
     try {
-        $stmt = $conn->prepare('SELECT Id_ulasan FROM ulasan WHERE Id_user = ? AND Id_wisata = ? LIMIT 1');
+        $stmt = $conn->prepare('SELECT Id_ulasan FROM ulasan WHERE Id_user = ? AND Id_wisata = ? ORDER BY Id_ulasan DESC LIMIT 1');
         $stmt->bind_param('is', $userId, $tourismId);
         $stmt->execute();
         $ada = $stmt->get_result()->fetch_assoc();
@@ -97,12 +110,12 @@ function simpanUlasan(mysqli $conn, int $userId, string $tourismId, float $ratin
         if ($ada) {
             $idUlasan = (int) $ada['Id_ulasan'];
             $stmt = $conn->prepare('UPDATE ulasan SET rating = ?, komentar = ?, tanggal_ulasan = CURDATE() WHERE Id_ulasan = ?');
-            $stmt->bind_param('dsi', $rating, $komentar, $idUlasan);
+            $stmt->bind_param('isi', $rating, $komentar, $idUlasan);
         } else {
             $stmt = $conn->prepare(
                 'INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar, tanggal_ulasan) VALUES (?, ?, ?, ?, CURDATE())'
             );
-            $stmt->bind_param('isds', $userId, $tourismId, $rating, $komentar);
+            $stmt->bind_param('isis', $userId, $tourismId, $rating, $komentar);
         }
         $ok = $stmt->execute();
         $stmt->close();
@@ -117,16 +130,7 @@ function perbaruiRatingWisata(mysqli $conn, string $tourismId): void
 {
     try {
         $stmt = $conn->prepare(
-            'UPDATE wisata SET rating = (SELECT ROUND(AVG(rating), 1) FROM ulasan WHERE Id_wisata = ?) WHERE id_wisata = ?'
-        );
-        $stmt->bind_param('ss', $tourismId, $tourismId);
-        $stmt->execute();
-        $stmt->close();
-    } catch (Throwable $e) {
-    }
-    try {
-        $stmt = $conn->prepare(
-            'UPDATE wisata SET jumlah_ulasan = (SELECT COUNT(*) FROM ulasan WHERE Id_wisata = ?) WHERE id_wisata = ?'
+            'UPDATE wisata SET average_rating = (SELECT ROUND(AVG(rating), 2) FROM ulasan WHERE Id_wisata = ?) WHERE id_wisata = ?'
         );
         $stmt->bind_param('ss', $tourismId, $tourismId);
         $stmt->execute();
@@ -147,28 +151,6 @@ if (!function_exists('isTourismFavorite')) {
     }
 }
 
-if (!function_exists('addTourismFavorite')) {
-    function addTourismFavorite(mysqli $conn, int $userId, string $tourismId): void
-    {
-        $stmt = $conn->prepare(
-            'INSERT IGNORE INTO favorit (Id_user, Id_wisata, tanggal_ditambahkan) VALUES (?, ?, CURDATE())'
-        );
-        $stmt->bind_param('is', $userId, $tourismId);
-        $stmt->execute();
-        $stmt->close();
-    }
-}
-
-if (!function_exists('removeTourismFavorite')) {
-    function removeTourismFavorite(mysqli $conn, int $userId, string $tourismId): void
-    {
-        $stmt = $conn->prepare('DELETE FROM favorit WHERE Id_user = ? AND Id_wisata = ?');
-        $stmt->bind_param('is', $userId, $tourismId);
-        $stmt->execute();
-        $stmt->close();
-    }
-}
-
 $tourismId = $_GET['id'] ?? '';
 if (!is_string($tourismId) || preg_match('/^[KM][0-9]{5,}$/', $tourismId) !== 1) {
     http_response_code(404);
@@ -177,57 +159,8 @@ if (!is_string($tourismId) || preg_match('/^[KM][0-9]{5,}$/', $tourismId) !== 1)
 
 $userId = filter_var($_SESSION['id_user'] ?? null, FILTER_VALIDATE_INT);
 $sudahLogin = $userId !== false && $userId > 0;
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'toggle_favorit') {
-    $lewatFetch = ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'fetch';
-
-    if (!$sudahLogin) {
-        if ($lewatFetch) {
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['status' => 'login']);
-            exit;
-        }
-        header('Location: ../auth/Login.php');
-        exit;
-    }
-
-    $csrfFavorit = isset($_POST['csrf'], $_SESSION['csrf']) && hash_equals($_SESSION['csrf'], (string) $_POST['csrf']);
-    if (!$csrfFavorit) {
-        http_response_code(403);
-        if ($lewatFetch) {
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['status' => 'error', 'tersimpan' => false]);
-            exit;
-        }
-        exit('Sesi tidak valid.');
-    }
-
-    $tersimpan = false;
-    $berhasil  = true;
-    try {
-        if (isTourismFavorite($conn, (int) $userId, $tourismId)) {
-            removeTourismFavorite($conn, (int) $userId, $tourismId);
-            $_SESSION['pesan'] = 'Dihapus dari destinasi favorit.';
-        } else {
-            addTourismFavorite($conn, (int) $userId, $tourismId);
-            $tersimpan = true;
-            $_SESSION['pesan'] = 'Berhasil ditambahkan ke destinasi favorit.';
-        }
-    } catch (Throwable $e) {
-        error_log('favorit: ' . $e->getMessage());
-        $berhasil = false;
-        $_SESSION['pesan'] = 'Gagal memperbarui destinasi favorit.';
-    }
-
-    if ($lewatFetch) {
-        unset($_SESSION['pesan']);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['status' => $berhasil ? 'ok' : 'error', 'tersimpan' => $tersimpan]);
-        exit;
-    }
-
-    header('Location: detail-wisata.php?id=' . rawurlencode($tourismId));
-    exit;
+if ($sudahLogin && empty($_SESSION['role'])) {
+    $_SESSION['role'] = 'user';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'tambah_ulasan') {
@@ -253,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'tambah_
         $_SESSION['pesan_ulasan'] = 'Pilih rating 1 sampai 5 bintang.';
     } elseif ($komentarIn === '') {
         $_SESSION['pesan_ulasan'] = 'Ulasan tidak boleh kosong.';
-    } elseif (simpanUlasan($conn, (int) $userId, $tourismId, (float) $ratingIn, $komentarIn)) {
+    } elseif (simpanUlasan($conn, (int) $userId, $tourismId, (int) $ratingIn, $komentarIn)) {
         perbaruiRatingWisata($conn, $tourismId);
         $_SESSION['pesan_ulasan'] = 'Terima kasih! Ulasanmu berhasil disimpan.';
     } else {
@@ -271,7 +204,21 @@ if ($tourism === null) {
     exit('Destinasi tidak ditemukan.');
 }
 
-$facilities = fetchTourismFacilities($conn, $tourismId);
+$urutanFasilitas = ['parkir' => 1, 'toilet' => 2, 'masjid' => 3, 'kamera' => 4, 'umum' => 5];
+$fasilitasDb = [];
+try {
+    $fasilitasDb = fetchTourismFacilities($conn, $tourismId);
+} catch (Throwable $e) {
+    $fasilitasDb = [];
+}
+$fasilitasTampil = [];
+foreach ($fasilitasDb as $namaFasilitas) {
+    $namaFasilitas = trim((string) $namaFasilitas);
+    if ($namaFasilitas === '') continue;
+    $fasilitasTampil[] = ['nama' => $namaFasilitas, 'ikon' => jenisFasilitas($namaFasilitas)];
+}
+usort($fasilitasTampil, static fn(array $a, array $b): int => $urutanFasilitas[$a['ikon']] <=> $urutanFasilitas[$b['ikon']]);
+
 $reviewRows = fetchTourismReviews($conn, $tourismId);
 $ratingCounts = array_fill(1, 5, 0);
 foreach ($reviewRows as $review) {
@@ -308,7 +255,14 @@ if (count($reviewRows) > 0) {
     $nilaiRating  = ($tourism['rating'] ?? null) !== null ? (float) $tourism['rating'] : 0.0;
 }
 
-$parkir = fetchTourismParking($conn, $tourismId);
+$extra = fetchTourismExtra($conn, $tourismId);
+$parkir = [];
+if (!empty($extra['parkir_motor'])) {
+    $parkir[] = 'Rp ' . number_format((int) $extra['parkir_motor'], 0, ',', '.') . '/Motor';
+}
+if (!empty($extra['parkir_mobil'])) {
+    $parkir[] = 'Rp ' . number_format((int) $extra['parkir_mobil'], 0, ',', '.') . '/Mobil';
+}
 
 $namaWisata     = (string) $tourism['nama_wisata'];
 $alamat         = trim((string) ($tourism['alamat'] ?? ''));
@@ -329,7 +283,7 @@ if ($punyaKoordinat) {
 } else {
     $mapQuery = $tourism['nama_wisata'] . ', ' . $tourism['wilayah'];
 }
-$petaTersedia = $punyaKoordinat || $alamat !== '' || $linkMapsValid;
+$petaTersedia = $punyaKoordinat || $alamat !== '';
 $mapsUrl = $linkMapsValid
     ? $linkMaps
     : 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($tourism['nama_wisata'] . ', ' . $tourism['wilayah']);
@@ -341,7 +295,7 @@ $jamBuka  = trim((string) ($tourism['jam_buka'] ?? ''));
 $jamTutup = trim((string) ($tourism['jam_tutup'] ?? ''));
 $hariBuka = '';
 foreach (['hari_operasional', 'hari_buka', 'hari'] as $kolomHari) {
-    $nilaiHari = trim((string) ($tourism[$kolomHari] ?? ''));
+    $nilaiHari = trim((string) ($extra[$kolomHari] ?? ''));
     if ($nilaiHari !== '') {
         $hariBuka = $nilaiHari;
         break;
@@ -367,7 +321,6 @@ $destination = [
     'location'     => $tourism['wilayah'],
     'subtitle'     => 'Temukan Informasi ' . $tourism['nama_wisata'] . ' dengan lebih detail',
     'description'  => trim((string) ($tourism['deskripsi'] ?? '')),
-    'facilities'   => $facilities,
     'ticket_price' => ($tourism['harga_tiket'] ?? 0) > 0
         ? 'Rp ' . number_format((float) $tourism['harga_tiket'], 0, ',', '.') . '/orang'
         : '',
@@ -387,8 +340,6 @@ $ulasanSaya   = $sudahLogin ? fetchUlasanSaya($conn, (int) $userId, $tourismId) 
 $ratingSaya   = isset($ulasanSaya['rating']) ? (int) round((float) $ulasanSaya['rating']) : 0;
 $komentarSaya = (string) ($ulasanSaya['komentar'] ?? '');
 
-$pesan = $_SESSION['pesan'] ?? '';
-unset($_SESSION['pesan']);
 $pesanUlasan = $_SESSION['pesan_ulasan'] ?? '';
 unset($_SESSION['pesan_ulasan']);
 
@@ -407,8 +358,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=shared-layout-15">
-    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
+    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=shared-layout-17">
 </head>
 <body class="halaman-detail">
 
@@ -489,6 +439,17 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                     <rect x="11" y="9.5" width="10" height="5" rx="1" fill="#eef2ee"/>
                 </g>
             </symbol>
+
+            <symbol id="i-gembok" viewBox="0 0 64 64">
+                <rect x="10" y="27" width="44" height="31" rx="7" fill="none" stroke="currentColor" stroke-width="5"/>
+                <path d="M19 27V19a13 13 0 0 1 26 0v8" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+                <circle cx="32" cy="41" r="3.2" fill="currentColor"/>
+                <path d="M32 43v6" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+            </symbol>
+
+            <symbol id="i-hati" viewBox="0 0 64 56">
+                <path d="M32 54C14 40 3 30 3 18.5 3 9.9 9.6 3 18 3c5.6 0 10.6 3 14 8 3.4-5 8.4-8 14-8 8.4 0 15 6.9 15 15.5C61 30 50 40 32 54Z" fill="currentColor"/>
+            </symbol>
         </defs>
     </svg>
 
@@ -503,20 +464,22 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
             </nav>
 
-            <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
-                <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" aria-hidden="true">
-                    <circle cx="16.5" cy="16.5" r="11.5"/>
-                    <line x1="25" y1="25" x2="36" y2="36"/>
-                </svg>
-            </a>
+            <div class="ep-aksi">
+                <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
+                    <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
+                        <circle cx="13.5" cy="13.5" r="11.7"/>
+                        <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
+                    </svg>
+                </a>
 
-            <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
-                <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="20" cy="20" r="17.5"/>
-                    <circle cx="20" cy="16" r="5.8"/>
-                    <path d="M9 31.5c1.5-5.8 5.6-8.8 11-8.8s9.5 3 11 8.8"/>
-                </svg>
-            </a>
+                <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
+                    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="20" cy="20" r="18.2"/>
+                        <circle cx="20" cy="16.2" r="5.8"/>
+                        <path d="M9 33.5C9.7 29.2 12.2 26 15.2 25.2C17 26.6 23 26.6 24.8 25.2C27.8 26 30.3 29.2 31 33.5"/>
+                    </svg>
+                </a>
+            </div>
         </div>
     </header>
 
@@ -541,9 +504,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
     <main class="detail">
 
-        <?php if ($pesan !== ''): ?>
-            <div class="notif" role="status"><?= e($pesan) ?></div>
-        <?php endif; ?>
+        <div class="notif notif--favorit" id="notif-favorit" role="status" hidden></div>
 
         <section class="ringkasan" aria-labelledby="judul-wisata">
             <div class="ringkasan__teks">
@@ -554,7 +515,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                         <span class="bintang" aria-hidden="true"><?= bintangHtml($destination['rating']) ?></span>
                         <span class="ringkasan__skor"><?= e($ratingText) ?> (<?= e($destination['review_label']) ?> ulasan)</span>
                     <?php else: ?>
-                        <span class="ringkasan__skor">Belum ada ulasan</span>
+                        <span class="ringkasan__skor">(belum ada ulasan)</span>
                     <?php endif; ?>
                 </div>
 
@@ -564,15 +525,16 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 </p>
             </div>
 
-            <form method="post" id="form-favorit" action="detail-wisata.php?id=<?= e(rawurlencode($destination['id'])) ?>">
-                <input type="hidden" name="aksi" value="toggle_favorit">
-                <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
-                <button class="tombol-favorit<?= $sudahFavorit ? ' aktif' : '' ?>" type="submit" id="tombol-favorit"
+            <div class="ringkasan__aksi">
+                <button class="tombol-favorit<?= $sudahFavorit ? ' aktif' : '' ?>" type="button" id="tombol-favorit"
+                        data-id="<?= e($destination['id']) ?>"
+                        data-csrf="<?= e($_SESSION['csrf']) ?>"
+                        data-login="<?= $sudahLogin ? '1' : '0' ?>"
                         aria-pressed="<?= $sudahFavorit ? 'true' : 'false' ?>">
                     <i class="bi <?= $sudahFavorit ? 'bi-heart-fill' : 'bi-heart' ?>" aria-hidden="true"></i>
                     <span><?= $sudahFavorit ? 'Tersimpan Di Favorit' : 'Simpan Favorit' ?></span>
                 </button>
-            </form>
+            </div>
         </section>
 
         <section class="blok" aria-labelledby="judul-info">
@@ -580,33 +542,33 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <p class="blok__sub"><?= e($destination['subtitle']) ?></p>
 
             <div class="info-grid">
-                <article class="kartu kartu--deskripsi">
+                <article class="kartu kartu--deskripsi<?= $destination['description'] === '' ? ' kartu--kosong' : '' ?>">
                     <h3>Deskripsi</h3>
-                    <p><?= nilaiAtauKet($destination['description'], 'Deskripsi destinasi ini belum tersedia.') ?></p>
+                    <p><?= nilaiAtauKet($destination['description'], 'Deskripsi destinasi ini belum tersedia') ?></p>
                 </article>
 
-                <article class="kartu kartu--fasilitas">
+                <article class="kartu kartu--fasilitas<?= $fasilitasTampil === [] ? ' kartu--kosong' : '' ?>">
                     <h3>Fasilitas</h3>
-                    <ul>
-                        <?php if ($destination['facilities'] !== []): ?>
-                            <?php foreach ($destination['facilities'] as $fasilitas): ?>
+                    <?php if ($fasilitasTampil !== []): ?>
+                        <ul>
+                            <?php foreach ($fasilitasTampil as $fasilitas): ?>
                                 <li>
                                     <?php
-                                    echo match ($fasilitas) {
-                                        'Area parkir' => '<svg class="ikon-fas ikon-parkir" viewBox="0 0 32 28" aria-hidden="true"><use href="#i-parkir"/></svg>',
-                                        'Toilet Umum' => '<svg class="ikon-fas ikon-toilet" viewBox="0 0 32 28" aria-hidden="true"><use href="#i-toilet"/></svg>',
-                                        'Mushola'     => '<svg class="ikon-fas ikon-masjid" viewBox="0 0 28 28" aria-hidden="true"><use href="#i-masjid"/></svg>',
-                                        'Spot Foto'   => '<span class="ikon-fas ikon-kamera" aria-hidden="true"><i class="bi bi-camera-fill"></i></span>',
-                                        default       => '<span class="ikon-fas" aria-hidden="true"><i class="bi bi-check-square-fill"></i></span>',
+                                    echo match ($fasilitas['ikon']) {
+                                        'parkir' => '<svg class="ikon-fas ikon-parkir" viewBox="0 0 32 28" aria-hidden="true"><use href="#i-parkir"/></svg>',
+                                        'toilet' => '<svg class="ikon-fas ikon-toilet" viewBox="0 0 32 28" aria-hidden="true"><use href="#i-toilet"/></svg>',
+                                        'masjid' => '<svg class="ikon-fas ikon-masjid" viewBox="0 0 28 28" aria-hidden="true"><use href="#i-masjid"/></svg>',
+                                        'kamera' => '<span class="ikon-fas ikon-kamera" aria-hidden="true"><i class="bi bi-camera-fill"></i></span>',
+                                        default  => '<span class="ikon-fas ikon-umum" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>',
                                     };
                                     ?>
-                                    <span class="fasilitas__nama"><?= e($fasilitas) ?></span>
+                                    <span class="fasilitas__nama"><?= e($fasilitas['nama']) ?></span>
                                 </li>
                             <?php endforeach; ?>
-                        <?php else: ?>
-                            <li class="fasilitas__kosong"><span class="belum">Informasi fasilitas belum tersedia.</span></li>
-                        <?php endif; ?>
-                    </ul>
+                        </ul>
+                    <?php else: ?>
+                        <p class="fasilitas__kosong">Informasi fasilitas ini belum tersedia</p>
+                    <?php endif; ?>
                 </article>
 
                 <article class="kartu kartu--harga">
@@ -659,7 +621,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                     <div class="peta peta--kosong" role="img" aria-label="Peta lokasi belum tersedia">
                         <svg class="peta__ikon" viewBox="0 0 40 46" aria-hidden="true"><use href="#i-pin-coret"/></svg>
                         <h3>Koordinat Wisata Tidak Tersedia</h3>
-                        <p>Peta belum dapat ditampilkan karena koordinat lokasi belum tersedia.</p>
+                        <p>Peta belum dapat ditampilkan karena koordinat lokasi belum tersedia</p>
                     </div>
                 <?php endif; ?>
 
@@ -709,26 +671,22 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             </div>
 
             <div class="ulasan-grid">
-                <?php if ($destination['reviews'] !== []): ?>
-                    <?php foreach ($destination['reviews'] as $ulasan): ?>
-                        <article class="ulasan">
-                            <div class="ulasan__kepala">
-                                <svg class="ulasan__avatar" viewBox="0 0 220 220" aria-hidden="true"><use href="#ikon-profil"/></svg>
-                                <div class="ulasan__meta">
-                                    <strong><?= e($ulasan['name']) ?></strong>
-                                    <span class="bintang bintang--kecil" role="img"
-                                          aria-label="<?= e(formatRating((float) $ulasan['rating'])) ?> dari 5 bintang">
-                                        <?= bintangHtml((float) $ulasan['rating']) ?>
-                                    </span>
-                                    <span class="ulasan__waktu"><?= e($ulasan['age']) ?></span>
-                                </div>
+                <?php foreach ($destination['reviews'] as $ulasan): ?>
+                    <article class="ulasan">
+                        <div class="ulasan__kepala">
+                            <svg class="ulasan__avatar" viewBox="0 0 220 220" aria-hidden="true"><use href="#ikon-profil"/></svg>
+                            <div class="ulasan__meta">
+                                <strong><?= e($ulasan['name']) ?></strong>
+                                <span class="bintang bintang--kecil" role="img"
+                                      aria-label="<?= e(formatRating((float) $ulasan['rating'])) ?> dari 5 bintang">
+                                    <?= bintangHtml((float) $ulasan['rating']) ?>
+                                </span>
+                                <span class="ulasan__waktu"><?= e($ulasan['age']) ?></span>
                             </div>
-                            <p class="ulasan__komentar"><?= e($ulasan['comment']) ?></p>
-                        </article>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p class="kosong">Belum ada ulasan untuk destinasi ini. Jadilah yang pertama memberikan ulasan.</p>
-                <?php endif; ?>
+                        </div>
+                        <p class="ulasan__komentar"><?= e($ulasan['comment']) ?></p>
+                    </article>
+                <?php endforeach; ?>
             </div>
 
             <?php else: ?>
@@ -778,7 +736,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <label class="dialog__label" for="komentar">Ulasan</label>
             <textarea id="komentar" name="komentar" rows="5" maxlength="500"
                       placeholder="Ceritakan pengalamanmu di sini..."><?= e($komentarSaya) ?></textarea>
-            <p class="dialog__catatan">Jika kamu sudah pernah mengulas destinasi ini, ulasan lamamu akan diperbarui.</p>
+            <p class="dialog__catatan">Jika kamu sudah pernah mengulas destinasi ini, ulasan lamamu akan di perbarui.</p>
 
             <p class="dialog__error" id="error-ulasan" role="alert" hidden></p>
 
@@ -787,6 +745,29 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 <button type="submit" class="btn-kirim">Kirim Ulasan</button>
             </div>
         </form>
+    </dialog>
+
+    <dialog class="popup" id="popup-login" aria-labelledby="popup-login-judul" aria-describedby="popup-login-isi">
+        <div class="popup__ikon popup__ikon--gembok" aria-hidden="true">
+            <svg viewBox="0 0 64 64"><use href="#i-gembok"/></svg>
+        </div>
+        <h2 class="popup__judul popup__judul--merah" id="popup-login-judul">Login untuk Memberikan Rating dan Ulasan</h2>
+        <p class="popup__isi" id="popup-login-isi">Bagikan pengalaman wisatamu setelah login. Silakan login terlebih dahulu untuk memberikan rating dan ulasan wisata ini</p>
+        <div class="popup__aksi">
+            <a class="popup__tombol popup__tombol--isi" href="../auth/Login.php" id="popup-login-ya">Login Sekarang</a>
+            <button class="popup__tombol popup__tombol--garis" type="button" id="popup-login-nanti" autofocus>Nanti saja</button>
+        </div>
+    </dialog>
+
+    <dialog class="popup" id="popup-sukses" aria-labelledby="popup-sukses-judul" aria-describedby="popup-sukses-isi">
+        <div class="popup__ikon popup__ikon--hati" aria-hidden="true">
+            <svg viewBox="0 0 64 56"><use href="#i-hati"/></svg>
+        </div>
+        <h2 class="popup__judul popup__judul--hijau" id="popup-sukses-judul">Berhasil di simpan!</h2>
+        <p class="popup__isi" id="popup-sukses-isi">Wisata favorit mu berhasil tersimpan. Kamu bisa melihat wisata favoritmu di halaman profil.</p>
+        <div class="popup__aksi popup__aksi--tunggal">
+            <button class="popup__tombol popup__tombol--isi" type="button" id="popup-sukses-ok" autofocus>OK</button>
+        </div>
     </dialog>
 
     <script>
@@ -859,10 +840,84 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         })();
 
         (function () {
-            document.querySelectorAll('.notif').forEach(function (n) {
+            document.querySelectorAll('.notif--ulasan').forEach(function (n) {
                 setTimeout(function () { n.classList.add('hilang'); }, 4000);
                 setTimeout(function () { n.style.display = 'none'; }, 4500);
             });
+        })();
+
+        var popupLogin = (function () {
+            var dialog = document.getElementById('popup-login');
+            var judul = document.getElementById('popup-login-judul');
+            var isi = document.getElementById('popup-login-isi');
+            var nanti = document.getElementById('popup-login-nanti');
+            if (!dialog) return { buka: function () {} };
+
+            var teks = {
+                favorit: {
+                    judul: 'Login untuk Menyimpan Destinasi Favorit',
+                    isi: 'Simpan wisata favoritmu setelah login. Silakan login terlebih dahulu untuk menyimpan destinasi favorit wisata ini'
+                },
+                ulasan: {
+                    judul: 'Login untuk Memberikan Rating dan Ulasan',
+                    isi: 'Bagikan pengalaman wisatamu setelah login. Silakan login terlebih dahulu untuk memberikan rating dan ulasan wisata ini'
+                }
+            };
+
+            function tutup() {
+                if (typeof dialog.close === 'function') {
+                    dialog.close();
+                } else {
+                    dialog.removeAttribute('open');
+                }
+            }
+
+            nanti.addEventListener('click', tutup);
+            dialog.addEventListener('click', function (e) {
+                if (e.target === dialog) tutup();
+            });
+
+            return {
+                buka: function (jenis) {
+                    var t = teks[jenis] || teks.ulasan;
+                    judul.textContent = t.judul;
+                    isi.textContent = t.isi;
+                    if (typeof dialog.showModal === 'function') {
+                        dialog.showModal();
+                    } else {
+                        dialog.setAttribute('open', '');
+                    }
+                }
+            };
+        })();
+
+        var popupSukses = (function () {
+            var dialog = document.getElementById('popup-sukses');
+            var ok = document.getElementById('popup-sukses-ok');
+            if (!dialog || !ok) return { buka: function () {} };
+
+            function tutup() {
+                if (typeof dialog.close === 'function') {
+                    dialog.close();
+                } else {
+                    dialog.removeAttribute('open');
+                }
+            }
+
+            ok.addEventListener('click', tutup);
+            dialog.addEventListener('click', function (e) {
+                if (e.target === dialog) tutup();
+            });
+
+            return {
+                buka: function () {
+                    if (typeof dialog.showModal === 'function') {
+                        dialog.showModal();
+                    } else {
+                        dialog.setAttribute('open', '');
+                    }
+                }
+            };
         })();
 
         (function () {
@@ -873,7 +928,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
             tombol.addEventListener('click', function () {
                 if (tombol.getAttribute('data-login') !== '1') {
-                    window.location.href = '../auth/Login.php';
+                    popupLogin.buka('ulasan');
                     return;
                 }
                 if (typeof dialog.showModal === 'function') {
@@ -973,10 +1028,11 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         })();
 
         (function () {
-            var form = document.getElementById('form-favorit');
             var tombol = document.getElementById('tombol-favorit');
-            if (!form || !tombol || !window.fetch) return;
+            var notif = document.getElementById('notif-favorit');
+            if (!tombol) return;
             var sibuk = false;
+            var timer = null;
 
             function tampilkan(tersimpan) {
                 tombol.classList.toggle('aktif', tersimpan);
@@ -985,31 +1041,63 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 tombol.querySelector('span').textContent = tersimpan ? 'Tersimpan Di Favorit' : 'Simpan Favorit';
             }
 
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
+            function kabar(teks) {
+                if (!notif) return;
+                notif.textContent = teks;
+                notif.hidden = false;
+                notif.classList.remove('hilang');
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    notif.classList.add('hilang');
+                    setTimeout(function () { notif.hidden = true; }, 400);
+                }, 4000);
+            }
+
+            tombol.addEventListener('click', function () {
+                if (tombol.getAttribute('data-login') !== '1') {
+                    popupLogin.buka('favorit');
+                    return;
+                }
                 if (sibuk) return;
                 sibuk = true;
                 tombol.disabled = true;
-                fetch(form.getAttribute('action'), {
+
+                var aksi = tombol.classList.contains('aktif') ? 'remove' : 'add';
+                var status = 0;
+
+                fetch('../../Backend/api/favorites.php', {
                     method: 'POST',
-                    body: new FormData(form),
                     credentials: 'same-origin',
-                    headers: { 'X-Requested-With': 'fetch' }
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': tombol.getAttribute('data-csrf')
+                    },
+                    body: JSON.stringify({
+                        destination_id: tombol.getAttribute('data-id'),
+                        action: aksi
+                    })
                 })
-                    .then(function (r) { return r.json(); })
+                    .then(function (r) {
+                        status = r.status;
+                        return r.json();
+                    })
                     .then(function (d) {
                         sibuk = false;
                         tombol.disabled = false;
-                        if (d.status === 'login') {
-                            window.location.href = '../auth/Login.php';
-                        } else if (d.status === 'ok') {
-                            tampilkan(d.tersimpan === true);
+                        if (status === 401) {
+                            tombol.setAttribute('data-login', '0');
+                            popupLogin.buka('favorit');
+                        } else if (d && d.status === 'success' && d.data) {
+                            tampilkan(d.data.is_favorite === true);
+                            if (d.data.is_favorite === true) popupSukses.buka();
+                        } else {
+                            kabar((d && d.message) || 'Gagal memperbarui destinasi favorit.');
                         }
                     })
                     .catch(function () {
                         sibuk = false;
                         tombol.disabled = false;
-                        form.submit();
+                        kabar('Gagal memperbarui destinasi favorit.');
                     });
             });
         })();
