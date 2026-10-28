@@ -4,5 +4,6 @@ RewriteRule ^api/destinations/search/?$ Backend/api/destinations_search.php [QSA
 RewriteRule ^api/destinations/([^/]+)/reviews/?$ Backend/api/destination_reviews.php?id=$1 [B,QSA,L]
 RewriteRule ^api/destinations/([^/]+)/location/?$ Backend/api/destination_location.php?id=$1 [B,QSA,L]
 RewriteRule ^users/me/?$ Backend/api/users_me.php [QSA,L]
+RewriteRule ^api/user/change-password/?$ Backend/api/change_password.php [QSA,L]
 RewriteRule ^categories/?$ Backend/api/categories.php [QSA,L]
 RewriteRule ^categories/([^/]+)/wisata/?$ Backend/api/wisata_by_category.php?id_kategori=$1 [B,L]

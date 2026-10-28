@@ -75,6 +75,24 @@ try {
 
     $contentType = strtolower(trim(explode(";", (string) ($_SERVER["CONTENT_TYPE"] ?? ""))[0]));
     if ($contentType !== "application/json") {
+        if ($contentType === "multipart/form-data") {
+            $photo = $_FILES["foto_profil"] ?? $_FILES["foto"] ?? null;
+            if (is_array($photo) && (int) ($photo["error"] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+                $uploadError = (int) ($photo["error"] ?? UPLOAD_ERR_OK);
+                if ($uploadError === UPLOAD_ERR_INI_SIZE ||
+                    $uploadError === UPLOAD_ERR_FORM_SIZE ||
+                    (int) ($photo["size"] ?? 0) > 10 * 1024 * 1024) {
+                    $respond(413, [
+                        "status" => "validation_error",
+                        "message" => "Ukuran foto profil melebihi batas maksimal 10 MB"
+                    ]);
+                }
+            }
+            $respond(422, [
+                "status" => "validation_error",
+                "message" => "Payload edit profil harus berupa JSON; unggah foto profil melalui field foto_profil."
+            ]);
+        }
         $respond(415, [
             "status" => "unsupported_media_type",
             "message" => "Gunakan Content-Type: application/json."

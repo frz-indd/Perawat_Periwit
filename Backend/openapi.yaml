@@ -238,6 +238,75 @@ paths:
                   status: { type: string, example: success }
                   message: { type: string }
                   data: { $ref: '#/components/schemas/UserProfile' }
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '400':
+          description: JSON tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '415':
+          description: Content-Type tidak didukung.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '422':
+          description: Nama atau email tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '413':
+          description: Foto profil melebihi 10 MB.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/user/change-password:
+    put:
+      tags: [Profil]
+      summary: Ubah password pengguna yang sedang login
+      description: Password baru minimal 8 karakter dengan huruf besar, huruf kecil, angka, dan karakter khusus.
+      security:
+        - PhpSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { type: string, format: password }
+                newPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+                  pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$'
+      responses:
+        '200':
+          description: Password berhasil diubah.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: Password berhasil diubah. }
+        '400':
+          description: JSON tidak valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '422':
+          description: Password tidak memenuhi kriteria atau password lama salah.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '500':
+          $ref: '#/components/responses/ServerError'
         '400':
           description: JSON tidak valid.
           content:
@@ -658,8 +727,16 @@ components:
       properties:
         nama: { type: string, maxLength: 255 }
         email: { type: string, format: email, maxLength: 255 }
-        password: { type: string, format: password, minLength: 8 }
-        confirmPassword: { type: string, format: password, minLength: 8 }
+        password:
+          type: string
+          format: password
+          minLength: 8
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$'
+        confirmPassword:
+          type: string
+          format: password
+          minLength: 8
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$'
     RegisteredUser:
       type: object
       properties:

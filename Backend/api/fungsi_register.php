@@ -66,10 +66,10 @@ if (!is_string($password) || trim($password) === "") {
     ]);
 }
 
-if (strlen($password) < 8) {
+if (strlen($password) > 72 || preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/', $password) !== 1) {
     $respond(422, [
         "status" => "validation_error",
-        "message" => "Password harus terdiri dari minimal 8 karakter."
+        "message" => "Password minimal 8 karakter dan harus memuat huruf besar, huruf kecil, angka, serta karakter khusus."
     ]);
 }
 
