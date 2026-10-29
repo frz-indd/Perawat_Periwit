@@ -49,13 +49,10 @@ function bintangHtml(float $nilai): string {
     return $html;
 }
 
-function jenisFasilitas(string $nama): string {
-    $n = mb_strtolower($nama, 'UTF-8');
-    if (str_contains($n, 'parkir')) return 'parkir';
-    if (preg_match('/toilet|wc|kamar mandi/u', $n) === 1) return 'toilet';
-    if (preg_match('/mushola|musholla|musala|masjid|ibadah/u', $n) === 1) return 'masjid';
-    if (preg_match('/foto|kamera|selfie/u', $n) === 1) return 'kamera';
-    return 'umum';
+function koordinatValid($lat, $lng): bool {
+    return is_numeric($lat) && is_numeric($lng)
+        && (float) $lat >= -90 && (float) $lat <= 90
+        && (float) $lng >= -180 && (float) $lng <= 180;
 }
 
 require_once __DIR__ . '/../../Backend/database/koneksi.php';
@@ -98,47 +95,6 @@ function fetchUlasanSaya(mysqli $conn, int $userId, string $tourismId): array {
     }
 }
 
-function simpanUlasan(mysqli $conn, int $userId, string $tourismId, int $rating, string $komentar): bool
-{
-    try {
-        $stmt = $conn->prepare('SELECT Id_ulasan FROM ulasan WHERE Id_user = ? AND Id_wisata = ? ORDER BY Id_ulasan DESC LIMIT 1');
-        $stmt->bind_param('is', $userId, $tourismId);
-        $stmt->execute();
-        $ada = $stmt->get_result()->fetch_assoc();
-        $stmt->close();
-
-        if ($ada) {
-            $idUlasan = (int) $ada['Id_ulasan'];
-            $stmt = $conn->prepare('UPDATE ulasan SET rating = ?, komentar = ?, tanggal_ulasan = CURDATE() WHERE Id_ulasan = ?');
-            $stmt->bind_param('isi', $rating, $komentar, $idUlasan);
-        } else {
-            $stmt = $conn->prepare(
-                'INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar, tanggal_ulasan) VALUES (?, ?, ?, ?, CURDATE())'
-            );
-            $stmt->bind_param('isis', $userId, $tourismId, $rating, $komentar);
-        }
-        $ok = $stmt->execute();
-        $stmt->close();
-        return $ok;
-    } catch (Throwable $e) {
-        error_log('ulasan: ' . $e->getMessage());
-        return false;
-    }
-}
-
-function perbaruiRatingWisata(mysqli $conn, string $tourismId): void
-{
-    try {
-        $stmt = $conn->prepare(
-            'UPDATE wisata SET average_rating = (SELECT ROUND(AVG(rating), 2) FROM ulasan WHERE Id_wisata = ?) WHERE id_wisata = ?'
-        );
-        $stmt->bind_param('ss', $tourismId, $tourismId);
-        $stmt->execute();
-        $stmt->close();
-    } catch (Throwable $e) {
-    }
-}
-
 if (!function_exists('isTourismFavorite')) {
     function isTourismFavorite(mysqli $conn, int $userId, string $tourismId): bool
     {
@@ -148,6 +104,61 @@ if (!function_exists('isTourismFavorite')) {
         $found = $stmt->get_result()->num_rows > 0;
         $stmt->close();
         return $found;
+    }
+}
+
+function simpanUlasan(mysqli $conn, int $userId, string $tourismId, int $rating, string $komentar): void {
+    $kolom = [];
+    $hasil = $conn->query('SHOW COLUMNS FROM ulasan');
+    if (!$hasil) {
+        throw new RuntimeException('Tabel ulasan tidak dapat dibaca.');
+    }
+    while ($k = $hasil->fetch_assoc()) {
+        $kolom[] = $k['Field'];
+    }
+    $adaTanggal = in_array('tanggal_ulasan', $kolom, true);
+
+    $stmt = $conn->prepare('SELECT Id_ulasan FROM ulasan WHERE Id_user = ? AND Id_wisata = ? ORDER BY Id_ulasan DESC LIMIT 1');
+    if (!$stmt) {
+        throw new RuntimeException('Query ulasan gagal disiapkan.');
+    }
+    $stmt->bind_param('is', $userId, $tourismId);
+    $stmt->execute();
+    $lama = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if ($lama) {
+        $sql = 'UPDATE ulasan SET rating = ?, komentar = ?' . ($adaTanggal ? ', tanggal_ulasan = NOW()' : '') . ' WHERE Id_ulasan = ?';
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            throw new RuntimeException('Query ulasan gagal disiapkan.');
+        }
+        $idUlasan = (int) $lama['Id_ulasan'];
+        $stmt->bind_param('isi', $rating, $komentar, $idUlasan);
+    } else {
+        $sql = $adaTanggal
+            ? 'INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar, tanggal_ulasan) VALUES (?, ?, ?, ?, NOW())'
+            : 'INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar) VALUES (?, ?, ?, ?)';
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            throw new RuntimeException('Query ulasan gagal disiapkan.');
+        }
+        $stmt->bind_param('isis', $userId, $tourismId, $rating, $komentar);
+    }
+    if (!$stmt->execute()) {
+        $stmt->close();
+        throw new RuntimeException('Ulasan gagal disimpan.');
+    }
+    $stmt->close();
+
+    $kolomRata = $conn->query("SHOW COLUMNS FROM wisata LIKE 'average_rating'");
+    if ($kolomRata && $kolomRata->num_rows > 0) {
+        $stmt = $conn->prepare('UPDATE wisata SET average_rating = (SELECT ROUND(AVG(rating), 2) FROM ulasan WHERE Id_wisata = ?) WHERE id_wisata = ?');
+        if ($stmt) {
+            $stmt->bind_param('ss', $tourismId, $tourismId);
+            $stmt->execute();
+            $stmt->close();
+        }
     }
 }
 
@@ -163,40 +174,6 @@ if ($sudahLogin && empty($_SESSION['role'])) {
     $_SESSION['role'] = 'user';
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'tambah_ulasan') {
-    if (!$sudahLogin) {
-        header('Location: ../auth/Login.php');
-        exit;
-    }
-
-    $csrfOk = isset($_POST['csrf'], $_SESSION['csrf']) && hash_equals($_SESSION['csrf'], (string) $_POST['csrf']);
-
-    $ratingIn = filter_var(
-        trim((string) ($_POST['rating'] ?? '')),
-        FILTER_VALIDATE_INT,
-        ['options' => ['min_range' => 1, 'max_range' => 5]]
-    );
-    $ratingValid = $ratingIn !== false;
-
-    $komentarIn = mb_substr(trim((string) ($_POST['komentar'] ?? '')), 0, 500, 'UTF-8');
-
-    if (!$csrfOk) {
-        $_SESSION['pesan_ulasan'] = 'Sesi tidak valid. Silakan coba lagi.';
-    } elseif (!$ratingValid) {
-        $_SESSION['pesan_ulasan'] = 'Pilih rating 1 sampai 5 bintang.';
-    } elseif ($komentarIn === '') {
-        $_SESSION['pesan_ulasan'] = 'Ulasan tidak boleh kosong.';
-    } elseif (simpanUlasan($conn, (int) $userId, $tourismId, (int) $ratingIn, $komentarIn)) {
-        perbaruiRatingWisata($conn, $tourismId);
-        $_SESSION['pesan_ulasan'] = 'Terima kasih! Ulasanmu berhasil disimpan.';
-    } else {
-        $_SESSION['pesan_ulasan'] = 'Ulasan gagal disimpan. Silakan coba lagi.';
-    }
-
-    header('Location: detail-wisata.php?id=' . rawurlencode($tourismId) . '#judul-ulasan');
-    exit;
-}
-
 $tourismRows = fetchTourismRows($conn, ['id_wisata' => $tourismId]);
 $tourism = $tourismRows[0] ?? null;
 if ($tourism === null) {
@@ -204,20 +181,41 @@ if ($tourism === null) {
     exit('Destinasi tidak ditemukan.');
 }
 
-$urutanFasilitas = ['parkir' => 1, 'toilet' => 2, 'masjid' => 3, 'kamera' => 4, 'umum' => 5];
-$fasilitasDb = [];
-try {
-    $fasilitasDb = fetchTourismFacilities($conn, $tourismId);
-} catch (Throwable $e) {
-    $fasilitasDb = [];
+$galatSimpan   = '';
+$ratingPost    = 0;
+$komentarPost  = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'ulasan') {
+    $tokenKirim   = (string) ($_POST['csrf'] ?? '');
+    $nilaiPost    = filter_var($_POST['rating'] ?? null, FILTER_VALIDATE_INT);
+    $komentarPost = trim((string) ($_POST['komentar'] ?? ''));
+    $ratingPost   = is_int($nilaiPost) ? $nilaiPost : 0;
+    $panjang      = mb_strlen($komentarPost, 'UTF-8');
+
+    if (!$sudahLogin) {
+        $galatSimpan = 'Silakan login terlebih dahulu untuk memberikan ulasan.';
+    } elseif (!hash_equals((string) $_SESSION['csrf'], $tokenKirim)) {
+        $galatSimpan = 'Sesi tidak valid. Muat ulang halaman lalu coba lagi.';
+    } elseif ($ratingPost < 1 || $ratingPost > 5) {
+        $galatSimpan = 'Pilih rating terlebih dahulu.';
+    } elseif ($panjang < 1 || $panjang > 500) {
+        $galatSimpan = 'Ulasan harus berisi 1 sampai 500 karakter.';
+    } else {
+        try {
+            simpanUlasan($conn, (int) $userId, $tourismId, $ratingPost, $komentarPost);
+            header('Location: detail-wisata.php?id=' . rawurlencode($tourismId) . '&ulasan=ok#judul-ulasan');
+            exit;
+        } catch (Throwable $e) {
+            $galatSimpan = 'Ulasan gagal disimpan. Silakan coba lagi.';
+        }
+    }
 }
-$fasilitasTampil = [];
-foreach ($fasilitasDb as $namaFasilitas) {
-    $namaFasilitas = trim((string) $namaFasilitas);
-    if ($namaFasilitas === '') continue;
-    $fasilitasTampil[] = ['nama' => $namaFasilitas, 'ikon' => jenisFasilitas($namaFasilitas)];
-}
-usort($fasilitasTampil, static fn(array $a, array $b): int => $urutanFasilitas[$a['ikon']] <=> $urutanFasilitas[$b['ikon']]);
+
+$fasilitasTampil = [
+    ['nama' => 'Area parkir', 'ikon' => 'parkir'],
+    ['nama' => 'Toilet Umum', 'ikon' => 'toilet'],
+    ['nama' => 'Mushola',     'ikon' => 'masjid'],
+    ['nama' => 'Spot Foto',   'ikon' => 'kamera'],
+];
 
 $reviewRows = fetchTourismReviews($conn, $tourismId);
 $ratingCounts = array_fill(1, 5, 0);
@@ -264,29 +262,32 @@ if (!empty($extra['parkir_mobil'])) {
     $parkir[] = 'Rp ' . number_format((int) $extra['parkir_mobil'], 0, ',', '.') . '/Mobil';
 }
 
-$namaWisata     = (string) $tourism['nama_wisata'];
-$alamat         = trim((string) ($tourism['alamat'] ?? ''));
-$alamatTampil   = $alamat;
+$namaWisata   = (string) $tourism['nama_wisata'];
+$alamat       = trim((string) ($tourism['alamat'] ?? ''));
+$alamatTampil = $alamat;
 if ($alamat !== '' && mb_stripos($alamat, $namaWisata, 0, 'UTF-8') !== 0) {
     $alamatTampil = $namaWisata . "\n" . $alamat;
 }
-$lat            = $tourism['latitude'] ?? null;
-$lng            = $tourism['longitude'] ?? null;
-$punyaKoordinat = is_numeric($lat) && is_numeric($lng);
-$linkMaps       = trim((string) ($tourism['Maps_Wisata'] ?? ''));
-$linkMapsValid  = preg_match('#^https?://#i', $linkMaps) === 1;
 
-if ($punyaKoordinat) {
-    $mapQuery = $lat . ',' . $lng;
-} elseif ($alamat !== '') {
-    $mapQuery = $tourism['nama_wisata'] . ', ' . $alamat;
-} else {
-    $mapQuery = $tourism['nama_wisata'] . ', ' . $tourism['wilayah'];
+$lat = $tourism['latitude'] ?? null;
+$lng = $tourism['longitude'] ?? null;
+$petaTersedia = koordinatValid($lat, $lng);
+$petaSrc = $petaTersedia
+    ? 'https://maps.google.com/maps?q=' . rawurlencode($lat . ',' . $lng) . '&hl=id&z=15&output=embed'
+    : '';
+
+$bisaMaps = $alamat !== '';
+$mapsUrl  = '';
+if ($bisaMaps) {
+    $linkMaps = trim((string) ($tourism['Maps_Wisata'] ?? ''));
+    if (preg_match('#^https?://#i', $linkMaps) === 1) {
+        $mapsUrl = $linkMaps;
+    } elseif ($petaTersedia) {
+        $mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($lat . ',' . $lng);
+    } else {
+        $mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($namaWisata . ', ' . $alamat);
+    }
 }
-$petaTersedia = $punyaKoordinat || $alamat !== '';
-$mapsUrl = $linkMapsValid
-    ? $linkMaps
-    : 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($tourism['nama_wisata'] . ', ' . $tourism['wilayah']);
 
 $gambar  = trim((string) ($tourism['gambar'] ?? ''));
 $adaFoto = $gambar !== '' && is_file(__DIR__ . '/../../' . $gambar);
@@ -313,24 +314,19 @@ $destination = [
     'id'           => $tourismId,
     'gambar'       => $gambar,
     'has_photo'    => $adaFoto,
-    'title'        => $tourism['nama_wisata'],
+    'title'        => $namaWisata,
     'review_label' => number_format($jumlahUlasan, 0, ',', '.'),
     'review_count' => $jumlahUlasan,
     'rating'       => $nilaiRating,
     'has_rating'   => $nilaiRating > 0 && $jumlahUlasan > 0,
     'location'     => $tourism['wilayah'],
-    'subtitle'     => 'Temukan Informasi ' . $tourism['nama_wisata'] . ' dengan lebih detail',
+    'subtitle'     => 'Temukan Informasi ' . $namaWisata . ' dengan lebih detail',
     'description'  => trim((string) ($tourism['deskripsi'] ?? '')),
     'ticket_price' => ($tourism['harga_tiket'] ?? 0) > 0
         ? 'Rp ' . number_format((float) $tourism['harga_tiket'], 0, ',', '.') . '/orang'
         : '',
     'parking'      => $parkir,
     'hours'        => $jamOperasional,
-    'has_address'  => $alamat !== '',
-    'address'      => $alamatTampil,
-    'maps_url'     => $mapsUrl,
-    'map_query'    => $mapQuery,
-    'map_ready'    => $petaTersedia,
     'distribution' => $distribution,
     'reviews'      => $reviews,
 ];
@@ -339,9 +335,15 @@ $sudahFavorit = $sudahLogin && isTourismFavorite($conn, (int) $userId, $tourismI
 $ulasanSaya   = $sudahLogin ? fetchUlasanSaya($conn, (int) $userId, $tourismId) : [];
 $ratingSaya   = isset($ulasanSaya['rating']) ? (int) round((float) $ulasanSaya['rating']) : 0;
 $komentarSaya = (string) ($ulasanSaya['komentar'] ?? '');
+if ($galatSimpan !== '') {
+    $ratingSaya   = $ratingPost;
+    $komentarSaya = $komentarPost;
+}
 
-$pesanUlasan = $_SESSION['pesan_ulasan'] ?? '';
-unset($_SESSION['pesan_ulasan']);
+$apiFavorit       = '../../api/favorites';
+$apiUlasan        = '../../api/destinations/' . rawurlencode($tourismId) . '/reviews';
+$apiLokasi        = '../../api/destinations/' . rawurlencode($tourismId) . '/location';
+$urlSelesaiUlasan = 'detail-wisata.php?id=' . rawurlencode($tourismId) . '&ulasan=ok#judul-ulasan';
 
 $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) : '-';
 ?>
@@ -354,20 +356,21 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <link rel="stylesheet" href="../CSS/edit-profil.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=shared-layout-17">
+    <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
+    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
+    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=final-8">
 </head>
 <body class="halaman-detail">
 
     <svg class="sprite" aria-hidden="true">
         <defs>
             <symbol id="ikon-profil" viewBox="0 0 220 220">
-                <circle cx="110" cy="110" r="93.5" fill="none" stroke="#166d5c" stroke-width="11"/>
-                <circle cx="110" cy="82.5" r="27.5" fill="none" stroke="#166d5c" stroke-width="11"/>
-                <path d="M49.5 170.5c9.35-27.5 30.25-41.25 60.5-41.25s51.15 13.75 60.5 41.25" fill="none" stroke="#166d5c" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="110" cy="110" r="93.5" fill="none" stroke="#166c5c" stroke-width="11"/>
+                <circle cx="110" cy="82.5" r="27.5" fill="none" stroke="#166c5c" stroke-width="11"/>
+                <path d="M49.5 170.5c9.35-27.5 30.25-41.25 60.5-41.25s51.15 13.75 60.5 41.25" fill="none" stroke="#166c5c" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
             </symbol>
 
             <symbol id="i-bintang" viewBox="0 0 24 24">
@@ -380,10 +383,11 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             </symbol>
 
             <symbol id="i-lokasi" viewBox="0 0 40 44">
-                <ellipse cx="20" cy="37" rx="14" ry="5" fill="#45d84f"/>
-                <path d="M20 32a14 5 0 0 1 0 10z" fill="#10b981"/>
-                <path d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z" fill="#ed2118"/>
-                <circle cx="20" cy="13.5" r="4.8" fill="#fff"/>
+                <ellipse cx="20" cy="38" rx="19.5" ry="6" fill="#4fd65b"/>
+                <path d="M20 44a19.5 6 0 0 0 0-12z" fill="#12b886"/>
+                <path d="M20 2C13 2 7.5 7.4 7.5 14c0 7 7.5 13 12.5 22z" fill="#f02a1a"/>
+                <path d="M20 2c7 0 12.5 5.4 12.5 12 0 7-7.5 13-12.5 22z" fill="#d92119"/>
+                <circle cx="20" cy="14" r="5.4" fill="#fff"/>
             </symbol>
 
             <symbol id="i-pin-hijau" viewBox="0 0 40 46">
@@ -410,49 +414,75 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             </symbol>
 
             <symbol id="i-parkir" viewBox="0 0 32 28">
-                <path d="M3.2 14.2 5.6 8.6C6.1 7.4 7.2 6.7 8.5 6.7h9c1.3 0 2.4.7 2.9 1.9l2.4 5.6c1.4.3 2.2 1.4 2.2 2.8v4.4c0 .8-.6 1.4-1.4 1.4H22v1.6c0 .8-.6 1.4-1.4 1.4h-1.8c-.8 0-1.4-.6-1.4-1.4v-1.6H9.6v1.6c0 .8-.6 1.4-1.4 1.4H6.4c-.8 0-1.4-.6-1.4-1.4v-1.6H3.4c-.8 0-1.4-.6-1.4-1.4V17c0-1.4.8-2.5 1.2-2.8z"/>
-                <path d="M7.6 9.2h9.8l1.6 4.2H6z" fill="#eef2ee"/>
-                <circle cx="6.2" cy="18.2" r="1.5" fill="#eef2ee"/>
-                <circle cx="19.8" cy="18.2" r="1.5" fill="#eef2ee"/>
-                <rect x="27" y="8" width="1.6" height="16" rx=".5"/>
-                <rect x="24.2" y="1.5" width="7.2" height="7.2" rx="1.2"/>
-                <path d="M26.6 7.3V2.9h1.7a1.3 1.3 0 0 1 0 2.6h-1.7" fill="none" stroke="#eef2ee" stroke-width="1"/>
+                <path d="M1.5 14.2 4 8.4C4.5 7 5.6 6.2 7 6.2h9c1.4 0 2.5.8 3 2.2l2.5 5.8h.5c1 0 1.5.8 1.5 1.8v6.2c0 1-.6 1.6-1.6 1.6H20v1.4c0 .7-.6 1.2-1.2 1.2h-2c-.7 0-1.2-.5-1.2-1.2v-1.4H8.4v1.4c0 .7-.6 1.2-1.2 1.2h-2c-.7 0-1.2-.5-1.2-1.2v-1.4H2.6C1.6 24.2 1 23.6 1 22.6V16c0-1 .5-1.8 1.5-1.8z"/>
+                <path d="M6.6 8.4h10.8l1.8 5.4H4.8z" fill="#eef2ee"/>
+                <circle cx="5.2" cy="18.6" r="1.7" fill="#eef2ee"/>
+                <circle cx="18.8" cy="18.6" r="1.7" fill="#eef2ee"/>
+                <rect x="9" y="19" width="6" height="1.4" fill="#eef2ee"/>
+                <rect x="26" y="7" width="1.4" height="20"/>
+                <rect x="23.2" y="0" width="7" height="7.6" rx="1.2"/>
+                <path d="M25.7 6.4V1.8h1.7a1.5 1.5 0 0 1 0 3h-1.7" fill="none" stroke="#eef2ee" stroke-width="1.1"/>
             </symbol>
 
             <symbol id="i-toilet" viewBox="0 0 32 28">
-                <circle cx="8.5" cy="4.2" r="2.8"/>
-                <path d="M5.4 7.2h6.2c1.2 0 2.2 1 2.2 2.2V17h-2.4v9H8.9v-8.4h-.8V26H5.6v-9H3.2V9.4c0-1.2 1-2.2 2.2-2.2z"/>
-                <circle cx="23.5" cy="4.2" r="2.8"/>
-                <path d="M23.5 7.2c-2.3 0-4 1.5-4.5 3.7L17.2 18h2.9v8h2.6v-5.5h1.6V26h2.6v-8h2.9L28 10.9c-.5-2.2-2.2-3.7-4.5-3.7z"/>
+                <circle cx="6.6" cy="3.2" r="2.7"/>
+                <path d="M3.4 7H9.8c1.2 0 2.2 1 2.2 2.2V16.4H10V26.4H7.6V17.4H5.6V26.4H3.2V16.4H1.2V9.2C1.2 8 2.2 7 3.4 7z"/>
+                <rect x="15.2" y="0.5" width="1.2" height="26.5"/>
+                <circle cx="25" cy="3.2" r="2.7"/>
+                <path d="M25 7c-1.8 0-3 1.1-3.4 2.8L19.4 17.6H22.2V26.4H24.2V20.2H25.8V26.4H27.8V17.6H30.6L28.4 9.8C28 8.1 26.8 7 25 7z"/>
             </symbol>
 
             <symbol id="i-masjid" viewBox="0 0 28 28">
-                <path d="M2 26V13.2l6.5-5.7 6.5 5.7V26z"/>
-                <path d="M6.6 26v-5.3a1.9 1.9 0 0 1 3.8 0V26z" fill="#eef2ee"/>
-                <path d="M16.8 26V9.6L19.6 3l2.8 6.6V26z"/>
-                <rect x="18.7" y="12.6" width="1.8" height="3" fill="#eef2ee"/>
+                <path d="M1.5 15.2C1.5 9.6 6 7 9 1.8C12 7 16.5 9.6 16.5 15.2z"/>
+                <rect x="1" y="14.4" width="16" height="12.6"/>
+                <rect x="1" y="14.4" width="16" height="1.3" fill="#eef2ee"/>
+                <path d="M7.2 27V22.6a1.8 1.8 0 0 1 3.6 0V27z" fill="#eef2ee"/>
+                <path d="M19.2 27V8.6L21.5 3.4 23.8 8.6V27z"/>
+                <rect x="22.2" y="9.4" width="0.9" height="17" fill="#eef2ee" opacity=".55"/>
+                <rect x="0" y="26.2" width="25" height="1.6"/>
             </symbol>
 
             <symbol id="i-tiket" viewBox="0 0 32 24">
-                <g transform="rotate(-10 16 12)">
-                    <path d="M2.5 5h27v4.4a2.6 2.6 0 0 0 0 5.2V19h-27v-4.4a2.6 2.6 0 0 0 0-5.2z"/>
-                    <rect x="11" y="9.5" width="10" height="5" rx="1" fill="#eef2ee"/>
-                </g>
+                <path d="M5.6 6.6 22.4 1.2Q24 .8 24.2 2.6L24.6 6.6z"/>
+                <path d="M3.8 7.4H28.2Q30 7.4 30 9.2V11.6a2.2 2.2 0 0 0 0 4.4V21.2Q30 23 28.2 23H3.8Q2 23 2 21.2V16a2.2 2.2 0 0 0 0-4.4V9.2Q2 7.4 3.8 7.4z"/>
+                <rect x="7" y="12" width="6" height="1.2" fill="#eef2ee"/>
+                <rect x="7" y="15" width="9.5" height="1.5" fill="#eef2ee"/>
+                <rect x="20.2" y="7.4" width="1" height="15.6" fill="#eef2ee" opacity=".55"/>
             </symbol>
 
-            <symbol id="i-gembok" viewBox="0 0 64 64">
-                <rect x="10" y="27" width="44" height="31" rx="7" fill="none" stroke="currentColor" stroke-width="5"/>
-                <path d="M19 27V19a13 13 0 0 1 26 0v8" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
-                <circle cx="32" cy="41" r="3.2" fill="currentColor"/>
-                <path d="M32 43v6" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+            <symbol id="i-alarm" viewBox="0 0 32 32">
+                <circle cx="16" cy="17.5" r="10.2" fill="none" stroke="currentColor" stroke-width="3"/>
+                <path d="M16 11.6v6.4l4.2 2.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M3.6 10.2A7.2 7.2 0 0 1 10 3.8M28.4 10.2A7.2 7.2 0 0 0 22 3.8" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+                <path d="M7.4 27.2 5 30M24.6 27.2 27 30" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </symbol>
+
+            <symbol id="i-gembok" viewBox="0 0 42 46">
+                <rect x="3" y="19.5" width="36" height="23.5" rx="5" fill="none" stroke="currentColor" stroke-width="3.2"/>
+                <path d="M10 19.5V14.5a11 11 0 0 1 22 0v5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+                <path d="M21 27.5v8" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
             </symbol>
 
             <symbol id="i-hati" viewBox="0 0 64 56">
                 <path d="M32 54C14 40 3 30 3 18.5 3 9.9 9.6 3 18 3c5.6 0 10.6 3 14 8 3.4-5 8.4-8 14-8 8.4 0 15 6.9 15 15.5C61 30 50 40 32 54Z" fill="currentColor"/>
             </symbol>
+
+            <symbol id="i-sampah" viewBox="0 0 48 56">
+                <path d="M18 4h12a2 2 0 0 1 2 2v5H16V6a2 2 0 0 1 2-2z" fill="currentColor"/>
+                <rect x="4" y="10" width="40" height="6.5" rx="3.2" fill="currentColor"/>
+                <path fill-rule="evenodd" fill="currentColor" d="M8 19h32l-2.2 30.2A5 5 0 0 1 32.8 54H15.2a5 5 0 0 1-5-4.8L8 19zM17 25.5a1.8 1.8 0 0 1 3.6 0v21a1.8 1.8 0 0 1-3.6 0zM27.4 25.5a1.8 1.8 0 0 1 3.6 0v21a1.8 1.8 0 0 1-3.6 0z"/>
+            </symbol>
         </defs>
     </svg>
 
+    <ul class="dd-kategori" id="kategori-menu" role="menu" aria-label="Kategori wisata">
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=alam">Wisata Alam &amp; pegunungan</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=air-curug">Wisata Air &amp; Curug</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
+        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
+    </ul>
+
+    <div class="bagian-atas">
     <header class="ep-navbar">
         <div class="ep-navbar__inner">
             <a class="ep-logo" href="../../index.php">Explore Majaku</a>
@@ -483,13 +513,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         </div>
     </header>
 
-    <ul class="dd-kategori" id="kategori-menu" role="menu" aria-label="Kategori wisata">
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=alam">Wisata Alam &amp; pegunungan</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
-    </ul>
-
     <div class="hero-wisata<?= $destination['has_photo'] ? '' : ' tanpa-foto' ?>" id="hero-wisata">
         <?php if ($destination['has_photo']): ?>
             <img src="../../<?= e($destination['gambar']) ?>"
@@ -500,6 +523,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <svg viewBox="0 0 64 56" aria-hidden="true"><use href="#i-foto"/></svg>
             <span>Foto Tidak Tersedia</span>
         </div>
+    </div>
     </div>
 
     <main class="detail">
@@ -529,6 +553,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 <button class="tombol-favorit<?= $sudahFavorit ? ' aktif' : '' ?>" type="button" id="tombol-favorit"
                         data-id="<?= e($destination['id']) ?>"
                         data-csrf="<?= e($_SESSION['csrf']) ?>"
+                        data-endpoint="<?= e($apiFavorit) ?>"
                         data-login="<?= $sudahLogin ? '1' : '0' ?>"
                         aria-pressed="<?= $sudahFavorit ? 'true' : 'false' ?>">
                     <i class="bi <?= $sudahFavorit ? 'bi-heart-fill' : 'bi-heart' ?>" aria-hidden="true"></i>
@@ -547,28 +572,23 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                     <p><?= nilaiAtauKet($destination['description'], 'Deskripsi destinasi ini belum tersedia') ?></p>
                 </article>
 
-                <article class="kartu kartu--fasilitas<?= $fasilitasTampil === [] ? ' kartu--kosong' : '' ?>">
+                <article class="kartu kartu--fasilitas">
                     <h3>Fasilitas</h3>
-                    <?php if ($fasilitasTampil !== []): ?>
-                        <ul>
-                            <?php foreach ($fasilitasTampil as $fasilitas): ?>
-                                <li>
-                                    <?php
-                                    echo match ($fasilitas['ikon']) {
-                                        'parkir' => '<svg class="ikon-fas ikon-parkir" viewBox="0 0 32 28" aria-hidden="true"><use href="#i-parkir"/></svg>',
-                                        'toilet' => '<svg class="ikon-fas ikon-toilet" viewBox="0 0 32 28" aria-hidden="true"><use href="#i-toilet"/></svg>',
-                                        'masjid' => '<svg class="ikon-fas ikon-masjid" viewBox="0 0 28 28" aria-hidden="true"><use href="#i-masjid"/></svg>',
-                                        'kamera' => '<span class="ikon-fas ikon-kamera" aria-hidden="true"><i class="bi bi-camera-fill"></i></span>',
-                                        default  => '<span class="ikon-fas ikon-umum" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>',
-                                    };
-                                    ?>
-                                    <span class="fasilitas__nama"><?= e($fasilitas['nama']) ?></span>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    <?php else: ?>
-                        <p class="fasilitas__kosong">Informasi fasilitas ini belum tersedia</p>
-                    <?php endif; ?>
+                    <ul>
+                        <?php foreach ($fasilitasTampil as $fasilitas): ?>
+                            <li>
+                                <?php
+                                echo match ($fasilitas['ikon']) {
+                                    'parkir' => '<svg class="ikon-fas ikon-parkir" viewBox="0 0 32 28" aria-hidden="true"><use href="#i-parkir"/></svg>',
+                                    'toilet' => '<svg class="ikon-fas ikon-toilet" viewBox="0 0 32 28" aria-hidden="true"><use href="#i-toilet"/></svg>',
+                                    'masjid' => '<svg class="ikon-fas ikon-masjid" viewBox="0 0 28 28" aria-hidden="true"><use href="#i-masjid"/></svg>',
+                                    default  => '<span class="ikon-fas ikon-kamera" aria-hidden="true"><i class="bi bi-camera-fill"></i></span>',
+                                };
+                                ?>
+                                <span class="fasilitas__nama"><?= e($fasilitas['nama']) ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
                 </article>
 
                 <article class="kartu kartu--harga">
@@ -597,7 +617,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
                     <h3 class="jam-judul">Jam Operasional</h3>
                     <div class="jam-baris">
-                        <i class="bi bi-alarm" aria-hidden="true"></i>
+                        <i class="bi bi-alarm ikon-jam" aria-hidden="true"></i>
                         <span><?= nilaiAtauKet($destination['hours']) ?></span>
                     </div>
                 </article>
@@ -608,32 +628,29 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <h2 class="blok__judul" id="judul-lokasi">LOKASI WISATA</h2>
             <p class="blok__sub">Temukan lokasi <?= e(mb_strtolower($destination['title'], 'UTF-8')) ?> dengan mudah di peta/maps</p>
 
-            <div class="lokasi-grid<?= $destination['map_ready'] ? '' : ' lokasi-grid--kosong' ?>">
-                <?php if ($destination['map_ready']): ?>
-                    <div class="peta">
-                        <iframe
+            <div class="lokasi-grid<?= $petaTersedia ? '' : ' lokasi-grid--kosong' ?>" id="lokasi-grid"
+                 data-endpoint="<?= e($apiLokasi) ?>"
+                 data-nama="<?= e($namaWisata) ?>">
+                <div class="peta" id="peta"<?= $petaTersedia ? '' : ' hidden' ?>>
+                    <iframe id="peta-frame"
                             title="Peta lokasi <?= e($destination['title']) ?>"
-                            src="https://maps.google.com/maps?q=<?= rawurlencode($destination['map_query']) ?>&amp;hl=id&amp;z=15&amp;output=embed"
+                            <?= $petaTersedia ? 'src="' . e($petaSrc) . '"' : '' ?>
                             allowfullscreen
                             referrerpolicy="no-referrer-when-downgrade"></iframe>
-                    </div>
-                <?php else: ?>
-                    <div class="peta peta--kosong" role="img" aria-label="Peta lokasi belum tersedia">
-                        <svg class="peta__ikon" viewBox="0 0 40 46" aria-hidden="true"><use href="#i-pin-coret"/></svg>
-                        <h3>Koordinat Wisata Tidak Tersedia</h3>
-                        <p>Peta belum dapat ditampilkan karena koordinat lokasi belum tersedia</p>
-                    </div>
-                <?php endif; ?>
+                </div>
 
-                <article class="kartu-alamat<?= $destination['has_address'] ? '' : ' kartu-alamat--kosong' ?>">
+                <div class="peta peta--kosong" id="peta-kosong" role="img" aria-label="Peta lokasi belum tersedia"<?= $petaTersedia ? ' hidden' : '' ?>>
+                    <svg class="peta__ikon" viewBox="0 0 40 46" aria-hidden="true"><use href="#i-pin-coret"/></svg>
+                    <h3>Koordinat Wisata Tidak Tersedia</h3>
+                    <p>Peta belum dapat ditampilkan karena koordinat lokasi belum tersedia</p>
+                </div>
+
+                <article class="kartu-alamat<?= $bisaMaps ? '' : ' kartu-alamat--kosong' ?>" id="kartu-alamat">
                     <svg class="kartu-alamat__ikon" viewBox="0 0 40 46" aria-hidden="true"><use href="#i-pin-hijau"/></svg>
-                    <h3><?= $destination['has_address'] ? 'Alamat tersedia' : 'Alamat Belum tersedia' ?></h3>
-                    <?php if ($destination['has_address']): ?>
-                        <p><?= nl2br(e($destination['address'])) ?></p>
-                    <?php else: ?>
-                        <p class="belum">Lokasi Akan Di perbarui Segera</p>
-                    <?php endif; ?>
-                    <a class="tombol-maps" href="<?= e($destination['maps_url']) ?>" target="_blank" rel="noopener noreferrer">
+                    <h3 id="alamat-judul"><?= $bisaMaps ? 'Alamat tersedia' : 'Alamat Belum tersedia' ?></h3>
+                    <p id="alamat-teks"<?= $bisaMaps ? '' : ' class="belum"' ?>><?= $bisaMaps ? e($alamatTampil) : 'Lokasi Akan Di perbarui Segera' ?></p>
+                    <a class="tombol-maps" id="tombol-maps"
+                       <?= $bisaMaps ? 'href="' . e($mapsUrl) . '" target="_blank" rel="noopener noreferrer"' : 'aria-disabled="true" tabindex="-1"' ?>>
                         <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
                         <span>Buka di Google Maps</span>
                     </a>
@@ -693,10 +710,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <div class="ulasan-kosong"><p>Belum ada ulasan</p></div>
             <?php endif; ?>
 
-            <?php if ($pesanUlasan !== ''): ?>
-                <div class="notif notif--ulasan" role="status"><?= e($pesanUlasan) ?></div>
-            <?php endif; ?>
-
             <button class="tombol-ulasan" type="button" id="tombol-ulasan"
                     data-login="<?= $sudahLogin ? '1' : '0' ?>" aria-haspopup="dialog">
                 Tambah Ulasan dan Rating
@@ -705,8 +718,12 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
     </main>
 
     <dialog class="dialog-ulasan" id="dialog-ulasan" aria-labelledby="judul-dialog">
-        <form method="post" id="form-ulasan" novalidate action="detail-wisata.php?id=<?= e(rawurlencode($destination['id'])) ?>">
-            <input type="hidden" name="aksi" value="tambah_ulasan">
+        <form id="form-ulasan" method="post" action="detail-wisata.php?id=<?= e(rawurlencode($tourismId)) ?>" novalidate
+              data-endpoint="<?= e($apiUlasan) ?>"
+              data-csrf="<?= e($_SESSION['csrf']) ?>"
+              data-sukses="<?= e($urlSelesaiUlasan) ?>">
+
+            <input type="hidden" name="aksi" value="ulasan">
             <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
 
             <h3 id="judul-dialog">Tambah Ulasan dan Rating</h3>
@@ -735,10 +752,10 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
             <label class="dialog__label" for="komentar">Ulasan</label>
             <textarea id="komentar" name="komentar" rows="5" maxlength="500"
-                      placeholder="Ceritakan pengalamanmu di sini..."><?= e($komentarSaya) ?></textarea>
+                      placeholder="Ceritakan Pengalamanmu di sini..."><?= e($komentarSaya) ?></textarea>
             <p class="dialog__catatan">Jika kamu sudah pernah mengulas destinasi ini, ulasan lamamu akan di perbarui.</p>
 
-            <p class="dialog__error" id="error-ulasan" role="alert" hidden></p>
+            <p class="dialog__error" id="error-ulasan" role="alert"<?= $galatSimpan === '' ? ' hidden' : '' ?>><?= e($galatSimpan) ?></p>
 
             <div class="dialog__aksi">
                 <button type="button" class="btn-batal" id="batal-ulasan">Batal</button>
@@ -749,7 +766,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
     <dialog class="popup" id="popup-login" aria-labelledby="popup-login-judul" aria-describedby="popup-login-isi">
         <div class="popup__ikon popup__ikon--gembok" aria-hidden="true">
-            <svg viewBox="0 0 64 64"><use href="#i-gembok"/></svg>
+            <svg viewBox="0 0 42 46"><use href="#i-gembok"/></svg>
         </div>
         <h2 class="popup__judul popup__judul--merah" id="popup-login-judul">Login untuk Memberikan Rating dan Ulasan</h2>
         <p class="popup__isi" id="popup-login-isi">Bagikan pengalaman wisatamu setelah login. Silakan login terlebih dahulu untuk memberikan rating dan ulasan wisata ini</p>
@@ -770,7 +787,95 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         </div>
     </dialog>
 
+    <dialog class="popup" id="popup-terhapus" aria-labelledby="popup-terhapus-judul" aria-describedby="popup-terhapus-isi">
+        <div class="popup__ikon popup__ikon--sampah" aria-hidden="true">
+            <svg viewBox="0 0 48 56"><use href="#i-sampah"/></svg>
+        </div>
+        <h2 class="popup__judul popup__judul--hijau" id="popup-terhapus-judul">Berhasil di Hapus!</h2>
+        <p class="popup__isi" id="popup-terhapus-isi">Wisata favorit mu berhasil dihapus dari destinasi favorit</p>
+        <div class="popup__aksi popup__aksi--tunggal">
+            <button class="popup__tombol popup__tombol--isi" type="button" id="popup-terhapus-ok" autofocus>OK</button>
+        </div>
+    </dialog>
+
+    <dialog class="popup" id="popup-konfirmasi" aria-labelledby="popup-konfirmasi-judul" aria-describedby="popup-konfirmasi-isi">
+        <div class="popup__ikon popup__ikon--sampah" aria-hidden="true">
+            <svg viewBox="0 0 48 56"><use href="#i-sampah"/></svg>
+        </div>
+        <h2 class="popup__judul popup__judul--hijau popup__judul--tanya" id="popup-konfirmasi-judul">Apakah Anda yakin ingin menghapus destinasi ini dari daftar favorit?</h2>
+        <p class="popup__isi" id="popup-konfirmasi-isi">Wisata favorit mu akan di hapus dari daftar destinasi favorit</p>
+        <div class="popup__aksi">
+            <button class="popup__tombol popup__tombol--isi" type="button" id="popup-konfirmasi-hapus">Hapus</button>
+            <button class="popup__tombol popup__tombol--garis" type="button" id="popup-konfirmasi-batal" autofocus>Batal</button>
+        </div>
+    </dialog>
+
     <script>
+        (function () {
+            var nav = document.querySelector('.ep-navbar');
+            var hero = document.getElementById('hero-wisata');
+            if (!nav || !hero) return;
+            var tutup = 24;
+
+            function rapat() {
+                var foto = hero.querySelector('img');
+                var el = (!foto || hero.classList.contains('tanpa-foto'))
+                    ? hero.querySelector('.hero-wisata__kosong')
+                    : foto;
+                if (!el) return;
+                hero.style.removeProperty('margin-top');
+                var selisih = el.getBoundingClientRect().top - nav.getBoundingClientRect().bottom + tutup;
+                if (Math.abs(selisih) > 0.5) {
+                    hero.style.setProperty('margin-top', (-tutup - selisih) + 'px', 'important');
+                }
+            }
+
+            rapat();
+            window.addEventListener('resize', rapat);
+            window.addEventListener('load', rapat);
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(rapat);
+            }
+            if (window.ResizeObserver) {
+                new ResizeObserver(rapat).observe(nav);
+            }
+            var gambar = hero.querySelector('img');
+            if (gambar) gambar.addEventListener('load', rapat);
+        })();
+
+        function buatDialog(id) {
+            var el = document.getElementById(id);
+            var api = {
+                el: el,
+                buka: function () {
+                    if (!el) return;
+                    if (typeof el.showModal === 'function') {
+                        if (!el.open) el.showModal();
+                    } else {
+                        el.setAttribute('open', '');
+                    }
+                },
+                tutup: function () {
+                    if (!el) return;
+                    if (typeof el.close === 'function') {
+                        el.close();
+                    } else {
+                        el.removeAttribute('open');
+                    }
+                }
+            };
+            if (el) {
+                el.addEventListener('click', function (e) {
+                    if (e.target !== el) return;
+                    var r = el.getBoundingClientRect();
+                    var dalam = e.clientX >= r.left && e.clientX <= r.right &&
+                                e.clientY >= r.top && e.clientY <= r.bottom;
+                    if (!dalam) api.tutup();
+                });
+            }
+            return api;
+        }
+
         (function () {
             var toggle = document.getElementById('kategori-toggle');
             var menu = document.getElementById('kategori-menu');
@@ -840,18 +945,95 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         })();
 
         (function () {
-            document.querySelectorAll('.notif--ulasan').forEach(function (n) {
-                setTimeout(function () { n.classList.add('hilang'); }, 4000);
-                setTimeout(function () { n.style.display = 'none'; }, 4500);
-            });
+            if (window.history && typeof history.replaceState === 'function' && /[?&]ulasan=/.test(location.search)) {
+                var u = new URL(location.href);
+                u.searchParams.delete('ulasan');
+                history.replaceState(null, '', u.pathname + u.search + u.hash);
+            }
+        })();
+
+        (function () {
+            var grid = document.getElementById('lokasi-grid');
+            if (!grid) return;
+
+            var peta = document.getElementById('peta');
+            var petaKosong = document.getElementById('peta-kosong');
+            var frame = document.getElementById('peta-frame');
+            var kartu = document.getElementById('kartu-alamat');
+            var judul = document.getElementById('alamat-judul');
+            var teks = document.getElementById('alamat-teks');
+            var maps = document.getElementById('tombol-maps');
+            var nama = grid.getAttribute('data-nama') || '';
+            var endpoint = grid.getAttribute('data-endpoint');
+
+            function koordinatValid(lat, lng) {
+                if (lat === null || lng === null || lat === '' || lng === '') return false;
+                lat = Number(lat);
+                lng = Number(lng);
+                return isFinite(lat) && isFinite(lng) &&
+                       lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+            }
+
+            function terapkan(d) {
+                var alamat = String(d.alamat === null || d.alamat === undefined ? '' : d.alamat).trim();
+                var ada = d.koordinat_lengkap === true && koordinatValid(d.latitude, d.longitude);
+
+                grid.classList.toggle('lokasi-grid--kosong', !ada);
+                peta.hidden = !ada;
+                petaKosong.hidden = ada;
+
+                if (ada) {
+                    var src = 'https://maps.google.com/maps?q=' +
+                        encodeURIComponent(d.latitude + ',' + d.longitude) +
+                        '&hl=id&z=15&output=embed';
+                    if (frame.getAttribute('src') !== src) frame.setAttribute('src', src);
+                }
+
+                kartu.classList.toggle('kartu-alamat--kosong', alamat === '');
+                judul.textContent = alamat !== '' ? 'Alamat tersedia' : 'Alamat Belum tersedia';
+                teks.classList.toggle('belum', alamat === '');
+
+                if (alamat === '') {
+                    teks.textContent = 'Lokasi Akan Di perbarui Segera';
+                    maps.removeAttribute('href');
+                    maps.removeAttribute('target');
+                    maps.removeAttribute('rel');
+                    maps.setAttribute('aria-disabled', 'true');
+                    maps.setAttribute('tabindex', '-1');
+                    return;
+                }
+
+                teks.textContent = alamat.toLowerCase().indexOf(nama.toLowerCase()) === 0
+                    ? alamat
+                    : nama + '\n' + alamat;
+
+                if (!maps.getAttribute('href')) {
+                    var q = ada ? d.latitude + ',' + d.longitude : nama + ', ' + alamat;
+                    maps.setAttribute('href', 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q));
+                    maps.setAttribute('target', '_blank');
+                    maps.setAttribute('rel', 'noopener noreferrer');
+                }
+                maps.removeAttribute('aria-disabled');
+                maps.removeAttribute('tabindex');
+            }
+
+            fetch(endpoint, {
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json' }
+            })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (j) {
+                    if (j && j.status === 'success' && j.data) terapkan(j.data);
+                })
+                .catch(function () {});
         })();
 
         var popupLogin = (function () {
-            var dialog = document.getElementById('popup-login');
+            var dlg = buatDialog('popup-login');
             var judul = document.getElementById('popup-login-judul');
             var isi = document.getElementById('popup-login-isi');
             var nanti = document.getElementById('popup-login-nanti');
-            if (!dialog) return { buka: function () {} };
+            if (!dlg.el) return { buka: function () {}, tutup: function () {} };
 
             var teks = {
                 favorit: {
@@ -864,91 +1046,75 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 }
             };
 
-            function tutup() {
-                if (typeof dialog.close === 'function') {
-                    dialog.close();
-                } else {
-                    dialog.removeAttribute('open');
-                }
-            }
-
-            nanti.addEventListener('click', tutup);
-            dialog.addEventListener('click', function (e) {
-                if (e.target === dialog) tutup();
-            });
+            if (nanti) nanti.addEventListener('click', dlg.tutup);
 
             return {
+                tutup: dlg.tutup,
                 buka: function (jenis) {
                     var t = teks[jenis] || teks.ulasan;
                     judul.textContent = t.judul;
                     isi.textContent = t.isi;
-                    if (typeof dialog.showModal === 'function') {
-                        dialog.showModal();
-                    } else {
-                        dialog.setAttribute('open', '');
-                    }
+                    dlg.buka();
                 }
             };
         })();
 
         var popupSukses = (function () {
-            var dialog = document.getElementById('popup-sukses');
+            var dlg = buatDialog('popup-sukses');
             var ok = document.getElementById('popup-sukses-ok');
-            if (!dialog || !ok) return { buka: function () {} };
+            if (ok) ok.addEventListener('click', dlg.tutup);
+            return { buka: dlg.buka, tutup: dlg.tutup };
+        })();
 
-            function tutup() {
-                if (typeof dialog.close === 'function') {
-                    dialog.close();
-                } else {
-                    dialog.removeAttribute('open');
-                }
+        var popupTerhapus = (function () {
+            var dlg = buatDialog('popup-terhapus');
+            var ok = document.getElementById('popup-terhapus-ok');
+            if (ok) ok.addEventListener('click', dlg.tutup);
+            return { buka: dlg.buka, tutup: dlg.tutup };
+        })();
+
+        var popupKonfirmasi = (function () {
+            var dlg = buatDialog('popup-konfirmasi');
+            var hapus = document.getElementById('popup-konfirmasi-hapus');
+            var batal = document.getElementById('popup-konfirmasi-batal');
+            var saatHapus = function () {};
+
+            if (batal) batal.addEventListener('click', dlg.tutup);
+            if (hapus) {
+                hapus.addEventListener('click', function () {
+                    dlg.tutup();
+                    saatHapus();
+                });
             }
 
-            ok.addEventListener('click', tutup);
-            dialog.addEventListener('click', function (e) {
-                if (e.target === dialog) tutup();
-            });
-
             return {
-                buka: function () {
-                    if (typeof dialog.showModal === 'function') {
-                        dialog.showModal();
-                    } else {
-                        dialog.setAttribute('open', '');
-                    }
-                }
+                buka: dlg.buka,
+                tutup: dlg.tutup,
+                setelahKonfirmasi: function (fn) { saatHapus = fn; }
             };
         })();
 
+        var dialogUlasan = buatDialog('dialog-ulasan');
+
         (function () {
             var tombol = document.getElementById('tombol-ulasan');
-            var dialog = document.getElementById('dialog-ulasan');
             var batal = document.getElementById('batal-ulasan');
-            if (!tombol || !dialog) return;
+            if (!tombol || !dialogUlasan.el) return;
 
             tombol.addEventListener('click', function () {
                 if (tombol.getAttribute('data-login') !== '1') {
                     popupLogin.buka('ulasan');
                     return;
                 }
-                if (typeof dialog.showModal === 'function') {
-                    dialog.showModal();
-                } else {
-                    dialog.setAttribute('open', '');
-                }
+                dialogUlasan.buka();
             });
 
-            batal.addEventListener('click', function () {
-                if (typeof dialog.close === 'function') {
-                    dialog.close();
-                } else {
-                    dialog.removeAttribute('open');
-                }
-            });
+            if (batal) batal.addEventListener('click', dialogUlasan.tutup);
 
-            dialog.addEventListener('click', function (e) {
-                if (e.target === dialog && typeof dialog.close === 'function') dialog.close();
-            });
+            var galatAwal = document.getElementById('error-ulasan');
+            if (galatAwal && !galatAwal.hidden && tombol.getAttribute('data-login') === '1') {
+                dialogUlasan.buka();
+            }
         })();
 
         (function () {
@@ -983,6 +1149,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
             radios.forEach(function (r) {
                 r.addEventListener('change', segarkan);
+                r.addEventListener('click', segarkan);
             });
 
             reset.addEventListener('click', function () {
@@ -1006,24 +1173,80 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             var form = document.getElementById('form-ulasan');
             var galat = document.getElementById('error-ulasan');
             if (!form) return;
+            var sibuk = false;
+
+            function tampilGalat(pesan) {
+                galat.textContent = pesan;
+                galat.hidden = false;
+            }
+
             form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (sibuk) return;
+
                 var rating = form.querySelector('input[name="rating"]:checked');
                 var komentar = form.querySelector('textarea[name="komentar"]');
-                var pesan = '';
+                var teks = komentar.value.trim();
+
                 if (!rating) {
-                    pesan = 'Pilih rating terlebih dahulu.';
-                } else if (komentar.value.trim() === '') {
-                    pesan = 'Ulasan tidak boleh kosong.';
-                }
-                if (pesan !== '') {
-                    e.preventDefault();
-                    galat.textContent = pesan;
-                    galat.hidden = false;
+                    tampilGalat('Pilih rating terlebih dahulu.');
                     return;
                 }
+                if (teks === '') {
+                    tampilGalat('Ulasan tidak boleh kosong.');
+                    return;
+                }
+
                 galat.hidden = true;
+                sibuk = true;
                 var kirim = form.querySelector('.btn-kirim');
                 if (kirim) kirim.disabled = true;
+
+                var status = 0;
+
+                function selesai() {
+                    sibuk = false;
+                    if (kirim) kirim.disabled = false;
+                }
+
+                fetch(form.getAttribute('data-endpoint'), {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-Token': form.getAttribute('data-csrf')
+                    },
+                    body: JSON.stringify({
+                        rating: parseInt(rating.value, 10),
+                        text: teks.slice(0, 500)
+                    })
+                })
+                    .then(function (r) {
+                        status = r.status;
+                        return r.json().catch(function () { return null; });
+                    })
+                    .then(function (d) {
+                        if (d && d.status === 'success' && status >= 200 && status < 300) {
+                            window.location.href = form.getAttribute('data-sukses');
+                            return;
+                        }
+                        if (status === 401) {
+                            selesai();
+                            dialogUlasan.tutup();
+                            popupLogin.buka('ulasan');
+                            return;
+                        }
+                        if (status === 422 && d && d.message) {
+                            selesai();
+                            tampilGalat(d.message);
+                            return;
+                        }
+                        form.submit();
+                    })
+                    .catch(function () {
+                        form.submit();
+                    });
             });
         })();
 
@@ -1053,23 +1276,18 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 }, 4000);
             }
 
-            tombol.addEventListener('click', function () {
-                if (tombol.getAttribute('data-login') !== '1') {
-                    popupLogin.buka('favorit');
-                    return;
-                }
+            function kirim(aksi) {
                 if (sibuk) return;
                 sibuk = true;
                 tombol.disabled = true;
-
-                var aksi = tombol.classList.contains('aktif') ? 'remove' : 'add';
                 var status = 0;
 
-                fetch('../../Backend/api/favorites.php', {
+                fetch(tombol.getAttribute('data-endpoint'), {
                     method: 'POST',
                     credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-Token': tombol.getAttribute('data-csrf')
                     },
                     body: JSON.stringify({
@@ -1084,21 +1302,48 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                     .then(function (d) {
                         sibuk = false;
                         tombol.disabled = false;
+
                         if (status === 401) {
                             tombol.setAttribute('data-login', '0');
                             popupLogin.buka('favorit');
-                        } else if (d && d.status === 'success' && d.data) {
-                            tampilkan(d.data.is_favorite === true);
-                            if (d.data.is_favorite === true) popupSukses.buka();
-                        } else {
-                            kabar((d && d.message) || 'Gagal memperbarui destinasi favorit.');
+                            return;
                         }
+
+                        if (d && d.status === 'success' && d.data) {
+                            var tersimpan = d.data.is_favorite === true;
+                            tampilkan(tersimpan);
+                            if (aksi === 'add' && tersimpan) {
+                                popupSukses.buka();
+                            } else if (aksi === 'remove' && !tersimpan) {
+                                popupTerhapus.buka();
+                            }
+                            return;
+                        }
+
+                        kabar((d && d.message) || 'Gagal memperbarui destinasi favorit.');
                     })
                     .catch(function () {
                         sibuk = false;
                         tombol.disabled = false;
                         kabar('Gagal memperbarui destinasi favorit.');
                     });
+            }
+
+            popupKonfirmasi.setelahKonfirmasi(function () {
+                kirim('remove');
+            });
+
+            tombol.addEventListener('click', function () {
+                if (tombol.getAttribute('data-login') !== '1') {
+                    popupLogin.buka('favorit');
+                    return;
+                }
+                if (sibuk) return;
+                if (tombol.classList.contains('aktif')) {
+                    popupKonfirmasi.buka();
+                    return;
+                }
+                kirim('add');
             });
         })();
     </script>
