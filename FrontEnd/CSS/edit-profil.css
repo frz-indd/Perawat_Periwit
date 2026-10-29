@@ -548,6 +548,10 @@ body.halaman-edit-profil .ep-input {
   background: rgba(0, 0, 0, 0.35);
 }
 
+.ep-modal[hidden] {
+  display: none;
+}
+
 .ep-modal__kotak {
   display: flex;
   flex-direction: column;
@@ -586,13 +590,14 @@ body.halaman-edit-profil .ep-input {
   font-size: calc(30 * var(--u));
   font-weight: 600;
   line-height: 1.3;
+  white-space: nowrap;
 }
 
 .ep-modal__isi {
-  margin: calc(20 * var(--u)) 0 0;
+  margin: calc(20 * var(--u)) calc(-40 * var(--u)) 0;
   color: var(--hijau);
   font-family: var(--font-serif);
-  font-size: calc(18 * var(--u));
+  font-size: calc(21 * var(--u));
   font-weight: 400;
   line-height: 1.5;
 }
@@ -605,6 +610,8 @@ body.halaman-edit-profil .ep-input {
   width: 100%;
   height: calc(59 * var(--u));
   margin-top: calc(69 * var(--u));
+  padding: 0;
+  border: 0;
   border-radius: calc(8 * var(--u));
   background: #166c5c;
   color: #fff;
@@ -613,6 +620,8 @@ body.halaman-edit-profil .ep-input {
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
   transition: background-color 0.15s ease;
 }
 
@@ -632,19 +641,35 @@ body.halaman-edit-profil .ep-input {
 }
 
 .ep-modal__isi--gagal {
-  max-width: calc(230 * var(--u));
+  max-width: calc(320 * var(--u));
 }
 
 .ep-modal__detail {
   margin: calc(8 * var(--u)) 0 0;
   color: #b3261e;
   font-family: var(--font-serif);
-  font-size: calc(15 * var(--u));
+  font-size: calc(17 * var(--u));
   line-height: 1.4;
 }
 
 .ep-modal__kotak--gagal .ep-modal__ok {
   margin-top: calc(46 * var(--u));
+}
+
+.ep-modal__kotak--lebar {
+  width: calc(620 * var(--u));
+  padding-left: calc(44 * var(--u));
+  padding-right: calc(44 * var(--u));
+}
+
+.ep-modal__isi--lebar {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.ep-modal__kotak--lebar .ep-modal__ok {
+  margin-top: calc(36 * var(--u));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -814,14 +839,21 @@ body.halaman-edit-profil .ep-input {
     padding: 32px 24px 24px;
   }
 
+  .ep-modal__kotak--lebar {
+    width: 360px;
+    padding: 32px 20px 24px;
+  }
+
   .ep-modal__ikon {
     width: 90px;
     height: 90px;
   }
 
-  .ep-modal__judul { font-size: 22px; margin-top: 20px; }
-  .ep-modal__isi { font-size: 15px; margin-top: 10px; }
+  .ep-modal__judul { font-size: 20px; margin-top: 20px; }
+  .ep-modal__isi { font-size: 17px; margin: 10px 0 0; }
+  .ep-modal__detail { font-size: 14px; }
   .ep-modal__isi--gagal { max-width: none; }
   .ep-modal__ok { height: 46px; font-size: 17px; margin-top: 28px; }
-  .ep-modal__kotak--gagal .ok { margin-top: 24px; }
+  .ep-modal__kotak--gagal .ep-modal__ok { margin-top: 24px; }
+  .ep-modal__kotak--lebar .ep-modal__ok { margin-top: 24px; }
 }

@@ -34,6 +34,26 @@ function catat_gagal(): void {
     }
 }
 
+function kekurangan_password(string $p): array {
+    $k = [];
+    if (mb_strlen($p) < 8) {
+        $k[] = 'Minimal 8 karakter';
+    }
+    if (preg_match('/\p{Lu}/u', $p) !== 1) {
+        $k[] = '1 huruf besar';
+    }
+    if (preg_match('/\p{Ll}/u', $p) !== 1) {
+        $k[] = '1 huruf kecil';
+    }
+    if (preg_match('/[0-9]/', $p) !== 1) {
+        $k[] = '1 angka';
+    }
+    if (preg_match('/[^\p{L}\p{N}\s]/u', $p) !== 1) {
+        $k[] = '1 simbol';
+    }
+    return $k;
+}
+
 $userId = filter_var($_SESSION['id_user'] ?? null, FILTER_VALIDATE_INT);
 if ($userId === false || $userId === null || $userId <= 0) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -69,10 +89,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($baru === '') {
             $errors['baru'] = 'Password baru wajib diisi';
-        } elseif (mb_strlen($baru) < 8) {
-            $errors['baru'] = 'Password baru minimal 8 karakter';
         } elseif (mb_strlen($baru) > 255) {
             $errors['baru'] = 'Password baru maksimal 255 karakter';
+        } elseif ($kurang = kekurangan_password($baru)) {
+            $errors['baru'] = implode(', ', $kurang);
         } elseif ($lama !== '' && hash_equals($lama, $baru)) {
             $errors['baru'] = 'Password baru harus berbeda dari password lama';
         }
@@ -156,7 +176,7 @@ header('Cache-Control: no-store');
   <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261058">
   <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-  <link rel="stylesheet" href="../CSS/Edit-Password.css?v=20261029">
+  <link rel="stylesheet" href="../CSS/Edit-Password.css?v=20261032">
 </head>
 <body class="halaman-edit-profil halaman-edit-password">
 
@@ -289,8 +309,8 @@ header('Cache-Control: no-store');
           <path d="M42 87l32 34 60-68" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
-      <h2 class="pw-modal__judul" id="judul-sukses">Edit Profil Berhasil!</h2>
-      <p class="pw-modal__isi" id="isi-sukses">Perubahan profil berhasil disimpan</p>
+      <h2 class="pw-modal__judul" id="judul-sukses">Ubah Password Berhasil!</h2>
+      <p class="pw-modal__isi" id="isi-sukses">Perubahan password berhasil disimpan</p>
       <a class="pw-modal__ok" href="profil.php" id="aksi-ok">OK</a>
     </div>
   </div>
@@ -302,8 +322,8 @@ header('Cache-Control: no-store');
           <path d="M53 53l70 70M123 53l-70 70" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round"/>
         </svg>
       </div>
-      <h2 class="pw-modal__judul pw-modal__judul--gagal" id="judul-gagal">Edit Profil Gagal!</h2>
-      <p class="pw-modal__isi pw-modal__isi--gagal" id="isi-gagal">Perubahan profil gagal disimpan</p>
+      <h2 class="pw-modal__judul pw-modal__judul--gagal" id="judul-gagal">Ubah Password Gagal!</h2>
+      <p class="pw-modal__isi pw-modal__isi--gagal" id="isi-gagal">Perubahan password gagal disimpan</p>
       <a class="pw-modal__ok" href="Edit-Password.php" id="aksi-coba">Coba Lagi</a>
     </div>
   </div>
@@ -402,6 +422,16 @@ header('Cache-Control: no-store');
 
       function panjang(s) {
         return Array.from(s).length;
+      }
+
+      function kekurangan(p) {
+        var k = [];
+        if (panjang(p) < 8) k.push('Minimal 8 karakter');
+        if (!/\p{Lu}/u.test(p)) k.push('1 huruf besar');
+        if (!/\p{Ll}/u.test(p)) k.push('1 huruf kecil');
+        if (!/[0-9]/.test(p)) k.push('1 angka');
+        if (!/[^\p{L}\p{N}\s]/u.test(p)) k.push('1 simbol');
+        return k;
       }
 
       function Masker(id, saatUbah) {
@@ -510,6 +540,7 @@ header('Cache-Control: no-store');
         var b = baru.nilai();
         var k = konf.nilai();
         var pb = panjang(b);
+        var kurang;
 
         if (l === '') {
           if (paksa) g.lama = 'Password lama wajib diisi';
@@ -519,12 +550,15 @@ header('Cache-Control: no-store');
 
         if (b === '') {
           if (paksa) g.baru = 'Password baru wajib diisi';
-        } else if (pb < 8) {
-          g.baru = 'Password baru minimal 8 karakter';
         } else if (pb > 255) {
           g.baru = 'Password baru maksimal 255 karakter';
-        } else if (l !== '' && b === l) {
-          g.baru = 'Password baru harus berbeda dari password lama';
+        } else {
+          kurang = kekurangan(b);
+          if (kurang.length) {
+            g.baru = kurang.join(', ');
+          } else if (l !== '' && b === l) {
+            g.baru = 'Password baru harus berbeda dari password lama';
+          }
         }
 
         if (k === '') {
@@ -718,10 +752,14 @@ header('Cache-Control: no-store');
             return;
           }
 
-          if (j && j.errors && j.errors.lama) {
-            pesanLama = j.errors.lama;
+          if (j && j.errors) {
+            if (j.errors.lama) pesanLama = j.errors.lama;
+            urutan.forEach(function (kunci) {
+              tampilkan(kunci, j.errors[kunci] || '');
+            });
+          } else {
+            segarkan(true);
           }
-          segarkan(true);
           tampilGagal();
         });
       });

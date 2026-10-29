@@ -49,6 +49,13 @@ function srcGambar(string $path): string
     return is_file(__DIR__ . '/../../' . ltrim($path, '/')) ? '../../' . ltrim($path, '/') : '';
 }
 
+$basePath = rtrim(str_replace('\\', '/', dirname(dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '')))), '/');
+if ($basePath === '.' || $basePath === '/') {
+    $basePath = '';
+}
+$apiProfil = $basePath . '/users/me';
+$apiFavorit = $basePath . '/api/favorites';
+
 $pesan      = '';
 $favorites  = [];
 $fotoProfil = '';
@@ -241,7 +248,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-    <link rel="stylesheet" href="../CSS/profil.css?v=26">
+    <link rel="stylesheet" href="../CSS/profil.css?v=28">
 </head>
 <body class="halaman-profil">
     <svg class="sprite" aria-hidden="true">
@@ -322,7 +329,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
     </ul>
 
     <div class="halaman">
-        <aside class="sidebar" aria-label="Informasi profil">
+        <aside class="sidebar" aria-label="Informasi profil" data-api="<?= e($apiProfil) ?>">
             <div class="avatar" aria-hidden="true">
                 <svg id="avatar-default" viewBox="0 0 220 220">
                     <circle cx="110" cy="110" r="110" fill="#d9d9d9"/>
@@ -372,7 +379,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
             </nav>
         </aside>
 
-        <section class="konten" aria-labelledby="judul-favorit" id="favorit">
+        <section class="konten" aria-labelledby="judul-favorit" id="favorit" data-api-favorit="<?= e($apiFavorit) ?>" data-csrf="<?= e($_SESSION['csrf']) ?>">
             <h2 class="konten__judul" id="judul-favorit">Destinasi Favorit</h2>
             <?php if ($pesan !== ''): ?>
                 <div class="notif" role="status"><?= e($pesan) ?></div>
@@ -453,6 +460,54 @@ if ($srcFoto === '' && $emailFoto !== '') {
     </dialog>
 
     <script>
+        (function () {
+            var sidebar = document.querySelector('.sidebar');
+            var avatar = document.querySelector('.avatar');
+            var namaEl = document.getElementById('profile-name');
+            var emailEl = document.getElementById('profile-email');
+            if (!sidebar || !avatar || !namaEl || !emailEl) return;
+
+            var apiUrl = sidebar.getAttribute('data-api');
+            if (!apiUrl) return;
+
+            function alamatFoto(path) {
+                path = String(path || '').trim();
+                if (path === '') return '';
+                if (/^https?:\/\//i.test(path)) return path;
+                return '../../' + path.replace(/^\/+/, '');
+            }
+
+            function pasangFoto(src) {
+                var tes = new Image();
+                tes.referrerPolicy = 'no-referrer';
+                tes.onload = function () {
+                    var img = avatar.querySelector('.avatar__foto');
+                    if (!img) {
+                        img = document.createElement('img');
+                        img.className = 'avatar__foto';
+                        img.alt = '';
+                        img.referrerPolicy = 'no-referrer';
+                        img.onerror = function () { img.remove(); };
+                        avatar.appendChild(img);
+                    }
+                    img.src = src;
+                };
+                tes.src = src;
+            }
+
+            fetch(apiUrl, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (j) {
+                    if (!j || j.status !== 'success' || !j.data) return;
+                    var d = j.data;
+                    if (d.nama) namaEl.textContent = d.nama;
+                    if (d.email) emailEl.textContent = d.email;
+                    var src = alamatFoto(d.foto_profil || d.foto || d.avatar || d.foto_url);
+                    if (src) pasangFoto(src);
+                })
+                .catch(function () {});
+        })();
+
         (function () {
             var logoutForm = document.getElementById('logout-form');
             var logoutTrigger = document.querySelector('.logout-trigger');
@@ -557,18 +612,93 @@ if ($srcFoto === '' && $emailFoto !== '') {
             });
         })();
 
-        document.querySelectorAll('.hapus-form').forEach(function (form) {
-            form.addEventListener('submit', function (e) {
-                var nama = form.getAttribute('data-nama') || 'destinasi ini';
-                if (!window.confirm('Hapus "' + nama + '" dari destinasi favorit?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+        (function () {
+            var konten = document.getElementById('favorit');
+            var judul = document.getElementById('judul-favorit');
+            if (!konten || !judul) return;
 
-        document.querySelectorAll('.notif').forEach(function (n) {
-            setTimeout(function () { n.classList.add('hilang'); }, 4000);
-        });
+            var apiFavorit = konten.getAttribute('data-api-favorit');
+            var csrf = konten.getAttribute('data-csrf') || '';
+            var timer = null;
+
+            function sembunyikan(n) {
+                clearTimeout(timer);
+                timer = setTimeout(function () { n.classList.add('hilang'); }, 4000);
+            }
+
+            function notif(teks) {
+                var n = konten.querySelector('.notif');
+                if (!n) {
+                    n = document.createElement('div');
+                    n.className = 'notif';
+                    n.setAttribute('role', 'status');
+                    judul.insertAdjacentElement('afterend', n);
+                }
+                n.classList.remove('hilang');
+                n.textContent = teks;
+                sembunyikan(n);
+            }
+
+            function cekKosong() {
+                if (konten.querySelector('.kartu') || konten.querySelector('.kosong')) return;
+                var p = document.createElement('p');
+                p.className = 'kosong';
+                p.textContent = 'Belum ada destinasi favorit.';
+                konten.appendChild(p);
+            }
+
+            var awal = konten.querySelector('.notif');
+            if (awal) sembunyikan(awal);
+
+            document.querySelectorAll('.hapus-form').forEach(function (form) {
+                var sedang = false;
+
+                form.addEventListener('submit', function (e) {
+                    var nama = form.getAttribute('data-nama') || 'destinasi ini';
+                    if (!window.confirm('Hapus "' + nama + '" dari destinasi favorit?')) {
+                        e.preventDefault();
+                        return;
+                    }
+                    if (!apiFavorit) return;
+
+                    e.preventDefault();
+                    if (sedang) return;
+                    sedang = true;
+
+                    var idEl = form.querySelector('input[name="id_wisata"]');
+                    var id = idEl ? idEl.value : '';
+
+                    fetch(apiFavorit, {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-Token': csrf
+                        },
+                        body: JSON.stringify({ destination_id: id, action: 'remove' })
+                    })
+                        .then(function (r) {
+                            return r.json().catch(function () { return {}; }).then(function (j) {
+                                if (r.ok && j && j.status === 'success') {
+                                    var kartu = form.closest('.kartu');
+                                    if (kartu) kartu.remove();
+                                    cekKosong();
+                                    notif('Dihapus dari destinasi favorit.');
+                                } else {
+                                    notif((j && j.message) || 'Gagal menghapus dari destinasi favorit.');
+                                }
+                            });
+                        })
+                        .catch(function () {
+                            notif('Tidak dapat menghubungi server.');
+                        })
+                        .then(function () {
+                            sedang = false;
+                        });
+                });
+            });
+        })();
     </script>
 </body>
 </html>

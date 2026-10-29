@@ -5,8 +5,22 @@ if (empty($_SESSION['csrf'])) {
     $_SESSION['csrf'] = bin2hex(random_bytes(16));
 }
 
+const MAKS_FOTO = 10 * 1024 * 1024;
+
+$teksFoto = [
+    'ukuran'        => 'Batas maksimal ukuran file adalah 10 MB',
+    'format'        => 'Format file ini tidak mendukung, format harus berbentuk JPG, JPEG, PNG',
+    'format_ukuran' => 'Format file ini tidak mendukung, format harus berbentuk JPG, JPEG, PNG dan batas maksimal ukuran file adalah 10 MB',
+    'unggah'        => 'Foto gagal diunggah, silakan coba lagi',
+];
+
 function e($s): string {
     return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
+}
+
+function post_teks(string $k): string {
+    $v = $_POST[$k] ?? '';
+    return is_string($v) ? trim($v) : '';
 }
 
 function srcGambar(string $path): string {
@@ -94,6 +108,48 @@ function simpan_profil_db(mysqli $conn, array $info, int $userId, string $nama, 
     }
 }
 
+function validasi_foto(array $f): array {
+    $mimeIzin = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
+    $extIzin = ['jpg', 'jpeg', 'png'];
+
+    if (!is_string($f['name'] ?? null) || !is_string($f['tmp_name'] ?? null)) {
+        return ['jenis' => 'unggah', 'ext' => ''];
+    }
+
+    $kode = (int) ($f['error'] ?? UPLOAD_ERR_NO_FILE);
+    $ukuranSalah = false;
+    $formatSalah = false;
+    $ext = '';
+
+    if ($kode === UPLOAD_ERR_INI_SIZE || $kode === UPLOAD_ERR_FORM_SIZE) {
+        $extAsli = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
+        $ukuranSalah = true;
+        $formatSalah = !in_array($extAsli, $extIzin, true);
+    } elseif ($kode !== UPLOAD_ERR_OK) {
+        return ['jenis' => 'unggah', 'ext' => ''];
+    } else {
+        $tmp = $f['tmp_name'];
+        $ukuranSalah = (int) ($f['size'] ?? 0) > MAKS_FOTO;
+        $tipe = is_uploaded_file($tmp) ? (string) @mime_content_type($tmp) : '';
+        if (isset($mimeIzin[$tipe]) && @getimagesize($tmp) !== false) {
+            $ext = $mimeIzin[$tipe];
+        } else {
+            $formatSalah = true;
+        }
+    }
+
+    $jenis = '';
+    if ($formatSalah && $ukuranSalah) {
+        $jenis = 'format_ukuran';
+    } elseif ($formatSalah) {
+        $jenis = 'format';
+    } elseif ($ukuranSalah) {
+        $jenis = 'ukuran';
+    }
+
+    return ['jenis' => $jenis, 'ext' => $ext];
+}
+
 $info = info_tabel_user($conn);
 $row = [];
 if ($info) {
@@ -142,22 +198,70 @@ if ($srcTampil === '') {
     $srcTampil = $gravatar;
 }
 
-$sukses = !empty($_SESSION['flash_profil']);
-unset($_SESSION['flash_profil']);
+$modal = null;
 
-$gagal = false;
-$detailGagal = '';
-if (!empty($_SESSION['flash_gagal'])) {
-    $gagal = true;
-    $detailGagal = (string) ($_SESSION['flash_gagal']['detail'] ?? '');
+$flashOk = $_SESSION['flash_profil'] ?? null;
+$flashGagal = $_SESSION['flash_gagal'] ?? null;
+unset($_SESSION['flash_profil'], $_SESSION['flash_gagal']);
+
+if (!empty($flashOk)) {
+    $fotoSaja = $flashOk === 'foto';
+    $modal = [
+        'tipe'   => 'sukses',
+        'judul'  => $fotoSaja ? 'Edit Foto Profil Berhasil!' : 'Edit Profil Berhasil!',
+        'isi'    => $fotoSaja ? 'Perubahan foto profil berhasil disimpan' : 'Perubahan profil berhasil disimpan',
+        'detail' => '',
+        'lebar'  => false,
+        'aksi'   => 'OK',
+        'href'   => 'profil.php',
+    ];
+} elseif (is_array($flashGagal)) {
+    $jenis = (string) ($flashGagal['jenis'] ?? 'umum');
+    if (isset($teksFoto[$jenis])) {
+        $modal = [
+            'tipe'   => 'gagal',
+            'judul'  => 'Edit Foto Profil Gagal!',
+            'isi'    => $teksFoto[$jenis],
+            'detail' => '',
+            'lebar'  => in_array($jenis, ['format', 'format_ukuran'], true),
+            'aksi'   => 'Coba Lagi',
+            'href'   => 'edit-profil.php',
+        ];
+    } else {
+        $modal = [
+            'tipe'   => 'gagal',
+            'judul'  => 'Edit Profil Gagal!',
+            'isi'    => 'Perubahan profil gagal disimpan',
+            'detail' => (string) ($flashGagal['detail'] ?? ''),
+            'lebar'  => false,
+            'aksi'   => 'Coba Lagi',
+            'href'   => 'edit-profil.php',
+        ];
+    }
 }
-unset($_SESSION['flash_gagal']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $errors   = [];
-    $namaBaru = trim($_POST['nama_lengkap'] ?? '');
-    $fotoBaru = $foto;
-    $fileBaru = null;
+    $errors     = [];
+    $jenisGagal = '';
+    $hasilFoto  = null;
+    $fotoBaru   = $foto;
+    $fileBaru   = null;
+
+    $melebihiPost = empty($_POST) && empty($_FILES) && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0;
+    $adaFoto = !$melebihiPost
+        && isset($_FILES['foto'])
+        && (int) ($_FILES['foto']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+
+    if ($melebihiPost) {
+        $jenisGagal = 'ukuran';
+    } elseif ($adaFoto) {
+        $hasilFoto = validasi_foto($_FILES['foto']);
+        $jenisGagal = $hasilFoto['jenis'];
+    }
+
+    $namaBaru = post_teks('nama_lengkap');
+    $namaAwal = post_teks('nama_awal');
+    if ($namaAwal === '') $namaAwal = $nama;
 
     if ($namaBaru === '') {
         $errors['nama'] = 'Nama lengkap wajib diisi.';
@@ -165,38 +269,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['nama'] = 'Nama lengkap maksimal 100 karakter.';
     }
 
-    if (($_POST['api_status'] ?? '') === 'gagal') {
-        $pesanApi = trim((string) ($_POST['api_pesan'] ?? ''));
+    if (post_teks('api_status') === 'gagal') {
+        $pesanApi = post_teks('api_pesan');
         $errors['api'] = $pesanApi !== '' ? mb_substr($pesanApi, 0, 150) : 'Profil gagal diperbarui.';
     }
 
-    if (!$errors && !empty($_FILES['foto']['name'])) {
-        $izin = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-
-        if ($_FILES['foto']['error'] !== UPLOAD_ERR_OK) {
-            $errors['foto'] = 'Foto gagal diunggah.';
+    if ($jenisGagal === '' && !$errors && $hasilFoto !== null) {
+        $folder = __DIR__ . '/../../uploads/profil/';
+        if (!is_dir($folder)) @mkdir($folder, 0755, true);
+        $namaFile = uniqid('profil_', true) . '.' . $hasilFoto['ext'];
+        if (is_dir($folder) && move_uploaded_file($_FILES['foto']['tmp_name'], $folder . $namaFile)) {
+            $fotoBaru = 'uploads/profil/' . $namaFile;
+            $fileBaru = $folder . $namaFile;
         } else {
-            $tipe = mime_content_type($_FILES['foto']['tmp_name']);
-            if (!isset($izin[$tipe])) {
-                $errors['foto'] = 'Format foto harus JPG, PNG, atau WEBP.';
-            } elseif ($_FILES['foto']['size'] > 2 * 1024 * 1024) {
-                $errors['foto'] = 'Ukuran foto maksimal 2 MB.';
-            } else {
-                $folder = __DIR__ . '/../../uploads/profil/';
-                if (!is_dir($folder)) mkdir($folder, 0755, true);
-                $namaFile = uniqid('profil_', true) . '.' . $izin[$tipe];
-                if (move_uploaded_file($_FILES['foto']['tmp_name'], $folder . $namaFile)) {
-                    $fotoBaru = 'uploads/profil/' . $namaFile;
-                    $fileBaru = $folder . $namaFile;
-                } else {
-                    $errors['foto'] = 'Foto gagal disimpan.';
-                }
-            }
+            $jenisGagal = 'unggah';
         }
     }
 
     $berhasil = false;
-    if (!$errors && $info) {
+    if ($jenisGagal === '' && !$errors && $info) {
         $berhasil = simpan_profil_db($conn, $info, $userId, $namaBaru, $fotoBaru);
     }
 
@@ -212,13 +303,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user']['nama'] = $namaBaru;
             $_SESSION['user']['foto_profil'] = $fotoBaru;
         }
-        $_SESSION['flash_profil'] = 1;
+        $_SESSION['flash_profil'] = ($fileBaru !== null && $namaBaru === $namaAwal) ? 'foto' : 'profil';
         header('Location: edit-profil.php');
         exit;
     }
 
     if ($fileBaru && is_file($fileBaru)) @unlink($fileBaru);
-    $_SESSION['flash_gagal'] = ['detail' => $errors ? (string) reset($errors) : ''];
+    $_SESSION['flash_gagal'] = [
+        'jenis'  => $jenisGagal !== '' ? $jenisGagal : 'umum',
+        'detail' => ($jenisGagal === '' && $errors) ? (string) reset($errors) : '',
+    ];
     header('Location: edit-profil.php');
     exit;
 }
@@ -233,7 +327,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261058">
+  <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261060">
   <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
 </head>
 <body class="halaman-edit-profil">
@@ -299,10 +393,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         data-email="<?= e($email) ?>">
     <input type="hidden" name="api_status" id="api-status" value="">
     <input type="hidden" name="api_pesan" id="api-pesan" value="">
+    <input type="hidden" name="nama_awal" id="nama-awal" value="<?= e($nama) ?>">
 
     <main class="ep-stage">
 
-      <input class="ep-foto__input" type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/webp">
+      <input class="ep-foto__input" type="file" id="foto" name="foto" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
 
       <div class="ep-foto__lingkaran" id="foto-tampil">
         <svg viewBox="0 0 220 220" id="avatar-default" aria-hidden="true">
@@ -334,33 +429,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </main>
   </form>
 
-  <?php if ($sukses): ?>
-    <div class="ep-modal" role="dialog" aria-modal="true" aria-labelledby="modal-judul" aria-describedby="modal-isi">
-      <div class="ep-modal__kotak">
-        <div class="ep-modal__ikon">
-          <svg viewBox="0 0 176 176" aria-hidden="true">
-            <path d="M41 86l32 35 59-68" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <h2 class="ep-modal__judul" id="modal-judul">Edit Profil Berhasil!</h2>
-        <p class="ep-modal__isi" id="modal-isi">Perubahan profil berhasil disimpan</p>
-        <a class="ep-modal__ok" href="profil.php" id="modal-aksi">OK</a>
+  <div class="ep-modal" id="modal-validasi" role="alertdialog" aria-modal="true"
+       aria-labelledby="validasi-judul" aria-describedby="validasi-isi"
+       data-pesan="<?= e(json_encode($teksFoto, JSON_UNESCAPED_UNICODE)) ?>" hidden>
+    <div class="ep-modal__kotak ep-modal__kotak--gagal" id="validasi-kotak">
+      <div class="ep-modal__ikon ep-modal__ikon--gagal">
+        <svg viewBox="0 0 176 176" aria-hidden="true">
+          <path d="M47 47l82 82M129 47l-82 82" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round"/>
+        </svg>
       </div>
+      <h2 class="ep-modal__judul ep-modal__judul--gagal" id="validasi-judul">Edit Foto Profil Gagal!</h2>
+      <p class="ep-modal__isi ep-modal__isi--gagal" id="validasi-isi"></p>
+      <button type="button" class="ep-modal__ok" id="validasi-tutup">Coba Lagi</button>
     </div>
-  <?php elseif ($gagal): ?>
-    <div class="ep-modal" role="alertdialog" aria-modal="true" aria-labelledby="modal-judul" aria-describedby="modal-isi">
-      <div class="ep-modal__kotak ep-modal__kotak--gagal">
-        <div class="ep-modal__ikon ep-modal__ikon--gagal">
+  </div>
+
+  <?php if ($modal !== null): ?>
+    <?php $gagalModal = $modal['tipe'] === 'gagal'; ?>
+    <div class="ep-modal" role="<?= $gagalModal ? 'alertdialog' : 'dialog' ?>" aria-modal="true" aria-labelledby="modal-judul" aria-describedby="modal-isi">
+      <div class="ep-modal__kotak<?= $gagalModal ? ' ep-modal__kotak--gagal' : '' ?><?= $modal['lebar'] ? ' ep-modal__kotak--lebar' : '' ?>">
+        <div class="ep-modal__ikon<?= $gagalModal ? ' ep-modal__ikon--gagal' : '' ?>">
           <svg viewBox="0 0 176 176" aria-hidden="true">
-            <path d="M47 47l82 82M129 47l-82 82" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round"/>
+            <?php if ($gagalModal): ?>
+              <path d="M47 47l82 82M129 47l-82 82" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round"/>
+            <?php else: ?>
+              <path d="M41 86l32 35 59-68" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+            <?php endif; ?>
           </svg>
         </div>
-        <h2 class="ep-modal__judul ep-modal__judul--gagal" id="modal-judul">Edit Profil Gagal!</h2>
-        <p class="ep-modal__isi ep-modal__isi--gagal" id="modal-isi">Perubahan profil gagal disimpan</p>
-        <?php if ($detailGagal !== ''): ?>
-          <p class="ep-modal__detail"><?= e($detailGagal) ?></p>
+        <h2 class="ep-modal__judul<?= $gagalModal ? ' ep-modal__judul--gagal' : '' ?>" id="modal-judul"><?= e($modal['judul']) ?></h2>
+        <p class="ep-modal__isi<?= $gagalModal ? ' ep-modal__isi--gagal' : '' ?><?= $modal['lebar'] ? ' ep-modal__isi--lebar' : '' ?>" id="modal-isi"><?= e($modal['isi']) ?></p>
+        <?php if ($modal['detail'] !== ''): ?>
+          <p class="ep-modal__detail"><?= e($modal['detail']) ?></p>
         <?php endif; ?>
-        <a class="ep-modal__ok" href="edit-profil.php" id="modal-aksi">Coba Lagi</a>
+        <a class="ep-modal__ok" href="<?= e($modal['href']) ?>" id="modal-aksi"><?= e($modal['aksi']) ?></a>
       </div>
     </div>
   <?php endif; ?>
@@ -435,48 +537,148 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     })();
 
     (function () {
+      var form          = document.getElementById('form-profil');
       var input         = document.getElementById('foto');
       var preview       = document.getElementById('preview-foto');
       var avatarDefault = document.getElementById('avatar-default');
+      var inpNama       = document.getElementById('nama_lengkap');
+      var namaAwal      = document.getElementById('nama-awal');
+      var emailEl       = document.getElementById('email-tampil');
+      var fStatus       = document.getElementById('api-status');
+      var fPesan        = document.getElementById('api-pesan');
+      var modal         = document.getElementById('modal-validasi');
+      var kotak         = document.getElementById('validasi-kotak');
+      var isiEl         = document.getElementById('validasi-isi');
+      var tutupBtn      = document.getElementById('validasi-tutup');
+      var apiUrl        = form.getAttribute('data-api');
+      var csrf          = form.getAttribute('data-csrf') || '';
+      var polaEmail     = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      var maks          = 10 * 1024 * 1024;
+      var srcAwal       = preview.getAttribute('src') || '';
       var urlLokal      = null;
+      var sedangKirim   = false;
+      var pesan         = {};
+
+      try {
+        pesan = JSON.parse(modal.getAttribute('data-pesan') || '{}');
+      } catch (err) {
+        pesan = {};
+      }
 
       function tampilkanFoto() {
         preview.hidden = false;
         avatarDefault.style.display = 'none';
       }
+
       function tampilkanDefault() {
         preview.hidden = true;
         avatarDefault.style.display = '';
       }
 
-      if (preview.getAttribute('src')) {
-        preview.addEventListener('load', tampilkanFoto);
-        preview.addEventListener('error', tampilkanDefault);
-        if (preview.complete) {
-          preview.naturalWidth > 0 ? tampilkanFoto() : tampilkanDefault();
+      function pulihkan() {
+        if (!urlLokal) return;
+        URL.revokeObjectURL(urlLokal);
+        urlLokal = null;
+        if (srcAwal) {
+          preview.src = srcAwal;
+        } else {
+          preview.removeAttribute('src');
+          tampilkanDefault();
         }
       }
 
-      document.getElementById('btn-foto').addEventListener('click', function () { input.click(); });
-      input.addEventListener('change', function () {
-        var file = input.files[0];
-        if (!file) return;
+      function cekFoto(file) {
+        var namaFile    = (file.name || '').toLowerCase();
+        var ekstensiOk  = /\.(jpe?g|png)$/.test(namaFile);
+        var tipeOk      = file.type === '' || file.type === 'image/jpeg' || file.type === 'image/png';
+        var formatSalah = !(ekstensiOk && tipeOk);
+        var ukuranSalah = file.size > maks;
+        if (formatSalah && ukuranSalah) return 'format_ukuran';
+        if (formatSalah) return 'format';
+        if (ukuranSalah) return 'ukuran';
+        return '';
+      }
+
+      function tampilGagal(jenis) {
+        var lebar = jenis === 'format' || jenis === 'format_ukuran';
+        isiEl.textContent = pesan[jenis] || '';
+        isiEl.classList.toggle('ep-modal__isi--lebar', lebar);
+        kotak.classList.toggle('ep-modal__kotak--lebar', lebar);
+        modal.hidden = false;
+        tutupBtn.focus();
+      }
+
+      function tutupGagal(ulang) {
+        modal.hidden = true;
+        if (ulang) bukaPemilih();
+      }
+
+      preview.addEventListener('load', tampilkanFoto);
+      preview.addEventListener('error', tampilkanDefault);
+      if (srcAwal && preview.complete) {
+        if (preview.naturalWidth > 0) { tampilkanFoto(); } else { tampilkanDefault(); }
+      }
+
+      tutupBtn.addEventListener('click', function () { tutupGagal(true); });
+      modal.addEventListener('click', function (e) { if (e.target === modal) tutupGagal(false); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modal.hidden) tutupGagal(false);
+      });
+
+      function terimaFile(file) {
+        if (!file) {
+          pulihkan();
+          return;
+        }
+        var jenis = cekFoto(file);
+        if (jenis) {
+          input.value = '';
+          pulihkan();
+          tampilGagal(jenis);
+          return;
+        }
         if (urlLokal) URL.revokeObjectURL(urlLokal);
         urlLokal = URL.createObjectURL(file);
         preview.src = urlLokal;
         tampilkanFoto();
-      });
-    })();
+      }
 
-    (function () {
-      var form      = document.getElementById('form-profil');
-      var inpNama   = document.getElementById('nama_lengkap');
-      var emailEl   = document.getElementById('email-tampil');
-      var fStatus   = document.getElementById('api-status');
-      var fPesan    = document.getElementById('api-pesan');
-      var apiUrl    = form.getAttribute('data-api');
-      var csrf      = form.getAttribute('data-csrf') || '';
-      var polaEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      function bukaPemilih() {
+        if (typeof window.showOpenFilePicker !== 'function' || !window.isSecureContext) {
+          input.click();
+          return;
+        }
+        window.showOpenFilePicker({
+          multiple: false,
+          excludeAcceptAllOption: true,
+          types: [{
+            description: 'Foto JPG, JPEG, PNG',
+            accept: { 'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'] }
+          }]
+        })
+          .then(function (daftar) { return daftar[0].getFile(); })
+          .then(function (file) {
+            try {
+              var dt = new DataTransfer();
+              dt.items.add(file);
+              input.files = dt.files;
+            } catch (err) {
+              input.click();
+              return;
+            }
+            terimaFile(file);
+          })
+          .catch(function (err) {
+            if (err && err.name === 'AbortError') return;
+            input.click();
+          });
+      }
+
+      document.getElementById('btn-foto').addEventListener('click', bukaPemilih);
+
+      input.addEventListener('change', function () {
+        terimaFile(input.files[0]);
+      });
 
       inpNama.addEventListener('input', function () { inpNama.setAttribute('data-diubah', '1'); });
 
@@ -484,7 +686,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (j) {
           if (!j || j.status !== 'success' || !j.data) return;
-          if (j.data.nama && !inpNama.getAttribute('data-diubah')) inpNama.value = j.data.nama;
+          if (j.data.nama && !inpNama.getAttribute('data-diubah')) {
+            inpNama.value = j.data.nama;
+            namaAwal.value = j.data.nama;
+          }
           if (j.data.email) {
             emailEl.textContent = j.data.email;
             form.setAttribute('data-email', j.data.email);
@@ -493,16 +698,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .catch(function () {});
 
       form.addEventListener('submit', function (e) {
+        if (sedangKirim) {
+          e.preventDefault();
+          return;
+        }
+
+        var file = input.files[0];
+        if (file) {
+          var jenis = cekFoto(file);
+          if (jenis) {
+            e.preventDefault();
+            input.value = '';
+            pulihkan();
+            tampilGagal(jenis);
+            return;
+          }
+        }
+
         var nama  = inpNama.value.trim();
         var email = form.getAttribute('data-email') || '';
 
         if (nama === '' || nama.length > 100 || !polaEmail.test(email)) return;
 
         e.preventDefault();
+        sedangKirim = true;
 
-        function lanjut(status, pesan) {
+        function lanjut(status, pesanApi) {
           fStatus.value = status;
-          fPesan.value = pesan || '';
+          fPesan.value = pesanApi || '';
           form.submit();
         }
 
