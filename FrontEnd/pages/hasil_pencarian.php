@@ -7,6 +7,8 @@ $keyword = isset($_GET['q']) && is_string($_GET['q'])
     : (isset($_GET['keyword']) && is_string($_GET['keyword'])
         ? trim($_GET['keyword'])
         : '');
+$keywordLength = preg_match_all('/./us', $keyword);
+$isShortKeyword = $keyword !== '' && $keywordLength !== false && $keywordLength < 2;
 $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $requestPath = is_string($requestPath) ? $requestPath : '/';
 $appRoot = preg_replace(
@@ -192,8 +194,8 @@ function terpilih($daftar, $nilai)
 
 
 <!-- SEARCH BAR -->
-<section class="search-header">
-    <form action="../../search" method="GET" class="search-box">
+<section class="search-header<?= $isShortKeyword ? ' has-validation' : '' ?>">
+    <form action="../../search" method="GET" class="search-box" novalidate>
 
         <input
             type="search"
@@ -201,7 +203,8 @@ function terpilih($daftar, $nilai)
             placeholder="Cari destinasi,kata kunci atau lokasi"
             value="<?= htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8') ?>"
             aria-label="Cari destinasi"
-            minlength="2"
+            aria-describedby="searchValidation"
+            aria-invalid="<?= $isShortKeyword ? 'true' : 'false' ?>"
         >
 
         <button type="submit" aria-label="Cari">
@@ -209,6 +212,16 @@ function terpilih($daftar, $nilai)
         </button>
 
     </form>
+
+    <p
+        class="search-validation"
+        id="searchValidation"
+        role="alert"
+        <?= $isShortKeyword ? '' : 'hidden' ?>
+    >
+        <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+        Masukkan Minimal 2 Karakter
+    </p>
 </section>
 
 
@@ -418,17 +431,25 @@ function terpilih($daftar, $nilai)
     const searchInput = searchForm.querySelector('input[name="q"]');
     const resultsGrid = document.querySelector('.destination-grid');
     const resultsCount = document.querySelector('.results-heading p');
+    const searchHeader = document.querySelector('.search-header');
+    const searchValidation = document.getElementById('searchValidation');
     const selectedDistanceRanges = <?= json_encode($jarakDipilih, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
+    function updateSearchValidation() {
+        const isInvalid = Array.from(searchInput.value.trim()).length === 1;
+        searchValidation.hidden = !isInvalid;
+        searchInput.setAttribute('aria-invalid', String(isInvalid));
+        searchHeader.classList.toggle('has-validation', isInvalid);
+        return isInvalid;
+    }
+
     searchForm.addEventListener('submit', function (event) {
-        if (searchInput.value.trim().length < 2) {
+        if (updateSearchValidation()) {
             event.preventDefault();
-            searchInput.setCustomValidity('Masukkan minimal 2 karakter untuk mencari.');
-            searchInput.reportValidity();
         }
     });
     searchInput.addEventListener('input', function () {
-        searchInput.setCustomValidity('');
+        updateSearchValidation();
     });
 
     filterForm.addEventListener('submit', function (event) {
@@ -689,9 +710,7 @@ function terpilih($daftar, $nilai)
             return;
         }
 
-        if (query.length < 2) {
-            resultsCount.textContent = 'Kata kunci minimal 2 karakter.';
-            showEmptyState('Masukkan minimal 2 karakter untuk mencari.', 'Kata kunci terlalu pendek');
+        if (Array.from(query).length < 2) {
             return;
         }
 
@@ -723,6 +742,7 @@ function terpilih($daftar, $nilai)
         }
     }
 
+    updateSearchValidation();
     loadSearchResults();
 </script>
 
