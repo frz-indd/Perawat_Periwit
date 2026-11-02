@@ -210,7 +210,7 @@
         </section>
     </div>
 
-    <script src="../js/auth.js?v=20261102-console-logger-2"></script>
+    <script src="../js/auth.js?v=home-search-1"></script>
 
 </body>
 </html>

@@ -267,13 +267,17 @@ if (loginForm) {
             const result = await sendForm(loginForm);
 
             if (result.status === 'success') {
+                const loginParams = new URLSearchParams(window.location.search);
+                const pendingQuery = (loginParams.get('q') || '').trim();
+                const redirectTarget = loginParams.get('next') === 'search'
+                    ? `../../search${pendingQuery ? `?q=${encodeURIComponent(pendingQuery)}` : ''}`
+                    : (result.redirect || '../../index.php');
+
                 showSuccessModal(
                     'Login Berhasil!',
                     'Selamat datang kembali di Explore MajaKu',
                     function () {
-                        window.location.assign(
-                            result.redirect || '../index.html'
-                        );
+                        window.location.assign(redirectTarget);
                     }
                 );
                 return;
