@@ -98,14 +98,14 @@
                             id="registerPhone"
                             name="telepon"
                             class="auth-input"
-                            placeholder="Contoh: 081234567890"
+                            placeholder="Contoh: +6281234567890"
                             autocomplete="tel"
                             inputmode="tel"
                             maxlength="20"
                         >
 
                         <div class="invalid-feedback">
-                            Masukkan nomor telepon Indonesia yang valid.
+                            Nomor telepon harus diawali +62, contoh: +6281234567890.
                         </div>
                     </div>
 

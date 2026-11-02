@@ -79,11 +79,11 @@ if ($phone !== "") {
     $normalizedPhone = preg_replace('/[\s()-]/', '', $phone);
     if (
         !is_string($normalizedPhone) ||
-        preg_match('/^(?:\+62|62|0)8[1-9][0-9]{6,11}$/', $normalizedPhone) !== 1
+        preg_match('/^\+628[1-9][0-9]{6,11}$/', $normalizedPhone) !== 1
     ) {
         $respond(422, [
             "status" => "validation_error",
-            "message" => "Masukkan nomor telepon Indonesia yang valid."
+            "message" => "Nomor telepon harus diawali +62, contoh: +6281234567890."
         ]);
     }
 

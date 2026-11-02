@@ -64,7 +64,7 @@ function isValidEmail(value) {
 function isValidPhone(value) {
     const phone = value.replace(/[\s()-]/g, '');
 
-    return /^(?:\+62|62|0)8[1-9][0-9]{6,11}$/.test(phone);
+    return /^\+628[1-9][0-9]{6,11}$/.test(phone);
 }
 
 function isValidLoginPhone(value) {
@@ -406,7 +406,8 @@ if (registerForm) {
         }
 
         if (phoneValue && !isValidPhone(phoneValue)) {
-            const error = 'Masukkan nomor telepon Indonesia yang valid.';
+            const error =
+                'Nomor telepon harus diawali +62, contoh: +6281234567890.';
 
             setInvalid(phone, phoneFeedback, error);
             errors.push(error);
