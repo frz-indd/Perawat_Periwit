@@ -146,26 +146,27 @@ function setFormSubmitting(form, button, submitting, idleLabel) {
    PASSWORD SHOW / HIDE
 ===================================================== */
 
-document.querySelectorAll('.password-toggle').forEach(button => {
-    button.addEventListener('click', function () {
-        const targetId = this.getAttribute('data-target');
-        const input = document.getElementById(targetId);
-        const icon = this.querySelector('i');
+document.addEventListener('click', event => {
+    const button = event.target.closest('.password-toggle');
+    if (!button) return;
 
-        if (!input || !icon) return;
+    const input = document.getElementById(button.dataset.target);
+    if (!input) return;
 
-        const show = input.type === 'password';
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
 
-        input.type = show ? 'text' : 'password';
-
+    const icon = button.querySelector('i');
+    if (icon) {
         icon.classList.toggle('bi-eye', show);
         icon.classList.toggle('bi-eye-slash', !show);
+    }
 
-        this.setAttribute(
-            'aria-label',
-            show ? 'Sembunyikan password' : 'Tampilkan password'
-        );
-    });
+    button.setAttribute('aria-pressed', String(show));
+    button.setAttribute(
+        'aria-label',
+        show ? 'Sembunyikan password' : 'Tampilkan password'
+    );
 });
 
 

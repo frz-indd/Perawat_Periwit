@@ -26,6 +26,7 @@ session_start();
                 <a class="ep-menu__kategori" href="#kategori" id="kategori-toggle"
                    role="button" aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">Kategori</a>
                 <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
+                <a href="kontrak-api.php">Endpoint API</a>
             </nav>
 
             <div class="ep-aksi">

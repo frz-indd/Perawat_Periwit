@@ -116,8 +116,8 @@ function escapeHtml(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/kategori.css?v=category-fonts-2">
+    <link rel="stylesheet" href="../CSS/kategori.css?v=category-active-4">
+    <link rel="stylesheet" href="../CSS/theme.css?v=dropdown-active-6">
 </head>
 <body>
     <header class="site-header">
@@ -140,7 +140,6 @@ function escapeHtml(string $value): string
                 <a href="tentang.php">Tentang</a>
             </div>
             <div class="nav-icons">
-                <a href="#search" aria-label="Cari destinasi"><i class="bi bi-search" aria-hidden="true"></i></a>
                 <a href="../auth/Login.php" aria-label="Profil"><svg class="profile-outline-icon" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17"></circle><circle cx="20" cy="15" r="5"></circle><path d="M9 31c1.7-5 5.5-7.5 11-7.5S29.3 26 31 31"></path></svg></a>
             </div>
         </nav>
@@ -178,7 +177,7 @@ function escapeHtml(string $value): string
             <?php if ($destinations !== []): ?>
                 <div class="destination-grid">
                     <?php foreach ($destinations as $destination): ?>
-                        <article class="destination-card">
+                        <a class="destination-card" href="detail-wisata.php?id=<?= rawurlencode((string) $destination['id_wisata']); ?>" aria-label="Lihat detail <?= escapeHtml($destination['nama_wisata']); ?>">
                             <img
                                 class="destination-image"
                                 src="../../<?= escapeHtml($destination['gambar'] ?? 'FrontEnd/assets/images/img.png'); ?>"
@@ -204,27 +203,87 @@ function escapeHtml(string $value): string
                                     </svg>
                                     <span><?= escapeHtml($destination['wilayah']); ?></span>
                                 </p>
-                                <small class="distance">
-                                    <?= $destination['harga_tiket'] > 0
-                                        ? 'Rp ' . number_format($destination['harga_tiket'], 0, ',', '.')
-                                        : 'Harga belum tersedia'; ?>
-                                </small>
+                                <small
+                                    class="distance"
+                                    data-latitude="<?= escapeHtml((string) ($destination['latitude'] ?? '')); ?>"
+                                    data-longitude="<?= escapeHtml((string) ($destination['longitude'] ?? '')); ?>"
+                                >Menghitung jarak...</small>
                             </div>
-                        </article>
+                        </a>
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
-                <div class="category-empty-state">
-                    <span class="empty-search-icon" aria-hidden="true">
-                        <i class="bi bi-search"></i>
-                        <span>×</span>
-                    </span>
-                    <h3>Wisata Tidak Di Temukan</h3>
-                    <p>Maaf, tidak ada destinasi wisata yang sesuai<br class="desktop-break"> dengan kata kunci pencarianmu dalam kategori ini</p>
-                    <a href="../../search">Lihat semua wisata</a>
-                </div>
+                <p class="empty-state">Destinasi tidak ditemukan. Coba kata pencarian yang lain.</p>
             <?php endif; ?>
         </section>
     </main>
+    <script src="../Js/api-endpoint-labels.js"></script>
+    <script>
+        const distanceElements = Array.from(
+            document.querySelectorAll('.distance[data-latitude][data-longitude]')
+        );
+        const destinationsWithCoordinates = distanceElements
+            .map(element => ({
+                element,
+                latitudeValue: element.dataset.latitude.trim(),
+                longitudeValue: element.dataset.longitude.trim(),
+                latitude: Number(element.dataset.latitude),
+                longitude: Number(element.dataset.longitude)
+            }))
+            .filter(destination =>
+                destination.latitudeValue !== '' &&
+                destination.longitudeValue !== '' &&
+                Number.isFinite(destination.latitude) &&
+                destination.latitude >= -90 && destination.latitude <= 90 &&
+                Number.isFinite(destination.longitude) &&
+                destination.longitude >= -180 && destination.longitude <= 180
+            );
+
+        distanceElements.forEach(element => {
+            if (!destinationsWithCoordinates.some(destination => destination.element === element)) {
+                element.textContent = 'Jarak tidak tersedia';
+            }
+        });
+
+        if (destinationsWithCoordinates.length > 0) {
+            if (!navigator.geolocation) {
+                destinationsWithCoordinates.forEach(({ element }) => {
+                    element.textContent = 'Lokasi tidak didukung';
+                });
+            } else {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const toRadians = degrees => degrees * Math.PI / 180;
+                        const originLatitude = toRadians(position.coords.latitude);
+                        const originLongitude = toRadians(position.coords.longitude);
+
+                        destinationsWithCoordinates.forEach(destination => {
+                            const latitudeDifference =
+                                toRadians(destination.latitude) - originLatitude;
+                            const longitudeDifference =
+                                toRadians(destination.longitude) - originLongitude;
+                            const haversine =
+                                Math.sin(latitudeDifference / 2) ** 2 +
+                                Math.cos(originLatitude) *
+                                Math.cos(toRadians(destination.latitude)) *
+                                Math.sin(longitudeDifference / 2) ** 2;
+                            const distance = 6371 * 2 * Math.atan2(
+                                Math.sqrt(haversine),
+                                Math.sqrt(1 - haversine)
+                            );
+
+                            destination.element.textContent = `${distance.toFixed(2)} KM`;
+                        });
+                    },
+                    () => {
+                        destinationsWithCoordinates.forEach(({ element }) => {
+                            element.textContent = 'Jarak tidak tersedia';
+                        });
+                    },
+                    { maximumAge: 300000, timeout: 10000 }
+                );
+            }
+        }
+    </script>
 </body>
 </html>

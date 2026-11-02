@@ -388,6 +388,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </ul>
 
   <form id="form-profil" action="" method="post" enctype="multipart/form-data" novalidate
+        data-api-url="<?= e($apiProfil) ?>"
         data-api="<?= e($apiProfil) ?>"
         data-csrf="<?= e($_SESSION['csrf']) ?>"
         data-email="<?= e($email) ?>">
@@ -467,6 +468,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   <?php endif; ?>
 
+  <script src="../Js/api-endpoint-labels.js"></script>
   <script>
     (function () {
       var toggle = document.getElementById('kategori-toggle');

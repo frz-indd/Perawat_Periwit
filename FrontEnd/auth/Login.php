@@ -66,6 +66,7 @@
                 <form
                     id="loginForm"
                     action="../../Backend/api/fungsi_login.php"
+                    data-api-url="../../Backend/api/fungsi_login.php"
                     method="post"
                     novalidate
                 >
@@ -164,6 +165,7 @@
                     type="button"
                     class="social-button"
                     id="googleLogin"
+                    data-api-url="../../Backend/api/google_login.php?intent=login"
                 >
                     <span class="google-icon">
                         <svg viewBox="0 0 24 24" width="28" height="28">
@@ -209,6 +211,7 @@
     </div>
 
     <script src="../js/auth.js?v=20261027-1"></script>
+    <script src="../Js/api-endpoint-labels.js"></script>
 
 </body>
 </html>

@@ -66,6 +66,7 @@
                 <form
                     id="registerForm"
                     action="../../Backend/api/fungsi_register.php"
+                    data-api-url="../../Backend/api/fungsi_register.php"
                     method="post"
                     novalidate
                 >
@@ -176,6 +177,7 @@
                     type="button"
                     class="social-button"
                     id="googleRegister"
+                    data-api-url="../../Backend/api/google_login.php?intent=register"
                 >
                     <span class="google-icon">
                         <svg viewBox="0 0 24 24" width="28" height="28">
@@ -221,6 +223,7 @@
     </div>
 
     <script src="../js/auth.js?v=20261027-1"></script>
+    <script src="../Js/api-endpoint-labels.js"></script>
 
 </body>
 </html>

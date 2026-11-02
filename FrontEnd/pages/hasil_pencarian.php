@@ -195,7 +195,8 @@ function terpilih($daftar, $nilai)
 
 <!-- SEARCH BAR -->
 <section class="search-header<?= $isShortKeyword ? ' has-validation' : '' ?>">
-    <form action="../../search" method="GET" class="search-box" novalidate>
+    <form action="../../search" method="GET" class="search-box" novalidate
+          data-api-url="../../api/destinations/search?q={kata-kunci}">
 
         <input
             type="search"
@@ -425,6 +426,7 @@ function terpilih($daftar, $nilai)
 
 </main>
 
+<script src="../Js/api-endpoint-labels.js"></script>
 <script>
     const filterForm = document.getElementById('filterForm');
     const searchForm = document.querySelector('.search-box');

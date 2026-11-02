@@ -367,7 +367,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
                     </a>
                     <span>Ubah Password</span>
                 </div>
-                <form class="menu-profil__item menu-profil__item--logout" id="logout-form" method="post" action="../../Backend/api/logout.php">
+                <form class="menu-profil__item menu-profil__item--logout" id="logout-form" method="post" action="../../Backend/api/logout.php" data-api-url="../../Backend/api/logout.php">
                     <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
                     <button type="button" class="menu-profil__ikon logout-trigger" aria-label="Logout" title="Logout" aria-haspopup="dialog" aria-controls="logout-dialog">
                         <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -428,7 +428,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
                                 <p><?= wilayahHtml((string) ($f['wilayah'] ?? '')) ?></p>
                             </div>
                         </div>
-                        <form class="hapus-form" method="post" action="profil.php" data-nama="<?= e($nama) ?>">
+                        <form class="hapus-form" method="post" action="profil.php" data-nama="<?= e($nama) ?>" data-api-url="<?= e($apiFavorit) ?>">
                             <input type="hidden" name="aksi" value="hapus_favorit">
                             <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
                             <input type="hidden" name="id_wisata" value="<?= e($idWisata) ?>">
@@ -459,6 +459,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
         </div>
     </dialog>
 
+    <script src="../Js/api-endpoint-labels.js"></script>
     <script>
         (function () {
             var sidebar = document.querySelector('.sidebar');

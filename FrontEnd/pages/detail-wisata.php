@@ -554,6 +554,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                         data-id="<?= e($destination['id']) ?>"
                         data-csrf="<?= e($_SESSION['csrf']) ?>"
                         data-endpoint="<?= e($apiFavorit) ?>"
+                        data-api-url="<?= e($apiFavorit) ?>"
                         data-login="<?= $sudahLogin ? '1' : '0' ?>"
                         aria-pressed="<?= $sudahFavorit ? 'true' : 'false' ?>">
                     <i class="bi <?= $sudahFavorit ? 'bi-heart-fill' : 'bi-heart' ?>" aria-hidden="true"></i>
@@ -711,7 +712,8 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <?php endif; ?>
 
             <button class="tombol-ulasan" type="button" id="tombol-ulasan"
-                    data-login="<?= $sudahLogin ? '1' : '0' ?>" aria-haspopup="dialog">
+                    data-login="<?= $sudahLogin ? '1' : '0' ?>" aria-haspopup="dialog"
+                    data-api-url="<?= e($apiUlasan) ?>">
                 Tambah Ulasan dan Rating
             </button>
         </section>
@@ -810,6 +812,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         </div>
     </dialog>
 
+    <script src="../Js/api-endpoint-labels.js"></script>
     <script>
         (function () {
             var nav = document.querySelector('.ep-navbar');

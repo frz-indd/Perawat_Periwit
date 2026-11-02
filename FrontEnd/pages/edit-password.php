@@ -232,7 +232,8 @@ header('Cache-Control: no-store');
     <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
   </ul>
 
-  <form id="form-password" action="" method="post" novalidate autocomplete="off" data-csrf="<?= e($_SESSION['csrf']) ?>">
+  <form id="form-password" action="" method="post" novalidate autocomplete="off"
+        data-csrf="<?= e($_SESSION['csrf']) ?>">
 
     <main class="pw-stage">
       <svg class="pw-kunci" viewBox="0 0 95 118" fill="none" stroke="currentColor" stroke-width="9" aria-hidden="true">
@@ -328,6 +329,7 @@ header('Cache-Control: no-store');
     </div>
   </div>
 
+  <script src="../Js/api-endpoint-labels.js"></script>
   <script>
     (function () {
       var toggle = document.getElementById('kategori-toggle');
