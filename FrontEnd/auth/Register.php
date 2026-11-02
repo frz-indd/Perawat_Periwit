@@ -91,6 +91,25 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="registerPhone">Nomor Telepon (opsional)</label>
+
+                        <input
+                            type="tel"
+                            id="registerPhone"
+                            name="telepon"
+                            class="auth-input"
+                            placeholder="Contoh: 081234567890"
+                            autocomplete="tel"
+                            inputmode="tel"
+                            maxlength="20"
+                        >
+
+                        <div class="invalid-feedback">
+                            Masukkan nomor telepon Indonesia yang valid.
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label for="registerPassword">Password</label>
 
                         <div class="password-wrapper">
@@ -222,7 +241,7 @@
         </section>
     </div>
 
-    <script src="../js/auth.js?v=20261102-console-logger-2"></script>
+    <script src="../Js/auth.js?v=20261102-console-logger-2"></script>
 
 </body>
 </html>

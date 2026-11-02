@@ -176,9 +176,10 @@ header('Cache-Control: no-store');
   <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261058">
   <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-  <link rel="stylesheet" href="../CSS/Edit-Password.css?v=20261032">
+  <link rel="stylesheet" href="../CSS/edit-password.css?v=20261032">
+  <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
 </head>
-<body class="halaman-edit-profil halaman-edit-password">
+<body class="halaman-edit-profil halaman-edit-password site-navbar-page">
 
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
@@ -195,17 +196,25 @@ header('Cache-Control: no-store');
     </defs>
   </svg>
 
-  <header class="ep-navbar">
+  <header class="ep-navbar site-navbar">
     <div class="ep-navbar__inner">
       <a class="ep-logo" href="../../index.php">Explore Majaku</a>
-
       <nav class="ep-menu" aria-label="Menu utama">
         <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
-        <a class="ep-menu__kategori" href="#kategori" id="kategori-toggle"
-           role="button" aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">Kategori</a>
+        <details class="category-dropdown ep-menu__kategori">
+          <summary>
+            <span>Kategori</span>
+            <span class="ep-menu__panah" aria-hidden="true"></span>
+          </summary>
+          <div class="category-menu">
+            <a href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a>
+            <a href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a>
+            <a href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a>
+            <a href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a>
+          </div>
+        </details>
         <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
       </nav>
-
       <div class="ep-aksi">
         <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
           <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
@@ -213,7 +222,6 @@ header('Cache-Control: no-store');
             <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
           </svg>
         </a>
-
         <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
           <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="20" cy="20" r="18.2"/>
@@ -224,13 +232,6 @@ header('Cache-Control: no-store');
       </div>
     </div>
   </header>
-
-  <ul class="dd-kategori" id="kategori-menu" role="menu" aria-label="Kategori wisata">
-    <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=alam">Wisata Alam &amp; pegunungan</a></li>
-    <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=air-curug">Wisata Air &amp; Curug</a></li>
-    <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-    <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
-  </ul>
 
   <form id="form-password" action="" method="post" novalidate autocomplete="off"
         data-csrf="<?= e($_SESSION['csrf']) ?>">
@@ -325,7 +326,7 @@ header('Cache-Control: no-store');
       </div>
       <h2 class="pw-modal__judul pw-modal__judul--gagal" id="judul-gagal">Ubah Password Gagal!</h2>
       <p class="pw-modal__isi pw-modal__isi--gagal" id="isi-gagal">Perubahan password gagal disimpan</p>
-      <a class="pw-modal__ok" href="Edit-Password.php" id="aksi-coba">Coba Lagi</a>
+      <a class="pw-modal__ok" href="edit-password.php" id="aksi-coba">Coba Lagi</a>
     </div>
   </div>
 

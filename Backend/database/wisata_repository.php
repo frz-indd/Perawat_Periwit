@@ -1,7 +1,11 @@
 <?php
 
-function fetchActiveCategories(mysqli $connection): array
+function fetchActiveCategories(?mysqli $connection): array
 {
+    if ($connection === null) {
+        return [];
+    }
+
     $result = $connection->query(
         "SELECT Id_kategori, nama_kategori, deskripsi, gambar
          FROM kategori
@@ -18,8 +22,12 @@ function fetchActiveCategories(mysqli $connection): array
     return $categories;
 }
 
-function fetchTourismRows(mysqli $connection, array $filters = []): array
+function fetchTourismRows(?mysqli $connection, array $filters = []): array
 {
+    if ($connection === null) {
+        return [];
+    }
+
     $conditions = ["w.aktif = 1", "k.aktif = 1"];
     $parameters = [];
     $parameterTypes = "";
@@ -161,8 +169,12 @@ function fetchTourismRows(mysqli $connection, array $filters = []): array
     return $rows;
 }
 
-function fetchTourismFacilities(mysqli $connection, string $tourismId): array
+function fetchTourismFacilities(?mysqli $connection, string $tourismId): array
 {
+    if ($connection === null) {
+        return [];
+    }
+
     $statement = $connection->prepare(
         "SELECT f.nama_fasilitas
          FROM wisata_fasilitas AS wf
@@ -178,8 +190,12 @@ function fetchTourismFacilities(mysqli $connection, string $tourismId): array
     return array_column($rows, "nama_fasilitas");
 }
 
-function fetchTourismReviews(mysqli $connection, string $tourismId): array
+function fetchTourismReviews(?mysqli $connection, string $tourismId): array
 {
+    if ($connection === null) {
+        return [];
+    }
+
     $statement = $connection->prepare(
         "SELECT u.Nama_user AS nama, ul.rating, ul.komentar, ul.tanggal_ulasan
          FROM ulasan AS ul
@@ -200,8 +216,12 @@ function fetchTourismReviews(mysqli $connection, string $tourismId): array
     return $rows;
 }
 
-function fetchUserTourismFavorites(mysqli $connection, int $userId): array
+function fetchUserTourismFavorites(?mysqli $connection, int $userId): array
 {
+    if ($connection === null) {
+        return [];
+    }
+
     $statement = $connection->prepare(
         "SELECT w.id_wisata, w.nama_wisata, w.domisili AS wilayah,
                 (

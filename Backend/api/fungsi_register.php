@@ -34,6 +34,8 @@ $email = strtolower(
     trim((string) ($_POST["email"] ?? $_POST["Email"] ?? ""))
 );
 
+$phone = trim((string) ($_POST["telepon"] ?? $_POST["no_telepon"] ?? ""));
+
 $password = $_POST["password"] ?? $_POST["Password"] ?? null;
 
 $confirmPassword =
@@ -55,6 +57,37 @@ if (strlen($email) > 255 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         "status" => "validation_error",
         "message" => "Masukkan alamat email yang valid."
     ]);
+}
+
+$normalizePhone = static function (string $value): string {
+    $value = preg_replace('/[\s()-]/', '', $value);
+    if (!is_string($value)) {
+        return "";
+    }
+
+    if (strpos($value, "+62") === 0) {
+        return $value;
+    }
+    if (strpos($value, "62") === 0) {
+        return "+" . $value;
+    }
+
+    return "+62" . substr($value, 1);
+};
+
+if ($phone !== "") {
+    $normalizedPhone = preg_replace('/[\s()-]/', '', $phone);
+    if (
+        !is_string($normalizedPhone) ||
+        preg_match('/^(?:\+62|62|0)8[1-9][0-9]{6,11}$/', $normalizedPhone) !== 1
+    ) {
+        $respond(422, [
+            "status" => "validation_error",
+            "message" => "Masukkan nomor telepon Indonesia yang valid."
+        ]);
+    }
+
+    $phone = $normalizePhone($phone);
 }
 
 // VALIDASI PASSWORD
@@ -109,6 +142,18 @@ if (strlen($name) > 255) {
 try {
     require_once __DIR__ . "/../database/koneksi.php";
 
+    if ($phone !== "") {
+        $phoneColumn = $conn->query(
+            "SHOW COLUMNS FROM `user` LIKE 'No_telepon'"
+        );
+        if (!$phoneColumn || !$phoneColumn->fetch_assoc()) {
+            $respond(503, [
+                "status" => "phone_not_configured",
+                "message" => "Kolom nomor telepon belum tersedia. Jalankan migrasi phone_login_migration.sql di database hosting."
+            ]);
+        }
+    }
+
     /* CEK EMAIL SUDAH TERDAFTAR */
 
     $check = $conn->prepare(
@@ -132,6 +177,27 @@ try {
         ]);
     }
 
+    if ($phone !== "") {
+        $checkPhone = $conn->prepare(
+            "SELECT Id_user
+             FROM `user`
+             WHERE No_telepon = ?
+             LIMIT 1"
+        );
+        $checkPhone->bind_param("s", $phone);
+        $checkPhone->execute();
+        $checkPhone->store_result();
+        $phoneExists = $checkPhone->num_rows > 0;
+        $checkPhone->close();
+
+        if ($phoneExists) {
+            $respond(409, [
+                "status" => "phone_exists",
+                "message" => "Nomor telepon sudah terdaftar. Silakan gunakan nomor lain."
+            ]);
+        }
+    }
+
     // HASH PASSWORD
 
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
@@ -142,12 +208,19 @@ try {
 
 // INSERT USER
 
-    $statement = $conn->prepare(
-        "INSERT INTO `user` (Nama_user, Email, Password)
-         VALUES (?, ?, ?)"
-    );
-
-    $statement->bind_param("sss", $name, $email, $passwordHash);
+    if ($phone === "") {
+        $statement = $conn->prepare(
+            "INSERT INTO `user` (Nama_user, Email, Password)
+             VALUES (?, ?, ?)"
+        );
+        $statement->bind_param("sss", $name, $email, $passwordHash);
+    } else {
+        $statement = $conn->prepare(
+            "INSERT INTO `user` (Nama_user, Email, No_telepon, Password)
+             VALUES (?, ?, ?, ?)"
+        );
+        $statement->bind_param("ssss", $name, $email, $phone, $passwordHash);
+    }
     $statement->execute();
 
     $userId = (int) $conn->insert_id;
@@ -161,7 +234,8 @@ try {
         "data" => [
             "id_user" => $userId,
             "nama" => $name,
-            "email" => $email
+            "email" => $email,
+            "telepon" => $phone !== "" ? $phone : null
         ]
     ]);
 
@@ -169,6 +243,13 @@ try {
     error_log("Register database error: " . $exception->getMessage());
 
     if ((int) $exception->getCode() === 1062) {
+        if ($phone !== "" && strpos($exception->getMessage(), "uq_user_no_telepon") !== false) {
+            $respond(409, [
+                "status" => "phone_exists",
+                "message" => "Nomor telepon sudah terdaftar. Silakan gunakan nomor lain."
+            ]);
+        }
+
         $respond(409, [
             "status" => "email_exists",
             "message" => "Email sudah terdaftar. Silakan gunakan email lain."

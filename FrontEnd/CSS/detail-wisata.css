@@ -40,7 +40,7 @@ html.html-detail {
 
 body.halaman-detail {
     --s: var(--u);
-    --nav-h: calc(83 * var(--u));
+    --nav-h: max(68px, calc(83 * var(--u)));
     --hero-h: calc(333 * var(--s));
     --hijau-tua: #166c5c;
     --hijau-tombol: #177a6c;
@@ -63,7 +63,7 @@ body.halaman-detail {
     --bayangan-dalam: inset 0 calc(4 * var(--s)) calc(4 * var(--s)) rgba(0, 0, 0, 0.25);
 
     margin: 0;
-    padding-top: 0;
+    padding-top: var(--nav-h);
     overflow: visible !important;
     height: auto !important;
     background: var(--halaman-bg);
@@ -81,7 +81,7 @@ body.halaman-detail {
 .bagian-atas {
     position: static;
     z-index: 1000;
-    display: block;
+    display: contents;
     margin: 0;
     padding: 0;
     border: 0;
@@ -89,9 +89,11 @@ body.halaman-detail {
 }
 
 body.halaman-detail .ep-navbar {
-    position: sticky;
+    position: fixed;
+    left: 0;
+    right: 0;
     top: 0;
-    z-index: 2;
+    z-index: 1000;
     margin: 0;
     border: 0;
     box-sizing: border-box;
@@ -110,7 +112,7 @@ body.halaman-detail .ep-navbar__inner {
     max-width: none;
     height: 100%;
     margin: 0;
-    padding: 0 calc(42 * var(--u)) 0 calc(43 * var(--u));
+    padding: 0 2.85% 0 11%;
 }
 
 body.halaman-detail .ep-logo {
@@ -138,7 +140,8 @@ body.halaman-detail .ep-menu {
     transform: translate(-50%, -50%);
 }
 
-body.halaman-detail .ep-menu > a {
+body.halaman-detail .ep-menu > a,
+body.halaman-detail .ep-menu > .category-dropdown {
     position: relative;
     inset: auto;
     width: auto;
@@ -165,10 +168,15 @@ body.halaman-detail .ep-menu__tentang {
 }
 
 body.halaman-detail .ep-aksi {
+    position: static !important;
+    display: flex !important;
+    flex-direction: row !important;
     flex: none;
-    display: flex;
     align-items: center;
-    gap: calc(20 * var(--u));
+    justify-content: flex-end;
+    gap: 16px;
+    width: auto;
+    height: auto;
 }
 
 body.halaman-detail .ep-ikon {
@@ -180,6 +188,17 @@ body.halaman-detail .ep-ikon {
     margin: 0;
     padding: 0;
     transform: none;
+}
+
+body.halaman-detail .ep-ikon--cari,
+body.halaman-detail .ep-ikon--profil {
+    position: static !important;
+    inset: auto !important;
+    display: flex !important;
+    flex: 0 0 auto !important;
+    width: 32px !important;
+    height: 32px !important;
+    margin: 0 !important;
 }
 
 body.halaman-detail .ep-ikon svg {
@@ -206,97 +225,44 @@ body.halaman-detail .ep-menu__kategori {
     pointer-events: auto;
 }
 
-body.halaman-detail .ep-menu__kategori::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: calc(100% + 10 * var(--u));
-    display: block;
-    width: calc(21 * var(--u));
-    height: calc(12 * var(--u));
-    margin: auto 0;
-    background: currentColor;
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 14'%3E%3Cpath d='M2 2l10 10L22 2' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 14'%3E%3Cpath d='M2 2l10 10L22 2' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
-    transform: none !important;
-    transition: none;
-}
-
-body.halaman-detail .ep-menu__kategori.aktif::after,
-body.halaman-detail .ep-menu__kategori:hover::after,
-body.halaman-detail .ep-menu__kategori[aria-expanded="true"]::after {
-    transform: none !important;
-}
-
-body.halaman-detail .ep-menu__kategori:hover,
-body.halaman-detail .ep-menu__kategori.aktif {
-    color: var(--hijau, #166c5c);
-}
-
-body.halaman-detail .dd-kategori {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 3000;
-    box-sizing: border-box;
-    width: max-content;
-    min-width: 0;
-    max-width: calc(100vw - 16px);
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
+body.halaman-detail .ep-menu__kategori > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(9 * var(--u));
+    cursor: pointer;
     list-style: none;
-    background: #fff;
-    border: 0;
-    border-radius: 0;
-    box-shadow: 0 calc(2 * var(--u)) calc(5 * var(--u)) rgba(0, 0, 0, 0.2);
-}
-
-body.halaman-detail .dd-kategori.show {
-    display: block;
-}
-
-body.halaman-detail .dd-kategori li {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-body.halaman-detail .dd-kategori a.dd-kategori__item {
-    display: block;
-    position: static;
-    box-sizing: border-box;
-    width: 100%;
-    padding: 0 calc(13 * var(--u));
-    background: transparent;
-    color: #000;
-    font-family: "Poppins", Arial, sans-serif;
-    font-size: max(11px, calc(12 * var(--u)));
-    font-weight: 400;
-    line-height: max(24px, calc(25 * var(--u)));
-    text-align: center;
-    text-decoration: none;
     white-space: nowrap;
 }
 
-body.halaman-detail .dd-kategori a.dd-kategori__item:hover,
-body.halaman-detail .dd-kategori a.dd-kategori__item:focus-visible {
-    background: var(--hijau, #166c5c);
-    color: #fff;
-    font-weight: 400;
-    outline: none;
+body.halaman-detail .ep-menu__kategori > summary::-webkit-details-marker {
+    display: none;
+}
+
+body.halaman-detail .ep-menu__kategori > summary::marker {
+    content: "";
+}
+
+body.halaman-detail .ep-menu__kategori > summary i {
+    font-size: calc(15 * var(--u));
+}
+
+body.halaman-detail .ep-menu__kategori:hover,
+body.halaman-detail .ep-menu__kategori[open] > summary {
+    color: var(--hijau, #166c5c);
 }
 
 body.halaman-detail .hero-wisata {
     top: auto !important;
 }
 
+.lokasi-grid .peta[hidden] {
+    display: none !important;
+}
+
 .hero-wisata {
     position: relative;
     z-index: 1;
-    margin: calc(-1 * var(--tutup)) 0 calc(-5 * var(--s));
+    margin: 0 0 calc(-5 * var(--s));
     padding: 0 0 calc(5 * var(--s));
     line-height: 0;
     background: var(--halaman-bg);
@@ -1593,7 +1559,7 @@ svg.ikon-fas {
     body.halaman-detail {
         --s: 0.8px;
         --hero-h: clamp(190px, 54vw, 340px);
-        padding-top: var(--nav-h);
+        padding-top: max(68px, var(--nav-h));
     }
 
     .bagian-atas {
@@ -1606,12 +1572,17 @@ svg.ikon-fas {
         left: 0;
         right: 0;
         z-index: 1000;
+        height: var(--nav-h);
+    }
+
+    body.halaman-detail .ep-navbar__inner {
+        padding: 0 4%;
     }
 
     .hero-wisata {
         position: relative;
         z-index: auto;
-        margin: calc(-1 * var(--tutup)) 0 0;
+        margin: 0;
         padding-bottom: 0;
     }
 
@@ -2005,6 +1976,7 @@ svg.ikon-fas {
     body.halaman-detail {
         --u: calc(100vw / 600);
         --nav-h: 0px;
+        padding-top: 0;
     }
 
     body.halaman-detail .ep-navbar {
@@ -2023,6 +1995,8 @@ svg.ikon-fas {
         gap: 6px 12px;
         width: 100%;
         height: auto;
+        padding-right: 16px;
+        padding-left: 16px;
         padding: 10px 16px 8px;
     }
 
@@ -2061,16 +2035,12 @@ svg.ikon-fas {
         font-size: clamp(14px, 4vw, 16px);
     }
 
-    body.halaman-detail .ep-menu__kategori::after {
-        left: calc(100% + 6px);
-        width: 14px;
-        height: 8px;
+    body.halaman-detail .ep-menu__kategori > summary {
+        gap: 6px;
     }
 
-    body.halaman-detail .dd-kategori a.dd-kategori__item {
-        padding: 0 22px;
-        font-size: 14px;
-        line-height: 42px;
+    body.halaman-detail .ep-menu__kategori > summary i {
+        font-size: 11px;
     }
 }
 

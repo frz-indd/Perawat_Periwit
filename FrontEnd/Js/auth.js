@@ -326,6 +326,7 @@ const registerForm = document.getElementById('registerForm');
 
 if (registerForm) {
     const email = document.getElementById('registerIdentity');
+    const phone = document.getElementById('registerPhone');
     const password = document.getElementById('registerPassword');
     const confirmPassword = document.getElementById('confirmPassword');
     const message = document.getElementById('registerMessage');
@@ -334,6 +335,10 @@ if (registerForm) {
     let isSubmitting = false;
 
     const emailFeedback = email
+        .closest('.form-group')
+        .querySelector('.invalid-feedback');
+
+    const phoneFeedback = phone
         .closest('.form-group')
         .querySelector('.invalid-feedback');
 
@@ -367,6 +372,7 @@ if (registerForm) {
         hideMessage(message);
 
         const emailValue = email.value.trim();
+        const phoneValue = phone.value.trim();
         const passwordValue = password.value;
         const confirmValue = confirmPassword.value;
 
@@ -387,6 +393,18 @@ if (registerForm) {
             valid = false;
         } else {
             setValid(email, emailFeedback);
+        }
+
+        if (phoneValue && !isValidPhone(phoneValue)) {
+            const error = 'Masukkan nomor telepon Indonesia yang valid.';
+
+            setInvalid(phone, phoneFeedback, error);
+            errors.push(error);
+            valid = false;
+        } else if (phoneValue) {
+            setValid(phone, phoneFeedback);
+        } else {
+            clearValidation(phone);
         }
 
         if (!passwordValue.trim()) {
@@ -447,6 +465,13 @@ if (registerForm) {
             const messages = {
                 email_exists:
                     'Email sudah terdaftar. Silakan gunakan email lain.',
+
+                phone_exists:
+                    'Nomor telepon sudah terdaftar. Silakan gunakan nomor lain.',
+
+                phone_not_configured:
+                    result.message ||
+                    'Pendaftaran dengan nomor telepon belum tersedia di server.',
 
                 validation_error:
                     result.message || 'Data pendaftaran tidak valid.',

@@ -118,31 +118,44 @@ function escapeHtml(string $value): string
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../CSS/kategori.css?v=empty-state-1">
     <link rel="stylesheet" href="../CSS/theme.css?v=dropdown-active-6">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
 </head>
-<body>
-    <header class="site-header">
-        <nav class="main-nav" aria-label="Navigasi utama">
-            <a class="brand" href="../../index.php">Explore Majaku</a>
-            <div class="nav-links">
-                <a href="../../index.php">Beranda</a>
-                <details class="category-dropdown">
-                    <summary class="active">kategori <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
-                    <div class="category-nav">
-                        <?php foreach ($categoryRoutes as $slug => $navigationCategoryId): ?>
-                            <?php if (in_array($navigationCategoryId, $availableCategoryIds, true)): ?>
-                                <a href="kategori.php?kategori=<?= escapeHtml($slug); ?>"<?= $categoryKey === $slug ? ' aria-current="page"' : ''; ?>>
-                                    <?= escapeHtml($categoryDisplayNames[$navigationCategoryId]); ?>
-                                </a>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
+<body class="site-navbar-page">
+    <header class="ep-navbar site-navbar">
+        <div class="ep-navbar__inner">
+            <a class="ep-logo" href="../../index.php">Explore Majaku</a>
+            <nav class="ep-menu" aria-label="Menu utama">
+                <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
+                <details class="category-dropdown ep-menu__kategori">
+                    <summary>
+                        <span>Kategori</span>
+                        <span class="ep-menu__panah" aria-hidden="true"></span>
+                    </summary>
+                    <div class="category-menu">
+                        <a href="kategori.php?kategori=alam"<?= $categoryKey === 'alam' ? ' aria-current="page"' : ''; ?>>Wisata Alam &amp; Pegunungan</a>
+                        <a href="kategori.php?kategori=air-curug"<?= $categoryKey === 'air-curug' ? ' aria-current="page"' : ''; ?>>Wisata Air &amp; Curug</a>
+                        <a href="kategori.php?kategori=buatan-kuliner"<?= $categoryKey === 'buatan-kuliner' ? ' aria-current="page"' : ''; ?>>Wisata Buatan &amp; Kuliner</a>
+                        <a href="kategori.php?kategori=sejarah-budaya"<?= $categoryKey === 'sejarah-budaya' ? ' aria-current="page"' : ''; ?>>Wisata Sejarah &amp; Budaya</a>
                     </div>
                 </details>
-                <a href="tentang.php">Tentang</a>
+                <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
+            </nav>
+            <div class="ep-aksi">
+                <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
+                    <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
+                        <circle cx="13.5" cy="13.5" r="11.7"/>
+                        <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
+                    </svg>
+                </a>
+                <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
+                    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="20" cy="20" r="18.2"/>
+                        <circle cx="20" cy="16.2" r="5.8"/>
+                        <path d="M9 33.5C9.7 29.2 12.2 26 15.2 25.2C17 26.6 23 26.6 24.8 25.2C27.8 26 30.3 29.2 31 33.5"/>
+                    </svg>
+                </a>
             </div>
-            <div class="nav-icons">
-                <a href="../auth/Login.php" aria-label="Profil"><svg class="profile-outline-icon" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17"></circle><circle cx="20" cy="15" r="5"></circle><path d="M9 31c1.7-5 5.5-7.5 11-7.5S29.3 26 31 31"></path></svg></a>
-            </div>
-        </nav>
+        </div>
     </header>
 
     <main>

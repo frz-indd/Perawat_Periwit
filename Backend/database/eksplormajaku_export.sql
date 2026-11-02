@@ -195,9 +195,11 @@ CREATE TABLE `user` (
   `Id_user` int(12) NOT NULL AUTO_INCREMENT,
   `Nama_user` varchar(255) NOT NULL,
   `Email` varchar(255) NOT NULL,
+  `No_telepon` varchar(20) DEFAULT NULL,
   `Password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`Id_user`),
-  UNIQUE KEY `uq_user_email` (`Email`)
+  UNIQUE KEY `uq_user_email` (`Email`),
+  UNIQUE KEY `uq_user_no_telepon` (`No_telepon`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -207,7 +209,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (7,'faris rachman','farisrachman@gmail.com','$2y$10$Zj..xVs7KTURCK39rg7JXu8vN10LFOKbrA6Bat/qWWfqi0ZskhnXW'),(8,'faris rachman','farisrachman213@gmail.com','$2y$10$b0Mexmr5YfzdKLHCs3PYzuU1SFu1QwOUZ5B.HQu4KFmDoMF9khxg2');
+INSERT INTO `user` (`Id_user`, `Nama_user`, `Email`, `Password`) VALUES (7,'faris rachman','farisrachman@gmail.com','$2y$10$Zj..xVs7KTURCK39rg7JXu8vN10LFOKbrA6Bat/qWWfqi0ZskhnXW'),(8,'faris rachman','farisrachman213@gmail.com','$2y$10$b0Mexmr5YfzdKLHCs3PYzuU1SFu1QwOUZ5B.HQu4KFmDoMF9khxg2');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 

@@ -22,6 +22,22 @@ $isValidPhone = static function (string $phone): bool {
         && preg_match('/^(?:\+62|62|0)8[1-9][0-9]{6,11}$/', $phone) === 1;
 };
 
+$normalizePhone = static function (string $phone): string {
+    $phone = preg_replace('/[\s()-]/', '', $phone);
+    if (!is_string($phone)) {
+        return '';
+    }
+
+    if (strpos($phone, '+62') === 0) {
+        return $phone;
+    }
+    if (strpos($phone, '62') === 0) {
+        return '+' . $phone;
+    }
+
+    return '+62' . substr($phone, 1);
+};
+
 /* METODE REQUEST */
 
 if (($_SERVER["REQUEST_METHOD"] ?? "") !== "POST") {
@@ -159,6 +175,8 @@ if ($isEmail) {
         "status" => "invalid_phone",
         "message" => "Masukkan nomor telepon yang valid."
     ]);
+} else {
+    $identity = $normalizePhone($identity);
 }
 
 /* AUTENTIKASI */

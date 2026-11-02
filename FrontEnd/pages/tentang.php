@@ -14,21 +14,29 @@ session_start();
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
     <link rel="stylesheet" href="../CSS/tentang.css?v=shared-layout-13">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
 </head>
-<body class="about-page halaman-tentang">
+<body class="about-page halaman-tentang site-navbar-page">
 
-    <header class="ep-navbar">
+    <header class="ep-navbar site-navbar">
         <div class="ep-navbar__inner">
             <a class="ep-logo" href="../../index.php">Explore Majaku</a>
-
             <nav class="ep-menu" aria-label="Menu utama">
                 <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
-                <a class="ep-menu__kategori" href="#kategori" id="kategori-toggle"
-                   role="button" aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">Kategori</a>
-                <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
-                <a href="kontrak-api.php">Endpoint API</a>
+                <details class="category-dropdown ep-menu__kategori">
+                    <summary>
+                        <span>Kategori</span>
+                        <span class="ep-menu__panah" aria-hidden="true"></span>
+                    </summary>
+                    <div class="category-menu">
+                        <a href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a>
+                        <a href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a>
+                        <a href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a>
+                        <a href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a>
+                    </div>
+                </details>
+                <a class="ep-menu__tentang" href="tentang.php" aria-current="page">Tentang</a>
             </nav>
-
             <div class="ep-aksi">
                 <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
                     <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
@@ -36,7 +44,6 @@ session_start();
                         <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
                     </svg>
                 </a>
-
                 <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
                     <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="20" cy="20" r="18.2"/>
@@ -47,13 +54,6 @@ session_start();
             </div>
         </div>
     </header>
-
-    <ul class="dd-kategori" id="kategori-menu" role="menu" aria-label="Kategori wisata">
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=alam">Wisata Alam &amp; pegunungan</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=air-curug">Wisata Air &amp; Curug</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
-    </ul>
 
     <main>
         <section class="about-hero" aria-label="Tentang Explore Majaku">

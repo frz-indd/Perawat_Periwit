@@ -6,7 +6,7 @@ $isLoggedIn = isset($_SESSION["id_user"]);
 require_once __DIR__ . "/Backend/database/koneksi.php";
 require_once __DIR__ . "/Backend/database/wisata_repository.php";
 
-$wisata = fetchTourismRows($conn);
+$wisata = $conn !== null ? fetchTourismRows($conn) : [];
 $destinasiUtama = array_slice($wisata, 0, 4);
 $destinasiLain = array_slice($wisata, 4, 4);
 ?>
@@ -30,22 +30,21 @@ $destinasiLain = array_slice($wisata, 4, 4);
     <!-- CSS Beranda -->
     <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=font-map-2">
     <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=shared-layout-4">
+    <link rel="stylesheet" href="FrontEnd/CSS/navbar-common.css?v=2">
 </head>
 
-<body class="home-page">
+<body class="home-page site-navbar-page">
 
-    <!-- HEADER -->
-    <header class="navbar">
-        <div class="navbar-container">
-
-            <a href="index.php" class="navbar-logo">
-                Explore Majaku
-            </a>
-
-            <nav class="navbar-menu">
-                <a href="index.php" class="active">Beranda</a>
-                <details class="category-dropdown">
-                    <summary>Kategori <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+    <header class="ep-navbar site-navbar">
+        <div class="ep-navbar__inner">
+            <a class="ep-logo" href="index.php">Explore Majaku</a>
+            <nav class="ep-menu" aria-label="Menu utama">
+                <a class="ep-menu__beranda" href="index.php" aria-current="page">Beranda</a>
+                <details class="category-dropdown ep-menu__kategori">
+                    <summary>
+                        <span>Kategori</span>
+                        <span class="ep-menu__panah" aria-hidden="true"></span>
+                    </summary>
                     <div class="category-menu">
                         <a href="FrontEnd/pages/kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a>
                         <a href="FrontEnd/pages/kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a>
@@ -53,32 +52,25 @@ $destinasiLain = array_slice($wisata, 4, 4);
                         <a href="FrontEnd/pages/kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a>
                     </div>
                 </details>
-                <a href="FrontEnd/pages/tentang.php">Tentang</a>
+                <a class="ep-menu__tentang" href="FrontEnd/pages/tentang.php">Tentang</a>
             </nav>
-
-            <div class="navbar-icons">
-
-                <a href="<?= $isLoggedIn ? 'FrontEnd/pages/profil.php' : 'FrontEnd/auth/Login.php' ?>"
-                   class="profile-icon"
-                   aria-label="<?= $isLoggedIn ? 'Profil' : 'Login' ?>">
-                    <svg class="profile-outline-icon" viewBox="0 0 40 40" aria-hidden="true">
-                        <circle cx="20" cy="20" r="17"></circle>
-                        <circle cx="20" cy="15" r="5"></circle>
-                        <path d="M9 31c1.7-5 5.5-7.5 11-7.5S29.3 26 31 31"></path>
+            <div class="ep-aksi">
+                <a class="ep-ikon ep-ikon--cari" href="FrontEnd/pages/hasil_pencarian.php" aria-label="Cari">
+                    <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
+                        <circle cx="13.5" cy="13.5" r="11.7"/>
+                        <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
                     </svg>
                 </a>
-
-                <?php if (!$isLoggedIn): ?>
-                    <a href="FrontEnd/auth/Login.php" class="login-button">
-                        Login
-                    </a>
-                <?php endif; ?>
-
+                <a class="ep-ikon ep-ikon--profil" href="FrontEnd/pages/profil.php" aria-label="Profil">
+                    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="20" cy="20" r="18.2"/>
+                        <circle cx="20" cy="16.2" r="5.8"/>
+                        <path d="M9 33.5C9.7 29.2 12.2 26 15.2 25.2C17 26.6 23 26.6 24.8 25.2C27.8 26 30.3 29.2 31 33.5"/>
+                    </svg>
+                </a>
             </div>
-
         </div>
     </header>
-
 
     <!-- HERO -->
     <section class="hero">

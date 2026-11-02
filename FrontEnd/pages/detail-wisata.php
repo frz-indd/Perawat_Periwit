@@ -271,9 +271,12 @@ if ($alamat !== '' && mb_stripos($alamat, $namaWisata, 0, 'UTF-8') !== 0) {
 
 $lat = $tourism['latitude'] ?? null;
 $lng = $tourism['longitude'] ?? null;
-$petaTersedia = koordinatValid($lat, $lng);
+$koordinatTersedia = koordinatValid($lat, $lng);
+$petaTersedia = $koordinatTersedia || $alamat !== '';
 $petaSrc = $petaTersedia
-    ? 'https://maps.google.com/maps?q=' . rawurlencode($lat . ',' . $lng) . '&hl=id&z=15&output=embed'
+    ? 'https://maps.google.com/maps?q=' . rawurlencode(
+        $koordinatTersedia ? $lat . ',' . $lng : $namaWisata . ', ' . $alamat
+    ) . '&hl=id&z=15&output=embed'
     : '';
 
 $bisaMaps = $alamat !== '';
@@ -361,9 +364,10 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=final-8">
+    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=final-11">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
 </head>
-<body class="halaman-detail">
+<body class="halaman-detail site-navbar-page">
 
     <svg class="sprite" aria-hidden="true">
         <defs>
@@ -475,25 +479,26 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         </defs>
     </svg>
 
-    <ul class="dd-kategori" id="kategori-menu" role="menu" aria-label="Kategori wisata">
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=alam">Wisata Alam &amp; pegunungan</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=air-curug">Wisata Air &amp; Curug</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
-    </ul>
-
     <div class="bagian-atas">
-    <header class="ep-navbar">
+    <header class="ep-navbar site-navbar">
         <div class="ep-navbar__inner">
             <a class="ep-logo" href="../../index.php">Explore Majaku</a>
-
             <nav class="ep-menu" aria-label="Menu utama">
                 <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
-                <a class="ep-menu__kategori" href="#kategori" id="kategori-toggle"
-                   role="button" aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">Kategori</a>
+                <details class="category-dropdown ep-menu__kategori">
+                    <summary>
+                        <span>Kategori</span>
+                        <span class="ep-menu__panah" aria-hidden="true"></span>
+                    </summary>
+                    <div class="category-menu">
+                        <a href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a>
+                        <a href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a>
+                        <a href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a>
+                        <a href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a>
+                    </div>
+                </details>
                 <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
             </nav>
-
             <div class="ep-aksi">
                 <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
                     <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
@@ -501,7 +506,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                         <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
                     </svg>
                 </a>
-
                 <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
                     <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="20" cy="20" r="18.2"/>
@@ -879,74 +883,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         }
 
         (function () {
-            var toggle = document.getElementById('kategori-toggle');
-            var menu = document.getElementById('kategori-menu');
-            var header = document.querySelector('.ep-navbar');
-            if (!toggle || !menu) return;
-
-            document.body.appendChild(menu);
-
-            function terbuka() {
-                return menu.classList.contains('show');
-            }
-
-            function posisi() {
-                var r = toggle.getBoundingClientRect();
-                var dasar = header ? header.getBoundingClientRect().bottom : r.bottom;
-                var lebar = menu.offsetWidth;
-                var kiri;
-                if (window.innerWidth <= 900) {
-                    kiri = (window.innerWidth - lebar) / 2;
-                } else {
-                    kiri = r.left + r.width * 0.15;
-                }
-                kiri = Math.max(8, Math.min(kiri, window.innerWidth - lebar - 8));
-                menu.style.top = Math.round(dasar + 6) + 'px';
-                menu.style.left = Math.round(kiri) + 'px';
-            }
-
-            function buka() {
-                menu.classList.add('show');
-                menu.style.setProperty('display', 'block', 'important');
-                menu.style.setProperty('visibility', 'visible', 'important');
-                menu.style.setProperty('opacity', '1', 'important');
-                posisi();
-                toggle.classList.add('aktif');
-                toggle.setAttribute('aria-expanded', 'true');
-            }
-
-            function tutup() {
-                menu.classList.remove('show');
-                menu.style.removeProperty('display');
-                menu.style.removeProperty('visibility');
-                menu.style.removeProperty('opacity');
-                toggle.classList.remove('aktif');
-                toggle.setAttribute('aria-expanded', 'false');
-            }
-
-            toggle.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                if (terbuka()) { tutup(); } else { buka(); }
-            });
-
-            document.addEventListener('click', function (e) {
-                if (terbuka() && !menu.contains(e.target) && !toggle.contains(e.target)) tutup();
-            });
-
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && terbuka()) {
-                    tutup();
-                    toggle.focus();
-                }
-            });
-
-            window.addEventListener('resize', function () {
-                if (terbuka()) posisi();
-            });
-        })();
-
-        (function () {
             if (window.history && typeof history.replaceState === 'function' && /[?&]ulasan=/.test(location.search)) {
                 var u = new URL(location.href);
                 u.searchParams.delete('ulasan');
@@ -978,15 +914,19 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
             function terapkan(d) {
                 var alamat = String(d.alamat === null || d.alamat === undefined ? '' : d.alamat).trim();
-                var ada = d.koordinat_lengkap === true && koordinatValid(d.latitude, d.longitude);
+                var koordinatAda = d.koordinat_lengkap === true && koordinatValid(d.latitude, d.longitude);
+                var ada = koordinatAda || alamat !== '';
 
                 grid.classList.toggle('lokasi-grid--kosong', !ada);
                 peta.hidden = !ada;
                 petaKosong.hidden = ada;
 
                 if (ada) {
+                    var query = koordinatAda
+                        ? d.latitude + ',' + d.longitude
+                        : nama + ', ' + alamat;
                     var src = 'https://maps.google.com/maps?q=' +
-                        encodeURIComponent(d.latitude + ',' + d.longitude) +
+                        encodeURIComponent(query) +
                         '&hl=id&z=15&output=embed';
                     if (frame.getAttribute('src') !== src) frame.setAttribute('src', src);
                 }

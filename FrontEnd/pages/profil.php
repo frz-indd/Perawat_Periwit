@@ -248,9 +248,10 @@ if ($srcFoto === '' && $emailFoto !== '') {
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
     <link rel="stylesheet" href="../CSS/profil.css?v=29">
 </head>
-<body class="halaman-profil">
+<body class="halaman-profil site-navbar-page">
     <svg class="sprite" aria-hidden="true">
         <defs>
             <clipPath id="klip-dalam"><circle cx="110" cy="110" r="103"/></clipPath>
@@ -291,17 +292,25 @@ if ($srcFoto === '' && $emailFoto !== '') {
         </defs>
     </svg>
 
-    <header class="ep-navbar">
+    <header class="ep-navbar site-navbar">
         <div class="ep-navbar__inner">
             <a class="ep-logo" href="../../index.php">Explore Majaku</a>
-
             <nav class="ep-menu" aria-label="Menu utama">
                 <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
-                <a class="ep-menu__kategori" href="#kategori" id="kategori-toggle"
-                   role="button" aria-haspopup="true" aria-expanded="false" aria-controls="kategori-menu">Kategori</a>
+                <details class="category-dropdown ep-menu__kategori">
+                    <summary>
+                        <span>Kategori</span>
+                        <span class="ep-menu__panah" aria-hidden="true"></span>
+                    </summary>
+                    <div class="category-menu">
+                        <a href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a>
+                        <a href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a>
+                        <a href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a>
+                        <a href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a>
+                    </div>
+                </details>
                 <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
             </nav>
-
             <div class="ep-aksi">
                 <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
                     <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
@@ -309,7 +318,6 @@ if ($srcFoto === '' && $emailFoto !== '') {
                         <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
                     </svg>
                 </a>
-
                 <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
                     <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="20" cy="20" r="18.2"/>
@@ -320,13 +328,6 @@ if ($srcFoto === '' && $emailFoto !== '') {
             </div>
         </div>
     </header>
-
-    <ul class="dd-kategori" id="kategori-menu" role="menu" aria-label="Kategori wisata">
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=alam">Wisata Alam &amp; pegunungan</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=air-curug">Wisata Air &amp; Curug</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=buatan-kuliner">Wisata Buatan &amp; Kuliner</a></li>
-        <li role="none"><a class="dd-kategori__item" role="menuitem" href="kategori.php?jenis=sejarah-budaya">Wisata Sejarah &amp; Budaya</a></li>
-    </ul>
 
     <div class="halaman">
         <aside class="sidebar" aria-label="Informasi profil" data-api="<?= e($apiProfil) ?>">
@@ -358,7 +359,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
                     <span>Beranda</span>
                 </div>
                 <div class="menu-profil__item">
-                    <a class="menu-profil__ikon" href="Edit-Password.php" aria-label="Ubah Password" title="Ubah Password">
+                    <a class="menu-profil__ikon" href="edit-password.php" aria-label="Ubah Password" title="Ubah Password">
                         <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <rect x="6.45" y="19.6" width="27.1" height="17.5" rx="3.8"/>
                             <path d="M11.2 19.6V11.7A8.8 8.8 0 0 1 28.8 11.7V19.6"/>
