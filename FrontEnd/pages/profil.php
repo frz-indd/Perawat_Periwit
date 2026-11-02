@@ -248,7 +248,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-    <link rel="stylesheet" href="../CSS/profil.css?v=28">
+    <link rel="stylesheet" href="../CSS/profil.css?v=29">
 </head>
 <body class="halaman-profil">
     <svg class="sprite" aria-hidden="true">
@@ -280,8 +280,8 @@ if ($srcFoto === '' && $emailFoto !== '') {
                 <path fill="currentColor" fill-rule="evenodd" d="M12 0h10a1 1 0 0 1 1 1v5H11V1a1 1 0 0 1 1-1zM13.2 2.6h7.6v3.4h-7.6z"/>
                 <rect x="0" y="4.8" width="33.8" height="2.5" rx="1.25" fill="currentColor"/>
                 <path d="M3.8 6h26.2v25.6a1.7 1.7 0 0 1-1.7 1.7H5.5a1.7 1.7 0 0 1-1.7-1.7z" fill="currentColor"/>
-                <rect x="11.5" y="11.8" width="3" height="14.8" rx="1.5" fill="#fff"/>
-                <rect x="19" y="11.8" width="3" height="14.8" rx="1.5" fill="#fff"/>
+                <rect x="11.5" y="11.8" width="3" height="14.8" rx="1.5" style="fill: var(--lubang, #fff)"/>
+                <rect x="19" y="11.8" width="3" height="14.8" rx="1.5" style="fill: var(--lubang, #fff)"/>
             </symbol>
             <symbol id="i-foto" viewBox="0 0 64 56">
                 <rect x="3" y="3" width="58" height="50" rx="8" fill="none" stroke="currentColor" stroke-width="6"/>
@@ -459,6 +459,29 @@ if ($srcFoto === '' && $emailFoto !== '') {
         </div>
     </dialog>
 
+    <dialog class="popup" id="popup-konfirmasi" aria-labelledby="popup-konfirmasi-judul" aria-describedby="popup-konfirmasi-isi">
+        <div class="popup__ikon popup__ikon--sampah" aria-hidden="true">
+            <svg viewBox="0 0 34 34"><use href="#i-sampah"/></svg>
+        </div>
+        <h2 class="popup__judul popup__judul--hijau popup__judul--tanya" id="popup-konfirmasi-judul">Apakah Anda yakin ingin menghapus destinasi ini dari daftar favorit?</h2>
+        <p class="popup__isi" id="popup-konfirmasi-isi">Wisata favorit mu akan di hapus dari daftar destinasi favorit</p>
+        <div class="popup__aksi">
+            <button class="popup__tombol popup__tombol--isi" type="button" id="popup-konfirmasi-hapus">Hapus</button>
+            <button class="popup__tombol popup__tombol--garis" type="button" id="popup-konfirmasi-batal" autofocus>Batal</button>
+        </div>
+    </dialog>
+
+    <dialog class="popup" id="popup-terhapus" aria-labelledby="popup-terhapus-judul" aria-describedby="popup-terhapus-isi">
+        <div class="popup__ikon popup__ikon--sampah" aria-hidden="true">
+            <svg viewBox="0 0 34 34"><use href="#i-sampah"/></svg>
+        </div>
+        <h2 class="popup__judul popup__judul--hijau" id="popup-terhapus-judul">Berhasil di Hapus!</h2>
+        <p class="popup__isi" id="popup-terhapus-isi">Wisata favorit mu berhasil dihapus dari destinasi favorit</p>
+        <div class="popup__aksi popup__aksi--tunggal">
+            <button class="popup__tombol popup__tombol--isi" type="button" id="popup-terhapus-ok" autofocus>OK</button>
+        </div>
+    </dialog>
+
     <script>
         (function () {
             var sidebar = document.querySelector('.sidebar');
@@ -620,6 +643,43 @@ if ($srcFoto === '' && $emailFoto !== '') {
             var apiFavorit = konten.getAttribute('data-api-favorit');
             var csrf = konten.getAttribute('data-csrf') || '';
             var timer = null;
+            var formTerpilih = null;
+
+            function buatDialog(id) {
+                var el = document.getElementById(id);
+                var api = {
+                    el: el,
+                    buka: function () {
+                        if (!el) return;
+                        if (typeof el.showModal === 'function') {
+                            if (!el.open) el.showModal();
+                        } else {
+                            el.setAttribute('open', '');
+                        }
+                    },
+                    tutup: function () {
+                        if (!el) return;
+                        if (typeof el.close === 'function') {
+                            el.close();
+                        } else {
+                            el.removeAttribute('open');
+                        }
+                    }
+                };
+                if (el) {
+                    el.addEventListener('click', function (e) {
+                        if (e.target !== el) return;
+                        var r = el.getBoundingClientRect();
+                        var dalam = e.clientX >= r.left && e.clientX <= r.right &&
+                                    e.clientY >= r.top && e.clientY <= r.bottom;
+                        if (!dalam) api.tutup();
+                    });
+                }
+                return api;
+            }
+
+            var dlgKonfirmasi = buatDialog('popup-konfirmasi');
+            var dlgTerhapus = buatDialog('popup-terhapus');
 
             function sembunyikan(n) {
                 clearTimeout(timer);
@@ -647,57 +707,76 @@ if ($srcFoto === '' && $emailFoto !== '') {
                 konten.appendChild(p);
             }
 
+            function hapusFavorit(form) {
+                if (!apiFavorit) { form.submit(); return; }
+                if (form.getAttribute('data-sedang') === '1') return;
+                form.setAttribute('data-sedang', '1');
+
+                var idEl = form.querySelector('input[name="id_wisata"]');
+                var id = idEl ? idEl.value : '';
+
+                fetch(apiFavorit, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-Token': csrf
+                    },
+                    body: JSON.stringify({ destination_id: id, action: 'remove' })
+                })
+                    .then(function (r) {
+                        return r.json().catch(function () { return {}; }).then(function (j) {
+                            if (r.ok && j && j.status === 'success') {
+                                var kartu = form.closest('.kartu');
+                                if (kartu) kartu.remove();
+                                cekKosong();
+                                dlgTerhapus.buka();
+                            } else {
+                                notif((j && j.message) || 'Gagal menghapus dari destinasi favorit.');
+                            }
+                        });
+                    })
+                    .catch(function () {
+                        notif('Tidak dapat menghubungi server.');
+                    })
+                    .then(function () {
+                        form.removeAttribute('data-sedang');
+                    });
+            }
+
             var awal = konten.querySelector('.notif');
             if (awal) sembunyikan(awal);
 
             document.querySelectorAll('.hapus-form').forEach(function (form) {
-                var sedang = false;
-
                 form.addEventListener('submit', function (e) {
-                    var nama = form.getAttribute('data-nama') || 'destinasi ini';
-                    if (!window.confirm('Hapus "' + nama + '" dari destinasi favorit?')) {
-                        e.preventDefault();
-                        return;
-                    }
-                    if (!apiFavorit) return;
-
                     e.preventDefault();
-                    if (sedang) return;
-                    sedang = true;
-
-                    var idEl = form.querySelector('input[name="id_wisata"]');
-                    var id = idEl ? idEl.value : '';
-
-                    fetch(apiFavorit, {
-                        method: 'POST',
-                        credentials: 'same-origin',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-Token': csrf
-                        },
-                        body: JSON.stringify({ destination_id: id, action: 'remove' })
-                    })
-                        .then(function (r) {
-                            return r.json().catch(function () { return {}; }).then(function (j) {
-                                if (r.ok && j && j.status === 'success') {
-                                    var kartu = form.closest('.kartu');
-                                    if (kartu) kartu.remove();
-                                    cekKosong();
-                                    notif('Dihapus dari destinasi favorit.');
-                                } else {
-                                    notif((j && j.message) || 'Gagal menghapus dari destinasi favorit.');
-                                }
-                            });
-                        })
-                        .catch(function () {
-                            notif('Tidak dapat menghubungi server.');
-                        })
-                        .then(function () {
-                            sedang = false;
-                        });
+                    formTerpilih = form;
+                    dlgKonfirmasi.buka();
                 });
             });
+
+            var btnHapus = document.getElementById('popup-konfirmasi-hapus');
+            var btnBatal = document.getElementById('popup-konfirmasi-batal');
+            var btnOk = document.getElementById('popup-terhapus-ok');
+
+            if (btnBatal) {
+                btnBatal.addEventListener('click', function () {
+                    formTerpilih = null;
+                    dlgKonfirmasi.tutup();
+                });
+            }
+
+            if (btnHapus) {
+                btnHapus.addEventListener('click', function () {
+                    var f = formTerpilih;
+                    formTerpilih = null;
+                    dlgKonfirmasi.tutup();
+                    if (f) hapusFavorit(f);
+                });
+            }
+
+            if (btnOk) btnOk.addEventListener('click', dlgTerhapus.tutup);
         })();
     </script>
 </body>
