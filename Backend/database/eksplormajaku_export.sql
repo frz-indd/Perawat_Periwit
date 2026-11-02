@@ -194,7 +194,7 @@ DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
   `Id_user` int(12) NOT NULL AUTO_INCREMENT,
   `Nama_user` varchar(255) NOT NULL,
-  `Email` varchar(255) NOT NULL,
+  `Email` varchar(255) DEFAULT NULL,
   `No_telepon` varchar(20) DEFAULT NULL,
   `Password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`Id_user`),

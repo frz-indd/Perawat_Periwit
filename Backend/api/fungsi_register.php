@@ -30,11 +30,38 @@ if (($_SERVER["REQUEST_METHOD"] ?? "") !== "POST") {
 
 $name = trim((string) ($_POST["nama"] ?? $_POST["Nama_user"] ?? ""));
 
-$email = strtolower(
-    trim((string) ($_POST["email"] ?? $_POST["Email"] ?? ""))
-);
-
+$identity = trim((string) ($_POST["email"] ?? $_POST["Email"] ?? ""));
+$email = null;
 $phone = trim((string) ($_POST["telepon"] ?? $_POST["no_telepon"] ?? ""));
+
+if ($identity === "") {
+    $respond(422, [
+        "status" => "validation_error",
+        "message" => "Email/No telepon wajib di isi."
+    ]);
+}
+
+if (filter_var($identity, FILTER_VALIDATE_EMAIL) !== false) {
+    $email = strtolower($identity);
+    if (strlen($email) > 255) {
+        $respond(422, [
+            "status" => "validation_error",
+            "message" => "Masukkan alamat email / no telepon yang valid."
+        ]);
+    }
+} elseif (strpos($identity, "@") !== false) {
+    $respond(422, [
+        "status" => "validation_error",
+        "message" => "Masukkan alamat email / no telepon yang valid."
+    ]);
+} elseif ($phone === "") {
+    $phone = $identity;
+} else {
+    $respond(422, [
+        "status" => "validation_error",
+        "message" => "Masukkan satu email atau nomor telepon."
+    ]);
+}
 
 $password = $_POST["password"] ?? $_POST["Password"] ?? null;
 
@@ -42,22 +69,6 @@ $confirmPassword =
     $_POST["confirmPassword"] ??
     $_POST["confirm_password"] ??
     null;
-
-//VALIDASI EMAIK
-
-if ($email === "") {
-    $respond(422, [
-        "status" => "validation_error",
-        "message" => "Email wajib diisi."
-    ]);
-}
-
-if (strlen($email) > 255 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    $respond(422, [
-        "status" => "validation_error",
-        "message" => "Masukkan alamat email yang valid."
-    ]);
-}
 
 $normalizePhone = static function (string $value): string {
     $value = preg_replace('/[\s()-]/', '', $value);
@@ -83,7 +94,7 @@ if ($phone !== "") {
     ) {
         $respond(422, [
             "status" => "validation_error",
-            "message" => "Nomor telepon harus diawali +62, contoh: +6281234567890."
+            "message" => "Masukkan alamat email / no telepon yang valid."
         ]);
     }
 
@@ -123,7 +134,7 @@ if ($password !== $confirmPassword) {
 }
 
 if ($name === "") {
-    $emailName = strstr($email, "@", true);
+    $emailName = $email !== null ? strstr($email, "@", true) : false;
 
     $name = is_string($emailName) && $emailName !== ""
         ? $emailName
@@ -144,7 +155,7 @@ try {
 
     if ($phone !== "") {
         $phoneColumn = $conn->query(
-            "SHOW COLUMNS FROM `user` LIKE 'No_telepon'"
+            "SHOW COLUMNS FROM `user` WHERE Field = 'No_telepon'"
         );
         if (!$phoneColumn || !$phoneColumn->fetch_assoc()) {
             $respond(503, [
@@ -152,29 +163,47 @@ try {
                 "message" => "Kolom nomor telepon belum tersedia. Jalankan migrasi phone_login_migration.sql di database hosting."
             ]);
         }
+
+        if ($email === null) {
+            $emailColumn = $conn->query(
+                "SHOW COLUMNS FROM `user` LIKE 'Email'"
+            );
+            $emailDefinition = $emailColumn
+                ? $emailColumn->fetch_assoc()
+                : false;
+
+            if (!$emailDefinition || strtoupper((string) $emailDefinition["Null"]) !== "YES") {
+                $respond(503, [
+                    "status" => "phone_not_configured",
+                    "message" => "Registrasi nomor telepon saja belum tersedia. Jalankan phone_only_registration_migration.sql di database hosting."
+                ]);
+            }
+        }
     }
 
     /* CEK EMAIL SUDAH TERDAFTAR */
 
-    $check = $conn->prepare(
-        "SELECT Id_user
-         FROM `user`
-         WHERE Email = ?
-         LIMIT 1"
-    );
+    if ($email !== null) {
+        $check = $conn->prepare(
+            "SELECT Id_user
+             FROM `user`
+             WHERE Email = ?
+             LIMIT 1"
+        );
 
-    $check->bind_param("s", $email);
-    $check->execute();
-    $check->store_result();
+        $check->bind_param("s", $email);
+        $check->execute();
+        $check->store_result();
 
-    $emailExists = $check->num_rows > 0;
-    $check->close();
+        $emailExists = $check->num_rows > 0;
+        $check->close();
 
-    if ($emailExists) {
-        $respond(409, [
-            "status" => "email_exists",
-            "message" => "Email sudah terdaftar. Silakan gunakan email lain."
-        ]);
+        if ($emailExists) {
+            $respond(409, [
+                "status" => "email_exists",
+                "message" => "Email sudah terdaftar. Silakan gunakan email lain."
+            ]);
+        }
     }
 
     if ($phone !== "") {

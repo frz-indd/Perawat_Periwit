@@ -22,6 +22,7 @@ function setInvalid(input, feedback, message) {
     if (input) {
         input.classList.add('is-invalid');
         input.classList.remove('is-valid');
+        input.setAttribute('aria-invalid', 'true');
     }
 
     if (feedback) {
@@ -34,6 +35,7 @@ function setValid(input, feedback) {
     if (input) {
         input.classList.remove('is-invalid');
         input.classList.add('is-valid');
+        input.setAttribute('aria-invalid', 'false');
     }
 
     if (feedback) {
@@ -46,6 +48,7 @@ function clearValidation(input) {
     if (!input) return;
 
     input.classList.remove('is-invalid', 'is-valid');
+    input.removeAttribute('aria-invalid');
 
     const feedback = input
         .closest('.form-group')
@@ -59,6 +62,15 @@ function clearValidation(input) {
 
 function isValidEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function isValidRegisterPassword(value) {
+    return value.length >= 8 &&
+        new TextEncoder().encode(value).length <= 72 &&
+        /[a-z]/.test(value) &&
+        /[A-Z]/.test(value) &&
+        /\d/.test(value) &&
+        /[^A-Za-z0-9]/.test(value);
 }
 
 function isValidPhone(value) {
@@ -227,42 +239,38 @@ if (loginForm) {
         const passwordValue = password.value;
 
         let valid = true;
-        const errors = [];
 
         if (!identityValue) {
-            const error = 'Email atau nomor telepon wajib diisi.';
-
-            setInvalid(identity, identityFeedback, error);
-            errors.push(error);
+            setInvalid(
+                identity,
+                identityFeedback,
+                'Email/No telepon wajib diisi'
+            );
             valid = false;
         } else if (
             identityValue.includes('@')
                 ? !isValidEmail(identityValue)
                 : !isValidLoginPhone(identityValue)
         ) {
-            const error = identityValue.includes('@')
-                ? 'Masukkan alamat email yang valid.'
-                : 'Nomor telepon harus diawali +62, contoh: +6281234567890.';
-
-            setInvalid(identity, identityFeedback, error);
-            errors.push(error);
+            setInvalid(
+                identity,
+                identityFeedback,
+                'Masukkan alamat email / no telepon yang valid'
+            );
             valid = false;
         } else {
             setValid(identity, identityFeedback);
         }
 
         if (!passwordValue.trim()) {
-            const error = 'Password wajib diisi.';
-
-            setInvalid(password, passwordFeedback, error);
-            errors.push(error);
+            setInvalid(password, passwordFeedback, 'Password wajib diisi');
             valid = false;
         } else {
             setValid(password, passwordFeedback);
         }
 
         if (!valid) {
-            showMessage(message, errors.join(' '));
+            loginForm.querySelector('.is-invalid')?.focus();
             return;
         }
 
@@ -289,36 +297,45 @@ if (loginForm) {
                 return;
             }
 
-            const messages = {
-                account_not_found:
-                    'Akun tidak ditemukan. Silakan daftar terlebih dahulu.',
+            if (result.status === 'wrong_password') {
+                setInvalid(
+                    password,
+                    passwordFeedback,
+                    'Password yang kamu masukkan salah, silahkan coba lagi'
+                );
+            } else if (
+                result.status === 'invalid_email' ||
+                result.status === 'invalid_phone'
+            ) {
+                setInvalid(
+                    identity,
+                    identityFeedback,
+                    result.status === 'invalid_email'
+                        ? 'Masukkan alamat email yang valid'
+                        : 'Masukkan nomor telepon yang valid'
+                );
+            } else {
+                const messages = {
+                    account_not_found:
+                        'Email atau No Telepon tidak ditemukan, silahkan daftar terlebih dahulu!',
+                    validation_error: result.message ||
+                        'Data login tidak valid.',
+                    server_error:
+                        'Terjadi kesalahan server, silahkan coba beberapa saat lagi.'
+                };
 
-                wrong_password:
-                    'Password yang kamu masukkan salah. Silakan coba lagi.',
-
-                invalid_email:
-                    'Masukkan alamat email yang valid.',
-
-                invalid_phone:
-                    'Nomor telepon harus diawali +62, contoh: +6281234567890.',
-
-                validation_error:
-                    result.message || 'Data login tidak valid.',
-
-                server_error:
-                    'Terjadi kesalahan pada server. Silakan coba lagi.'
-            };
-
-            const error = messages[result.status] ||
-                result.message ||
-                'Terjadi kesalahan pada server. Silakan coba lagi.';
-
-            showMessage(message, error);
+                showMessage(
+                    message,
+                    messages[result.status] ||
+                        result.message ||
+                        'Terjadi kesalahan server, silahkan coba beberapa saat lagi.'
+                );
+            }
 
         } catch {
             showMessage(
                 message,
-                'Terjadi kesalahan pada server. Silakan coba lagi.'
+                'Terjadi kesalahan server. Silakan coba lagi beberapa saat.'
             );
         } finally {
             isSubmitting = false;
@@ -335,8 +352,7 @@ if (loginForm) {
 const registerForm = document.getElementById('registerForm');
 
 if (registerForm) {
-    const email = document.getElementById('registerIdentity');
-    const phone = document.getElementById('registerPhone');
+    const identity = document.getElementById('registerIdentity');
     const password = document.getElementById('registerPassword');
     const confirmPassword = document.getElementById('confirmPassword');
     const message = document.getElementById('registerMessage');
@@ -344,11 +360,7 @@ if (registerForm) {
     const submitLabel = submitButton.textContent.trim();
     let isSubmitting = false;
 
-    const emailFeedback = email
-        .closest('.form-group')
-        .querySelector('.invalid-feedback');
-
-    const phoneFeedback = phone
+    const identityFeedback = identity
         .closest('.form-group')
         .querySelector('.invalid-feedback');
 
@@ -370,7 +382,9 @@ if (registerForm) {
         cancelled: 'Pendaftaran dengan Google dibatalkan.'
     };
 
-    if (googleMessages[googleResult]) {
+    if (googleResult === 'email_exists') {
+        setInvalid(identity, identityFeedback, googleMessages[googleResult]);
+    } else if (googleMessages[googleResult]) {
         showMessage(message, googleMessages[googleResult]);
     }
 
@@ -381,78 +395,72 @@ if (registerForm) {
 
         hideMessage(message);
 
-        const emailValue = email.value.trim();
-        const phoneValue = phone.value.trim();
+        const identityValue = identity.value.trim();
         const passwordValue = password.value;
         const confirmValue = confirmPassword.value;
 
         let valid = true;
-        const errors = [];
 
-        if (!emailValue) {
-            const error = 'Email wajib diisi.';
-
-            setInvalid(email, emailFeedback, error);
-            errors.push(error);
+        if (!identityValue) {
+            setInvalid(
+                identity,
+                identityFeedback,
+                'Email/No telepon wajib di isi'
+            );
             valid = false;
-        } else if (!isValidEmail(emailValue)) {
-            const error = 'Masukkan alamat email yang valid.';
-
-            setInvalid(email, emailFeedback, error);
-            errors.push(error);
+        } else if (
+            identityValue.includes('@')
+                ? !isValidEmail(identityValue)
+                : !isValidPhone(identityValue)
+        ) {
+            setInvalid(
+                identity,
+                identityFeedback,
+                'Masukkan alamat email / no telepon yang valid'
+            );
             valid = false;
         } else {
-            setValid(email, emailFeedback);
-        }
-
-        if (phoneValue && !isValidPhone(phoneValue)) {
-            const error =
-                'Nomor telepon harus diawali +62, contoh: +6281234567890.';
-
-            setInvalid(phone, phoneFeedback, error);
-            errors.push(error);
-            valid = false;
-        } else if (phoneValue) {
-            setValid(phone, phoneFeedback);
-        } else {
-            clearValidation(phone);
+            setValid(identity, identityFeedback);
         }
 
         if (!passwordValue.trim()) {
-            const error = 'Password wajib diisi.';
-
-            setInvalid(password, passwordFeedback, error);
-            errors.push(error);
+            setInvalid(
+                password,
+                passwordFeedback,
+                'Password wajib diisi'
+            );
             valid = false;
-        } else if (passwordValue.length < 8) {
-            const error =
-                'Password harus terdiri dari minimal 8 karakter.';
-
-            setInvalid(password, passwordFeedback, error);
-            errors.push(error);
+        } else if (!isValidRegisterPassword(passwordValue)) {
+            setInvalid(
+                password,
+                passwordFeedback,
+                'Password minimal 8 karakter dan harus memuat huruf besar, huruf kecil, angka, serta karakter khusus.'
+            );
             valid = false;
         } else {
             setValid(password, passwordFeedback);
         }
 
         if (!confirmValue.trim()) {
-            const error = 'Verifikasi password wajib diisi.';
-
-            setInvalid(confirmPassword, confirmFeedback, error);
-            errors.push(error);
+            setInvalid(
+                confirmPassword,
+                confirmFeedback,
+                'Verifikasi password wajib diisi'
+            );
             valid = false;
         } else if (passwordValue !== confirmValue) {
-            const error = 'Konfirmasi password tidak sesuai.';
-
-            setInvalid(confirmPassword, confirmFeedback, error);
-            errors.push(error);
+            setInvalid(
+                confirmPassword,
+                confirmFeedback,
+                'Konfirmasi password tidak sesuai'
+            );
             valid = false;
         } else {
             setValid(confirmPassword, confirmFeedback);
         }
 
         if (!valid) {
-            showMessage(message, errors.join(' '));
+            registerForm.querySelector('.is-invalid')?.focus();
             return;
         }
 
@@ -473,34 +481,52 @@ if (registerForm) {
                 return;
             }
 
-            const messages = {
-                email_exists:
-                    'Email sudah terdaftar. Silakan gunakan email lain.',
+            if (
+                result.status === 'email_exists' ||
+                result.status === 'phone_exists'
+            ) {
+                setInvalid(
+                    identity,
+                    identityFeedback,
+                    'Email/ No Telepon sudah terdaftar, silahkan gunakan email/no telp lain'
+                );
+            } else if (result.status === 'validation_error') {
+                const errorMessage = result.message ||
+                    'Data pendaftaran tidak valid.';
+                const normalizedMessage = errorMessage.toLowerCase();
 
-                phone_exists:
-                    'Nomor telepon sudah terdaftar. Silakan gunakan nomor lain.',
+                if (normalizedMessage.includes('password')) {
+                    setInvalid(password, passwordFeedback, errorMessage);
+                } else if (normalizedMessage.includes('verifikasi')) {
+                    setInvalid(
+                        confirmPassword,
+                        confirmFeedback,
+                        errorMessage
+                    );
+                } else {
+                    setInvalid(identity, identityFeedback, errorMessage);
+                }
+            } else {
+                const messages = {
+                    phone_not_configured:
+                        result.message ||
+                        'Pendaftaran dengan nomor telepon belum tersedia di server.',
+                    server_error:
+                        'Terjadi kesalahan server, silahkan coba beberapa saat lagi.'
+                };
 
-                phone_not_configured:
-                    result.message ||
-                    'Pendaftaran dengan nomor telepon belum tersedia di server.',
-
-                validation_error:
-                    result.message || 'Data pendaftaran tidak valid.',
-
-                server_error:
-                    'Terjadi kesalahan pada server. Silakan coba lagi.'
-            };
-
-            const error = messages[result.status] ||
-                result.message ||
-                'Terjadi kesalahan pada server. Silakan coba lagi.';
-
-            showMessage(message, error);
+                showMessage(
+                    message,
+                    messages[result.status] ||
+                        result.message ||
+                        'Terjadi kesalahan server, silahkan coba beberapa saat lagi.'
+                );
+            }
 
         } catch {
             showMessage(
                 message,
-                'Terjadi kesalahan pada server. Silakan coba lagi.'
+                'Terjadi kesalahan server, silahkan coba beberapa saat lagi.'
             );
         } finally {
             isSubmitting = false;

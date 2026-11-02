@@ -166,8 +166,9 @@ if ($info) {
 
 $email = trim((string) ($_SESSION['email'] ?? ($_SESSION['user']['email'] ?? ($_SESSION['no_hp'] ?? ($_SESSION['telepon'] ?? '')))));
 if ($email === '' && $info) {
-    $email = nilai_pertama($row, $info, ['email', 'no_hp', 'telepon']);
+    $email = nilai_pertama($row, $info, ['email', 'no_telepon', 'no_hp', 'telepon']);
 }
+$emailAkun = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : '';
 
 $nama = $info ? nilai_pertama($row, $info, ['nama', 'nama_lengkap', 'nama_user', 'username']) : '';
 if ($nama === '') $nama = trim((string) ($_SESSION['nama'] ?? ($_SESSION['user']['nama'] ?? '')));
@@ -392,7 +393,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         data-api-url="<?= e($apiProfil) ?>"
         data-api="<?= e($apiProfil) ?>"
         data-csrf="<?= e($_SESSION['csrf']) ?>"
-        data-email="<?= e($email) ?>">
+        data-email="<?= e($emailAkun) ?>">
     <input type="hidden" name="api_status" id="api-status" value="">
     <input type="hidden" name="api_pesan" id="api-pesan" value="">
     <input type="hidden" name="nama_awal" id="nama-awal" value="<?= e($nama) ?>">
@@ -422,9 +423,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <input class="ep-input" type="text" id="nama_lengkap" name="nama_lengkap"
              value="<?= e($nama) ?>" placeholder="Nama User" maxlength="100" autocomplete="name" required>
 
-      <span class="ep-label ep-label--email">Email</span>
+      <span class="ep-label ep-label--email">Email / No telepon</span>
       <p class="ep-email" id="email-tampil"><?= e($email) ?></p>
-      <p class="ep-catatan">Email tidak dapat diubah karena digunakan sebagai identitas akun.</p>
+      <p class="ep-catatan">Identitas akun tidak dapat diubah.</p>
 
       <button type="submit" class="ep-btn ep-btn--utama">Simpan Perubahan</button>
       <a href="profil.php" class="ep-btn ep-btn--batal">Batal</a>
@@ -692,9 +693,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             inpNama.value = j.data.nama;
             namaAwal.value = j.data.nama;
           }
-          if (j.data.email) {
-            emailEl.textContent = j.data.email;
-            form.setAttribute('data-email', j.data.email);
+          if (j.data.email || j.data.telepon) {
+            emailEl.textContent = j.data.email || j.data.telepon;
+            form.setAttribute(
+              'data-email',
+              j.data.email && polaEmail.test(j.data.email) ? j.data.email : ''
+            );
           }
         })
         .catch(function () {});
@@ -720,7 +724,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         var nama  = inpNama.value.trim();
         var email = form.getAttribute('data-email') || '';
 
-        if (nama === '' || nama.length > 100 || !polaEmail.test(email)) return;
+        if (nama === '' || nama.length > 100 || (email !== '' && !polaEmail.test(email))) return;
 
         e.preventDefault();
         sedangKirim = true;

@@ -25,14 +25,14 @@
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="../CSS/auth.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
+    <link rel="stylesheet" href="../CSS/theme.css?v=auth-design-9">
+    <link rel="stylesheet" href="../CSS/auth.css?v=auth-design-9">
 </head>
 
-<body>
+<body class="auth-page">
 
     <header class="auth-header">
-        <a href="../index.html" class="brand-name">
+        <a href="../../index.php" class="brand-name">
             Explore Majaku
         </a>
     </header>
@@ -72,23 +72,21 @@
                 >
 
                     <div class="form-group">
-                        <label for="loginIdentity">
-                            Email atau Nomor Telepon
-                        </label>
+                        <label for="loginIdentity">Email atau No telepon</label>
 
                         <input
                             type="text"
                             id="loginIdentity"
                             name="email"
                             class="auth-input"
-                            placeholder="Email atau +6281234567890"
+                            placeholder="Masukkan Email or No Telepon"
                             autocomplete="username"
                             maxlength="255"
                             required
                         >
 
                         <div class="invalid-feedback">
-                            Email atau nomor telepon wajib diisi. Nomor telepon harus diawali +62.
+                            Email/No telepon wajib diisi
                         </div>
                     </div>
 
@@ -101,7 +99,7 @@
                                 id="loginPassword"
                                 name="password"
                                 class="auth-input"
-                                placeholder="Masukkan password kamu"
+                                placeholder="Masukkan Password"
                                 autocomplete="current-password"
                                 required
                             >
@@ -112,27 +110,14 @@
                                 data-target="loginPassword"
                                 aria-label="Tampilkan password"
                             >
-                                <i class="bi bi-eye-slash"></i>
+                                <i class="bi bi-eye"></i>
                             </button>
                         </div>
 
                         <div class="invalid-feedback">
-                            Password wajib diisi.
+                            Password wajib diisi
                         </div>
                     </div>
-
-                    <div
-                        id="loginMessage"
-                        class="alert alert-danger mt-3 d-none"
-                        role="alert"
-                        aria-live="polite"
-                    ></div>
-
-                    <div
-                        id="loginPasswordError"
-                        class="d-none"
-                        role="alert"
-                    ></div>
 
                     <div class="login-options">
                         <div class="remember-me">
@@ -148,6 +133,13 @@
                             Lupa Kata Sandi?
                         </a>
                     </div>
+
+                    <div
+                        id="loginMessage"
+                        class="alert alert-danger d-none"
+                        role="alert"
+                        aria-live="polite"
+                    ></div>
 
                     <button type="submit" class="auth-button">
                         Login
@@ -210,7 +202,7 @@
         </section>
     </div>
 
-    <script src="../Js/auth.js?v=20261102-phone-login-1"></script>
+    <script src="../Js/auth.js?v=auth-design-9"></script>
 
 </body>
 </html>

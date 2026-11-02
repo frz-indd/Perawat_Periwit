@@ -114,7 +114,7 @@ if ($role === "admin") {
             session_start();
         }
         session_regenerate_id(true);
-        unset($_SESSION["id_user"], $_SESSION["nama_user"], $_SESSION["email"]);
+        unset($_SESSION["id_user"], $_SESSION["nama_user"], $_SESSION["email"], $_SESSION["telepon"]);
         $_SESSION["id_admin"] = (int) $adminId;
         $_SESSION["nama_admin"] = $adminName;
         $_SESSION["username_admin"] = $storedUsername;
@@ -295,6 +295,7 @@ try {
     $_SESSION["id_user"] = (int) $userId;
     $_SESSION["nama_user"] = $name;
     $_SESSION["email"] = $storedEmail;
+    $_SESSION["telepon"] = $isEmail ? null : $identity;
     $_SESSION["role"] = "user";
     $_SESSION["csrf"] = bin2hex(random_bytes(32));
 
@@ -306,6 +307,7 @@ try {
             "id_user" => (int) $userId,
             "nama" => $name,
             "email" => $storedEmail,
+            "telepon" => $_SESSION["telepon"],
             "csrf" => $_SESSION["csrf"]
         ]
     ]);

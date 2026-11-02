@@ -30,8 +30,8 @@ $destinasiLain = array_slice($wisata, 4, 4);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <!-- CSS Beranda -->
-    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=home-search-1">
-    <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=home-search-1">
+    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=home-reference-4">
+    <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=home-reference-4">
     <link rel="stylesheet" href="FrontEnd/CSS/navbar-common.css?v=2">
 </head>
 
@@ -57,12 +57,6 @@ $destinasiLain = array_slice($wisata, 4, 4);
                 <a class="ep-menu__tentang" href="FrontEnd/pages/tentang.php">Tentang</a>
             </nav>
             <div class="ep-aksi">
-                <a class="ep-ikon ep-ikon--cari" href="FrontEnd/pages/hasil_pencarian.php" aria-label="Cari">
-                    <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
-                        <circle cx="13.5" cy="13.5" r="11.7"/>
-                        <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
-                    </svg>
-                </a>
                 <a class="ep-ikon ep-ikon--profil" href="FrontEnd/pages/profil.php" aria-label="Profil">
                     <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="20" cy="20" r="18.2"/>
@@ -70,6 +64,9 @@ $destinasiLain = array_slice($wisata, 4, 4);
                         <path d="M9 33.5C9.7 29.2 12.2 26 15.2 25.2C17 26.6 23 26.6 24.8 25.2C27.8 26 30.3 29.2 31 33.5"/>
                     </svg>
                 </a>
+                <?php if (!$isLoggedIn): ?>
+                    <a class="login-button" href="FrontEnd/auth/Login.php">Login</a>
+                <?php endif; ?>
             </div>
         </div>
     </header>
@@ -87,7 +84,7 @@ $destinasiLain = array_slice($wisata, 4, 4);
                 Temukan destinasi wisata terbaik di majalengka &amp; Kuningan
             </p>
 
-            <div class="home-search-actions">
+            <div class="hero-search-actions">
                 <form
                     class="search-box"
                     action="<?= $isLoggedIn ? 'search' : 'FrontEnd/auth/Login.php' ?>"
@@ -134,7 +131,7 @@ $destinasiLain = array_slice($wisata, 4, 4);
         <!-- DESTINASI UTAMA -->
         <section class="destination-section">
 
-            <h2>Destinasi Wisata</h2>
+            <h2>Rekomendasi Untuk kamu</h2>
 
             <div class="destination-grid">
                 <?php foreach ($destinasiUtama as $destination): ?>
@@ -176,7 +173,7 @@ $destinasiLain = array_slice($wisata, 4, 4);
         <!-- DESTINASI LAINNYA -->
         <section class="destination-section nearby-section">
 
-            <h2>Destinasi Lainnya</h2>
+            <h2>Wisata Terdekat dari lokasi mu</h2>
 
             <div class="destination-grid">
                 <?php foreach ($destinasiLain as $destination): ?>
@@ -224,7 +221,7 @@ $destinasiLain = array_slice($wisata, 4, 4);
 
         searchForm.addEventListener('submit', function (event) {
             const query = searchInput.value.trim();
-            if (query.length < 2) {
+            if (Array.from(query).length < 2) {
                 event.preventDefault();
                 searchInput.setCustomValidity('Masukkan minimal 2 karakter untuk mencari.');
                 searchInput.reportValidity();

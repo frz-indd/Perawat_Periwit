@@ -11,12 +11,12 @@ $baseUrl = $scheme . "://" . $host . $appRoot;
 
 $endpoints = [
     ["POST", "/Backend/api/fungsi_login.php", "Login pengguna dengan email atau nomor telepon berformat +62, atau login admin.", true],
-    ["POST", "/Backend/api/fungsi_register.php", "Mendaftarkan akun dengan email dan nomor telepon opsional.", true],
+    ["POST", "/Backend/api/fungsi_register.php", "Mendaftarkan akun dengan email atau nomor telepon.", true],
     ["GET", "/Backend/api/google_login.php", "Memulai login Google.", true],
     ["GET", "/Backend/api/google_login.php?intent=register", "Memulai pendaftaran Google.", true],
     ["GET", "/Backend/api/google_callback.php", "Menyelesaikan proses login Google.", true],
     ["GET", "/users/me", "Mengambil profil pengguna yang login.", true],
-    ["PUT", "/users/me", "Mengubah nama dan email pengguna.", true],
+    ["PUT", "/users/me", "Mengubah nama pengguna tanpa mengubah identitas akun.", true],
     ["GET", "/Backend/api/wisata.php", "Mengambil daftar wisata dan informasi lokasinya.", true],
     ["GET", "/categories", "Mengambil daftar kategori aktif.", true],
     ["GET", "/categories/{id}/wisata", "Mengambil wisata dalam kategori aktif.", true],

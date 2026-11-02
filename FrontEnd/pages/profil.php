@@ -216,7 +216,7 @@ if ($modePreview) {
 
     $namaUser = ambilKolomUser($conn, $userId, ['nama', 'nama_lengkap', 'nama_user', 'username'])
         ?: ($namaSesi !== '' ? $namaSesi : 'Pengguna');
-    $emailUser = $identitasLogin !== '' ? $identitasLogin : ambilKolomUser($conn, $userId, ['email', 'no_hp', 'telepon']);
+    $emailUser = $identitasLogin !== '' ? $identitasLogin : ambilKolomUser($conn, $userId, ['email', 'no_telepon', 'no_hp', 'telepon']);
 
     $favorites  = ambilFavoritUser($conn, $userId);
     $fotoProfil = ambilFotoProfil($conn, $userId);

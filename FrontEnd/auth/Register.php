@@ -25,14 +25,14 @@
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="../CSS/auth.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
+    <link rel="stylesheet" href="../CSS/theme.css?v=auth-design-9">
+    <link rel="stylesheet" href="../CSS/auth.css?v=auth-design-9">
 </head>
 
-<body>
+<body class="auth-page">
 
     <header class="auth-header">
-        <a href="../index.html" class="brand-name">
+        <a href="../../index.php" class="brand-name">
             Explore Majaku
         </a>
     </header>
@@ -72,40 +72,21 @@
                 >
 
                     <div class="form-group">
-                        <label for="registerIdentity">Email</label>
+                        <label for="registerIdentity">Email atau No telepon</label>
 
                         <input
-                            type="email"
+                            type="text"
                             id="registerIdentity"
                             name="email"
                             class="auth-input"
-                            placeholder="Masukkan email kamu"
-                            autocomplete="email"
+                            placeholder="Masukkan Email or No Telepon"
+                            autocomplete="username"
                             maxlength="255"
                             required
                         >
 
                         <div class="invalid-feedback">
-                            Email wajib diisi.
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="registerPhone">Nomor Telepon (opsional)</label>
-
-                        <input
-                            type="tel"
-                            id="registerPhone"
-                            name="telepon"
-                            class="auth-input"
-                            placeholder="Contoh: +6281234567890"
-                            autocomplete="tel"
-                            inputmode="tel"
-                            maxlength="20"
-                        >
-
-                        <div class="invalid-feedback">
-                            Nomor telepon harus diawali +62, contoh: +6281234567890.
+                            Email/No telepon wajib di isi
                         </div>
                     </div>
 
@@ -118,7 +99,7 @@
                                 id="registerPassword"
                                 name="password"
                                 class="auth-input"
-                                placeholder="Masukkan password kamu"
+                                placeholder="Masukkan Password"
                                 autocomplete="new-password"
                                 minlength="8"
                                 required
@@ -130,12 +111,12 @@
                                 data-target="registerPassword"
                                 aria-label="Tampilkan password"
                             >
-                                <i class="bi bi-eye-slash"></i>
+                                <i class="bi bi-eye"></i>
                             </button>
                         </div>
 
                         <div class="invalid-feedback">
-                            Password wajib diisi.
+                            Password minimal 8 karakter dan harus memuat huruf besar, huruf kecil, angka, serta karakter khusus.
                         </div>
                     </div>
 
@@ -150,7 +131,7 @@
                                 id="confirmPassword"
                                 name="confirmPassword"
                                 class="auth-input"
-                                placeholder="Masukkan ulang password kamu"
+                                placeholder="Verifikasi Password"
                                 autocomplete="new-password"
                                 required
                             >
@@ -161,7 +142,7 @@
                                 data-target="confirmPassword"
                                 aria-label="Tampilkan password"
                             >
-                                <i class="bi bi-eye-slash"></i>
+                                <i class="bi bi-eye"></i>
                             </button>
                         </div>
 
@@ -169,16 +150,9 @@
                             class="invalid-feedback"
                             id="confirmPasswordError"
                         >
-                            Verifikasi password wajib diisi.
+                            Verifikasi password wajib diisi
                         </div>
                     </div>
-
-                    <div
-                        id="registerMessage"
-                        class="alert alert-danger mt-3 d-none"
-                        role="alert"
-                        aria-live="polite"
-                    ></div>
 
                     <button type="submit" class="auth-button">
                         Register
@@ -191,6 +165,13 @@
                     <p>Atau</p>
                     <span></span>
                 </div>
+
+                <div
+                    id="registerMessage"
+                    class="alert alert-danger d-none"
+                    role="alert"
+                    aria-live="polite"
+                ></div>
 
                 <button
                     type="button"
@@ -207,7 +188,7 @@
                         </svg>
                     </span>
 
-                    <span>Masuk dengan Google</span>
+                    <span>Daftar dengan Google</span>
                 </button>
 
                 <div class="switch-auth">
@@ -241,7 +222,7 @@
         </section>
     </div>
 
-    <script src="../Js/auth.js?v=20261102-phone-login-1"></script>
+    <script src="../Js/auth.js?v=auth-design-9"></script>
 
 </body>
 </html>

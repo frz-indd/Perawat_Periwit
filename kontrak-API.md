@@ -61,9 +61,9 @@ Status yang dapat diterima:
 
 Kirim data sebagai `application/x-www-form-urlencoded` atau `multipart/form-data`.
 
-Field `email`, `password`, dan `confirmPassword` wajib diisi. Field `nama` boleh kosong. Isi `password` dan `confirmPassword` dengan kata sandi yang sama.
+Field `email` menerima alamat email **atau** nomor telepon Indonesia berformat `+62`; isi salah satunya bersama `password` dan `confirmPassword`. Field `nama` boleh kosong. Nomor telepon disimpan pada kolom `No_telepon`, sedangkan `Email` akan bernilai `null` untuk akun telepon saja.
 
-Password harus memiliki 8 sampai 72 karakter, huruf besar dan kecil, angka, serta karakter khusus. Jika `nama` tidak diisi, backend menggunakan bagian email sebelum tanda `@`. Pendaftaran tidak langsung membuat session login.
+Password harus memiliki 8 sampai 72 karakter, huruf besar dan kecil, angka, serta karakter khusus. Jika `nama` tidak diisi, backend menggunakan bagian email sebelum tanda `@` atau nama generik untuk akun telepon. Pendaftaran tidak langsung membuat session login. Database harus menjalankan migrasi `phone_login_migration.sql`; bila migrasi itu sudah pernah dijalankan, jalankan `phone_only_registration_migration.sql` untuk membuat kolom email nullable.
 
 Contoh respons `201 Created`:
 
@@ -74,7 +74,8 @@ Contoh respons `201 Created`:
   "data": {
     "id_user": 8,
     "nama": "Nama",
-    "email": "nama@example.com"
+    "email": "nama@example.com",
+    "telepon": null
   }
 }
 ```
@@ -83,8 +84,9 @@ Status yang dapat diterima:
 
 - `201`: akun berhasil dibuat.
 - `405`: metode selain POST.
-- `409`: email sudah digunakan.
-- `422`: email, password, konfirmasi password, atau nama tidak valid.
+- `409`: email atau nomor telepon sudah digunakan.
+- `422`: email/nomor telepon, password, konfirmasi password, atau nama tidak valid.
+- `503`: dukungan kolom nomor telepon atau email nullable belum dikonfigurasi.
 - `500`: terjadi kesalahan server.
 
 ## 3. Login Google

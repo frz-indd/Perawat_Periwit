@@ -24,11 +24,28 @@ $jarakDipilih = is_array($_GET['distance'] ?? null)
     ? array_values(array_filter($_GET['distance'], 'is_string'))
     : [];
 
-$budgetMin = isset($_GET['min']) && $_GET['min'] !== ''
-    ? max(0, (int) $_GET['min']) : 0;
-
-$budgetMax = isset($_GET['max']) && $_GET['max'] !== ''
-    ? max(0, (int) $_GET['max']) : 1000000;
+$minimumBudgetInput = is_string($_GET['min'] ?? null)
+    ? trim($_GET['min'])
+    : '';
+$maximumBudgetInput = is_string($_GET['max'] ?? null)
+    ? trim($_GET['max'])
+    : '';
+$hasMinimumBudget = $minimumBudgetInput !== '';
+$hasMaximumBudget = $maximumBudgetInput !== '';
+$parsedMinimumBudget = $hasMinimumBudget
+    ? filter_var($minimumBudgetInput, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]])
+    : 0;
+$parsedMaximumBudget = $hasMaximumBudget
+    ? filter_var($maximumBudgetInput, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]])
+    : 1000000;
+$isInvalidBudgetInput = $parsedMinimumBudget === false || $parsedMaximumBudget === false;
+$budgetMin = $parsedMinimumBudget === false ? 0 : (int) $parsedMinimumBudget;
+$budgetMax = $parsedMaximumBudget === false ? 1000000 : (int) $parsedMaximumBudget;
+$isInvalidBudgetRange = !$isInvalidBudgetInput &&
+    $hasMinimumBudget &&
+    $hasMaximumBudget &&
+    $budgetMin > $budgetMax;
+$hasBudgetValidationError = $isInvalidBudgetInput || $isInvalidBudgetRange;
 
 $categoryDisplayNames = [
     1 => 'Wisata Alam & Pegunungan',
@@ -36,6 +53,8 @@ $categoryDisplayNames = [
     3 => 'Wisata Buatan & Kuliner',
     2 => 'Wisata Sejarah & Budaya'
 ];
+$categoryFilterNames = $categoryDisplayNames;
+$categoryFilterNames[3] = 'Wisata Buatan/Kuliner';
 
 // Destination cards are populated from the active database rows below.
 $destinasi = [];
@@ -43,7 +62,10 @@ $destinasi = [];
 // Keep results empty if the database cannot be read; never show sample destinations.
 $destinasi = [];
 $filterCategories = [];
-$regionOptions = [];
+$regionOptions = [
+    'Kuningan' => 'Kuningan',
+    'Majalengka' => 'Majalengka'
+];
 try {
     require_once __DIR__ . '/../../Backend/database/koneksi.php';
     require_once __DIR__ . '/../../Backend/database/wisata_repository.php';
@@ -75,11 +97,21 @@ try {
     error_log($exception->getMessage());
     $destinasi = [];
 }
+if ($filterCategories === []) {
+    foreach ($categoryDisplayNames as $id => $name) {
+        $filterCategories[] = [
+            'Id_kategori' => $id,
+            'nama_kategori' => $name
+        ];
+    }
+}
 $regionOptions = array_values($regionOptions);
 
 
 // FILTER DATA DESTINASI
-$hasil = array_filter($destinasi, function ($item) use (
+$hasil = $isShortKeyword || $hasBudgetValidationError
+    ? []
+    : array_filter($destinasi, function ($item) use (
     $keyword,
     $wilayahDipilih,
     $kategoriDipilih,
@@ -126,6 +158,12 @@ $hasil = array_filter($destinasi, function ($item) use (
 
 $jumlahHasil = count($hasil);
 
+function formatReviewCount(int $count): string
+{
+    return $count >= 1000
+        ? number_format($count / 1000, 1, ',', '.') . 'k'
+        : (string) $count;
+}
 
 // Helper untuk mempertahankan pilihan filter di URL.
 function terpilih($daftar, $nilai)
@@ -162,11 +200,11 @@ function terpilih($daftar, $nilai)
     >
 
     <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/hasil_pencarian.css?v=empty-state-1">
+    <link rel="stylesheet" href="../CSS/hasil_pencarian.css?v=search-reference-2">
     <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
 </head>
 
-<body class="site-navbar-page">
+<body class="site-navbar-page search-results-page">
 <header class="ep-navbar site-navbar">
     <div class="ep-navbar__inner">
         <a class="ep-logo" href="../../index.php">Explore Majaku</a>
@@ -187,12 +225,6 @@ function terpilih($daftar, $nilai)
             <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
         </nav>
         <div class="ep-aksi">
-            <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
-                <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
-                    <circle cx="13.5" cy="13.5" r="11.7"/>
-                    <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
-                </svg>
-            </a>
             <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
                 <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="20" cy="20" r="18.2"/>
@@ -292,7 +324,7 @@ function terpilih($daftar, $nilai)
                         <input type="checkbox" name="kategori[]" value="<?= $categoryValue ?>"
                             <?= terpilih($kategoriDipilih, $categoryValue) ?>>
                         <span><?= htmlspecialchars(
-                            $categoryDisplayNames[(int) $filterCategory['Id_kategori']]
+                            $categoryFilterNames[(int) $filterCategory['Id_kategori']]
                                 ?? $filterCategory['nama_kategori'],
                             ENT_QUOTES,
                             'UTF-8'
@@ -314,7 +346,8 @@ function terpilih($daftar, $nilai)
                         name="min"
                         min="0"
                         placeholder="contoh : 10.000"
-                        value="<?= $budgetMin > 0 ? $budgetMin : '' ?>"
+                        value="<?= $hasMinimumBudget ? htmlspecialchars($minimumBudgetInput, ENT_QUOTES, 'UTF-8') : '' ?>"
+                        aria-invalid="<?= $hasBudgetValidationError ? 'true' : 'false' ?>"
                     >
                 </div>
 
@@ -326,9 +359,16 @@ function terpilih($daftar, $nilai)
                         name="max"
                         min="0"
                         placeholder="contoh : 10.000"
-                        value="<?= isset($_GET['max']) ? $budgetMax : '' ?>"
+                        value="<?= $hasMaximumBudget ? htmlspecialchars($maximumBudgetInput, ENT_QUOTES, 'UTF-8') : '' ?>"
+                        aria-invalid="<?= $hasBudgetValidationError ? 'true' : 'false' ?>"
                     >
                 </div>
+                <p
+                    class="filter-validation"
+                    id="budgetValidation"
+                    role="alert"
+                    <?= $hasBudgetValidationError ? '' : 'hidden' ?>
+                >Minimum budget harus berupa angka valid dan tidak boleh lebih besar dari maksimum.</p>
             </div>
 
             <button type="submit" class="apply-filter">
@@ -347,7 +387,7 @@ function terpilih($daftar, $nilai)
     <!-- SEARCH RESULTS -->
     <section class="results-section">
 
-        <div class="results-heading" <?= $jumlahHasil === 0 ? 'hidden' : '' ?>>
+        <div class="results-heading">
             <h1>Hasil Pencarian</h1>
 
             <p>
@@ -382,8 +422,8 @@ function terpilih($daftar, $nilai)
 
                             <div class="rating">
                                 <?php if ($item['rating'] !== null && $item['review_count'] > 0): ?>
-                                    <span class="stars">★ <?= number_format($item['rating'], 1, ',', '.') ?>/5</span>
-                                    <span class="review-count">(<?= (int) $item['review_count'] ?> ulasan)</span>
+                                    <span class="stars" aria-label="Rating <?= number_format($item['rating'], 1, ',', '.') ?> dari 5">★★★</span>
+                                    <span class="review-count">(<?= htmlspecialchars(formatReviewCount((int) $item['review_count']), ENT_QUOTES, 'UTF-8') ?> ulasan)</span>
                                 <?php else: ?>
                                     <span class="review-count">Belum ada ulasan</span>
                                 <?php endif; ?>
@@ -418,7 +458,7 @@ function terpilih($daftar, $nilai)
 
             <?php else: ?>
 
-                <div class="empty-results">
+                <div class="empty-results" role="status">
                     <span class="empty-search-icon" aria-hidden="true">
                         <i class="bi bi-search"></i>
                         <span>×</span>
@@ -448,7 +488,12 @@ function terpilih($daftar, $nilai)
     const resultsCount = resultsHeading.querySelector('p');
     const searchHeader = document.querySelector('.search-header');
     const searchValidation = document.getElementById('searchValidation');
+    const minBudgetInput = document.getElementById('minBudget');
+    const maxBudgetInput = document.getElementById('maxBudget');
+    const budgetValidation = document.getElementById('budgetValidation');
     const selectedDistanceRanges = <?= json_encode($jarakDipilih, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    let searchRequestTimer;
+    let searchRequestId = 0;
 
     function updateSearchValidation() {
         const isInvalid = Array.from(searchInput.value.trim()).length === 1;
@@ -464,17 +509,53 @@ function terpilih($daftar, $nilai)
         }
     });
     searchInput.addEventListener('input', function () {
-        updateSearchValidation();
+        searchRequestId++;
+        if (updateSearchValidation()) {
+            resultsCount.textContent = '0 Destinasi Ditemukan';
+            showEmptyState('Maaf, tidak ada destinasi wisata yang sesuai dengan kata kunci pencarianmu');
+            return;
+        }
+
+        clearTimeout(searchRequestTimer);
+        if (Array.from(searchInput.value.trim()).length >= 2) {
+            searchRequestTimer = setTimeout(loadSearchResults, 250);
+        }
     });
 
     filterForm.addEventListener('submit', function (event) {
-        const min = document.getElementById('minBudget').value;
-        const max = document.getElementById('maxBudget').value;
+        const min = minBudgetInput.value;
+        const max = maxBudgetInput.value;
 
         if (min !== '' && max !== '' && Number(min) > Number(max)) {
             event.preventDefault();
-            alert('Budget minimum tidak boleh lebih besar dari budget maksimum.');
+            budgetValidation.hidden = false;
+            minBudgetInput.setAttribute('aria-invalid', 'true');
+            maxBudgetInput.setAttribute('aria-invalid', 'true');
+            minBudgetInput.focus();
+            return;
         }
+
+        budgetValidation.hidden = true;
+        minBudgetInput.setAttribute('aria-invalid', 'false');
+        maxBudgetInput.setAttribute('aria-invalid', 'false');
+
+        if (updateSearchValidation()) {
+            event.preventDefault();
+            searchInput.focus();
+        }
+    });
+    [minBudgetInput, maxBudgetInput].forEach(input => {
+        input.addEventListener('input', function () {
+            if (
+                minBudgetInput.value === '' ||
+                maxBudgetInput.value === '' ||
+                Number(minBudgetInput.value) <= Number(maxBudgetInput.value)
+            ) {
+                budgetValidation.hidden = true;
+                minBudgetInput.setAttribute('aria-invalid', 'false');
+                maxBudgetInput.setAttribute('aria-invalid', 'false');
+            }
+        });
     });
 
     function updateDistances() {
@@ -552,9 +633,9 @@ function terpilih($daftar, $nilai)
     }
 
     function showEmptyState(message, title = 'Wisata Tidak Di Temukan') {
-        resultsHeading.hidden = true;
         const emptyState = document.createElement('div');
         emptyState.className = 'empty-results';
+        emptyState.setAttribute('role', 'status');
 
         const iconWrapper = document.createElement('span');
         iconWrapper.className = 'empty-search-icon';
@@ -609,11 +690,16 @@ function terpilih($daftar, $nilai)
         if (destination.rating !== null && Number(destination.jumlah_ulasan) > 0) {
             const stars = document.createElement('span');
             stars.className = 'stars';
-            stars.textContent = `★ ${Number(destination.rating).toFixed(1).replace('.', ',')}/5`;
+            stars.setAttribute('aria-label', `Rating ${Number(destination.rating).toFixed(1).replace('.', ',')} dari 5`);
+            stars.textContent = '★★★';
 
             const reviewCount = document.createElement('span');
             reviewCount.className = 'review-count';
-            reviewCount.textContent = `(${Number(destination.jumlah_ulasan)} ulasan)`;
+            const totalReviews = Number(destination.jumlah_ulasan);
+            const formattedReviews = totalReviews >= 1000
+                ? `${(totalReviews / 1000).toFixed(1).replace('.', ',')}k`
+                : String(totalReviews);
+            reviewCount.textContent = `(${formattedReviews} ulasan)`;
             rating.append(stars, reviewCount);
         } else {
             const noReviews = document.createElement('span');
@@ -676,8 +762,8 @@ function terpilih($daftar, $nilai)
         const selectedCategories = Array.from(
             filterForm.querySelectorAll('input[name="kategori[]"]:checked')
         ).map(input => input.value);
-        const minimum = Number(document.getElementById('minBudget').value || 0);
-        const maximum = Number(document.getElementById('maxBudget').value || 1000000);
+        const minimum = Number(minBudgetInput.value || 0);
+        const maximum = Number(maxBudgetInput.value || 1000000);
 
         return destinations.filter(destination => {
             const mappedRegion = (destination.wilayah || '').toLowerCase().includes('majalengka')
@@ -714,13 +800,15 @@ function terpilih($daftar, $nilai)
         });
 
         resultsCount.textContent = `${visibleCount} Destinasi Ditemukan`;
-        resultsHeading.hidden = visibleCount === 0;
         if (visibleCount === 0) {
             showEmptyState('Maaf, tidak ada destinasi wisata yang sesuai dengan kata kunci pencarianmu');
+        } else {
+            resultsGrid.querySelector('.empty-results')?.remove();
         }
     }
 
     async function loadSearchResults() {
+        const requestId = ++searchRequestId;
         const query = searchInput.value.trim();
         if (query === '') {
             updateDistances();
@@ -740,6 +828,9 @@ function terpilih($daftar, $nilai)
                 headers: { Accept: 'application/json' }
             });
             const payload = await response.json();
+            if (requestId !== searchRequestId) {
+                return;
+            }
             console.info('[API Response] /api/destinations/search', {
                 httpStatus: response.status,
                 ok: response.ok,
@@ -754,7 +845,6 @@ function terpilih($daftar, $nilai)
 
             const filteredResults = filterDestinations(payload.data);
             resultsCount.textContent = `${filteredResults.length} Destinasi Ditemukan`;
-            resultsHeading.hidden = filteredResults.length === 0;
             if (filteredResults.length === 0) {
                 showEmptyState('Maaf, tidak ada destinasi wisata yang sesuai dengan kata kunci pencarianmu');
                 return;
@@ -765,6 +855,9 @@ function terpilih($daftar, $nilai)
             );
             updateDistances();
         } catch (error) {
+            if (requestId !== searchRequestId) {
+                return;
+            }
             console.error(`[API Error] ${endpoint}`, error);
             resultsCount.textContent = 'Hasil pencarian gagal dimuat.';
             showEmptyState('Terjadi masalah saat mengambil data. Silakan muat ulang halaman.', 'Pencarian gagal');

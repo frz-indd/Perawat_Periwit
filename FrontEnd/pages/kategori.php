@@ -105,6 +105,13 @@ function escapeHtml(string $value): string
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 }
 
+function formatReviewCount(int $count): string
+{
+    return $count >= 1000
+        ? number_format($count / 1000, 1, ',', '.') . 'k'
+        : (string) $count;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -116,11 +123,11 @@ function escapeHtml(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../CSS/kategori.css?v=empty-state-1">
+    <link rel="stylesheet" href="../CSS/kategori.css?v=category-reference-2">
     <link rel="stylesheet" href="../CSS/theme.css?v=dropdown-active-6">
     <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
 </head>
-<body class="site-navbar-page">
+<body class="site-navbar-page category-page">
     <header class="ep-navbar site-navbar">
         <div class="ep-navbar__inner">
             <a class="ep-logo" href="../../index.php">Explore Majaku</a>
@@ -141,12 +148,6 @@ function escapeHtml(string $value): string
                 <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
             </nav>
             <div class="ep-aksi">
-                <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
-                    <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
-                        <circle cx="13.5" cy="13.5" r="11.7"/>
-                        <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
-                    </svg>
-                </a>
                 <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
                     <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="20" cy="20" r="18.2"/>
@@ -186,9 +187,7 @@ function escapeHtml(string $value): string
                 <button type="submit" aria-label="Cari"><i class="bi bi-search" aria-hidden="true"></i></button>
             </form>
 
-            <?php if ($destinations !== []): ?>
-                <h2><?= escapeHtml($categoryName); ?></h2>
-            <?php endif; ?>
+            <h2><?= escapeHtml($categoryName); ?></h2>
             <?php if ($destinations !== []): ?>
                 <div class="destination-grid">
                     <?php foreach ($destinations as $destination): ?>
@@ -203,8 +202,8 @@ function escapeHtml(string $value): string
                                 <h3><?= escapeHtml($destination['nama_wisata']); ?></h3>
                                 <div class="rating">
                                     <?php if ($destination['rating'] !== null): ?>
-                                        <span class="stars" aria-label="Rating <?= number_format($destination['rating'], 1, ',', '.'); ?> dari 5">★ <?= number_format($destination['rating'], 1, ',', '.'); ?>/5</span>
-                                        <small>(<?= (int) $destination['jumlah_ulasan']; ?> ulasan)</small>
+                                        <span class="stars" aria-label="Rating <?= number_format($destination['rating'], 1, ',', '.'); ?> dari 5">★★★</span>
+                                        <small>(<?= escapeHtml(formatReviewCount((int) $destination['jumlah_ulasan'])); ?> ulasan)</small>
                                     <?php else: ?>
                                         <small>Belum ada ulasan</small>
                                     <?php endif; ?>
@@ -216,7 +215,7 @@ function escapeHtml(string $value): string
                                         <path class="map-pin-body" d="M20 3C13.4 3 9 7.9 9 13.8c0 7.2 8.6 14.6 11 19.2 2.4-4.6 11-12 11-19.2C31 7.9 26.6 3 20 3z"></path>
                                         <circle class="map-pin-hole" cx="20" cy="13.5" r="4.8"></circle>
                                     </svg>
-                                    <span><?= escapeHtml($destination['wilayah']); ?></span>
+                                    <span><?= escapeHtml((string) $destination['wilayah']); ?></span>
                                 </p>
                                 <small
                                     class="distance"
@@ -234,8 +233,8 @@ function escapeHtml(string $value): string
                         <span>×</span>
                     </span>
                     <h2>Wisata Tidak Di Temukan</h2>
-                    <p>Maaf, tidak ada destinasi wisata yang sesuai dengan kata kunci pencarianmu</p>
-                    <a href="kategori.php?kategori=<?= escapeHtml($categoryKey); ?>">Cari yang lain</a>
+                    <p>Maaf, tidak ada destinasi wisata yang sesuai dengan kata kunci pencarianmu dalam kategori ini</p>
+                    <a href="kategori.php?kategori=<?= escapeHtml($categoryKey); ?>">Lihat semua wisata</a>
                 </div>
             <?php endif; ?>
         </section>

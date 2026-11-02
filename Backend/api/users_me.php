@@ -44,15 +44,21 @@ try {
     require_once __DIR__ . "/../database/koneksi.php";
 
     if ($method === "GET") {
+        $phoneColumn = $conn->query(
+            "SHOW COLUMNS FROM `user` WHERE Field = 'No_telepon'"
+        );
+        $phoneSelect = $phoneColumn && $phoneColumn->fetch_assoc()
+            ? "No_telepon"
+            : "NULL";
         $statement = $conn->prepare(
-            "SELECT Id_user, Nama_user, Email
+            "SELECT Id_user, Nama_user, Email, {$phoneSelect}
              FROM `user`
              WHERE Id_user = ?
              LIMIT 1"
         );
         $statement->bind_param("i", $userId);
         $statement->execute();
-        $statement->bind_result($id, $name, $email);
+        $statement->bind_result($id, $name, $email, $phone);
 
         if (!$statement->fetch()) {
             $statement->close();
@@ -68,7 +74,8 @@ try {
             "data" => [
                 "id_user" => (int) $id,
                 "nama" => $name,
-                "email" => $email
+                "email" => $email,
+                "telepon" => $phone
             ]
         ]);
     }
@@ -108,11 +115,11 @@ try {
     }
 
     $name = $input["nama"] ?? null;
-    $email = $input["email"] ?? null;
+    $email = $input["email"] ?? "";
     if (!is_string($name) || !is_string($email)) {
         $respond(422, [
             "status" => "validation_error",
-            "message" => "Field nama dan email wajib berupa teks."
+            "message" => "Field nama wajib berupa teks dan email (jika diisi) harus berupa teks."
         ]);
     }
 
@@ -129,24 +136,36 @@ try {
         ]);
     }
 
-    if (strlen($email) > 255 || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+    if ($email !== "" &&
+        (strlen($email) > 255 || filter_var($email, FILTER_VALIDATE_EMAIL) === false)) {
         $respond(422, [
             "status" => "validation_error",
             "message" => "Masukkan alamat email yang valid (maksimal 255 karakter)."
         ]);
     }
 
-    $statement = $conn->prepare(
-        "UPDATE `user`
-         SET Nama_user = ?, Email = ?
-         WHERE Id_user = ?"
-    );
-    $statement->bind_param("ssi", $name, $email, $userId);
+    if ($email === "") {
+        $statement = $conn->prepare(
+            "UPDATE `user`
+             SET Nama_user = ?
+             WHERE Id_user = ?"
+        );
+        $statement->bind_param("si", $name, $userId);
+    } else {
+        $statement = $conn->prepare(
+            "UPDATE `user`
+             SET Nama_user = ?, Email = ?
+             WHERE Id_user = ?"
+        );
+        $statement->bind_param("ssi", $name, $email, $userId);
+    }
     $statement->execute();
     $statement->close();
 
     $_SESSION["nama_user"] = $name;
-    $_SESSION["email"] = $email;
+    if ($email !== "") {
+        $_SESSION["email"] = $email;
+    }
 
     $respond(200, [
         "status" => "success",
@@ -154,7 +173,7 @@ try {
         "data" => [
             "id_user" => (int) $userId,
             "nama" => $name,
-            "email" => $email
+            "email" => $email !== "" ? $email : null
         ]
     ]);
 } catch (mysqli_sql_exception $exception) {
