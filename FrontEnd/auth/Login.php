@@ -210,8 +210,7 @@
         </section>
     </div>
 
-    <script src="../js/auth.js?v=20261027-1"></script>
-    <script src="../Js/api-endpoint-labels.js"></script>
+    <script src="../js/auth.js?v=20261102-console-logger-2"></script>
 
 </body>
 </html>

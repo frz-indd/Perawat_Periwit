@@ -30,6 +30,12 @@ $budgetMin = isset($_GET['min']) && $_GET['min'] !== ''
 $budgetMax = isset($_GET['max']) && $_GET['max'] !== ''
     ? max(0, (int) $_GET['max']) : 1000000;
 
+$categoryDisplayNames = [
+    1 => 'Wisata Alam & Pegunungan',
+    4 => 'Wisata Air & Curug',
+    3 => 'Wisata Buatan & Kuliner',
+    2 => 'Wisata Sejarah & Budaya'
+];
 
 // Destination cards are populated from the active database rows below.
 $destinasi = [];
@@ -156,7 +162,7 @@ function terpilih($daftar, $nilai)
     >
 
     <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/hasil_pencarian.css?v=font-map-3">
+    <link rel="stylesheet" href="../CSS/hasil_pencarian.css?v=empty-state-1">
 </head>
 
 <body>
@@ -280,7 +286,12 @@ function terpilih($daftar, $nilai)
                     <label class="filter-option">
                         <input type="checkbox" name="kategori[]" value="<?= $categoryValue ?>"
                             <?= terpilih($kategoriDipilih, $categoryValue) ?>>
-                        <span><?= htmlspecialchars($filterCategory['nama_kategori'], ENT_QUOTES, 'UTF-8') ?></span>
+                        <span><?= htmlspecialchars(
+                            $categoryDisplayNames[(int) $filterCategory['Id_kategori']]
+                                ?? $filterCategory['nama_kategori'],
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?></span>
                     </label>
                 <?php endforeach; ?>
             </div>
@@ -331,7 +342,7 @@ function terpilih($daftar, $nilai)
     <!-- SEARCH RESULTS -->
     <section class="results-section">
 
-        <div class="results-heading">
+        <div class="results-heading" <?= $jumlahHasil === 0 ? 'hidden' : '' ?>>
             <h1>Hasil Pencarian</h1>
 
             <p>
@@ -410,10 +421,7 @@ function terpilih($daftar, $nilai)
 
                     <h2>Wisata Tidak Di Temukan</h2>
 
-                    <p>
-                        Maaf, tidak ada destinasi wisata yang sesuai<br>
-                        dengan kata kunci pencarianmu
-                    </p>
+                    <p>Maaf, tidak ada destinasi wisata yang sesuai dengan kata kunci pencarianmu</p>
 
                     <a href="../../search">Cari yang lain</a>
                 </div>
@@ -426,13 +434,13 @@ function terpilih($daftar, $nilai)
 
 </main>
 
-<script src="../Js/api-endpoint-labels.js"></script>
 <script>
     const filterForm = document.getElementById('filterForm');
     const searchForm = document.querySelector('.search-box');
     const searchInput = searchForm.querySelector('input[name="q"]');
     const resultsGrid = document.querySelector('.destination-grid');
-    const resultsCount = document.querySelector('.results-heading p');
+    const resultsHeading = document.querySelector('.results-heading');
+    const resultsCount = resultsHeading.querySelector('p');
     const searchHeader = document.querySelector('.search-header');
     const searchValidation = document.getElementById('searchValidation');
     const selectedDistanceRanges = <?= json_encode($jarakDipilih, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
@@ -539,6 +547,7 @@ function terpilih($daftar, $nilai)
     }
 
     function showEmptyState(message, title = 'Wisata Tidak Di Temukan') {
+        resultsHeading.hidden = true;
         const emptyState = document.createElement('div');
         emptyState.className = 'empty-results';
 
@@ -700,6 +709,7 @@ function terpilih($daftar, $nilai)
         });
 
         resultsCount.textContent = `${visibleCount} Destinasi Ditemukan`;
+        resultsHeading.hidden = visibleCount === 0;
         if (visibleCount === 0) {
             showEmptyState('Maaf, tidak ada destinasi wisata yang sesuai dengan kata kunci pencarianmu');
         }
@@ -716,20 +726,32 @@ function terpilih($daftar, $nilai)
             return;
         }
 
+        const endpoint =
+            `../../api/destinations/search?q=${encodeURIComponent(query)}`;
+        console.info(`[API Request] GET ${endpoint}`);
+
         try {
-            const response = await fetch(
-                `../../api/destinations/search?q=${encodeURIComponent(query)}`,
-                { headers: { Accept: 'application/json' } }
-            );
+            const response = await fetch(endpoint, {
+                headers: { Accept: 'application/json' }
+            });
             const payload = await response.json();
+            console.info('[API Response] /api/destinations/search', {
+                httpStatus: response.status,
+                ok: response.ok,
+                status: payload.status,
+                message: payload.message,
+                resultCount: Array.isArray(payload.data) ? payload.data.length : 0
+            });
+
             if (!response.ok || payload.status !== 'success' || !Array.isArray(payload.data)) {
                 throw new Error(payload.message || 'Respons pencarian tidak valid.');
             }
 
             const filteredResults = filterDestinations(payload.data);
             resultsCount.textContent = `${filteredResults.length} Destinasi Ditemukan`;
+            resultsHeading.hidden = filteredResults.length === 0;
             if (filteredResults.length === 0) {
-                showEmptyState('Coba ubah kata kunci atau filter pencarianmu.');
+                showEmptyState('Maaf, tidak ada destinasi wisata yang sesuai dengan kata kunci pencarianmu');
                 return;
             }
 
@@ -738,7 +760,7 @@ function terpilih($daftar, $nilai)
             );
             updateDistances();
         } catch (error) {
-            console.error('Gagal memuat hasil pencarian:', error);
+            console.error(`[API Error] ${endpoint}`, error);
             resultsCount.textContent = 'Hasil pencarian gagal dimuat.';
             showEmptyState('Terjadi masalah saat mengambil data. Silakan muat ulang halaman.', 'Pencarian gagal');
         }

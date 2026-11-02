@@ -329,7 +329,6 @@ header('Cache-Control: no-store');
     </div>
   </div>
 
-  <script src="../Js/api-endpoint-labels.js"></script>
   <script>
     (function () {
       var toggle = document.getElementById('kategori-toggle');

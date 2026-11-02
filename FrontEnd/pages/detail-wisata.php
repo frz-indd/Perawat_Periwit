@@ -812,7 +812,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         </div>
     </dialog>
 
-    <script src="../Js/api-endpoint-labels.js"></script>
     <script>
         (function () {
             var nav = document.querySelector('.ep-navbar');

@@ -468,7 +468,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   <?php endif; ?>
 
-  <script src="../Js/api-endpoint-labels.js"></script>
   <script>
     (function () {
       var toggle = document.getElementById('kategori-toggle');

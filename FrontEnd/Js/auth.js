@@ -69,7 +69,6 @@ function isValidPhone(value) {
 
 async function sendForm(form) {
     const endpoint = new URL(form.action, window.location.href).pathname;
-
     console.info(`[API Request] POST ${endpoint}`);
 
     let response;
@@ -105,7 +104,8 @@ async function sendForm(form) {
         httpStatus: response.status,
         ok: response.ok,
         status: result.status,
-        message: result.message
+        message: result.message,
+        role: result.data?.role
     });
 
     if (!response.ok && !result.status) {
@@ -303,12 +303,6 @@ if (loginForm) {
                 result.message ||
                 'Terjadi kesalahan pada server. Silakan coba lagi.';
 
-            if (result.status === 'wrong_password') {
-                setInvalid(password, passwordFeedback, error);
-            } else if (result.status === 'account_not_found') {
-                setInvalid(identity, identityFeedback, error);
-            }
-
             showMessage(message, error);
 
         } catch {
@@ -464,10 +458,6 @@ if (registerForm) {
             const error = messages[result.status] ||
                 result.message ||
                 'Terjadi kesalahan pada server. Silakan coba lagi.';
-
-            if (result.status === 'email_exists') {
-                setInvalid(email, emailFeedback, error);
-            }
 
             showMessage(message, error);
 

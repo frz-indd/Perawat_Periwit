@@ -459,7 +459,6 @@ if ($srcFoto === '' && $emailFoto !== '') {
         </div>
     </dialog>
 
-    <script src="../Js/api-endpoint-labels.js"></script>
     <script>
         (function () {
             var sidebar = document.querySelector('.sidebar');

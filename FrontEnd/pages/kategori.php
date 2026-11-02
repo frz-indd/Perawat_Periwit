@@ -116,7 +116,7 @@ function escapeHtml(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../CSS/kategori.css?v=category-active-4">
+    <link rel="stylesheet" href="../CSS/kategori.css?v=empty-state-1">
     <link rel="stylesheet" href="../CSS/theme.css?v=dropdown-active-6">
 </head>
 <body>
@@ -173,7 +173,9 @@ function escapeHtml(string $value): string
                 <button type="submit" aria-label="Cari"><i class="bi bi-search" aria-hidden="true"></i></button>
             </form>
 
-            <h2><?= escapeHtml($categoryName); ?></h2>
+            <?php if ($destinations !== []): ?>
+                <h2><?= escapeHtml($categoryName); ?></h2>
+            <?php endif; ?>
             <?php if ($destinations !== []): ?>
                 <div class="destination-grid">
                     <?php foreach ($destinations as $destination): ?>
@@ -213,11 +215,18 @@ function escapeHtml(string $value): string
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
-                <p class="empty-state">Destinasi tidak ditemukan. Coba kata pencarian yang lain.</p>
+                <div class="category-empty-results" role="status">
+                    <span class="empty-search-icon" aria-hidden="true">
+                        <i class="bi bi-search"></i>
+                        <span>×</span>
+                    </span>
+                    <h2>Wisata Tidak Di Temukan</h2>
+                    <p>Maaf, tidak ada destinasi wisata yang sesuai dengan kata kunci pencarianmu</p>
+                    <a href="kategori.php?kategori=<?= escapeHtml($categoryKey); ?>">Cari yang lain</a>
+                </div>
             <?php endif; ?>
         </section>
     </main>
-    <script src="../Js/api-endpoint-labels.js"></script>
     <script>
         const distanceElements = Array.from(
             document.querySelectorAll('.distance[data-latitude][data-longitude]')
@@ -284,6 +293,24 @@ function escapeHtml(string $value): string
                 );
             }
         }
+    </script>
+    <script>
+        console.info('[Server-rendered Data] kategori.php', {
+            category: {
+                id: <?= (int) $categoryId; ?>,
+                name: <?= json_encode(
+                    $categoryName,
+                    JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT |
+                    JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE
+                ); ?>,
+                keyword: <?= json_encode(
+                    $keyword,
+                    JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT |
+                    JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE
+                ); ?>
+            },
+            destinationCount: <?= count($destinations); ?>
+        });
     </script>
 </body>
 </html>
