@@ -1,7 +1,9 @@
 <?php
 session_start();
 
-$isLoggedIn = isset($_SESSION["id_user"]);
+$isLoggedIn = isset($_SESSION["id_user"]) &&
+    (int) $_SESSION["id_user"] > 0 &&
+    ($_SESSION["role"] ?? "user") === "user";
 
 require_once __DIR__ . "/Backend/database/koneksi.php";
 require_once __DIR__ . "/Backend/database/wisata_repository.php";
@@ -28,8 +30,8 @@ $destinasiLain = array_slice($wisata, 4, 4);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <!-- CSS Beranda -->
-    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=font-map-2">
-    <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=shared-layout-4">
+    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=home-search-1">
+    <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=home-search-1">
     <link rel="stylesheet" href="FrontEnd/CSS/navbar-common.css?v=2">
 </head>
 
@@ -85,44 +87,46 @@ $destinasiLain = array_slice($wisata, 4, 4);
                 Temukan destinasi wisata terbaik di majalengka &amp; Kuningan
             </p>
 
-            <form
-                class="search-box"
-                action="search"
-                method="GET"
-                id="searchForm"
-            >
-
-                <input
-                    type="text"
-                    name="q"
-                    id="searchInput"
-                    placeholder="Cari destinasi,kata kunci atau lokasi"
-                    aria-label="Cari destinasi wisata"
-                    minlength="2"
-                    required
+            <div class="home-search-actions">
+                <form
+                    class="search-box"
+                    action="<?= $isLoggedIn ? 'search' : 'FrontEnd/auth/Login.php' ?>"
+                    method="GET"
+                    id="searchForm"
                 >
+                    <input
+                        type="search"
+                        name="q"
+                        id="searchInput"
+                        placeholder="Cari destinasi,kata kunci atau lokasi"
+                        aria-label="Cari destinasi wisata"
+                        minlength="2"
+                        required
+                    >
 
-                <button type="submit" aria-label="Cari wisata">
-                    <i class="bi bi-search"></i>
-                </button>
+                    <?php if (!$isLoggedIn): ?>
+                        <input type="hidden" name="next" value="search">
+                    <?php endif; ?>
 
-            </form>
+                    <button type="submit" aria-label="Cari wisata">
+                        <i class="bi bi-search" aria-hidden="true"></i>
+                    </button>
+                </form>
+
+                <a
+                    class="search-filter-button"
+                    href="<?= $isLoggedIn ? 'search' : 'FrontEnd/auth/Login.php?next=search' ?>"
+                    aria-label="Buka filter pencarian wisata"
+                >
+                    <svg width="70" height="66" viewBox="0 0 70 66" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <rect width="70" height="66" rx="20" fill="#D9D9D9"/>
+                        <path d="M21.2692 28.0476H49.7308V30.9047H21.2692V28.0476ZM27.6731 37.0953H43.3269V39.9524H27.6731V37.0953ZM31.9423 46.1429H39.0577V49H31.9423V46.1429ZM17 19H54V21.8571H17V19Z" fill="#166C5C"/>
+                    </svg>
+                </a>
+            </div>
 
         </div>
     </section>
-
-    <script>
-        document.getElementById('searchForm').addEventListener('submit', function (event) {
-            const input = document.getElementById('searchInput');
-            if (input.value.trim().length < 2) {
-                event.preventDefault();
-                input.setCustomValidity('Masukkan minimal 2 karakter untuk mencari.');
-                input.reportValidity();
-                input.addEventListener('input', () => input.setCustomValidity(''), { once: true });
-            }
-        });
-    </script>
-
 
     <!-- KONTEN UTAMA -->
     <main class="main-content">
@@ -216,13 +220,28 @@ $destinasiLain = array_slice($wisata, 4, 4);
     <script>
         const searchForm = document.getElementById('searchForm');
         const searchInput = document.getElementById('searchInput');
+        const isLoggedIn = <?= json_encode($isLoggedIn); ?>;
 
         searchForm.addEventListener('submit', function (event) {
-            if (searchInput.value.trim() === '') {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
                 event.preventDefault();
-                alert('Silakan masukkan destinasi yang ingin dicari.');
+                searchInput.setCustomValidity('Masukkan minimal 2 karakter untuk mencari.');
+                searchInput.reportValidity();
                 searchInput.focus();
+                return;
             }
+
+            if (!isLoggedIn) {
+                event.preventDefault();
+                const loginUrl = new URL('FrontEnd/auth/Login.php', window.location.href);
+                loginUrl.searchParams.set('next', 'search');
+                loginUrl.searchParams.set('q', query);
+                window.location.assign(loginUrl.href);
+            }
+        });
+        searchInput.addEventListener('input', function () {
+            searchInput.setCustomValidity('');
         });
 
         const distanceElements = Array.from(
