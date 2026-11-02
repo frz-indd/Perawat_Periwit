@@ -1,221 +1,368 @@
-EXPLORE MAJAKU - KONTRAK API BACKEND
-===================================
+# EXPLORE MAJAKU - KONTRAK API BACKEND
 
-Base URL
---------
-Gunakan URL sesuai nama folder aplikasi di htdocs. Contoh instalasi ini:
+## Base URL
+
+Gunakan alamat sesuai nama folder aplikasi di `htdocs`. Contoh instalasi ini:
+
+```text
 http://localhost/Perawat_Periwit
+```
 
-Route bersih (clean URL) di bawah ini diteruskan oleh .htaccess ke file PHP
-backend yang disebutkan. Semua endpoint JSON mengirim Content-Type
-application/json; endpoint logout dan OAuth dapat mengembalikan redirect.
+Clean URL yang saat ini diteruskan oleh `.htaccess` adalah `/users/me`, `/categories`, dan `/categories/{id}/wisata`. Endpoint lain pada dokumen ini menggunakan alamat file backend secara langsung, kecuali jika disebutkan bahwa route belum tersedia. Endpoint data mengembalikan JSON; logout dan OAuth juga dapat mengarahkan browser ke halaman lain.
 
-Autentikasi dan session
------------------------
-- Login menggunakan session PHP dan cookie PHPSESSID.
-- Browser harus menyimpan dan mengirim cookie yang sama (same-origin).
-- Endpoint perubahan data yang disebutkan di bawah memakai header
-  X-CSRF-Token dengan token dari respons login atau session halaman.
-- Login admin menggunakan role=admin. Endpoint pengelolaan lokasi mensyaratkan
-  session admin; endpoint ulasan mensyaratkan session pengguna.
+## Autentikasi dan session
 
-1. Login pengguna atau admin
-----------------------------
-POST /Backend/api/fungsi_login.php
-Content-Type: application/x-www-form-urlencoded atau multipart/form-data
+- Login membuat session PHP dan cookie `PHPSESSID`.
+- Browser harus menyimpan dan mengirim cookie session yang sama. Untuk request dari aplikasi gunakan same-origin.
+- Login pengguna maupun admin mengembalikan token `csrf` dalam respons.
+- Dari endpoint yang saat ini tersedia, logout meminta token CSRF melalui field `csrf`. Endpoint profil tidak memeriksa token CSRF.
+- Login admin menyimpan role `admin` di session. Endpoint khusus admin belum tersedia.
 
-Pengguna:
-  role=user (boleh dihilangkan), email=<email atau nomor telepon>,
-  password=<password>
+## 1. Login pengguna atau admin
 
-Admin:
-  role=admin, username=<username>, password=<password>
+`POST /Backend/api/fungsi_login.php`
 
-Respons sukses 200:
-  {"status":"success","data":{"id_user":7,"nama":"Nama","email":"nama@example.com","csrf":"<token>"}}
+Kirim data sebagai `application/x-www-form-urlencoded` atau `multipart/form-data`.
 
-Login admin mengembalikan id_admin, nama, username, role=admin, dan csrf.
-Status umum: 200 sukses; 401 kredensial salah; 404 akun pengguna tidak
-ditemukan; 422 input atau role tidak valid; 500 kesalahan server.
+Login pengguna memakai field `email` (alamat email atau nomor telepon) dan `password` (kata sandi). Field `role` boleh tidak dikirim; nilai bawaannya `user`.
 
-2. Registrasi pengguna
-----------------------
-POST /Backend/api/fungsi_register.php
-Content-Type: application/x-www-form-urlencoded atau multipart/form-data
+Login admin memakai `role=admin`, field `username`, dan `password` (kata sandi).
 
-Field:
-  nama (opsional), email, password, confirmPassword
+Contoh respons login pengguna `200 OK`:
 
-Password minimal 8 karakter. Jika nama kosong, backend menggunakan bagian
-email sebelum tanda @. Registrasi tidak langsung membuat session login.
+```json
+{
+  "status": "success",
+  "message": "Login berhasil.",
+  "redirect": "../../index.php",
+  "data": {
+    "id_user": 7,
+    "nama": "Nama",
+    "email": "nama@example.com",
+    "csrf": "<token>"
+  }
+}
+```
 
-Respons sukses 201:
-  {"status":"success","data":{"id_user":8,"nama":"Nama","email":"nama@example.com"}}
+Login admin mengembalikan `id_admin`, `nama`, `username`, `role` dengan nilai `admin`, dan `csrf` di dalam `data`.
 
-Status umum: 201 dibuat; 409 email telah digunakan; 422 input tidak valid;
-500 kesalahan server.
+Status yang dapat diterima:
 
-3. Login Google
----------------
-GET /Backend/api/google_login.php
-GET /Backend/api/google_login.php?intent=register
+- `200`: login berhasil dan session dibuat.
+- `401`: password salah atau kredensial tidak cocok.
+- `404`: akun pengguna tidak ditemukan.
+- `405`: metode selain POST.
+- `422`: input atau role tidak valid.
+- `500`: terjadi kesalahan server.
 
-Memulai OAuth Google dan mengarahkan browser ke Google. intent=register
-memulai alur registrasi. Jika konfigurasi Google belum tersedia, browser
-diarahkan kembali ke halaman login/registrasi dengan google=not_configured.
+## 2. Registrasi pengguna
 
-GET /Backend/api/google_callback.php?code=<authorization-code>&state=<state>
+`POST /Backend/api/fungsi_register.php`
 
-Callback OAuth yang dipanggil Google. State harus cocok dengan session yang
-dibuat pada saat login dimulai dan hanya dapat digunakan sekali. Status JSON
-yang dapat terjadi: 400 state/kode tidak valid; 401 kode ditolak Google;
-503 konfigurasi OAuth belum tersedia; selain itu dapat mengarahkan browser ke
-halaman login/registrasi.
+Kirim data sebagai `application/x-www-form-urlencoded` atau `multipart/form-data`.
 
-4. Profil pengguna
-------------------
-GET /users/me
-  Memerlukan session pengguna.
-  Respons 200: {"status":"success","data":{"id_user":7,"nama":"Nama","email":"nama@example.com"}}
+Field `email`, `password`, dan `confirmPassword` wajib diisi. Field `nama` boleh kosong. Isi `password` dan `confirmPassword` dengan kata sandi yang sama.
 
-PUT /users/me
+Password harus memiliki 8 sampai 72 karakter, huruf besar dan kecil, angka, serta karakter khusus. Jika `nama` tidak diisi, backend menggunakan bagian email sebelum tanda `@`. Pendaftaran tidak langsung membuat session login.
+
+Contoh respons `201 Created`:
+
+```json
+{
+  "status": "success",
+  "message": "Pendaftaran berhasil.",
+  "data": {
+    "id_user": 8,
+    "nama": "Nama",
+    "email": "nama@example.com"
+  }
+}
+```
+
+Status yang dapat diterima:
+
+- `201`: akun berhasil dibuat.
+- `405`: metode selain POST.
+- `409`: email sudah digunakan.
+- `422`: email, password, konfirmasi password, atau nama tidak valid.
+- `500`: terjadi kesalahan server.
+
+## 3. Login Google
+
+Login Google memakai redirect browser dan cookie session. Frontend tidak mengirim token Google secara langsung.
+
+Server harus menyediakan `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET`. `GOOGLE_REDIRECT_URI` dapat diisi atau dibiarkan kosong agar server membentuk alamatnya sendiri. Untuk instalasi lokal, callback yang didaftarkan di Google Cloud adalah:
+
+```text
+http://localhost/Perawat_Periwit/Backend/api/google_callback.php
+```
+
+### Memulai OAuth
+
+`GET /Backend/api/google_login.php`
+
+Untuk pendaftaran, gunakan:
+
+`GET /Backend/api/google_login.php?intent=register`
+
+Nilai `intent` yang tidak diisi atau bukan `register` akan diperlakukan sebagai login. Endpoint mengarahkan browser ke Google. Browser harus mempertahankan cookie session ketika kembali ke aplikasi.
+
+Jika konfigurasi Google belum tersedia, browser diarahkan ke halaman login atau pendaftaran dengan `google=not_configured`. Metode selain GET menghasilkan `405`.
+
+### Callback OAuth
+
+`GET /Backend/api/google_callback.php`
+
+Google mengarahkan browser ke callback dengan kode otorisasi dan state. State harus sesuai dengan session dari proses login dan hanya dapat dipakai sekali.
+
+Jika berhasil, backend membuat atau mencocokkan akun berdasarkan email, membuat session login, lalu mengarahkan browser ke halaman utama. Jika pengguna membatalkan, browser kembali ke halaman autentikasi dengan `google=cancelled`. Jika email untuk pendaftaran sudah terdaftar, browser kembali dengan `google=email_exists`.
+
+Untuk kegagalan yang ditangani sebagai JSON, bentuk responsnya:
+
+```json
+{
+  "status": "error",
+  "message": "Pesan kegagalan"
+}
+```
+
+Status yang dapat diterima:
+
+- `400`: state atau kode otorisasi tidak valid.
+- `401`: Google menolak kode atau identitas tidak valid.
+- `405`: metode selain GET.
+- `503`: konfigurasi Google OAuth belum tersedia.
+- `500`: login gagal karena kesalahan server.
+
+## 4. Profil pengguna
+
+Kedua endpoint memakai session pengguna. Identitas pengguna diambil dari session, bukan dari ID yang dikirim frontend.
+
+### GET /users/me
+
+Mengambil profil pengguna yang sedang login.
+
+Contoh respons `200 OK`:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id_user": 7,
+    "nama": "Nama",
+    "email": "nama@example.com"
+  }
+}
+```
+
+### PUT /users/me
+
+Memperbarui nama dan email. Password tidak dapat diubah melalui endpoint ini.
+
+Header:
+
+```text
 Content-Type: application/json
 Accept: application/json
-  Memerlukan session pengguna.
+```
+
 Body:
-  {"nama":"Nama Baru","email":"baru@example.com"}
 
-Status: 200 berhasil; 400 JSON tidak valid; 401 belum login; 404 pengguna
-tidak ditemukan; 405 metode tidak didukung; 409 email sudah dipakai;
-415 Content-Type bukan JSON; 422 field tidak valid; 500 kesalahan server.
+```json
+{
+  "nama": "Nama Baru",
+  "email": "baru@example.com"
+}
+```
 
-5. Daftar wisata
-----------------
-GET /Backend/api/wisata.php
-  Mengembalikan daftar wisata beserta kategori, foto, harga, jam, dan objek
-  lokasi yang berisi alamat, domisili, latitude, longitude, dan
-  koordinat_lengkap.
+Status yang dapat diterima:
 
-Parameter opsional untuk jarak pengguna:
-  ?latitude=-6.9&longitude=108.4
-  Kedua koordinat harus dikirim bersama. Latitude harus berada pada -90..90
-  dan longitude pada -180..180. Koordinat pengguna yang tidak lengkap atau
-  tidak valid menghasilkan 422.
+- `200`: profil berhasil dibaca atau diperbarui.
+- `400`: JSON tidak valid.
+- `401`: belum login.
+- `404`: pengguna tidak ditemukan.
+- `405`: metode selain GET atau PUT; header `Allow` mencantumkan metode yang diterima.
+- `409`: email sudah dipakai.
+- `415`: PUT tidak menggunakan `Content-Type: application/json`.
+- `422`: field tidak valid.
+- `500`: terjadi kesalahan server.
 
-6. Kategori wisata
-------------------
-GET /categories
-  Mengembalikan kategori aktif.
-  Bentuk item: {"id_kategori":1,"nama":"Alam","gambar":"..."}
+## 5. Daftar wisata
 
-GET /categories/{id}/wisata
-  Mengembalikan kategori dan wisata di kategori aktif tersebut. Item wisata
-  berisi id_wisata, nama_wisata, gambar, deskripsi, alamat, wilayah,
-  harga_tiket, jam_buka, jam_tutup, latitude, longitude, dan objek lokasi.
-  ID bukan bilangan bulat positif menghasilkan 400; kategori tidak ada/tidak
-  aktif menghasilkan 404; kategori tanpa wisata tetap menghasilkan 200 dengan
-  array wisata kosong.
+`GET /Backend/api/wisata.php`
 
-7. Pencarian destinasi
-----------------------
-GET /api/destinations/search?q=<kata-kunci>
-  q wajib berupa teks minimal 2 karakter. Pencarian mencocokkan nama,
-  deskripsi, alamat, domisili, dan kategori. Respons sukses:
-  {"status":"success","data":[...]}
-  Data menyertakan informasi lokasi. q tidak valid menghasilkan 400 atau 422.
+Mengembalikan daftar wisata beserta kategori, foto, harga, jam operasional, dan objek `lokasi`. Objek lokasi berisi `alamat`, `domisili`, `latitude`, `longitude`, dan `koordinat_lengkap`. Setiap item juga memiliki `jarak_km`; nilainya `null` bila koordinat pengguna tidak dikirim atau koordinat wisata tidak lengkap.
 
-Halaman frontend /search juga memakai parameter filter wilayah[], kategori[],
-min, dan max; parameter filter tersebut diproses oleh halaman pencarian.
+Contoh parameter jarak:
 
-8. Data lokasi destinasi
-------------------------
-GET /api/destinations/{id}/location
-  Mengembalikan id_wisata, nama_wisata, alamat, latitude, longitude, dan
-  koordinat_lengkap. Jika salah satu koordinat kosong atau pasangan tidak
-  valid, kedua koordinat dikembalikan sebagai null dan koordinat_lengkap=false.
-  Status: 200 sukses; 400 ID tidak valid; 404 destinasi tidak ditemukan.
+```text
+GET /Backend/api/wisata.php?latitude=-6.9&longitude=108.4
+```
 
-PUT /api/destinations/{id}/location
+`latitude` dan `longitude` harus dikirim bersama sebagai angka. Latitude harus berada pada rentang -90 sampai 90, dan longitude pada -180 sampai 180. Koordinat pengguna yang tidak lengkap atau tidak valid menghasilkan `422`.
+
+## 6. Kategori wisata
+
+Request kategori tidak memerlukan login.
+
+### GET /categories
+
+Mengembalikan semua kategori aktif.
+
+Contoh item:
+
+```json
+{
+  "id_kategori": 1,
+  "nama": "Alam",
+  "gambar": "FrontEnd/assets/images/gununglandscape.jpg"
+}
+```
+
+### GET /categories/{id}/wisata
+
+Mengembalikan kategori aktif dan daftar wisata di kategori tersebut. Setiap wisata memiliki `id_wisata`, `id_kategori`, `nama_wisata`, `gambar`, `deskripsi`, `alamat`, `wilayah`, `harga_tiket`, `jam_buka`, `jam_tutup`, `latitude`, `longitude`, dan objek `lokasi`.
+
+- ID yang bukan bilangan bulat positif menghasilkan `400 invalid_category_id`.
+- Kategori tidak ditemukan atau tidak aktif menghasilkan `404 category_not_found`.
+- Kategori tanpa wisata menghasilkan `200` dengan `wisata` berupa array kosong.
+
+Untuk database lama, jalankan migration `Backend/database/categories_api_migration.sql`. Database baru dari `Backend/database/eksplormajaku_export.sql` sudah memiliki kolom kategori yang diperlukan.
+
+## 7. Pencarian destinasi
+
+Route API `GET /api/destinations/search?q=<kata-kunci>` belum tersedia di backend saat ini. Halaman frontend `/search` memiliki pencarian dan filter sendiri; parameter `wilayah[]`, `kategori[]`, `min`, dan `max` diproses oleh halaman tersebut, bukan oleh endpoint API pencarian.
+
+Spesifikasi endpoint yang diminta:
+
+- `q` wajib berupa teks minimal 2 karakter.
+- Pencarian mencocokkan nama, deskripsi, alamat, domisili, dan kategori.
+- Respons sukses berbentuk `{"status":"success","data":[...]}` dan menyertakan informasi lokasi.
+- Kata kunci tidak valid menghasilkan `400` atau `422`.
+
+## 8. Data lokasi destinasi
+
+Route `GET` dan `PUT /api/destinations/{id}/location` belum tersedia di backend saat ini.
+
+Spesifikasi endpoint yang diminta:
+
+### GET /api/destinations/{id}/location
+
+Mengembalikan `id_wisata`, `nama_wisata`, `alamat`, `latitude`, `longitude`, dan `koordinat_lengkap`. Jika koordinat kosong atau tidak valid, kedua koordinat dikembalikan sebagai `null` dan `koordinat_lengkap` bernilai `false`.
+
+Status yang diminta: `200` berhasil, `400` ID tidak valid, `404` destinasi tidak ditemukan.
+
+### PUT /api/destinations/{id}/location
+
+Spesifikasi ini mensyaratkan session admin dan token CSRF.
+
+Header:
+
+```text
 Content-Type: application/json
 X-CSRF-Token: <token-session-admin>
 Cookie: PHPSESSID=<session-admin>
-  Hanya admin yang login boleh mengubah lokasi.
+```
+
 Body wajib menyertakan semua field:
-  {"alamat":"Alamat wisata","latitude":-6.94333,"longitude":108.43917}
 
-Alamat harus berupa teks maksimal 255 karakter. Latitude dan longitude harus
-dikirim berpasangan, berupa angka dalam rentang latitude -90..90 dan longitude
--180..180. Kirim keduanya null jika koordinat belum diketahui.
-Status: 200 berhasil; 400 JSON/ID tidak valid; 401 session admin tidak ada;
-403 CSRF tidak valid; 404 destinasi tidak ditemukan; 415 Content-Type salah;
-422 alamat/koordinat tidak valid atau koordinat tidak lengkap; 500 kesalahan
-server.
+```json
+{
+  "alamat": "Alamat wisata",
+  "latitude": -6.94333,
+  "longitude": 108.43917
+}
+```
 
-9. Ulasan destinasi
--------------------
-POST /api/destinations/{id}/reviews
+Alamat berupa teks maksimal 255 karakter. Latitude dan longitude dikirim berpasangan sebagai angka dalam rentang latitude -90 sampai 90 dan longitude -180 sampai 180. Kirim keduanya `null` jika koordinat belum diketahui.
+
+Status yang diminta: `200` berhasil, `400` JSON atau ID tidak valid, `401` session admin tidak ada, `403` CSRF tidak valid, `404` destinasi tidak ditemukan, `415` Content-Type salah, `422` alamat atau koordinat tidak valid, dan `500` kesalahan server.
+
+## 9. Ulasan destinasi
+
+`POST /api/destinations/{id}/reviews` belum tersedia di backend saat ini.
+
+Spesifikasi endpoint yang diminta mensyaratkan session pengguna dan token CSRF.
+
+Header:
+
+```text
 Content-Type: application/json
 X-CSRF-Token: <token-session-user>
 Cookie: PHPSESSID=<session-user>
-  Memerlukan session pengguna.
+```
+
 Body:
-  {"rating":5,"text":"Tempatnya nyaman dan bersih."}
 
-rating harus bilangan bulat 1..5. text wajib 1..500 karakter; field komentar
-juga dapat digunakan sebagai nama alternatif. Respons sukses 201 berisi
-id_review, destination_id, rating, text, average_rating, dan review_count.
+```json
+{
+  "rating": 5,
+  "text": "Tempatnya nyaman dan bersih."
+}
+```
 
-Implementasi schema saat ini menyimpan ulasan di tabel ulasan dan wisata di
-tabel wisata. Kolom wisata.average_rating menyimpan rata-rata terbaru dengan
-dua angka desimal. Terapkan migration berikut sebelum memakai endpoint:
-  Backend/database/destination_reviews_migration.sql
+`rating` harus bilangan bulat 1 sampai 5. `text` wajib berisi 1 sampai 500 karakter; nama field `komentar` juga dapat digunakan.
 
-Status: 201 tersimpan; 400 JSON/ID tidak valid; 401 belum login sebagai
-pengguna; 403 CSRF tidak valid; 404 destinasi tidak ditemukan; 405 metode
-tidak didukung; 415 Content-Type salah; 422 payload tidak valid; 500
-kesalahan server.
+Respons sukses yang diminta adalah `201` dengan `id_review`, `destination_id`, `rating`, `text`, `average_rating`, dan `review_count`. Spesifikasi penyimpanan menggunakan tabel `ulasan` dan kolom `wisata.average_rating`; migration yang disebut untuk fitur ini adalah `Backend/database/destination_reviews_migration.sql`.
 
-10. Favorit destinasi
----------------------
-POST /api/favorites
+Status yang diminta: `201` tersimpan, `400` JSON atau ID tidak valid, `401` belum login sebagai pengguna, `403` CSRF tidak valid, `404` destinasi tidak ditemukan, `405` metode tidak didukung, `415` Content-Type salah, `422` payload tidak valid, dan `500` kesalahan server.
+
+## 10. Favorit destinasi
+
+`POST /api/favorites` belum tersedia di backend saat ini.
+
+Spesifikasi endpoint yang diminta mensyaratkan session pengguna dan token CSRF.
+
+Header:
+
+```text
 Content-Type: application/json
 X-CSRF-Token: <token-session-user>
 Cookie: PHPSESSID=<session-user>
-  Memerlukan session pengguna. Body untuk menambah favorit:
-  {"destination_id":"DEST001","action":"add"}
-  Ganti action menjadi "remove" untuk menghapus favorit. destination_id
-  merujuk ke wisata.id_wisata; identitas user diambil dari session, bukan body.
-  Implementasi menyimpan relasi pada tabel favorit (Id_user, Id_wisata).
-  Status: 200 berhasil; 400 JSON tidak valid; 401 belum login; 403 CSRF tidak
-  valid; 404 destinasi tidak ditemukan; 405 metode tidak didukung; 415
-  Content-Type salah; 422 payload tidak valid; 500 kesalahan server.
+```
 
-11. Logout
-----------
-POST /Backend/api/logout.php
-Content-Type: application/x-www-form-urlencoded
+Body untuk menambah favorit:
+
+```json
+{
+  "destination_id": "DEST001",
+  "action": "add"
+}
+```
+
+Gunakan `action: "remove"` untuk menghapus favorit. `destination_id` merujuk ke `wisata.id_wisata`; identitas pengguna diambil dari session, bukan body. Spesifikasi penyimpanan menggunakan tabel `favorit` dengan relasi `Id_user` dan `Id_wisata`.
+
+Status yang diminta: `200` berhasil, `400` JSON tidak valid, `401` belum login, `403` CSRF tidak valid, `404` destinasi tidak ditemukan, `405` metode tidak didukung, `415` Content-Type salah, `422` payload tidak valid, dan `500` kesalahan server.
+
+## 11. Logout
+
+`POST /Backend/api/logout.php`
+
+Logout memerlukan cookie session dan token CSRF yang sama dengan token session. Kirim token sebagai field `csrf` dengan format form-urlencoded atau multipart form-data.
+
+```text
 Cookie: PHPSESSID=<session-id>
-Body: csrf=<token-session>
+csrf=<token-session>
+```
 
-Token harus sama dengan token CSRF pada session. Sukses menghapus session dan
-mengalihkan ke halaman login (303). Token tidak valid menghasilkan 403; metode
-selain POST menghasilkan 405. Endpoint ini bukan respons JSON.
+Jika berhasil, session dihapus dan browser diarahkan kembali ke halaman utama dengan status `303`. Token tidak valid menghasilkan `403`; metode selain POST menghasilkan `405`. Endpoint ini bukan respons JSON.
 
-Kolom alamat dan koordinat
---------------------------
-Tabel wisata menggunakan kolom alamat, latitude, dan longitude. Untuk database
-lama, jalankan:
-  Backend/database/destination_location_migration.sql
+## Kolom lokasi dan migration
 
-Collection Postman
-------------------
-Collection:
-  Backend/api/postman/users-me.postman_collection.json
+Tabel `wisata` menggunakan kolom `alamat`, `latitude`, dan `longitude`. Spesifikasi awal menyebut migration `Backend/database/destination_location_migration.sql` untuk database lama. Pastikan file migration tersedia sebelum menjalankannya.
 
-Variabel baseUrl untuk folder project ini:
-  http://localhost/Perawat_Periwit
+## Collection Postman
 
-Jika loginEmail/loginPassword atau adminUsername/adminPassword diisi dengan
-kredensial valid, collection juga menguji alur login dan akses terautentikasi.
-Jika kosong, collection memeriksa validasi login dan penolakan akses tanpa
-autentikasi. Jangan commit kredensial.
+Collection tersedia di:
+
+```text
+Backend/api/postman/users-me.postman_collection.json
+```
+
+Atur `baseUrl` ke:
+
+```text
+http://localhost/Perawat_Periwit
+```
+
+Collection menguji profil dan kategori. Jika `loginEmail` dan `loginPassword` diisi dengan kredensial valid, collection juga menguji login serta akses terautentikasi. Jangan menyimpan kredensial ke repository.
