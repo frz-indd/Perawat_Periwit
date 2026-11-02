@@ -10,7 +10,7 @@ $host = (string) ($_SERVER["HTTP_HOST"] ?? "localhost");
 $baseUrl = $scheme . "://" . $host . $appRoot;
 
 $endpoints = [
-    ["POST", "/Backend/api/fungsi_login.php", "Login pengguna dengan email atau nomor telepon, atau login admin.", true],
+    ["POST", "/Backend/api/fungsi_login.php", "Login pengguna dengan email atau nomor telepon berformat +62, atau login admin.", true],
     ["POST", "/Backend/api/fungsi_register.php", "Mendaftarkan akun dengan email dan nomor telepon opsional.", true],
     ["GET", "/Backend/api/google_login.php", "Memulai login Google.", true],
     ["GET", "/Backend/api/google_login.php?intent=register", "Memulai pendaftaran Google.", true],

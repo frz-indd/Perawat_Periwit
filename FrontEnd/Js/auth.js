@@ -67,6 +67,12 @@ function isValidPhone(value) {
     return /^(?:\+62|62|0)8[1-9][0-9]{6,11}$/.test(phone);
 }
 
+function isValidLoginPhone(value) {
+    const phone = value.replace(/[\s()-]/g, '');
+
+    return /^\+628[1-9][0-9]{6,11}$/.test(phone);
+}
+
 async function sendForm(form) {
     const endpoint = new URL(form.action, window.location.href).pathname;
     console.info(`[API Request] POST ${endpoint}`);
@@ -232,11 +238,11 @@ if (loginForm) {
         } else if (
             identityValue.includes('@')
                 ? !isValidEmail(identityValue)
-                : !isValidPhone(identityValue)
+                : !isValidLoginPhone(identityValue)
         ) {
             const error = identityValue.includes('@')
                 ? 'Masukkan alamat email yang valid.'
-                : 'Masukkan nomor telepon yang valid.';
+                : 'Nomor telepon harus diawali +62, contoh: +6281234567890.';
 
             setInvalid(identity, identityFeedback, error);
             errors.push(error);
@@ -294,7 +300,7 @@ if (loginForm) {
                     'Masukkan alamat email yang valid.',
 
                 invalid_phone:
-                    'Masukkan nomor telepon yang valid.',
+                    'Nomor telepon harus diawali +62, contoh: +6281234567890.',
 
                 validation_error:
                     result.message || 'Data login tidak valid.',

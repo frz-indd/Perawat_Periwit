@@ -19,7 +19,7 @@ $isValidPhone = static function (string $phone): bool {
     $phone = preg_replace('/[\s()-]/', '', $phone);
 
     return is_string($phone)
-        && preg_match('/^(?:\+62|62|0)8[1-9][0-9]{6,11}$/', $phone) === 1;
+        && preg_match('/^\+628[1-9][0-9]{6,11}$/', $phone) === 1;
 };
 
 $normalizePhone = static function (string $phone): string {
@@ -173,7 +173,7 @@ if ($isEmail) {
 } elseif (!$isValidPhone($identity)) {
     $respond(422, [
         "status" => "invalid_phone",
-        "message" => "Masukkan nomor telepon yang valid."
+        "message" => "Nomor telepon harus diawali +62, contoh: +6281234567890."
     ]);
 } else {
     $identity = $normalizePhone($identity);

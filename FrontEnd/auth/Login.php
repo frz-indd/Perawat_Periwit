@@ -81,14 +81,14 @@
                             id="loginIdentity"
                             name="email"
                             class="auth-input"
-                            placeholder="Masukkan email atau nomor telepon"
+                            placeholder="Email atau +6281234567890"
                             autocomplete="username"
                             maxlength="255"
                             required
                         >
 
                         <div class="invalid-feedback">
-                            Email atau nomor telepon wajib diisi.
+                            Email atau nomor telepon wajib diisi. Nomor telepon harus diawali +62.
                         </div>
                     </div>
 
