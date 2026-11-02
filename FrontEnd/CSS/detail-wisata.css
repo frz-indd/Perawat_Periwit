@@ -79,8 +79,7 @@ body.halaman-detail {
 }
 
 .bagian-atas {
-    position: sticky;
-    top: 0;
+    position: static;
     z-index: 1000;
     display: block;
     margin: 0;
@@ -90,7 +89,8 @@ body.halaman-detail {
 }
 
 body.halaman-detail .ep-navbar {
-    position: relative;
+    position: sticky;
+    top: 0;
     z-index: 2;
     margin: 0;
     border: 0;

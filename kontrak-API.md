@@ -91,7 +91,7 @@ Status yang dapat diterima:
 
 Login Google memakai redirect browser dan cookie session. Frontend tidak mengirim token Google secara langsung.
 
-Server harus menyediakan `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET`. `GOOGLE_REDIRECT_URI` dapat diisi atau dibiarkan kosong agar server membentuk alamatnya sendiri. Untuk instalasi lokal, callback yang didaftarkan di Google Cloud adalah:
+Server dapat memakai environment variables `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, dan `GOOGLE_REDIRECT_URI`. Jika environment variables tidak tersedia, backend membaca `Backend/google_oauth.local.php`; unggah file konfigurasi tersebut secara terpisah dan jangan masukkan kredensial ke Git. Callback yang didaftarkan di Google Cloud adalah:
 
 `https://perawatperiwit.site.je/Backend/api/google_callback.php`
 

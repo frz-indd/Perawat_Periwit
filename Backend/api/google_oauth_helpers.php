@@ -1,9 +1,27 @@
 <?php
 function googleOauthConfig(): ?array
 {
+  $localConfig = [];
+  $localConfigPath = dirname(__DIR__) . "/google_oauth.local.php";
+  if (is_file($localConfigPath)) {
+    $loadedConfig = require $localConfigPath;
+    if (!is_array($loadedConfig)) {
+      throw new RuntimeException("Konfigurasi OAuth Google lokal tidak valid");
+    }
+    $localConfig = $loadedConfig;
+  }
+
   $clientId = getenv("GOOGLE_CLIENT_ID");
   $clientSecret = getenv("GOOGLE_CLIENT_SECRET");
   $redirectUri = getenv("GOOGLE_REDIRECT_URI");
+
+  if (!is_string($clientId) || trim($clientId) === "") {
+    $clientId = $localConfig["client_id"] ?? "";
+  }
+
+  if (!is_string($clientSecret) || trim($clientSecret) === "") {
+    $clientSecret = $localConfig["client_secret"] ?? "";
+  }
 
   if (!is_string($clientId) || trim($clientId) === "") {
     return null;
@@ -11,6 +29,10 @@ function googleOauthConfig(): ?array
 
   if (!is_string($clientSecret) || trim($clientSecret) === "") {
     return null;
+  }
+
+  if (!is_string($redirectUri) || trim($redirectUri) === "") {
+    $redirectUri = $localConfig["redirect_uri"] ?? "";
   }
 
   if (!is_string($redirectUri) || trim($redirectUri) === "") {
