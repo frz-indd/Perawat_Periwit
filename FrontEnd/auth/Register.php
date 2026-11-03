@@ -72,14 +72,14 @@
                 >
 
                     <div class="form-group">
-                        <label for="registerIdentity">Email atau Nomor Telepon</label>
+                        <label for="registerIdentity">Email atau Nomor telepon</label>
 
                         <input
                             type="text"
                             id="registerIdentity"
                             name="identity"
                             class="auth-input"
-                            placeholder="Email atau +6281234567890"
+                            placeholder="Email or No Telepon"
                             autocomplete="username"
                             inputmode="text"
                             maxlength="255"
