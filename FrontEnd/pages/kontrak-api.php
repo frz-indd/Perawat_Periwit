@@ -11,7 +11,7 @@ $baseUrl = $scheme . "://" . $host . $appRoot;
 
 $endpoints = [
     ["POST", "/Backend/api/fungsi_login.php", "Login pengguna dengan email atau nomor telepon berformat +62, atau login admin.", true],
-    ["POST", "/Backend/api/fungsi_register.php", "Mendaftarkan akun dengan email atau nomor telepon.", true],
+    ["POST", "/Backend/api/fungsi_register.php", "Mendaftarkan akun menggunakan email atau nomor telepon berformat +62.", true],
     ["GET", "/Backend/api/google_login.php", "Memulai login Google.", true],
     ["GET", "/Backend/api/google_login.php?intent=register", "Memulai pendaftaran Google.", true],
     ["GET", "/Backend/api/google_callback.php", "Menyelesaikan proses login Google.", true],

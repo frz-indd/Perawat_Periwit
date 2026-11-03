@@ -24,7 +24,7 @@ Untuk pengujian lokal, ganti domain dengan `http://localhost/Perawat_Periwit`. C
 
 Kirim data sebagai `application/x-www-form-urlencoded` atau `multipart/form-data`.
 
-Login pengguna memakai field `email` (alamat email atau nomor telepon) dan `password` (kata sandi). Field `role` boleh tidak dikirim; nilai bawaannya `user`.
+Login pengguna memakai field `email` (alamat email atau nomor telepon Indonesia berformat `+62`, misalnya `+6281234567890`) dan `password` (kata sandi). Field `role` boleh tidak dikirim; nilai bawaannya `user`.
 
 Login admin memakai `role=admin`, field `username`, dan `password` (kata sandi).
 
@@ -61,9 +61,11 @@ Status yang dapat diterima:
 
 Kirim data sebagai `application/x-www-form-urlencoded` atau `multipart/form-data`.
 
-Field `email` menerima alamat email **atau** nomor telepon Indonesia berformat `+62`; isi salah satunya bersama `password` dan `confirmPassword`. Field `nama` boleh kosong. Nomor telepon disimpan pada kolom `No_telepon`, sedangkan `Email` akan bernilai `null` untuk akun telepon saja.
+Field `identity`, `password`, dan `confirmPassword` wajib diisi. `identity` dapat berupa alamat email atau nomor telepon Indonesia berformat `+62`, misalnya `+6281234567890`. Field `nama` boleh kosong. Isi `password` dan `confirmPassword` dengan kata sandi yang sama.
 
-Password harus memiliki 8 sampai 72 karakter, huruf besar dan kecil, angka, serta karakter khusus. Jika `nama` tidak diisi, backend menggunakan bagian email sebelum tanda `@` atau nama generik untuk akun telepon. Pendaftaran tidak langsung membuat session login. Database harus menjalankan migrasi `phone_login_migration.sql`; bila migrasi itu sudah pernah dijalankan, jalankan `phone_only_registration_migration.sql` untuk membuat kolom email nullable.
+Nomor telepon disimpan dalam format `+62` pada kolom `No_telepon`; akun yang hanya memakai nomor telepon menyimpan `Email` sebagai `NULL`. Nomor telepon dan email harus unik. Password harus memiliki 8 sampai 72 karakter, huruf besar dan kecil, angka, serta karakter khusus. Pendaftaran tidak langsung membuat session login.
+
+Untuk database lama yang belum memiliki kolom `No_telepon`, jalankan `Backend/database/phone_login_migration.sql` satu kali. Jika kolom tersebut sudah tersedia tetapi `Email` masih wajib diisi, jalankan `Backend/database/phone_only_registration_migration.sql` satu kali. Database baru yang dibuat dari `Backend/database/eksplormajaku_export.sql` sudah menyertakan kolom-kolom tersebut.
 
 Contoh respons `201 Created`:
 

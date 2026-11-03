@@ -1,0 +1,5 @@
+Options -Indexes
+
+<FilesMatch "^google_oauth\.local\.php$">
+    Require all denied
+</FilesMatch>

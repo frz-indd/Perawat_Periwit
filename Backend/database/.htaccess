@@ -1,0 +1,5 @@
+Options -Indexes
+
+<FilesMatch "^(database\.local\.php|.*\.sql)$">
+    Require all denied
+</FilesMatch>

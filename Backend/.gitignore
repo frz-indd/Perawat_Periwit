@@ -1,2 +1,3 @@
 /vendor/
 /google_oauth.local.php
+/database/database.local.php

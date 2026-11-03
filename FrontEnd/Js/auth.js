@@ -402,22 +402,21 @@ if (registerForm) {
         let valid = true;
 
         if (!identityValue) {
-            setInvalid(
-                identity,
-                identityFeedback,
-                'Email/No telepon wajib di isi'
-            );
+            const error = 'Email atau nomor telepon wajib diisi.';
+            setInvalid(identity, identityFeedback, error);
             valid = false;
-        } else if (
-            identityValue.includes('@')
-                ? !isValidEmail(identityValue)
-                : !isValidPhone(identityValue)
-        ) {
-            setInvalid(
-                identity,
-                identityFeedback,
-                'Masukkan alamat email / no telepon yang valid'
-            );
+        } else if (identityValue.includes('@')) {
+            if (!isValidEmail(identityValue)) {
+                const error = 'Masukkan alamat email yang valid.';
+                setInvalid(identity, identityFeedback, error);
+                valid = false;
+            } else {
+                setValid(identity, identityFeedback);
+            }
+        } else if (!isValidPhone(identityValue)) {
+            const error =
+                'Masukkan nomor telepon berawalan +62, contoh: +6281234567890.';
+            setInvalid(identity, identityFeedback, error);
             valid = false;
         } else {
             setValid(identity, identityFeedback);

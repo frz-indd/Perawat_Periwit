@@ -72,21 +72,22 @@
                 >
 
                     <div class="form-group">
-                        <label for="registerIdentity">Email atau No telepon</label>
+                        <label for="registerIdentity">Email atau Nomor Telepon</label>
 
                         <input
                             type="text"
                             id="registerIdentity"
-                            name="email"
+                            name="identity"
                             class="auth-input"
-                            placeholder="Masukkan Email or No Telepon"
+                            placeholder="Email atau +6281234567890"
                             autocomplete="username"
+                            inputmode="text"
                             maxlength="255"
                             required
                         >
 
                         <div class="invalid-feedback">
-                            Email/No telepon wajib di isi
+                            Isi email yang valid atau nomor telepon berawalan +62.
                         </div>
                     </div>
 
