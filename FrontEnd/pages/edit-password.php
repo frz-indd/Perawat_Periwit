@@ -177,7 +177,7 @@ header('Cache-Control: no-store');
   <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261058">
   <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
   <link rel="stylesheet" href="../CSS/edit-password.css?v=20261032">
-  <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
+  <link rel="stylesheet" href="../CSS/navbar-common.css?v=4">
 </head>
 <body class="halaman-edit-profil halaman-edit-password site-navbar-page">
 

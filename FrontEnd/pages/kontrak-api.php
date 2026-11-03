@@ -23,7 +23,7 @@ $endpoints = [
     ["GET", "/api/destinations/search?q={kata-kunci}", "Mencari destinasi melalui API JSON.", true],
     ["GET", "/api/destinations/{id}/location", "Mengambil lokasi satu destinasi.", true],
     ["PUT", "/api/destinations/{id}/location", "Mengubah lokasi destinasi oleh admin.", true],
-    ["POST", "/api/destinations/{id}/reviews", "Menambahkan ulasan destinasi.", true],
+    ["POST", "/api/destinations/{id}/reviews", "Menambahkan ulasan atau memperbarui ulasan pengguna yang sudah ada.", true],
     ["POST", "/api/favorites", "Menambah atau menghapus favorit destinasi.", true],
     ["PUT", "/api/user/change-password", "Mengubah password pengguna yang login.", true],
     ["POST", "/Backend/api/logout.php", "Mengakhiri session pengguna atau admin.", true]

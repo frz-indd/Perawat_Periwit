@@ -32,7 +32,7 @@ $destinasiLain = array_slice($wisata, 4, 4);
     <!-- CSS Beranda -->
     <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=home-reference-4">
     <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=home-reference-4">
-    <link rel="stylesheet" href="FrontEnd/CSS/navbar-common.css?v=2">
+    <link rel="stylesheet" href="FrontEnd/CSS/navbar-common.css?v=4">
 </head>
 
 <body class="home-page site-navbar-page">

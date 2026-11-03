@@ -201,7 +201,7 @@ function terpilih($daftar, $nilai)
 
     <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
     <link rel="stylesheet" href="../CSS/hasil_pencarian.css?v=search-reference-2">
-    <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=4">
 </head>
 
 <body class="site-navbar-page search-results-page">

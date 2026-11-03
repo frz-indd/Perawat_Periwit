@@ -272,6 +272,13 @@ try {
         ]);
     }
 
+    $name = trim((string) $name);
+    if ($name === "" || strcasecmp($name, "Nama User") === 0) {
+        $name = $isEmail
+            ? trim((string) strstr($identity, "@", true))
+            : "Nama User";
+    }
+
     /* SESSION LOGIN */
 
     if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -296,6 +303,7 @@ try {
     $_SESSION["nama_user"] = $name;
     $_SESSION["email"] = $storedEmail;
     $_SESSION["telepon"] = $isEmail ? null : $identity;
+    $_SESSION["login_dengan_telepon"] = !$isEmail;
     $_SESSION["role"] = "user";
     $_SESSION["csrf"] = bin2hex(random_bytes(32));
 

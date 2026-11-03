@@ -125,7 +125,7 @@ function formatReviewCount(int $count): string
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../CSS/kategori.css?v=category-reference-2">
     <link rel="stylesheet" href="../CSS/theme.css?v=dropdown-active-6">
-    <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=4">
 </head>
 <body class="site-navbar-page category-page">
     <header class="ep-navbar site-navbar">
@@ -133,7 +133,7 @@ function formatReviewCount(int $count): string
             <a class="ep-logo" href="../../index.php">Explore Majaku</a>
             <nav class="ep-menu" aria-label="Menu utama">
                 <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
-                <details class="category-dropdown ep-menu__kategori">
+                <details class="category-dropdown ep-menu__kategori" aria-current="page">
                     <summary>
                         <span>Kategori</span>
                         <span class="ep-menu__panah" aria-hidden="true"></span>

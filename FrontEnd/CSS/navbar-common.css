@@ -99,6 +99,14 @@ body.site-navbar-page .ep-menu a[aria-current="page"] {
     color: #166c5c;
 }
 
+body.site-navbar-page .ep-menu > a:hover,
+body.site-navbar-page .ep-menu > a:focus-visible,
+body.site-navbar-page .ep-menu > .category-dropdown:hover > summary,
+body.site-navbar-page .ep-menu > .category-dropdown[open] > summary,
+body.site-navbar-page .ep-menu > .category-dropdown[aria-current="page"] > summary {
+    color: #166c5c;
+}
+
 body.site-navbar-page .ep-menu .category-dropdown {
     display: flex;
     align-items: center;
@@ -148,8 +156,8 @@ body.site-navbar-page .ep-menu .category-dropdown > .category-menu {
     z-index: 1100;
     display: none;
     flex-direction: column;
-    width: min(calc(216 * var(--site-navbar-unit)), calc(100vw - 16px));
-    min-width: 0;
+    width: max-content;
+    min-width: calc(216 * var(--site-navbar-unit));
     max-width: calc(100vw - 16px);
     gap: 0;
     padding: 0;
@@ -182,7 +190,7 @@ body.site-navbar-page .ep-menu .category-menu a {
     font-weight: 400;
     line-height: 1.2;
     text-align: center;
-    white-space: normal;
+    white-space: nowrap;
 }
 
 body.site-navbar-page .ep-menu .category-menu a:hover,

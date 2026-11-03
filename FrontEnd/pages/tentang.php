@@ -14,7 +14,7 @@ session_start();
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
     <link rel="stylesheet" href="../CSS/tentang.css?v=shared-layout-13">
-    <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=4">
 </head>
 <body class="about-page halaman-tentang site-navbar-page">
 

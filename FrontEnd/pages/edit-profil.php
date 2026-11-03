@@ -164,15 +164,24 @@ if ($info) {
     }
 }
 
-$email = trim((string) ($_SESSION['email'] ?? ($_SESSION['user']['email'] ?? ($_SESSION['no_hp'] ?? ($_SESSION['telepon'] ?? '')))));
-if ($email === '' && $info) {
-    $email = nilai_pertama($row, $info, ['email', 'no_telepon', 'no_hp', 'telepon']);
+$teleponLogin = trim((string) ($_SESSION['telepon'] ?? ($_SESSION['no_hp'] ?? '')));
+$loginDenganTelepon = !empty($_SESSION['login_dengan_telepon']) || $teleponLogin !== '';
+$emailAkun = trim((string) ($_SESSION['email'] ?? ($_SESSION['user']['email'] ?? '')));
+if ($emailAkun === '' && $info) {
+    $emailAkun = nilai_pertama($row, $info, ['email']);
 }
-$emailAkun = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : '';
+$email = $loginDenganTelepon ? $teleponLogin : $emailAkun;
+if ($email === '' && $info) {
+    $email = nilai_pertama($row, $info, $loginDenganTelepon
+        ? ['no_telepon', 'no_hp', 'telepon']
+        : ['email']);
+}
 
 $nama = $info ? nilai_pertama($row, $info, ['nama', 'nama_lengkap', 'nama_user', 'username']) : '';
-if ($nama === '') $nama = trim((string) ($_SESSION['nama'] ?? ($_SESSION['user']['nama'] ?? '')));
-if ($nama === '' || strcasecmp($nama, 'Nama User') === 0) {
+if ($nama === '') $nama = trim((string) ($_SESSION['nama_user'] ?? ($_SESSION['nama'] ?? ($_SESSION['user']['nama'] ?? ''))));
+if ($loginDenganTelepon && ($nama === '' || strcasecmp($nama, 'Nama User') === 0)) {
+    $nama = 'Nama User';
+} elseif ($nama === '' || strcasecmp($nama, 'Nama User') === 0) {
     $nama = filter_var($email, FILTER_VALIDATE_EMAIL) ? ucfirst((string) strstr($email, '@', true)) : '';
 }
 
@@ -187,8 +196,8 @@ $fotoEmail = trim((string) (
     ?? ($_SESSION['user']['picture'] ?? ''))))
 ));
 
-$gravatar = filter_var($email, FILTER_VALIDATE_EMAIL)
-    ? 'https://www.gravatar.com/avatar/' . hash('sha256', strtolower($email)) . '?s=440&d=404'
+$gravatar = filter_var($emailAkun, FILTER_VALIDATE_EMAIL)
+    ? 'https://www.gravatar.com/avatar/' . hash('sha256', strtolower($emailAkun)) . '?s=440&d=404'
     : '';
 
 $srcTampil = srcGambar($foto);
@@ -330,7 +339,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261060">
   <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-  <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
+  <link rel="stylesheet" href="../CSS/navbar-common.css?v=4">
 </head>
 <body class="halaman-edit-profil site-navbar-page">
 
@@ -393,7 +402,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         data-api-url="<?= e($apiProfil) ?>"
         data-api="<?= e($apiProfil) ?>"
         data-csrf="<?= e($_SESSION['csrf']) ?>"
-        data-email="<?= e($emailAkun) ?>">
+        data-email="<?= e($emailAkun) ?>"
+        data-login-telepon="<?= $loginDenganTelepon ? '1' : '0' ?>">
     <input type="hidden" name="api_status" id="api-status" value="">
     <input type="hidden" name="api_pesan" id="api-pesan" value="">
     <input type="hidden" name="nama_awal" id="nama-awal" value="<?= e($nama) ?>">
@@ -423,9 +433,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <input class="ep-input" type="text" id="nama_lengkap" name="nama_lengkap"
              value="<?= e($nama) ?>" placeholder="Nama User" maxlength="100" autocomplete="name" required>
 
-      <span class="ep-label ep-label--email">Email / No telepon</span>
+      <span class="ep-label ep-label--email">Email/No Telepon</span>
       <p class="ep-email" id="email-tampil"><?= e($email) ?></p>
-      <p class="ep-catatan">Identitas akun tidak dapat diubah.</p>
+      <p class="ep-catatan">Email/No Telepon tidak dapat diubah karena digunakan sebagai identitas akun.</p>
 
       <button type="submit" class="ep-btn ep-btn--utama">Simpan Perubahan</button>
       <a href="profil.php" class="ep-btn ep-btn--batal">Batal</a>
@@ -549,6 +559,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       var emailEl       = document.getElementById('email-tampil');
       var fStatus       = document.getElementById('api-status');
       var fPesan        = document.getElementById('api-pesan');
+      var loginDenganTelepon = form.getAttribute('data-login-telepon') === '1';
       var modal         = document.getElementById('modal-validasi');
       var kotak         = document.getElementById('validasi-kotak');
       var isiEl         = document.getElementById('validasi-isi');
@@ -689,16 +700,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (j) {
           if (!j || j.status !== 'success' || !j.data) return;
-          if (j.data.nama && !inpNama.getAttribute('data-diubah')) {
-            inpNama.value = j.data.nama;
-            namaAwal.value = j.data.nama;
+          if (!inpNama.getAttribute('data-diubah')) {
+            var namaApi = String(j.data.nama || '').trim();
+            if (namaApi && namaApi.toLowerCase() !== 'nama user') {
+              inpNama.value = namaApi;
+              namaAwal.value = namaApi;
+            } else if (loginDenganTelepon) {
+              inpNama.value = 'Nama User';
+              namaAwal.value = 'Nama User';
+            } else {
+              var emailNama = String(j.data.email || '').trim();
+              if (emailNama.indexOf('@') > 0) {
+                inpNama.value = emailNama.split('@')[0];
+                namaAwal.value = inpNama.value;
+              }
+            }
           }
-          if (j.data.email || j.data.telepon) {
-            emailEl.textContent = j.data.email || j.data.telepon;
-            form.setAttribute(
-              'data-email',
-              j.data.email && polaEmail.test(j.data.email) ? j.data.email : ''
-            );
+          var identitas = loginDenganTelepon ? j.data.telepon : (j.data.email || j.data.telepon);
+          if (identitas) {
+            emailEl.textContent = identitas;
+          }
+          if (j.data.email !== undefined) {
+            form.setAttribute('data-email', j.data.email && polaEmail.test(j.data.email) ? j.data.email : '');
           }
         })
         .catch(function () {});

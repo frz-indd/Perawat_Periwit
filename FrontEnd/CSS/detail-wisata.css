@@ -253,11 +253,20 @@ body.halaman-detail .ep-menu__kategori[open] > summary {
 
 body.halaman-detail.site-navbar-page .ep-menu .category-dropdown > .category-menu {
     top: 100%;
+    width: max-content;
+    min-width: 216px;
+    max-width: calc(100vw - 16px);
     visibility: hidden;
     opacity: 0;
     pointer-events: none;
     transform: translate(-50%, 4px);
     transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease;
+}
+
+body.halaman-detail.site-navbar-page .ep-menu .category-menu a {
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap !important;
 }
 
 body.halaman-detail.site-navbar-page .ep-menu .category-dropdown[open] > .category-menu {

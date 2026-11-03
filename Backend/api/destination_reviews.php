@@ -82,14 +82,41 @@ try {
     }
     $destination->close();
 
-    $insert = $conn->prepare(
-        "INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar, tanggal_ulasan)
-         VALUES (?, ?, ?, ?, CURDATE())"
+    $existingReview = $conn->prepare(
+        "SELECT Id_ulasan FROM ulasan
+         WHERE Id_user = ? AND Id_wisata = ?
+         ORDER BY Id_ulasan DESC
+         LIMIT 1
+         FOR UPDATE"
     );
-    $insert->bind_param("isis", $userId, $destinationId, $rating, $reviewText);
-    $insert->execute();
-    $reviewId = (int) $conn->insert_id;
-    $insert->close();
+    $existingReview->bind_param("is", $userId, $destinationId);
+    $existingReview->execute();
+    $existingReview->bind_result($existingReviewId);
+    $hasExistingReview = $existingReview->fetch();
+    $existingReview->close();
+
+    if ($hasExistingReview) {
+        $saveReview = $conn->prepare(
+            "UPDATE ulasan
+             SET rating = ?, komentar = ?, tanggal_ulasan = CURDATE()
+             WHERE Id_ulasan = ?"
+        );
+        $reviewId = (int) $existingReviewId;
+        $saveReview->bind_param("isi", $rating, $reviewText, $reviewId);
+        $saveReview->execute();
+        $saveReview->close();
+        $responseCode = 200;
+    } else {
+        $saveReview = $conn->prepare(
+            "INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar, tanggal_ulasan)
+             VALUES (?, ?, ?, ?, CURDATE())"
+        );
+        $saveReview->bind_param("isis", $userId, $destinationId, $rating, $reviewText);
+        $saveReview->execute();
+        $reviewId = (int) $conn->insert_id;
+        $saveReview->close();
+        $responseCode = 201;
+    }
 
     $update = $conn->prepare(
         "UPDATE wisata
@@ -112,7 +139,7 @@ try {
     $averageQuery->close();
 
     $conn->commit();
-    $respond(201, [
+    $respond($responseCode, [
         "status" => "success",
         "message" => "Ulasan berhasil disimpan.",
         "data" => [

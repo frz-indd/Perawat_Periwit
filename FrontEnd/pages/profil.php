@@ -3,6 +3,7 @@ session_start();
 date_default_timezone_set('Asia/Jakarta');
 
 $modePreview = false;
+$loginDenganTelepon = false;
 
 if (empty($_SESSION['csrf'])) {
     $_SESSION['csrf'] = bin2hex(random_bytes(16));
@@ -18,9 +19,12 @@ function formatRating(float $nilai): string
     return number_format($nilai, 1, ',', '.');
 }
 
-function bintangHtml(float $nilai): string
+function bintangHtml(float $nilai, bool $tanpaSetengah = false): string
 {
     $nilai    = max(0.0, min(5.0, $nilai));
+    if ($tanpaSetengah) {
+        $nilai = round($nilai);
+    }
     $dibulat  = round($nilai * 2) / 2;
     $penuh    = (int) floor($dibulat);
     $setengah = ($dibulat - $penuh) >= 0.5;
@@ -208,15 +212,31 @@ if ($modePreview) {
         exit;
     }
 
-    $identitasLogin = trim((string) ($_SESSION['email'] ?? ($_SESSION['user']['email'] ?? ($_SESSION['no_hp'] ?? ($_SESSION['telepon'] ?? '')))));
-    $namaSesi       = trim((string) ($_SESSION['nama'] ?? ($_SESSION['user']['nama'] ?? '')));
-    if (strcasecmp($namaSesi, 'Nama User') === 0) {
+    $teleponLogin = trim((string) ($_SESSION['telepon'] ?? ($_SESSION['no_hp'] ?? '')));
+    $loginDenganTelepon = !empty($_SESSION['login_dengan_telepon']) || $teleponLogin !== '';
+    $identitasLogin = $loginDenganTelepon
+        ? $teleponLogin
+        : trim((string) ($_SESSION['email'] ?? ($_SESSION['user']['email'] ?? '')));
+    $namaSesi = trim((string) ($_SESSION['nama_user'] ?? ($_SESSION['nama'] ?? ($_SESSION['user']['nama'] ?? ''))));
+    if (!$loginDenganTelepon && strcasecmp($namaSesi, 'Nama User') === 0) {
         $namaSesi = '';
     }
 
-    $namaUser = ambilKolomUser($conn, $userId, ['nama', 'nama_lengkap', 'nama_user', 'username'])
-        ?: ($namaSesi !== '' ? $namaSesi : 'Pengguna');
-    $emailUser = $identitasLogin !== '' ? $identitasLogin : ambilKolomUser($conn, $userId, ['email', 'no_telepon', 'no_hp', 'telepon']);
+    $namaTersimpan = ambilKolomUser($conn, $userId, ['nama', 'nama_lengkap', 'nama_user', 'username']);
+    if ($loginDenganTelepon && $identitasLogin === '') {
+        $identitasLogin = ambilKolomUser($conn, $userId, ['no_telepon', 'no_hp', 'telepon']);
+    } elseif (!$loginDenganTelepon && $identitasLogin === '') {
+        $identitasLogin = ambilKolomUser($conn, $userId, ['email']);
+    }
+    $namaUser = $namaTersimpan !== '' ? $namaTersimpan : $namaSesi;
+    if ($namaUser === '' || strcasecmp($namaUser, 'Nama User') === 0) {
+        $namaUser = $loginDenganTelepon
+            ? 'Nama User'
+            : (filter_var($identitasLogin, FILTER_VALIDATE_EMAIL)
+                ? trim((string) strstr($identitasLogin, '@', true))
+                : 'Pengguna');
+    }
+    $emailUser = $identitasLogin;
 
     $favorites  = ambilFavoritUser($conn, $userId);
     $fotoProfil = ambilFotoProfil($conn, $userId);
@@ -227,7 +247,10 @@ unset($_SESSION['pesan']);
 
 $namaUser   = (string) $namaUser;
 $emailUser  = trim((string) $emailUser);
-$emailFoto  = filter_var($emailUser, FILTER_VALIDATE_EMAIL) !== false ? $emailUser : (filter_var($identitasLogin, FILTER_VALIDATE_EMAIL) !== false ? $identitasLogin : '');
+$emailSesi  = (string) ($_SESSION['email'] ?? '');
+$emailFoto  = filter_var($emailUser, FILTER_VALIDATE_EMAIL) !== false
+    ? $emailUser
+    : (filter_var($emailSesi, FILTER_VALIDATE_EMAIL) !== false ? $emailSesi : '');
 
 $srcFoto = srcGambar((string) $fotoProfil);
 if ($srcFoto === '' && preg_match('#^https://#i', $fotoEmail) === 1) {
@@ -248,7 +271,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-    <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=4">
     <link rel="stylesheet" href="../CSS/profil.css?v=29">
 </head>
 <body class="halaman-profil site-navbar-page">
@@ -330,7 +353,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
     </header>
 
     <div class="halaman">
-        <aside class="sidebar" aria-label="Informasi profil" data-api="<?= e($apiProfil) ?>">
+        <aside class="sidebar" aria-label="Informasi profil" data-api="<?= e($apiProfil) ?>" data-login-telepon="<?= $loginDenganTelepon ? '1' : '0' ?>">
             <div class="avatar" aria-hidden="true">
                 <svg id="avatar-default" viewBox="0 0 220 220">
                     <circle cx="110" cy="110" r="110" fill="#d9d9d9"/>
@@ -416,7 +439,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
                             </h3>
                             <div class="rating">
                                 <?php if ($jumlah > 0 && $rating > 0): ?>
-                                    <span class="bintang" aria-hidden="true"><?= bintangHtml($rating) ?></span>
+                                    <span class="bintang" aria-hidden="true"><?= bintangHtml($rating, true) ?></span>
                                     <span class="rating__ulasan"><?= e(formatRating($rating)) ?> (<?= e($jumlahLabel) ?> ulasan)</span>
                                 <?php elseif ($jumlah > 0): ?>
                                     <span class="rating__ulasan">(<?= e($jumlahLabel) ?> ulasan)</span>
@@ -489,6 +512,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
             var avatar = document.querySelector('.avatar');
             var namaEl = document.getElementById('profile-name');
             var emailEl = document.getElementById('profile-email');
+            var loginDenganTelepon = sidebar && sidebar.getAttribute('data-login-telepon') === '1';
             if (!sidebar || !avatar || !namaEl || !emailEl) return;
 
             var apiUrl = sidebar.getAttribute('data-api');
@@ -524,8 +548,19 @@ if ($srcFoto === '' && $emailFoto !== '') {
                 .then(function (j) {
                     if (!j || j.status !== 'success' || !j.data) return;
                     var d = j.data;
-                    if (d.nama) namaEl.textContent = d.nama;
-                    if (d.email) emailEl.textContent = d.email;
+                    var namaApi = String(d.nama || '').trim();
+                    if (namaApi && namaApi.toLowerCase() !== 'nama user') {
+                        namaEl.textContent = namaApi;
+                    } else if (loginDenganTelepon) {
+                        namaEl.textContent = 'Nama User';
+                    } else {
+                        var emailNama = String(d.email || '').trim();
+                        if (emailNama.indexOf('@') > 0) {
+                            namaEl.textContent = emailNama.split('@')[0];
+                        }
+                    }
+                    var identitas = loginDenganTelepon ? d.telepon : (d.email || d.telepon);
+                    if (identitas) emailEl.textContent = identitas;
                     var src = alamatFoto(d.foto_profil || d.foto || d.avatar || d.foto_url);
                     if (src) pasangFoto(src);
                 })

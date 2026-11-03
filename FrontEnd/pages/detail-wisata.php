@@ -36,8 +36,11 @@ function formatJam($jam): string {
     return str_replace(':', '.', substr((string) $jam, 0, 5));
 }
 
-function bintangHtml(float $nilai): string {
+function bintangHtml(float $nilai, bool $tanpaSetengah = false): string {
     $nilai    = max(0.0, min(5.0, $nilai));
+    if ($tanpaSetengah) {
+        $nilai = round($nilai);
+    }
     $dibulat  = round($nilai * 2) / 2;
     $penuh    = (int) floor($dibulat);
     $setengah = ($dibulat - $penuh) >= 0.5;
@@ -343,7 +346,7 @@ $destination = [
 $sudahFavorit = $sudahLogin && isTourismFavorite($conn, (int) $userId, $tourismId);
 $ulasanSaya   = $sudahLogin ? fetchUlasanSaya($conn, (int) $userId, $tourismId) : [];
 $ratingSaya   = isset($ulasanSaya['rating']) ? (int) round((float) $ulasanSaya['rating']) : 0;
-$komentarSaya = (string) ($ulasanSaya['komentar'] ?? '');
+$komentarSaya = '';
 if ($galatSimpan !== '') {
     $ratingSaya   = $ratingPost;
     $komentarSaya = $komentarPost;
@@ -370,8 +373,8 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=final-21">
-    <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
+    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=final-22">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=4">
 </head>
 <body class="halaman-detail site-navbar-page">
 
@@ -546,7 +549,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
                 <div class="ringkasan__rating">
                     <?php if ($destination['has_rating']): ?>
-                        <span class="bintang" aria-hidden="true"><?= bintangHtml($destination['rating']) ?></span>
+                        <span class="bintang" aria-hidden="true"><?= bintangHtml($destination['rating'], true) ?></span>
                         <span class="ringkasan__skor"><?= e($ratingText) ?> (<?= e($destination['review_label']) ?> ulasan)</span>
                     <?php else: ?>
                         <span class="ringkasan__skor">(belum ada ulasan)</span>
@@ -660,7 +663,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
                 <article class="kartu-alamat<?= $adaLokasi ? '' : ' kartu-alamat--kosong' ?>" id="kartu-alamat">
                     <svg class="kartu-alamat__ikon" viewBox="0 0 39.31 50.5" aria-hidden="true"><use href="#i-pin-hijau"/></svg>
-                    <h3 id="alamat-judul"><?= $alamat !== '' ? 'Alamat tersedia' : ($wilayah !== '' ? 'Wilayah tersedia' : 'Alamat Belum tersedia') ?></h3>
+                    <h3 id="alamat-judul">Alamat tersedia</h3>
                     <p id="alamat-teks"<?= $adaLokasi ? '' : ' class="belum"' ?>><?= $adaLokasi ? e($alamatTampil) : 'Lokasi Akan Di perbarui Segera' ?></p>
                     <a class="tombol-maps" id="tombol-maps"
                        <?= $bisaMaps ? 'href="' . e($mapsUrl) . '" target="_blank" rel="noopener noreferrer"' : 'aria-disabled="true" tabindex="-1"' ?>>
@@ -681,7 +684,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
                 <div class="ringkasan-ulasan__info">
                     <?php if ($destination['has_rating']): ?>
-                        <span class="bintang bintang--besar" aria-hidden="true"><?= bintangHtml($destination['rating']) ?></span>
+                        <span class="bintang bintang--besar" aria-hidden="true"><?= bintangHtml($destination['rating'], true) ?></span>
                     <?php endif; ?>
                     <span class="ringkasan-ulasan__jumlah">Dari <?= e($destination['review_label']) ?> ulasan</span>
                 </div>
@@ -767,7 +770,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <label class="dialog__label" for="komentar">Ulasan</label>
             <textarea id="komentar" name="komentar" rows="5" maxlength="500"
                       placeholder="Ceritakan Pengalamanmu di sini..."><?= e($komentarSaya) ?></textarea>
-            <p class="dialog__catatan">Jika kamu sudah pernah mengulas destinasi ini, ulasan lamamu akan di perbarui.</p>
+            <p class="dialog__catatan">Jika kamu sudah pernah mengulas, ulasan yang kamu kirim akan menggantikan ulasan sebelumnya.</p>
 
             <p class="dialog__error" id="error-ulasan" role="alert"<?= $galatSimpan === '' ? ' hidden' : '' ?>><?= e($galatSimpan) ?></p>
 
@@ -944,9 +947,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 }
 
                 kartu.classList.toggle('kartu-alamat--kosong', !adaLokasi);
-                judul.textContent = alamat !== ''
-                    ? 'Alamat tersedia'
-                    : (wilayah !== '' ? 'Wilayah tersedia' : 'Alamat Belum tersedia');
+                judul.textContent = 'Alamat tersedia';
                 teks.classList.toggle('belum', !adaLokasi);
                 if (!adaLokasi) {
                     teks.textContent = 'Lokasi Akan Di perbarui Segera';
