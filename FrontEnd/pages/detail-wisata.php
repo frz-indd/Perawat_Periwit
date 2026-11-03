@@ -264,33 +264,39 @@ if (!empty($extra['parkir_mobil'])) {
 
 $namaWisata   = (string) $tourism['nama_wisata'];
 $alamat       = trim((string) ($tourism['alamat'] ?? ''));
-$alamatTampil = $alamat;
-if ($alamat !== '' && mb_stripos($alamat, $namaWisata, 0, 'UTF-8') !== 0) {
-    $alamatTampil = $namaWisata . "\n" . $alamat;
+$wilayah      = trim((string) ($tourism['wilayah'] ?? ''));
+$lokasiTampil = $alamat !== '' ? $alamat : $wilayah;
+$adaLokasi    = $lokasiTampil !== '';
+$alamatTampil = $lokasiTampil;
+if ($adaLokasi && mb_stripos($lokasiTampil, $namaWisata, 0, 'UTF-8') !== 0) {
+    $alamatTampil = $namaWisata . "\n" . $lokasiTampil;
 }
 
 $lat = $tourism['latitude'] ?? null;
 $lng = $tourism['longitude'] ?? null;
 $koordinatTersedia = koordinatValid($lat, $lng);
-$petaTersedia = $koordinatTersedia || $alamat !== '';
+$petaTersedia = $koordinatTersedia || $adaLokasi;
 $petaSrc = $petaTersedia
     ? 'https://maps.google.com/maps?q=' . rawurlencode(
-        $koordinatTersedia ? $lat . ',' . $lng : $namaWisata . ', ' . $alamat
+        $koordinatTersedia ? $lat . ',' . $lng : $namaWisata . ', ' . $lokasiTampil
     ) . '&hl=id&z=15&output=embed'
     : '';
 
-$bisaMaps = $alamat !== '';
-$mapsUrl  = '';
-if ($bisaMaps) {
-    $linkMaps = trim((string) ($tourism['Maps_Wisata'] ?? ''));
-    if (preg_match('#^https?://#i', $linkMaps) === 1) {
-        $mapsUrl = $linkMaps;
-    } elseif ($petaTersedia) {
-        $mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($lat . ',' . $lng);
-    } else {
-        $mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($namaWisata . ', ' . $alamat);
-    }
+$linkMaps = trim((string) ($tourism['Maps_Wisata'] ?? ''));
+if (preg_match('#^https?://#i', $linkMaps) === 1) {
+    $mapsUrlTersimpan = $linkMaps;
+    $mapsUrl = $mapsUrlTersimpan;
+} elseif ($koordinatTersedia) {
+    $mapsUrlTersimpan = '';
+    $mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($lat . ',' . $lng);
+} elseif ($adaLokasi) {
+    $mapsUrlTersimpan = '';
+    $mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($namaWisata . ', ' . $lokasiTampil);
+} else {
+    $mapsUrlTersimpan = '';
+    $mapsUrl = '';
 }
+$bisaMaps = $mapsUrl !== '';
 
 $gambar  = trim((string) ($tourism['gambar'] ?? ''));
 $adaFoto = $gambar !== '' && is_file(__DIR__ . '/../../' . $gambar);
@@ -364,17 +370,17 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=final-11">
+    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=final-21">
     <link rel="stylesheet" href="../CSS/navbar-common.css?v=2">
 </head>
 <body class="halaman-detail site-navbar-page">
 
     <svg class="sprite" aria-hidden="true">
         <defs>
-            <symbol id="ikon-profil" viewBox="0 0 220 220">
-                <circle cx="110" cy="110" r="93.5" fill="none" stroke="#166c5c" stroke-width="11"/>
-                <circle cx="110" cy="82.5" r="27.5" fill="none" stroke="#166c5c" stroke-width="11"/>
-                <path d="M49.5 170.5c9.35-27.5 30.25-41.25 60.5-41.25s51.15 13.75 60.5 41.25" fill="none" stroke="#166c5c" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+            <symbol id="ikon-profil" viewBox="0 0 40 40">
+                <circle cx="20" cy="20" r="18.2" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="20" cy="16.2" r="5.8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9 33.5C9.7 29.2 12.2 26 15.2 25.2C17 26.6 23 26.6 24.8 25.2C27.8 26 30.3 29.2 31 33.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             </symbol>
 
             <symbol id="i-bintang" viewBox="0 0 24 24">
@@ -386,18 +392,16 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 <path d="M3 3v5h5"/>
             </symbol>
 
-            <symbol id="i-lokasi" viewBox="0 0 40 44">
-                <ellipse cx="20" cy="38" rx="19.5" ry="6" fill="#4fd65b"/>
-                <path d="M20 44a19.5 6 0 0 0 0-12z" fill="#12b886"/>
-                <path d="M20 2C13 2 7.5 7.4 7.5 14c0 7 7.5 13 12.5 22z" fill="#f02a1a"/>
-                <path d="M20 2c7 0 12.5 5.4 12.5 12 0 7-7.5 13-12.5 22z" fill="#d92119"/>
-                <circle cx="20" cy="14" r="5.4" fill="#fff"/>
+            <symbol id="i-lokasi" viewBox="0 0 30 40">
+                <path d="M15 26.5A15 6.5 0 0 0 15 39.5Z" fill="#59d65a"/>
+                <path d="M15 26.5A15 6.5 0 0 1 15 39.5Z" fill="#1fc27d"/>
+                <path d="M15 36C10 30 3.5 22.5 3.5 13A11.5 11.5 0 0 1 15 1.5Z" fill="#ff4a26"/>
+                <path d="M15 36C20 30 26.5 22.5 26.5 13A11.5 11.5 0 0 0 15 1.5Z" fill="#e5301c"/>
+                <circle cx="15" cy="13" r="4.8" fill="#fff"/>
             </symbol>
 
-            <symbol id="i-pin-hijau" viewBox="0 0 40 46">
-                <path d="M20 2.5C13.2 2.5 8 7.8 8 14.4c0 7.2 8.2 13.6 12 18.6 3.8-5 12-11.4 12-18.6C32 7.8 26.8 2.5 20 2.5Z" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linejoin="round"/>
-                <circle cx="20" cy="14" r="3.2" fill="currentColor"/>
-                <path d="M11.5 30.5C6.6 31.6 3.8 33.6 3.8 36.2c0 3.8 7.2 6.6 16.2 6.6s16.2-2.8 16.2-6.6c0-2.6-2.8-4.6-7.7-5.7" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <symbol id="i-pin-hijau" viewBox="0 0 39.31 50.5">
+                <path fill="currentColor" fill-rule="evenodd" d="M0 40.19 0.19 42.19 1 43.88 2.31 45.38 5 47.25 7.88 48.56 11.5 49.62 17.38 50.44 21.62 50.44 26 49.94 30.19 48.94 32.81 47.94 35.5 46.44 37.38 44.88 38.69 43 39.25 40.88 38.88 39.06 37.56 36.94 35 34.88 32.5 33.69 31.31 33.88 30.88 34.38 30.81 35.19 33.94 38.31 34.25 39.25 34.06 40.69 33.25 41.88 31.75 43.06 27.12 44.88 23.38 45.5 18.44 45.75 12.06 44.88 7.75 43.25 5.81 41.75 4.94 39.81 5.56 37.81 8.12 35.25 7.94 34.19 7.06 33.69 4.94 34.38 2.38 36.19 0.69 38.25ZM18.94 9.62 16.88 10.38 15.94 11.19 15.06 12.75 14.75 14.69 15.5 16.75 16.69 18.06 18.06 18.81 20.31 19 21.94 18.44 23.56 16.94 24.25 15.56 24.38 13.69 23.69 11.81 22.5 10.5 20.62 9.69ZM17.94 0 15.31 0.5 12.56 1.62 10.44 3 8.5 4.81 6.75 7.25 5.75 9.44 5 12.25 4.88 15.06 6.19 20.75 9.69 27.75 15.62 36.19 18.69 39.69 19.88 40 21.12 39.06 25.94 33 31 25.06 33.69 18.5 34.25 15.88 34.31 13.25 33.88 10.81 32.38 7.12 30.69 4.81 29.12 3.31 26.38 1.5 23.44 0.38 21.38 0ZM19 4.69 22.5 5.06 25.94 6.94 28.19 9.62 29.12 11.81 29.38 13.38 28.94 17.56 26.44 23.38 21.69 30.75 20.44 32.19 19.75 32.5 18.88 32.25 17.94 31.25 12.69 23.19 10.62 18.69 9.81 15.06 10.19 11.5 11 9.62 12.12 8.06 14.06 6.31 15.69 5.44Z"/>
             </symbol>
 
             <symbol id="i-pin-coret" viewBox="0 0 40 46">
@@ -471,10 +475,12 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 <path d="M32 54C14 40 3 30 3 18.5 3 9.9 9.6 3 18 3c5.6 0 10.6 3 14 8 3.4-5 8.4-8 14-8 8.4 0 15 6.9 15 15.5C61 30 50 40 32 54Z" fill="currentColor"/>
             </symbol>
 
-            <symbol id="i-sampah" viewBox="0 0 48 56">
-                <path d="M18 4h12a2 2 0 0 1 2 2v5H16V6a2 2 0 0 1 2-2z" fill="currentColor"/>
-                <rect x="4" y="10" width="40" height="6.5" rx="3.2" fill="currentColor"/>
-                <path fill-rule="evenodd" fill="currentColor" d="M8 19h32l-2.2 30.2A5 5 0 0 1 32.8 54H15.2a5 5 0 0 1-5-4.8L8 19zM17 25.5a1.8 1.8 0 0 1 3.6 0v21a1.8 1.8 0 0 1-3.6 0zM27.4 25.5a1.8 1.8 0 0 1 3.6 0v21a1.8 1.8 0 0 1-3.6 0z"/>
+            <symbol id="i-sampah" viewBox="0 0 34 34">
+                <path fill="currentColor" fill-rule="evenodd" d="M12 0h10a1 1 0 0 1 1 1v5H11V1a1 1 0 0 1 1-1zM13.2 2.6h7.6v3.4h-7.6z"/>
+                <rect x="0" y="4.8" width="33.8" height="2.5" rx="1.25" fill="currentColor"/>
+                <path d="M3.8 6h26.2v25.6a1.7 1.7 0 0 1-1.7 1.7H5.5a1.7 1.7 0 0 1-1.7-1.7z" fill="currentColor"/>
+                <rect x="11.5" y="11.8" width="3" height="14.8" rx="1.5" style="fill: var(--lubang, #fff)"/>
+                <rect x="19" y="11.8" width="3" height="14.8" rx="1.5" style="fill: var(--lubang, #fff)"/>
             </symbol>
         </defs>
     </svg>
@@ -635,7 +641,9 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
             <div class="lokasi-grid<?= $petaTersedia ? '' : ' lokasi-grid--kosong' ?>" id="lokasi-grid"
                  data-endpoint="<?= e($apiLokasi) ?>"
-                 data-nama="<?= e($namaWisata) ?>">
+                 data-nama="<?= e($namaWisata) ?>"
+                 data-wilayah="<?= e($wilayah) ?>"
+                 data-map-url="<?= e($mapsUrlTersimpan) ?>">
                 <div class="peta" id="peta"<?= $petaTersedia ? '' : ' hidden' ?>>
                     <iframe id="peta-frame"
                             title="Peta lokasi <?= e($destination['title']) ?>"
@@ -650,10 +658,10 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                     <p>Peta belum dapat ditampilkan karena koordinat lokasi belum tersedia</p>
                 </div>
 
-                <article class="kartu-alamat<?= $bisaMaps ? '' : ' kartu-alamat--kosong' ?>" id="kartu-alamat">
-                    <svg class="kartu-alamat__ikon" viewBox="0 0 40 46" aria-hidden="true"><use href="#i-pin-hijau"/></svg>
-                    <h3 id="alamat-judul"><?= $bisaMaps ? 'Alamat tersedia' : 'Alamat Belum tersedia' ?></h3>
-                    <p id="alamat-teks"<?= $bisaMaps ? '' : ' class="belum"' ?>><?= $bisaMaps ? e($alamatTampil) : 'Lokasi Akan Di perbarui Segera' ?></p>
+                <article class="kartu-alamat<?= $adaLokasi ? '' : ' kartu-alamat--kosong' ?>" id="kartu-alamat">
+                    <svg class="kartu-alamat__ikon" viewBox="0 0 39.31 50.5" aria-hidden="true"><use href="#i-pin-hijau"/></svg>
+                    <h3 id="alamat-judul"><?= $alamat !== '' ? 'Alamat tersedia' : ($wilayah !== '' ? 'Wilayah tersedia' : 'Alamat Belum tersedia') ?></h3>
+                    <p id="alamat-teks"<?= $adaLokasi ? '' : ' class="belum"' ?>><?= $adaLokasi ? e($alamatTampil) : 'Lokasi Akan Di perbarui Segera' ?></p>
                     <a class="tombol-maps" id="tombol-maps"
                        <?= $bisaMaps ? 'href="' . e($mapsUrl) . '" target="_blank" rel="noopener noreferrer"' : 'aria-disabled="true" tabindex="-1"' ?>>
                         <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
@@ -696,7 +704,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 <?php foreach ($destination['reviews'] as $ulasan): ?>
                     <article class="ulasan">
                         <div class="ulasan__kepala">
-                            <svg class="ulasan__avatar" viewBox="0 0 220 220" aria-hidden="true"><use href="#ikon-profil"/></svg>
+                            <svg class="ulasan__avatar" viewBox="0 0 40 40" aria-hidden="true"><use href="#ikon-profil"/></svg>
                             <div class="ulasan__meta">
                                 <strong><?= e($ulasan['name']) ?></strong>
                                 <span class="bintang bintang--kecil" role="img"
@@ -902,6 +910,8 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             var teks = document.getElementById('alamat-teks');
             var maps = document.getElementById('tombol-maps');
             var nama = grid.getAttribute('data-nama') || '';
+            var wilayah = grid.getAttribute('data-wilayah') || '';
+            var mapsUrlAwal = grid.getAttribute('data-map-url') || '';
             var endpoint = grid.getAttribute('data-endpoint');
 
             function koordinatValid(lat, lng) {
@@ -914,60 +924,81 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
             function terapkan(d) {
                 var alamat = String(d.alamat === null || d.alamat === undefined ? '' : d.alamat).trim();
+                var lokasiTampil = alamat !== '' ? alamat : wilayah;
                 var koordinatAda = d.koordinat_lengkap === true && koordinatValid(d.latitude, d.longitude);
-                var ada = koordinatAda || alamat !== '';
+                var adaLokasi = lokasiTampil !== '';
+                var adaPeta = koordinatAda || adaLokasi;
 
-                grid.classList.toggle('lokasi-grid--kosong', !ada);
-                peta.hidden = !ada;
-                petaKosong.hidden = ada;
+                grid.classList.toggle('lokasi-grid--kosong', !adaPeta);
+                peta.hidden = !adaPeta;
+                petaKosong.hidden = adaPeta;
 
-                if (ada) {
+                if (adaPeta) {
                     var query = koordinatAda
                         ? d.latitude + ',' + d.longitude
-                        : nama + ', ' + alamat;
+                        : nama + ', ' + lokasiTampil;
                     var src = 'https://maps.google.com/maps?q=' +
                         encodeURIComponent(query) +
                         '&hl=id&z=15&output=embed';
                     if (frame.getAttribute('src') !== src) frame.setAttribute('src', src);
                 }
 
-                kartu.classList.toggle('kartu-alamat--kosong', alamat === '');
-                judul.textContent = alamat !== '' ? 'Alamat tersedia' : 'Alamat Belum tersedia';
-                teks.classList.toggle('belum', alamat === '');
-
-                if (alamat === '') {
+                kartu.classList.toggle('kartu-alamat--kosong', !adaLokasi);
+                judul.textContent = alamat !== ''
+                    ? 'Alamat tersedia'
+                    : (wilayah !== '' ? 'Wilayah tersedia' : 'Alamat Belum tersedia');
+                teks.classList.toggle('belum', !adaLokasi);
+                if (!adaLokasi) {
                     teks.textContent = 'Lokasi Akan Di perbarui Segera';
+                } else {
+                    teks.textContent = lokasiTampil.toLowerCase().indexOf(nama.toLowerCase()) === 0
+                        ? lokasiTampil
+                        : nama + '\n' + lokasiTampil;
+                }
+
+                var mapsUrl = String(d.Maps_Wisata || d.maps_url || '').trim();
+                if (!/^https?:\/\//i.test(mapsUrl)) {
+                    mapsUrl = mapsUrlAwal;
+                }
+                if (!/^https?:\/\//i.test(mapsUrl)) {
+                    mapsUrl = koordinatAda
+                        ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(d.latitude + ',' + d.longitude)
+                        : (adaLokasi
+                            ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(nama + ', ' + lokasiTampil)
+                            : '');
+                }
+                if (mapsUrl !== '') {
+                    maps.setAttribute('href', mapsUrl);
+                    maps.setAttribute('target', '_blank');
+                    maps.setAttribute('rel', 'noopener noreferrer');
+                    maps.removeAttribute('aria-disabled');
+                    maps.removeAttribute('tabindex');
+                } else {
                     maps.removeAttribute('href');
                     maps.removeAttribute('target');
                     maps.removeAttribute('rel');
                     maps.setAttribute('aria-disabled', 'true');
                     maps.setAttribute('tabindex', '-1');
-                    return;
                 }
-
-                teks.textContent = alamat.toLowerCase().indexOf(nama.toLowerCase()) === 0
-                    ? alamat
-                    : nama + '\n' + alamat;
-
-                if (!maps.getAttribute('href')) {
-                    var q = ada ? d.latitude + ',' + d.longitude : nama + ', ' + alamat;
-                    maps.setAttribute('href', 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q));
-                    maps.setAttribute('target', '_blank');
-                    maps.setAttribute('rel', 'noopener noreferrer');
-                }
-                maps.removeAttribute('aria-disabled');
-                maps.removeAttribute('tabindex');
             }
 
             fetch(endpoint, {
                 credentials: 'same-origin',
                 headers: { 'Accept': 'application/json' }
             })
-                .then(function (r) { return r.ok ? r.json() : null; })
-                .then(function (j) {
-                    if (j && j.status === 'success' && j.data) terapkan(j.data);
+                .then(function (r) {
+                    if (!r.ok) throw new Error('Lokasi wisata gagal dimuat (' + r.status + ').');
+                    return r.json();
                 })
-                .catch(function () {});
+                .then(function (j) {
+                    if (!j || j.status !== 'success' || !j.data) {
+                        throw new Error('Respons lokasi wisata tidak valid.');
+                    }
+                    terapkan(j.data);
+                })
+                .catch(function (error) {
+                    console.error('Gagal memperbarui alamat dan peta wisata:', error);
+                });
         })();
 
         var popupLogin = (function () {
@@ -1052,7 +1083,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             });
 
             if (batal) batal.addEventListener('click', dialogUlasan.tutup);
-
             var galatAwal = document.getElementById('error-ulasan');
             if (galatAwal && !galatAwal.hidden && tombol.getAttribute('data-login') === '1') {
                 dialogUlasan.buka();
@@ -1087,6 +1117,10 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 var nilai = terpilih();
                 tampil(nilai, false);
                 reset.hidden = nilai === '';
+                baris.classList.toggle('terkunci', nilai !== '');
+                radios.forEach(function (r) {
+                    r.disabled = nilai !== '' && r.value !== nilai;
+                });
             }
 
             radios.forEach(function (r) {
@@ -1102,7 +1136,9 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             if (bisaHover) {
                 baris.querySelectorAll('label').forEach(function (l) {
                     l.addEventListener('mouseenter', function () {
-                        tampil(l.getAttribute('for').replace('rating-', ''), true);
+                        if (!terpilih()) {
+                            tampil(l.getAttribute('for').replace('rating-', ''), true);
+                        }
                     });
                 });
                 baris.addEventListener('mouseleave', segarkan);
@@ -1143,8 +1179,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 sibuk = true;
                 var kirim = form.querySelector('.btn-kirim');
                 if (kirim) kirim.disabled = true;
-
-                var status = 0;
 
                 function selesai() {
                     sibuk = false;
