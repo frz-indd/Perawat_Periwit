@@ -11,39 +11,48 @@ function googleOauthConfig(): ?array
     $localConfig = $loadedConfig;
   }
 
-  $clientId = getenv("GOOGLE_CLIENT_ID");
-  $clientSecret = getenv("GOOGLE_CLIENT_SECRET");
-  $redirectUri = getenv("GOOGLE_REDIRECT_URI");
+  [$scheme, $host, $callbackPath] = googleOauthCurrentCallback();
+  $isLocalHost = googleOauthIsLocalHost($host);
+  $environmentClientId = getenv("GOOGLE_CLIENT_ID");
+  $environmentClientSecret = getenv("GOOGLE_CLIENT_SECRET");
+  $environmentRedirectUri = getenv("GOOGLE_REDIRECT_URI");
+  $localClientId = $localConfig["client_id"] ?? "";
+  $localClientSecret = $localConfig["client_secret"] ?? "";
+  $localRedirectUri = $localConfig["redirect_uri"] ?? "";
 
-  if (!is_string($clientId) || trim($clientId) === "") {
-    $clientId = $localConfig["client_id"] ?? "";
-  }
-
-  if (!is_string($clientSecret) || trim($clientSecret) === "") {
-    $clientSecret = $localConfig["client_secret"] ?? "";
-  }
-
-  if (!is_string($clientId) || trim($clientId) === "") {
-    return null;
-  }
-
-  if (!is_string($clientSecret) || trim($clientSecret) === "") {
-    return null;
-  }
-
-  if (!is_string($redirectUri) || trim($redirectUri) === "") {
-    $redirectUri = $localConfig["redirect_uri"] ?? "";
-  }
-
-  if (!is_string($redirectUri) || trim($redirectUri) === "") {
-    $scheme = ((!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") || ($_SERVER["SERVER_PORT"] ?? null) == 443)
-      ? "https"
-      : "http";
-
-    $host = $_SERVER["HTTP_HOST"] ?? "localhost";
-    $scriptName = $_SERVER["SCRIPT_NAME"] ?? "/Backend/api/google_login.php";
-    $callbackPath = dirname($scriptName) . "/google_callback.php";
+  if ($isLocalHost) {
+    $clientId = is_string($localClientId) && trim($localClientId) !== ""
+      ? $localClientId
+      : $environmentClientId;
+    $clientSecret = is_string($localClientSecret) && trim($localClientSecret) !== ""
+      ? $localClientSecret
+      : $environmentClientSecret;
     $redirectUri = $scheme . "://" . $host . $callbackPath;
+  } else {
+    $clientId = $environmentClientId;
+    $clientSecret = $environmentClientSecret;
+    $redirectUri = $environmentRedirectUri;
+
+    if (!is_string($clientId) || trim($clientId) === "") {
+      $clientId = $localClientId;
+    }
+    if (!is_string($clientSecret) || trim($clientSecret) === "") {
+      $clientSecret = $localClientSecret;
+    }
+    if (!is_string($redirectUri) || trim($redirectUri) === "") {
+      $redirectUri = $localRedirectUri;
+    }
+    if (!is_string($redirectUri) || trim($redirectUri) === "") {
+      $redirectUri = $scheme . "://" . $host . $callbackPath;
+    }
+  }
+
+  if (!is_string($clientId) || trim($clientId) === "") {
+    return null;
+  }
+
+  if (!is_string($clientSecret) || trim($clientSecret) === "") {
+    return null;
   }
 
   return [
@@ -53,18 +62,165 @@ function googleOauthConfig(): ?array
   ];
 }
 
+function googleOauthCurrentCallback(): array
+{
+  $scheme = ((!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") || ($_SERVER["SERVER_PORT"] ?? null) == 443)
+    ? "https"
+    : "http";
+  $host = $_SERVER["HTTP_HOST"] ?? "localhost";
+  $scriptName = str_replace("\\", "/", (string) ($_SERVER["SCRIPT_NAME"] ?? "/Backend/api/google_login.php"));
+  $callbackPath = rtrim(dirname($scriptName), "/") . "/google_callback.php";
+
+  return [$scheme, $host, $callbackPath];
+}
+
+function googleOauthIsLocalHost(string $host): bool
+{
+  $hostname = strtolower($host);
+  if (str_starts_with($hostname, "[")) {
+    $end = strpos($hostname, "]");
+    $hostname = $end === false ? $hostname : substr($hostname, 1, $end - 1);
+  } else {
+    $colon = strrpos($hostname, ":");
+    $port = $colon === false ? "" : substr($hostname, $colon + 1);
+    if ($colon !== false && ctype_digit($port)) {
+      $hostname = substr($hostname, 0, $colon);
+    }
+  }
+
+  return in_array($hostname, ["localhost", "127.0.0.1", "::1"], true);
+}
+
+function googleOauthBase64UrlDecode(string $value): string|false
+{
+  $remainder = strlen($value) % 4;
+  if ($remainder > 0) {
+    $value .= str_repeat("=", 4 - $remainder);
+  }
+
+  return base64_decode(strtr($value, "-_", "+/"), true);
+}
+
+function googleOauthDerLength(string $value): string
+{
+  $length = strlen($value);
+  if ($length < 128) {
+    return chr($length) . $value;
+  }
+
+  $lengthBytes = ltrim(pack("N", $length), "\x00");
+  return chr(0x80 | strlen($lengthBytes)) . $lengthBytes . $value;
+}
+
+function googleOauthDerInteger(string $bytes): string
+{
+  if ($bytes === "") {
+    $bytes = "\x00";
+  }
+  if ((ord($bytes[0]) & 0x80) === 0x80) {
+    $bytes = "\x00" . $bytes;
+  }
+
+  return "\x02" . googleOauthDerLength($bytes);
+}
+
+function googleOauthJwkToPem(array $jwk): ?string
+{
+  $modulusEncoded = $jwk["n"] ?? "";
+  $exponentEncoded = $jwk["e"] ?? "";
+  if (!is_string($modulusEncoded) || !is_string($exponentEncoded) || $modulusEncoded === "" || $exponentEncoded === "") {
+    return null;
+  }
+
+  $modulus = googleOauthBase64UrlDecode($modulusEncoded);
+  $exponent = googleOauthBase64UrlDecode($exponentEncoded);
+  if ($modulus === false || $exponent === false) {
+    return null;
+  }
+
+  $rsaKey = googleOauthDerInteger($modulus) . googleOauthDerInteger($exponent);
+  $rsaSequence = "\x30" . googleOauthDerLength($rsaKey);
+  $bitString = "\x03" . googleOauthDerLength("\x00" . $rsaSequence);
+  $algorithm = hex2bin("300d06092a864886f70d0101010500");
+  if ($algorithm === false) {
+    return null;
+  }
+
+  $der = "\x30" . googleOauthDerLength($algorithm . $bitString);
+  return "-----BEGIN PUBLIC KEY-----\n" .
+    chunk_split(base64_encode($der), 64, "\n") .
+    "-----END PUBLIC KEY-----\n";
+}
+
 function googleOauthVerifyIdToken(string $idToken, string $clientId): ?array
 {
   $autoloadPath = __DIR__ . "/../vendor/autoload.php";
-  if (!is_file($autoloadPath)) {
-    throw new RuntimeException("Dependensi Google API Client belum terpasang");
+  if (is_file($autoloadPath)) {
+    require_once $autoloadPath;
+    $client = new Google\Client(["client_id" => $clientId]);
+    $identity = $client->verifyIdToken($idToken);
+    if (is_array($identity)) {
+      return $identity;
+    }
   }
 
-  require_once $autoloadPath;
-  $client = new Google\Client(["client_id" => $clientId]);
-  $identity = $client->verifyIdToken($idToken);
+  $parts = explode(".", $idToken);
+  if (count($parts) !== 3) {
+    return null;
+  }
 
-  return is_array($identity) ? $identity : null;
+  $headerJson = googleOauthBase64UrlDecode($parts[0]);
+  $payloadJson = googleOauthBase64UrlDecode($parts[1]);
+  $signature = googleOauthBase64UrlDecode($parts[2]);
+  if ($headerJson === false || $payloadJson === false || $signature === false) {
+    return null;
+  }
+
+  $header = json_decode($headerJson, true);
+  $payload = json_decode($payloadJson, true);
+  if (!is_array($header) || !is_array($payload)) {
+    return null;
+  }
+
+  $algorithm = $header["alg"] ?? "";
+  $keyId = $header["kid"] ?? "";
+  if ($algorithm !== "RS256" || !is_string($keyId) || $keyId === "") {
+    return null;
+  }
+
+  [$status, $jwks] = googleOauthRequest("https://www.googleapis.com/oauth2/v3/certs");
+  $keys = $jwks["keys"] ?? [];
+  if ($status !== 200 || !is_array($keys)) {
+    return null;
+  }
+
+  $matchingKey = null;
+  foreach ($keys as $key) {
+    if (is_array($key) && ($key["kid"] ?? "") === $keyId) {
+      $matchingKey = $key;
+      break;
+    }
+  }
+  if ($matchingKey === null) {
+    return null;
+  }
+
+  $pem = googleOauthJwkToPem($matchingKey);
+  if ($pem === null) {
+    return null;
+  }
+
+  $verified = openssl_verify(
+    $parts[0] . "." . $parts[1],
+    $signature,
+    $pem,
+    OPENSSL_ALGO_SHA256
+  );
+  if ($verified !== 1) {
+    return null;
+  }
+
+  return $payload;
 }
 
 function googleOauthRespond(int $statusCode, array $payload): void

@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/admin/dashboard"
+method: GET
+headers:
+  Accept: application/json
+  Authorization: "Bearer {{adminJwtToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      const hasToken = Boolean(pm.collectionVariables.get('adminJwtToken'));
+      pm.test('Admin dashboard endpoint validates JWT token', function () {
+          pm.response.to.have.status(hasToken ? 200 : 403);
+          if (hasToken) {
+              const res = pm.response.json();
+              pm.expect(res.status).to.eql('success');
+              pm.expect(res.auth.role).to.eql('admin');
+          } else {
+              pm.expect(pm.response.json().message).to.eql('Akses ditolak: Anda tidak memiliki wewenang admin.');
+          }
+      });
+    language: text/javascript
+order: 8200
+

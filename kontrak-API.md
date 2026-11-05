@@ -16,9 +16,58 @@ Untuk pengujian lokal, ganti domain dengan `http://localhost/Perawat_Periwit`. C
 - Browser harus menyimpan dan mengirim cookie session yang sama. Untuk request dari aplikasi gunakan same-origin.
 - Login pengguna maupun admin mengembalikan token `csrf` dalam respons.
 - Dari endpoint yang saat ini tersedia, logout meminta token CSRF melalui field `csrf`. Endpoint profil tidak memeriksa token CSRF.
-- Login admin menyimpan role `admin` di session. Endpoint khusus admin belum tersedia.
+- Untuk otorisasi API berbasis token, gunakan endpoint JWT `/api/admin/login` yang menerbitkan Bearer Token JWT dengan payload `{ id, role }` serta masa kedaluwarsa 24 jam (1 hari). Rute khusus admin diproteksi menggunakan middleware `adminOnly` via header `Authorization: Bearer <token>`.
 
-## 1. Login pengguna atau admin
+## 1. Login Admin via JWT (/api/admin/login)
+
+`POST https://perawatperiwit.site.je/api/admin/login`
+
+Kirim data sebagai `application/json` atau form-urlencoded dengan body:
+```json
+{
+  "username": "admin",
+  "password": "password_admin"
+}
+```
+
+Format Response HTTP `200 OK`:
+```json
+{
+  "status": "success",
+  "message": "Login berhasil.",
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": 1,
+    "name": "Administrator MajaKu",
+    "email": "admin@majakusample.com",
+    "role": "admin"
+  }
+}
+```
+
+Status yang dapat diterima:
+- `200`: login berhasil, token JWT HS256 diterbitkan.
+- `401`: `{"message": "Username atau password salah."}` jika kredensial salah, user tidak ditemukan, atau `role !== 'admin'`.
+- `422`: `{"status": "validation_error", "message": "Username dan password wajib diisi."}` jika input kosong.
+- `405`: metode selain POST.
+- `500`: kesalahan server / database.
+
+## 2. Middleware RBAC (adminOnly)
+
+Proteksi rute khusus admin dengan menyertakan header:
+`Authorization: Bearer <token>`
+
+Jika token tidak valid, telah kedaluwarsa, atau role pada payload token bukan `admin`, request dibatalkan dan mengembalikan HTTP `403 Forbidden`:
+```json
+{
+  "message": "Akses ditolak: Anda tidak memiliki wewenang admin."
+}
+```
+
+Contoh rute terlindungi:
+`GET /api/admin/dashboard`
+
+## 3. Login pengguna atau admin (Session Based Legacy)
 
 `POST https://perawatperiwit.site.je/Backend/api/fungsi_login.php`
 

@@ -120,6 +120,9 @@ try {
   }
 
   require_once __DIR__ . "/../database/koneksi.php";
+  if (!$conn instanceof mysqli) {
+    throw new RuntimeException("Koneksi database tidak tersedia");
+  }
   $conn->begin_transaction();
 
   try {

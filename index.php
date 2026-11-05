@@ -100,11 +100,6 @@ $destinasiLain = array_slice($wisata, 4, 4);
                         minlength="2"
                         required
                     >
-
-                    <?php if (!$isLoggedIn): ?>
-                        <input type="hidden" name="next" value="search">
-                    <?php endif; ?>
-
                     <button type="submit" aria-label="Cari wisata">
                         <i class="bi bi-search" aria-hidden="true"></i>
                     </button>
@@ -112,7 +107,7 @@ $destinasiLain = array_slice($wisata, 4, 4);
 
                 <a
                     class="search-filter-button"
-                    href="<?= $isLoggedIn ? 'search' : 'FrontEnd/auth/Login.php?next=search' ?>"
+                    href='search' next=search
                     aria-label="Buka filter pencarian wisata"
                 >
                     <svg width="70" height="66" viewBox="0 0 70 66" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

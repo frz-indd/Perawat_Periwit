@@ -21,7 +21,7 @@ Jika hosting mendukung environment variables PHP, `DB_HOST`, `DB_PORT`, `DB_NAME
 
 ## Google OAuth
 
-Login Google memerlukan dependensi Composer di `Backend/vendor`. Jalankan `composer install --no-dev --optimize-autoloader` dari folder `Backend`, atau upload folder `vendor` yang dibuat secara lokal. Kredensial OAuth harus disediakan terpisah melalui environment variables `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`, atau file `Backend/google_oauth.local.php`.
+Login Google memverifikasi ID token Google melalui JWKS. Folder Composer `Backend/vendor` bersifat opsional. Kredensial OAuth harus disediakan terpisah melalui environment variables `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`, atau file `Backend/google_oauth.local.php`. Pada localhost, backend memakai URL callback dari request yang sedang berjalan.
 
 Pastikan URL callback yang didaftarkan pada Google Cloud sama persis dengan URL callback di konfigurasi hosting. Jangan unggah konfigurasi OAuth atau database ke repositori.
 

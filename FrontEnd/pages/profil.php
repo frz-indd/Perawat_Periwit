@@ -391,14 +391,14 @@ if ($srcFoto === '' && $emailFoto !== '') {
                     </a>
                     <span>Ubah Password</span>
                 </div>
-                <form class="menu-profil__item menu-profil__item--logout" id="logout-form" method="post" action="../../Backend/api/logout.php" data-api-url="../../Backend/api/logout.php">
+            <form class="menu-profil__item menu-profil__item--logout" id="logout-form" method="post" action="../../Backend/api/logout.php" data-api-url="../../Backend/api/logout.php">
                     <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
-                    <button type="button" class="menu-profil__ikon logout-trigger" aria-label="Logout" title="Logout" aria-haspopup="dialog" aria-controls="logout-dialog">
-                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <button type="button" class="menu-profil__logout logout-trigger" aria-haspopup="dialog" aria-controls="logout-dialog">
+                        <svg class="menu-profil__ikon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M3.5 19.4 17.7 5.5V13.2H35.8Q36.6 13.2 36.6 14V24.3Q36.6 25.1 35.8 25.1H17.7V33.8Z"/>
                         </svg>
+                        <span>Logout</span>
                     </button>
-                    <span>Logout</span>
                 </form>
             </nav>
         </aside>

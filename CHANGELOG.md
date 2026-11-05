@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-11-04
+
+### Diperbaiki
+
+- Login Google di XAMPP gagal dengan `{"status":"error","message":"login Google gagal"}` karena callback memakai URL lama `eksplorMajaKu` dan verifikasi ID token mewajibkan folder Composer `Backend/vendor` yang tidak terpasang.
+- `redirect_uri` OAuth sekarang memakai URL aplikasi yang sedang diakses saat host-nya `localhost`, sehingga login dari `Perawat_Periwit` kembali ke callback proyek yang sama.
+- Pada localhost, kredensial diambil dari `Backend/google_oauth.local.php` terlebih dahulu agar environment variable klien OAuth proyek lama tidak menimpa konfigurasi.
+- Verifikasi ID token Google memakai tanda tangan JWT RS256 dari JWKS Google, tanpa bergantung pada `google/apiclient`.
+- Callback menolak proses bila koneksi database tidak tersedia, alih-alih memicu error `begin_transaction()` pada `null`.
+
+### Catatan
+
+- Daftarkan `http://localhost/Perawat_Periwit/Backend/api/google_callback.php` sebagai Authorized redirect URI pada klien OAuth Google Cloud yang dipakai aplikasi ini, di samping URL callback hosting.
+
 ## 2026-10-28
 
 ### Ditambahkan
