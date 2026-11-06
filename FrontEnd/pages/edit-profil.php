@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/navbar-profile-session.php';
 
 if (empty($_SESSION['csrf'])) {
     $_SESSION['csrf'] = bin2hex(random_bytes(16));
@@ -187,26 +188,11 @@ if ($loginDenganTelepon && ($nama === '' || strcasecmp($nama, 'Nama User') === 0
 
 $foto = $info ? nilai_pertama($row, $info, ['foto_profil', 'foto', 'avatar']) : '';
 if ($foto === '') $foto = trim((string) ($_SESSION['foto_profil'] ?? ($_SESSION['foto'] ?? ($_SESSION['user']['foto_profil'] ?? ''))));
-
-$fotoEmail = trim((string) (
-    $_SESSION['foto_google']
-    ?? ($_SESSION['picture']
-    ?? ($_SESSION['avatar_url']
-    ?? ($_SESSION['user']['foto_google']
-    ?? ($_SESSION['user']['picture'] ?? ''))))
-));
-
-$gravatar = filter_var($emailAkun, FILTER_VALIDATE_EMAIL)
-    ? 'https://www.gravatar.com/avatar/' . hash('sha256', strtolower($emailAkun)) . '?s=440&d=404'
-    : '';
+if ($foto !== '') {
+    $_SESSION['foto_profil'] = $foto;
+}
 
 $srcTampil = srcGambar($foto);
-if ($srcTampil === '' && preg_match('#^https://#i', $fotoEmail) === 1) {
-    $srcTampil = $fotoEmail;
-}
-if ($srcTampil === '') {
-    $srcTampil = $gravatar;
-}
 
 $modal = null;
 
@@ -337,9 +323,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261060">
+  <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261109">
   <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-  <link rel="stylesheet" href="../CSS/navbar-common.css?v=4">
+  <link rel="stylesheet" href="../CSS/navbar-common.css?v=6">
 </head>
 <body class="halaman-edit-profil site-navbar-page">
 
@@ -387,12 +373,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
           </svg>
         </a>
-        <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
+        <a class="ep-ikon ep-ikon--profil<?= fotoNavbarClass($srcTampil) ?>" href="profil.php" aria-label="Profil">
           <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="20" cy="20" r="18.2"/>
             <circle cx="20" cy="16.2" r="5.8"/>
             <path d="M9 33.5C9.7 29.2 12.2 26 15.2 25.2C17 26.6 23 26.6 24.8 25.2C27.8 26 30.3 29.2 31 33.5"/>
           </svg>
+          <?= fotoNavbarMarkup($srcTampil) ?>
         </a>
       </div>
     </div>
@@ -412,7 +399,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <input class="ep-foto__input" type="file" id="foto" name="foto" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
 
-      <div class="ep-foto__lingkaran" id="foto-tampil">
+      <div class="ep-foto__lingkaran<?= $srcTampil !== '' ? ' ada-foto' : '' ?>" id="foto-tampil">
         <svg viewBox="0 0 220 220" id="avatar-default" aria-hidden="true">
           <circle cx="110" cy="110" r="110" fill="#d9d9d9"/>
           <use href="#ikon-profil"/>
@@ -581,11 +568,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       function tampilkanFoto() {
         preview.hidden = false;
+        preview.parentNode.classList.add('ada-foto');
         avatarDefault.style.display = 'none';
       }
 
       function tampilkanDefault() {
         preview.hidden = true;
+        preview.parentNode.classList.remove('ada-foto');
         avatarDefault.style.display = '';
       }
 

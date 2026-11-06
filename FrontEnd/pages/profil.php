@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/navbar-profile-session.php';
 date_default_timezone_set('Asia/Jakarta');
 
 $modePreview = false;
@@ -63,14 +64,6 @@ $apiFavorit = $basePath . '/api/favorites';
 $pesan      = '';
 $favorites  = [];
 $fotoProfil = '';
-
-$fotoEmail = trim((string) (
-    $_SESSION['foto_google']
-    ?? ($_SESSION['picture']
-    ?? ($_SESSION['avatar_url']
-    ?? ($_SESSION['user']['foto_google']
-    ?? ($_SESSION['user']['picture'] ?? ''))))
-));
 
 if ($modePreview) {
     $namaUser       = 'Nama User';
@@ -247,17 +240,10 @@ unset($_SESSION['pesan']);
 
 $namaUser   = (string) $namaUser;
 $emailUser  = trim((string) $emailUser);
-$emailSesi  = (string) ($_SESSION['email'] ?? '');
-$emailFoto  = filter_var($emailUser, FILTER_VALIDATE_EMAIL) !== false
-    ? $emailUser
-    : (filter_var($emailSesi, FILTER_VALIDATE_EMAIL) !== false ? $emailSesi : '');
 
 $srcFoto = srcGambar((string) $fotoProfil);
-if ($srcFoto === '' && preg_match('#^https://#i', $fotoEmail) === 1) {
-    $srcFoto = $fotoEmail;
-}
-if ($srcFoto === '' && $emailFoto !== '') {
-    $srcFoto = 'https://www.gravatar.com/avatar/' . hash('sha256', strtolower($emailFoto)) . '?s=440&d=404';
+if ($fotoProfil !== '') {
+    $_SESSION['foto_profil'] = $fotoProfil;
 }
 ?>
 <!DOCTYPE html>
@@ -271,8 +257,8 @@ if ($srcFoto === '' && $emailFoto !== '') {
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-    <link rel="stylesheet" href="../CSS/navbar-common.css?v=4">
-    <link rel="stylesheet" href="../CSS/profil.css?v=29">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=6">
+    <link rel="stylesheet" href="../CSS/profil.css?v=35">
 </head>
 <body class="halaman-profil site-navbar-page">
     <svg class="sprite" aria-hidden="true">
@@ -335,18 +321,15 @@ if ($srcFoto === '' && $emailFoto !== '') {
                 <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
             </nav>
             <div class="ep-aksi">
-                <a class="ep-ikon ep-ikon--cari" href="hasil_pencarian.php" aria-label="Cari">
-                    <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
-                        <circle cx="13.5" cy="13.5" r="11.7"/>
-                        <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
-                    </svg>
-                </a>
-                <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
+                <a class="ep-ikon ep-ikon--profil<?= $srcFoto !== '' ? ' ada-foto' : '' ?>" id="navbar-profil" href="profil.php" aria-label="Profil">
                     <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="20" cy="20" r="18.2"/>
                         <circle cx="20" cy="16.2" r="5.8"/>
                         <path d="M9 33.5C9.7 29.2 12.2 26 15.2 25.2C17 26.6 23 26.6 24.8 25.2C27.8 26 30.3 29.2 31 33.5"/>
                     </svg>
+                    <?php if ($srcFoto !== ''): ?>
+                        <img class="ep-ikon__foto" src="<?= e($srcFoto) ?>" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.classList.remove('ada-foto');this.remove()">
+                    <?php endif; ?>
                 </a>
             </div>
         </div>
@@ -354,13 +337,13 @@ if ($srcFoto === '' && $emailFoto !== '') {
 
     <div class="halaman">
         <aside class="sidebar" aria-label="Informasi profil" data-api="<?= e($apiProfil) ?>" data-login-telepon="<?= $loginDenganTelepon ? '1' : '0' ?>">
-            <div class="avatar" aria-hidden="true">
+            <div class="avatar<?= $srcFoto !== '' ? ' ada-foto' : '' ?>" aria-hidden="true">
                 <svg id="avatar-default" viewBox="0 0 220 220">
                     <circle cx="110" cy="110" r="110" fill="#d9d9d9"/>
                     <use href="#ikon-profil"/>
                 </svg>
                 <?php if ($srcFoto !== ''): ?>
-                    <img class="avatar__foto" src="<?= e($srcFoto) ?>" alt="" referrerpolicy="no-referrer" onerror="this.remove()">
+                    <img class="avatar__foto" src="<?= e($srcFoto) ?>" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.classList.remove('ada-foto');this.remove()">
                 <?php endif; ?>
             </div>
             <h1 class="nama">
@@ -388,17 +371,17 @@ if ($srcFoto === '' && $emailFoto !== '') {
                             <path d="M11.2 19.6V11.7A8.8 8.8 0 0 1 28.8 11.7V19.6"/>
                             <path d="M20 25.3V31.4"/>
                         </svg>
-                        <span>Ubah Password</span>
                     </a>
+                    <span>Ubah Password</span>
                 </div>
-            <form class="menu-profil__item menu-profil__item--logout" id="logout-form" method="post" action="../../Backend/api/logout.php" data-api-url="../../Backend/api/logout.php">
+                <form class="menu-profil__item menu-profil__item--logout" id="logout-form" method="post" action="../../Backend/api/logout.php" data-api-url="../../Backend/api/logout.php">
                     <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
-                    <button type="submit" class="menu-profil__logout logout-trigger" style="color:red;" aria-haspopup="dialog" aria-controls="logout-dialog">
-                        <svg class="menu-profil__ikon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <button type="button" class="menu-profil__logout-icon logout-trigger" aria-label="Logout" aria-haspopup="dialog" aria-controls="logout-dialog">
+                        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M3.5 19.4 17.7 5.5V13.2H35.8Q36.6 13.2 36.6 14V24.3Q36.6 25.1 35.8 25.1H17.7V33.8Z"/>
                         </svg>
-                        <span>Logout</span>
                     </button>
+                    <span class="menu-profil__logout-label">Logout</span>
                 </form>
             </nav>
         </aside>
@@ -512,6 +495,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
             var avatar = document.querySelector('.avatar');
             var namaEl = document.getElementById('profile-name');
             var emailEl = document.getElementById('profile-email');
+            var navProfil = document.getElementById('navbar-profil');
             var loginDenganTelepon = sidebar && sidebar.getAttribute('data-login-telepon') === '1';
             if (!sidebar || !avatar || !namaEl || !emailEl) return;
 
@@ -525,6 +509,24 @@ if ($srcFoto === '' && $emailFoto !== '') {
                 return '../../' + path.replace(/^\/+/, '');
             }
 
+            function pasangFotoNavbar(src) {
+                if (!navProfil) return;
+                var img = navProfil.querySelector('.ep-ikon__foto');
+                if (!img) {
+                    img = document.createElement('img');
+                    img.className = 'ep-ikon__foto';
+                    img.alt = '';
+                    img.referrerPolicy = 'no-referrer';
+                    img.onerror = function () {
+                        navProfil.classList.remove('ada-foto');
+                        img.remove();
+                    };
+                    navProfil.appendChild(img);
+                }
+                img.src = src;
+                navProfil.classList.add('ada-foto');
+            }
+
             function pasangFoto(src) {
                 var tes = new Image();
                 tes.referrerPolicy = 'no-referrer';
@@ -535,10 +537,15 @@ if ($srcFoto === '' && $emailFoto !== '') {
                         img.className = 'avatar__foto';
                         img.alt = '';
                         img.referrerPolicy = 'no-referrer';
-                        img.onerror = function () { img.remove(); };
+                        img.onerror = function () {
+                            avatar.classList.remove('ada-foto');
+                            img.remove();
+                        };
                         avatar.appendChild(img);
                     }
                     img.src = src;
+                    avatar.classList.add('ada-foto');
+                    pasangFotoNavbar(src);
                 };
                 tes.src = src;
             }
@@ -561,7 +568,7 @@ if ($srcFoto === '' && $emailFoto !== '') {
                     }
                     var identitas = loginDenganTelepon ? d.telepon : (d.email || d.telepon);
                     if (identitas) emailEl.textContent = identitas;
-                    var src = alamatFoto(d.foto_profil || d.foto || d.avatar || d.foto_url);
+                    var src = alamatFoto(d.foto_profil || d.foto || d.avatar);
                     if (src) pasangFoto(src);
                 })
                 .catch(function () {});
@@ -569,15 +576,16 @@ if ($srcFoto === '' && $emailFoto !== '') {
 
         (function () {
             var logoutForm = document.getElementById('logout-form');
-            var logoutTrigger = document.querySelector('.logout-trigger');
+            var logoutTrigger = document.querySelector('#logout-form .logout-trigger');
             var logoutDialog = document.getElementById('logout-dialog');
             var logoutConfirm = document.getElementById('logout-confirm');
             var logoutCancel = document.getElementById('logout-cancel');
 
             if (!logoutForm || !logoutTrigger || !logoutDialog || !logoutConfirm || !logoutCancel) return;
 
-            logoutTrigger.addEventListener('click', function () {
-                logoutDialog.showModal();
+            logoutTrigger.addEventListener('click', function (event) {
+                event.preventDefault();
+                if (!logoutDialog.open) logoutDialog.showModal();
             });
 
             logoutCancel.addEventListener('click', function () {

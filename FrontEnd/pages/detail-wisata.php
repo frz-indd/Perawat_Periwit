@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/navbar-profile-session.php';
 date_default_timezone_set('Asia/Jakarta');
 
 if (empty($_SESSION['csrf'])) {
@@ -83,6 +84,62 @@ function fetchTourismExtra(mysqli $conn, string $tourismId): array {
     } catch (Throwable $e) {
         return [];
     }
+}
+
+function fetchTourismReviewProfiles(?mysqli $conn, string $tourismId): array {
+    if ($conn === null) {
+        return [];
+    }
+
+    $columns = [];
+    $result = $conn->query('SHOW COLUMNS FROM `user`');
+    while ($column = $result->fetch_assoc()) {
+        $columns[] = $column['Field'];
+    }
+
+    $photoColumn = null;
+    foreach (['foto_profil', 'foto', 'avatar'] as $candidate) {
+        if (in_array($candidate, $columns, true)) {
+            $photoColumn = $candidate;
+            break;
+        }
+    }
+    if ($photoColumn === null) {
+        return [];
+    }
+
+    $statement = $conn->prepare(
+        "SELECT ul.Id_user, u.`$photoColumn` AS foto
+         FROM ulasan AS ul
+         INNER JOIN `user` AS u ON u.Id_user = ul.Id_user
+         WHERE ul.Id_wisata = ?
+         ORDER BY ul.tanggal_ulasan DESC, ul.Id_ulasan DESC
+         LIMIT 3"
+    );
+    $statement->bind_param('s', $tourismId);
+    $statement->execute();
+    $profiles = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
+    $statement->close();
+
+    return $profiles;
+}
+
+function fotoUlasanUrl(string $path): string {
+    $path = trim(str_replace('\\', '/', $path));
+    if ($path === '') {
+        return '';
+    }
+    if (preg_match('#^https?://#i', $path) === 1) {
+        return $path;
+    }
+
+    $path = preg_replace('#^(?:\.\./)+#', '', $path);
+    $path = ltrim((string) $path, '/');
+    if ($path === '' || !is_file(__DIR__ . '/../../' . $path)) {
+        return '';
+    }
+
+    return '../../' . $path;
 }
 
 function fetchUlasanSaya(mysqli $conn, int $userId, string $tourismId): array {
@@ -221,6 +278,7 @@ $fasilitasTampil = [
 ];
 
 $reviewRows = fetchTourismReviews($conn, $tourismId);
+$reviewProfiles = fetchTourismReviewProfiles($conn, $tourismId);
 $ratingCounts = array_fill(1, 5, 0);
 foreach ($reviewRows as $review) {
     $rounded = max(1, min(5, (int) round((float) $review['rating'])));
@@ -237,12 +295,26 @@ foreach ([5, 4, 3, 2, 1] as $stars) {
     ];
 }
 
-$reviews = array_map(static fn(array $r): array => [
-    'name'    => $r['nama'],
-    'rating'  => (float) $r['rating'],
-    'age'     => waktuRelatif((string) $r['tanggal_ulasan']),
-    'comment' => $r['komentar'],
-], array_slice($reviewRows, 0, 3));
+$reviews = [];
+foreach (array_slice($reviewRows, 0, 3) as $index => $review) {
+    $profile = $reviewProfiles[$index] ?? [];
+    $photo = fotoUlasanUrl((string) ($profile['foto'] ?? ''));
+    if (
+        $photo === ''
+        && $sudahLogin
+        && (int) ($profile['Id_user'] ?? 0) === (int) $userId
+    ) {
+        $photo = fotoNavbarUrl();
+    }
+
+    $reviews[] = [
+        'name'    => $review['nama'],
+        'rating'  => (float) $review['rating'],
+        'age'     => waktuRelatif((string) $review['tanggal_ulasan']),
+        'comment' => $review['komentar'],
+        'avatar'  => $photo,
+    ];
+}
 
 if (count($reviewRows) > 0) {
     $total = 0.0;
@@ -373,8 +445,8 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=final-22">
-    <link rel="stylesheet" href="../CSS/navbar-common.css?v=4">
+    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=final-24">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=6">
 </head>
 <body class="halaman-detail site-navbar-page">
 
@@ -515,12 +587,13 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                         <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
                     </svg>
                 </a>
-                <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
+                <a class="ep-ikon ep-ikon--profil<?= fotoNavbarClass() ?>" href="profil.php" aria-label="Profil">
                     <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="20" cy="20" r="18.2"/>
                         <circle cx="20" cy="16.2" r="5.8"/>
                         <path d="M9 33.5C9.7 29.2 12.2 26 15.2 25.2C17 26.6 23 26.6 24.8 25.2C27.8 26 30.3 29.2 31 33.5"/>
                     </svg>
+                    <?= fotoNavbarMarkup() ?>
                 </a>
             </div>
         </div>
@@ -707,7 +780,12 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 <?php foreach ($destination['reviews'] as $ulasan): ?>
                     <article class="ulasan">
                         <div class="ulasan__kepala">
-                            <svg class="ulasan__avatar" viewBox="0 0 40 40" aria-hidden="true"><use href="#ikon-profil"/></svg>
+                            <span class="ulasan__avatar-bingkai">
+                                <svg class="ulasan__avatar" viewBox="0 0 40 40" aria-hidden="true"><use href="#ikon-profil"/></svg>
+                                <?php if ($ulasan['avatar'] !== ''): ?>
+                                    <img class="ulasan__avatar ulasan__avatar--foto" src="<?= e($ulasan['avatar']) ?>" alt="" referrerpolicy="no-referrer" onerror="this.remove()">
+                                <?php endif; ?>
+                            </span>
                             <div class="ulasan__meta">
                                 <strong><?= e($ulasan['name']) ?></strong>
                                 <span class="bintang bintang--kecil" role="img"

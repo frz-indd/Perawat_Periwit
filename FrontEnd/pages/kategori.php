@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/navbar-profile-session.php";
 require_once __DIR__ . "/../../Backend/database/koneksi.php";
 require_once __DIR__ . "/../../Backend/database/wisata_repository.php";
 
@@ -204,7 +205,7 @@ function formatReviewCount(int $count): string
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../CSS/kategori.css?v=category-reference-3">
     <link rel="stylesheet" href="../CSS/theme.css?v=dropdown-active-6">
-    <link rel="stylesheet" href="../CSS/navbar-common.css?v=4">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=6">
 </head>
 <body class="site-navbar-page category-page">
     <header class="ep-navbar site-navbar">
@@ -227,12 +228,13 @@ function formatReviewCount(int $count): string
                 <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
             </nav>
             <div class="ep-aksi">
-                <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
+                <a class="ep-ikon ep-ikon--profil<?= fotoNavbarClass() ?>" href="profil.php" aria-label="Profil">
                     <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="20" cy="20" r="18.2"/>
                         <circle cx="20" cy="16.2" r="5.8"/>
                         <path d="M9 33.5C9.7 29.2 12.2 26 15.2 25.2C17 26.6 23 26.6 24.8 25.2C27.8 26 30.3 29.2 31 33.5"/>
                     </svg>
+                    <?= fotoNavbarMarkup() ?>
                 </a>
             </div>
         </div>

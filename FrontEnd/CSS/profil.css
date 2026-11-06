@@ -131,14 +131,27 @@ body.halaman-profil .ep-ikon svg {
     height: 100%;
 }
 
-body.halaman-profil .ep-ikon--cari {
-    width: calc(36 * var(--u));
-    height: calc(36 * var(--u));
-}
-
-body.halaman-profil .ep-ikon--cari,
 body.halaman-profil .ep-ikon--profil {
     color: var(--hijau, #166c5c);
+}
+
+body.halaman-profil .ep-ikon__foto {
+    display: none;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    border: calc(2.5 * var(--u)) solid var(--hijau, #166c5c);
+    border-radius: 50%;
+    background: #d9d9d9;
+    object-fit: cover;
+}
+
+body.halaman-profil .ep-ikon--profil.ada-foto svg {
+    display: none;
+}
+
+body.halaman-profil .ep-ikon--profil.ada-foto .ep-ikon__foto {
+    display: block;
 }
 
 body.halaman-profil .ep-menu__kategori {
@@ -285,6 +298,10 @@ body.halaman-profil .dd-kategori a.dd-kategori__item:focus-visible {
     color: var(--hijau);
 }
 
+body.halaman-profil .avatar.ada-foto > svg {
+    display: none;
+}
+
 body.halaman-profil .avatar .avatar__foto {
     position: absolute;
     inset: 0;
@@ -412,6 +429,56 @@ body.halaman-profil .avatar .avatar__foto {
     outline: 2px solid var(--hijau);
     outline-offset: 3px;
     border-radius: 4px;
+}
+
+.menu-profil__logout-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #ff0000;
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.menu-profil__logout-icon {
+    width: calc(40 * var(--p));
+    height: calc(40 * var(--p));
+}
+
+.menu-profil__logout-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.menu-profil__logout-label {
+    display: block;
+    min-width: max-content;
+    min-height: calc(40 * var(--p));
+    padding: 0 calc(4 * var(--p));
+    color: #ff0000;
+    cursor: default;
+    user-select: none;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.menu-profil__logout-icon:focus-visible {
+    outline: 2px solid var(--hijau);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+.menu-profil__logout-icon:hover {
+    opacity: 0.75;
 }
 
 .logout-modal {
@@ -968,6 +1035,10 @@ body.halaman-profil .avatar .avatar__foto {
         height: 30px;
     }
 
+    body.halaman-profil .ep-ikon__foto {
+        border-width: 2px;
+    }
+
     body.halaman-profil .ep-menu {
         position: static;
         inset: auto;
@@ -1057,6 +1128,16 @@ body.halaman-profil .avatar .avatar__foto {
     .menu-profil__ikon {
         width: 28px;
         height: 28px;
+    }
+
+    .menu-profil__logout-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .menu-profil__logout-label {
+        min-height: 28px;
+        padding: 0 4px;
     }
 
     .logout-modal {

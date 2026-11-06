@@ -1,6 +1,7 @@
 
 <?php
 session_start();
+require_once __DIR__ . '/navbar-profile-session.php';
 
 $keyword = isset($_GET['q']) && is_string($_GET['q'])
     ? trim($_GET['q'])
@@ -192,7 +193,7 @@ function terpilih($daftar, $nilai)
 
     <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
     <link rel="stylesheet" href="../CSS/hasil_pencarian.css?v=search-reference-2">
-    <link rel="stylesheet" href="../CSS/navbar-common.css?v=4">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=6">
 </head>
 
 <body class="site-navbar-page search-results-page">
@@ -216,12 +217,13 @@ function terpilih($daftar, $nilai)
             <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
         </nav>
         <div class="ep-aksi">
-            <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
+            <a class="ep-ikon ep-ikon--profil<?= fotoNavbarClass() ?>" href="profil.php" aria-label="Profil">
                 <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="20" cy="20" r="18.2"/>
                     <circle cx="20" cy="16.2" r="5.8"/>
                     <path d="M9 33.5C9.7 29.2 12.2 26 15.2 25.2C17 26.6 23 26.6 24.8 25.2C27.8 26 30.3 29.2 31 33.5"/>
                 </svg>
+                <?= fotoNavbarMarkup() ?>
             </a>
         </div>
     </div>

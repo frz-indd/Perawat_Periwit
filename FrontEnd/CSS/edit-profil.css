@@ -21,9 +21,9 @@
 
 html,
 body.halaman-edit-profil {
-  min-height: 100%;
+  height: 100% !important;
   margin: 0;
-  overflow-y: auto;
+  overflow: hidden !important;
 }
 
 body.halaman-edit-profil {
@@ -239,6 +239,10 @@ body.halaman-edit-profil .ep-ikon--profil {
   color: var(--hijau, #166c5c);
 }
 
+body.halaman-edit-profil .ep-ikon--profil.ada-foto > svg {
+  display: none !important;
+}
+
 body.halaman-edit-profil .ep-navbar .ep-menu a.ep-menu__kategori::after {
   content: "";
   position: absolute;
@@ -319,6 +323,7 @@ body.halaman-edit-profil .dd-kategori a.dd-kategori__item:focus-visible {
   position: relative;
   width: 100%;
   height: calc(1024 * var(--u));
+  margin-top: calc(-60 * var(--u));
 }
 
 .ep-stage > * {
@@ -343,6 +348,10 @@ body.halaman-edit-profil .dd-kategori a.dd-kategori__item:focus-visible {
   width: 100%;
   height: 100%;
   color: var(--hijau);
+}
+
+body.halaman-edit-profil .ep-foto__lingkaran.ada-foto > svg {
+  display: none;
 }
 
 .ep-foto__lingkaran img {
@@ -681,7 +690,16 @@ body.halaman-edit-profil .ep-input {
 
 @media (max-width: 900px) {
   html, body.halaman-edit-profil {
-    overflow-y: auto;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  body.halaman-edit-profil form {
+    padding-top: 0 !important;
+  }
+
+  body.halaman-edit-profil .ep-stage {
+    padding-top: 12px !important;
   }
 
   body.halaman-edit-profil .ep-navbar {
@@ -764,9 +782,10 @@ body.halaman-edit-profil .ep-input {
   .ep-stage {
     position: relative;
     height: auto;
+    margin-top: 0;
     display: flex;
     flex-direction: column;
-    padding: 24px 16px 40px;
+    padding: 12px 16px 40px;
     gap: 14px;
   }
 
