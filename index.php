@@ -30,7 +30,7 @@ $destinasiLain = array_slice($wisata, 4, 4);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <!-- CSS Beranda -->
-    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=home-reference-4">
+    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=home-reference-5">
     <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=home-reference-4">
     <link rel="stylesheet" href="FrontEnd/CSS/navbar-common.css?v=4">
 </head>
@@ -87,9 +87,10 @@ $destinasiLain = array_slice($wisata, 4, 4);
             <div class="hero-search-actions">
                 <form
                     class="search-box"
-                    action="<?= $isLoggedIn ? 'search' : 'FrontEnd/auth/Login.php' ?>"
+                    action="search"
                     method="GET"
                     id="searchForm"
+                    novalidate
                 >
                     <input
                         type="search"
@@ -97,6 +98,8 @@ $destinasiLain = array_slice($wisata, 4, 4);
                         id="searchInput"
                         placeholder="Cari destinasi,kata kunci atau lokasi"
                         aria-label="Cari destinasi wisata"
+                        aria-describedby="searchValidation"
+                        aria-invalid="false"
                         minlength="2"
                         required
                     >
@@ -104,10 +107,9 @@ $destinasiLain = array_slice($wisata, 4, 4);
                         <i class="bi bi-search" aria-hidden="true"></i>
                     </button>
                 </form>
-
                 <a
                     class="search-filter-button"
-                    href='search' next=search
+                    href="search"
                     aria-label="Buka filter pencarian wisata"
                 >
                     <svg width="70" height="66" viewBox="0 0 70 66" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -116,6 +118,10 @@ $destinasiLain = array_slice($wisata, 4, 4);
                     </svg>
                 </a>
             </div>
+            <p class="home-search-validation" id="searchValidation" role="alert" hidden>
+                <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+                Masukkan Minimal 2 Karakter
+            </p>
 
         </div>
     </section>
@@ -212,28 +218,24 @@ $destinasiLain = array_slice($wisata, 4, 4);
     <script>
         const searchForm = document.getElementById('searchForm');
         const searchInput = document.getElementById('searchInput');
-        const isLoggedIn = <?= json_encode($isLoggedIn); ?>;
+        const searchValidation = document.getElementById('searchValidation');
 
         searchForm.addEventListener('submit', function (event) {
             const query = searchInput.value.trim();
             if (Array.from(query).length < 2) {
                 event.preventDefault();
-                searchInput.setCustomValidity('Masukkan minimal 2 karakter untuk mencari.');
-                searchInput.reportValidity();
+                searchValidation.hidden = false;
+                searchInput.setAttribute('aria-invalid', 'true');
                 searchInput.focus();
                 return;
             }
-
-            if (!isLoggedIn) {
-                event.preventDefault();
-                const loginUrl = new URL('FrontEnd/auth/Login.php', window.location.href);
-                loginUrl.searchParams.set('next', 'search');
-                loginUrl.searchParams.set('q', query);
-                window.location.assign(loginUrl.href);
-            }
+            searchValidation.hidden = true;
+            searchInput.setAttribute('aria-invalid', 'false');
         });
         searchInput.addEventListener('input', function () {
-            searchInput.setCustomValidity('');
+            const isShortQuery = Array.from(searchInput.value.trim()).length === 1;
+            searchValidation.hidden = !isShortQuery;
+            searchInput.setAttribute('aria-invalid', String(isShortQuery));
         });
 
         const distanceElements = Array.from(
