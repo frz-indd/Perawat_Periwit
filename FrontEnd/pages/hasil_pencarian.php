@@ -122,16 +122,7 @@ $hasil = $isShortKeyword || $hasBudgetValidationError
     $cocokKeyword = true;
 
     if ($keyword !== '') {
-        $teksCari = strtolower(
-            $item['nama'] . ' ' .
-            $item['wilayah'] . ' ' .
-            $item['kategori']
-        );
-
-        $cocokKeyword = strpos(
-            $teksCari,
-            strtolower($keyword)
-        ) !== false;
+        $cocokKeyword = mb_stripos($item['nama'], $keyword, 'UTF-8') !== false;
     }
 
     // Filter wilayah
@@ -487,6 +478,7 @@ function terpilih($daftar, $nilai)
     const resultsHeading = document.querySelector('.results-heading');
     const resultsCount = resultsHeading.querySelector('p');
     const searchHeader = document.querySelector('.search-header');
+    const filterKeywordInput = filterForm.querySelector('input[name="q"]');
     const searchValidation = document.getElementById('searchValidation');
     const minBudgetInput = document.getElementById('minBudget');
     const maxBudgetInput = document.getElementById('maxBudget');
@@ -509,6 +501,7 @@ function terpilih($daftar, $nilai)
         }
     });
     searchInput.addEventListener('input', function () {
+        filterKeywordInput.value = searchInput.value.trim();
         searchRequestId++;
         if (updateSearchValidation()) {
             resultsCount.textContent = '0 Destinasi Ditemukan';

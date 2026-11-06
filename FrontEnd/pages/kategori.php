@@ -32,6 +32,54 @@ $category = null;
 $keyword = isset($_GET["keyword"]) && is_string($_GET["keyword"])
     ? trim($_GET["keyword"])
     : "";
+$keywordLength = preg_match_all('/./us', $keyword);
+$isShortKeyword = $keyword !== "" && $keywordLength !== false && $keywordLength < 2;
+$selectedRegions = is_array($_GET["wilayah"] ?? null)
+    ? array_values(array_filter(
+        $_GET["wilayah"],
+        static fn ($value) => is_string($value) && in_array($value, ["Kuningan", "Majalengka"], true)
+    ))
+    : [];
+$selectedDistances = is_array($_GET["distance"] ?? null)
+    ? array_values(array_filter(
+        $_GET["distance"],
+        static fn ($value) => is_string($value) && in_array($value, ["0-5", "5-10", "10-20", "20-30"], true)
+    ))
+    : [];
+$minimumBudgetInput = is_string($_GET["min"] ?? null) ? trim($_GET["min"]) : "";
+$maximumBudgetInput = is_string($_GET["max"] ?? null) ? trim($_GET["max"]) : "";
+$minimumBudget = $minimumBudgetInput === ""
+    ? 0
+    : filter_var($minimumBudgetInput, FILTER_VALIDATE_INT, ["options" => ["min_range" => 0]]);
+$maximumBudget = $maximumBudgetInput === ""
+    ? 1000000
+    : filter_var($maximumBudgetInput, FILTER_VALIDATE_INT, ["options" => ["min_range" => 0]]);
+$hasBudgetError = $minimumBudget === false ||
+    $maximumBudget === false ||
+    (
+        $minimumBudgetInput !== "" &&
+        $maximumBudgetInput !== "" &&
+        $minimumBudget !== false &&
+        $maximumBudget !== false &&
+        $minimumBudget > $maximumBudget
+    );
+$filterSubmitted = ($_GET["filter_submitted"] ?? "") === "1";
+$selectedCategories = is_array($_GET["kategori_filter"] ?? null)
+    ? array_values(array_filter(array_map(
+        static function ($value) {
+            return is_string($value) || is_int($value)
+                ? filter_var($value, FILTER_VALIDATE_INT)
+                : false;
+        },
+        $_GET["kategori_filter"]
+    ), static fn ($value) => $value !== false && in_array((int) $value, $availableCategoryIds, true)))
+    : [];
+if (!$filterSubmitted) {
+    $selectedCategories = [$categoryId];
+}
+if ($selectedCategories !== []) {
+    $selectedCategories = array_values(array_unique(array_map("intval", $selectedCategories)));
+}
 foreach ($categories as $availableCategory) {
     if ($availableCategory["Id_kategori"] === $categoryId) {
         $category = $availableCategory;
@@ -49,16 +97,47 @@ if ($category === null) {
     ];
     $categoryDestinations = [];
 } else {
-    $destinations = fetchTourismRows($conn, [
-        "id_kategori" => $categoryId,
-        "keyword" => $keyword
-    ]);
     $categoryDestinations = fetchTourismRows($conn, [
         "id_kategori" => $categoryId
     ]);
+    $destinationFilters = [];
+    if (!$isShortKeyword && $keyword !== "") {
+        $destinationFilters["keyword"] = $keyword;
+    }
+    if ($selectedCategories !== []) {
+        $destinationFilters["id_kategori_in"] = $selectedCategories;
+    }
+    if (!$hasBudgetError && $minimumBudgetInput !== "") {
+        $destinationFilters["min_price"] = $minimumBudget;
+    }
+    if (!$hasBudgetError && $maximumBudgetInput !== "") {
+        $destinationFilters["max_price"] = $maximumBudget;
+    }
+    $destinations = $isShortKeyword || $hasBudgetError
+        ? []
+        : fetchTourismRows($conn, $destinationFilters);
+    if ($selectedRegions !== []) {
+        $destinations = array_values(array_filter(
+            $destinations,
+            static function ($destination) use ($selectedRegions): bool {
+                $region = stripos($destination["wilayah"], "Majalengka") !== false
+                    ? "Majalengka"
+                    : "Kuningan";
+                return in_array($region, $selectedRegions, true);
+            }
+        ));
+    }
 }
 $categoryName = $categoryDisplayNames[$categoryId] ?? $category["nama_kategori"];
 $categoryHeroName = $categoryHeroNames[$categoryId] ?? $categoryName;
+$resultsTitle = $categoryName;
+if ($filterSubmitted) {
+    if ($selectedCategories === []) {
+        $resultsTitle = "Semua Wisata";
+    } elseif (count($selectedCategories) > 1 || $selectedCategories[0] !== $categoryId) {
+        $resultsTitle = "Hasil Filter Wisata";
+    }
+}
 
 $heroImageFallbacks = [
     1 => [
@@ -123,7 +202,7 @@ function formatReviewCount(int $count): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../CSS/kategori.css?v=category-reference-2">
+    <link rel="stylesheet" href="../CSS/kategori.css?v=category-reference-3">
     <link rel="stylesheet" href="../CSS/theme.css?v=dropdown-active-6">
     <link rel="stylesheet" href="../CSS/navbar-common.css?v=4">
 </head>
@@ -174,24 +253,122 @@ function formatReviewCount(int $count): string
         </section>
 
         <section class="category-content">
-            <form class="search-box" id="search" action="kategori.php" method="get" role="search">
+            <form class="search-box<?= $isShortKeyword ? ' has-validation' : ''; ?>" id="search" action="kategori.php" method="get" role="search" novalidate>
                 <input type="hidden" name="kategori" value="<?= escapeHtml($categoryKey); ?>">
-                <label class="visually-hidden" for="destination-search">Cari destinasi atau lokasi</label>
+                <label class="visually-hidden" for="destination-search">Cari nama destinasi</label>
                 <input
                     id="destination-search"
                     type="search"
                     name="keyword"
-                    placeholder="Cari destinasi alam atau lokasi"
+                    placeholder="Cari nama destinasi wisata"
                     value="<?= escapeHtml($keyword); ?>"
+                    minlength="2"
+                    aria-describedby="categorySearchValidation"
+                    aria-invalid="<?= $isShortKeyword ? 'true' : 'false'; ?>"
                 >
                 <button type="submit" aria-label="Cari"><i class="bi bi-search" aria-hidden="true"></i></button>
             </form>
+            <p
+                class="category-search-validation"
+                id="categorySearchValidation"
+                role="alert"
+                <?= $isShortKeyword ? '' : 'hidden'; ?>
+            >
+                <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+                Masukkan Minimal 2 Karakter
+            </p>
 
-            <h2><?= escapeHtml($categoryName); ?></h2>
+            <form class="category-filter-form" id="categoryFilterForm" action="kategori.php" method="get">
+                <input type="hidden" name="kategori" value="<?= escapeHtml($categoryKey); ?>">
+                <input type="hidden" name="keyword" id="filterKeyword" value="<?= escapeHtml($keyword); ?>">
+                <input type="hidden" name="filter_submitted" value="1">
+
+                <h2 class="category-filter-title">Filter Pencarian</h2>
+                <div class="category-filter-groups">
+                    <fieldset class="category-filter-group">
+                        <legend>Jarak</legend>
+                        <?php foreach ([
+                            '0-5' => '5 Km',
+                            '5-10' => '5 - 10 Km',
+                            '10-20' => '10 - 20 Km',
+                            '20-30' => '20 - 30 Km'
+                        ] as $distanceValue => $distanceLabel): ?>
+                            <label class="category-filter-option">
+                                <input type="checkbox" name="distance[]" value="<?= $distanceValue; ?>"
+                                    <?= in_array($distanceValue, $selectedDistances, true) ? 'checked' : ''; ?>>
+                                <span><?= escapeHtml($distanceLabel); ?></span>
+                            </label>
+                        <?php endforeach; ?>
+                    </fieldset>
+
+                    <fieldset class="category-filter-group">
+                        <legend>Wilayah</legend>
+                        <?php foreach (['Kuningan', 'Majalengka'] as $region): ?>
+                            <label class="category-filter-option">
+                                <input type="checkbox" name="wilayah[]" value="<?= escapeHtml($region); ?>"
+                                    <?= in_array($region, $selectedRegions, true) ? 'checked' : ''; ?>>
+                                <span><?= escapeHtml($region); ?></span>
+                            </label>
+                        <?php endforeach; ?>
+                    </fieldset>
+
+                    <fieldset class="category-filter-group">
+                        <legend>Kategori</legend>
+                        <?php foreach ($categories as $filterCategory): ?>
+                            <?php $filterCategoryId = (int) $filterCategory['Id_kategori']; ?>
+                            <label class="category-filter-option">
+                                <input type="checkbox" name="kategori_filter[]" value="<?= $filterCategoryId; ?>"
+                                    <?= in_array($filterCategoryId, $selectedCategories, true) ? 'checked' : ''; ?>>
+                                <span><?= escapeHtml(
+                                    $categoryDisplayNames[$filterCategoryId] ?? $filterCategory['nama_kategori']
+                                ); ?></span>
+                            </label>
+                        <?php endforeach; ?>
+                    </fieldset>
+
+                    <fieldset class="category-filter-group category-budget-group">
+                        <legend>Budget</legend>
+                        <label for="categoryMinBudget">Minimum Rp</label>
+                        <input
+                            type="number"
+                            id="categoryMinBudget"
+                            name="min"
+                            min="0"
+                            value="<?= escapeHtml($minimumBudgetInput); ?>"
+                            aria-invalid="<?= $hasBudgetError ? 'true' : 'false'; ?>"
+                        >
+                        <label for="categoryMaxBudget">Maximum Rp</label>
+                        <input
+                            type="number"
+                            id="categoryMaxBudget"
+                            name="max"
+                            min="0"
+                            value="<?= escapeHtml($maximumBudgetInput); ?>"
+                            aria-invalid="<?= $hasBudgetError ? 'true' : 'false'; ?>"
+                        >
+                    </fieldset>
+                </div>
+                <p class="category-filter-validation" id="categoryBudgetValidation" role="alert"
+                    <?= $hasBudgetError ? '' : 'hidden'; ?>>
+                    Minimum budget harus berupa angka valid dan tidak boleh lebih besar dari maksimum.
+                </p>
+                <div class="category-filter-actions">
+                    <button type="submit">Terapkan Filter</button>
+                    <a href="kategori.php?kategori=<?= rawurlencode($categoryKey); ?><?= $keyword !== '' ? '&amp;keyword=' . rawurlencode($keyword) : ''; ?>">Reset Filter</a>
+                </div>
+            </form>
+
+            <h2><?= escapeHtml($resultsTitle); ?></h2>
+            <p class="category-result-count" id="categoryResultCount"><?= count($destinations); ?> Destinasi Ditemukan</p>
             <?php if ($destinations !== []): ?>
-                <div class="destination-grid">
+                <div class="destination-grid" id="categoryResults">
                     <?php foreach ($destinations as $destination): ?>
-                        <a class="destination-card" href="detail-wisata.php?id=<?= rawurlencode((string) $destination['id_wisata']); ?>" aria-label="Lihat detail <?= escapeHtml($destination['nama_wisata']); ?>">
+                        <a
+                            class="destination-card"
+                            href="detail-wisata.php?id=<?= rawurlencode((string) $destination['id_wisata']); ?>"
+                            aria-label="Lihat detail <?= escapeHtml($destination['nama_wisata']); ?>"
+                            data-category="<?= (int) $destination['id_kategori']; ?>"
+                        >
                             <img
                                 class="destination-image"
                                 src="../../<?= escapeHtml($destination['gambar'] ?? 'FrontEnd/assets/images/img.png'); ?>"
@@ -240,9 +417,96 @@ function formatReviewCount(int $count): string
         </section>
     </main>
     <script>
+        const categorySearchForm = document.getElementById('search');
+        const categorySearchInput = document.getElementById('destination-search');
+        const categorySearchValidation = document.getElementById('categorySearchValidation');
+        const categoryFilterForm = document.getElementById('categoryFilterForm');
+        const filterKeywordInput = document.getElementById('filterKeyword');
+        const minimumBudgetInput = document.getElementById('categoryMinBudget');
+        const maximumBudgetInput = document.getElementById('categoryMaxBudget');
+        const budgetValidation = document.getElementById('categoryBudgetValidation');
+        const resultCount = document.getElementById('categoryResultCount');
+        const selectedDistanceRanges = <?= json_encode(
+            $selectedDistances,
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+        ); ?>;
+
+        function updateCategorySearchValidation() {
+            const isShort = Array.from(categorySearchInput.value.trim()).length === 1;
+            categorySearchValidation.hidden = !isShort;
+            categorySearchInput.setAttribute('aria-invalid', String(isShort));
+            categorySearchForm.classList.toggle('has-validation', isShort);
+            return isShort;
+        }
+
+        categorySearchForm.addEventListener('submit', function (event) {
+            if (updateCategorySearchValidation()) {
+                event.preventDefault();
+                categorySearchInput.focus();
+            }
+        });
+        categorySearchInput.addEventListener('input', function () {
+            filterKeywordInput.value = categorySearchInput.value.trim();
+            updateCategorySearchValidation();
+        });
+
+        categoryFilterForm.addEventListener('submit', function (event) {
+            const minimum = minimumBudgetInput.value;
+            const maximum = maximumBudgetInput.value;
+            if (minimum !== '' && maximum !== '' && Number(minimum) > Number(maximum)) {
+                event.preventDefault();
+                budgetValidation.hidden = false;
+                minimumBudgetInput.setAttribute('aria-invalid', 'true');
+                maximumBudgetInput.setAttribute('aria-invalid', 'true');
+                minimumBudgetInput.focus();
+                return;
+            }
+
+            budgetValidation.hidden = true;
+            minimumBudgetInput.setAttribute('aria-invalid', 'false');
+            maximumBudgetInput.setAttribute('aria-invalid', 'false');
+        });
+
         const distanceElements = Array.from(
             document.querySelectorAll('.distance[data-latitude][data-longitude]')
         );
+        const destinationGrid = document.getElementById('categoryResults');
+
+        function applyDistanceFilters() {
+            if (selectedDistanceRanges.length === 0 || !destinationGrid) {
+                return;
+            }
+
+            const cards = Array.from(destinationGrid.querySelectorAll('.destination-card'));
+            let visibleCount = 0;
+            cards.forEach(card => {
+                const distanceElement = card.querySelector('.distance');
+                const distance = Number(distanceElement?.dataset.distanceKm);
+                const matches = !Number.isFinite(distance) || selectedDistanceRanges.some(range => {
+                    const [minimum, maximum] = range.split('-').map(Number);
+                    return Number.isFinite(distance) && distance >= minimum && distance <= maximum;
+                });
+                card.hidden = !matches;
+                if (matches) {
+                    visibleCount++;
+                }
+            });
+
+            resultCount.textContent = `${visibleCount} Destinasi Ditemukan`;
+            let emptyState = document.querySelector('.category-empty-results');
+            if (visibleCount === 0 && !emptyState) {
+                emptyState = document.createElement('div');
+                emptyState.className = 'category-empty-results';
+                emptyState.setAttribute('role', 'status');
+                const message = document.createElement('p');
+                message.textContent = 'Maaf, tidak ada destinasi wisata yang sesuai dengan filter jarak.';
+                emptyState.append(message);
+                destinationGrid.after(emptyState);
+            } else if (visibleCount > 0 && emptyState) {
+                emptyState.remove();
+            }
+        }
+
         const destinationsWithCoordinates = distanceElements
             .map(element => ({
                 element,
@@ -271,6 +535,7 @@ function formatReviewCount(int $count): string
                 destinationsWithCoordinates.forEach(({ element }) => {
                     element.textContent = 'Lokasi tidak didukung';
                 });
+                applyDistanceFilters();
             } else {
                 navigator.geolocation.getCurrentPosition(
                     position => {
@@ -294,16 +559,21 @@ function formatReviewCount(int $count): string
                             );
 
                             destination.element.textContent = `${distance.toFixed(2)} KM`;
+                            destination.element.dataset.distanceKm = String(distance);
                         });
+                        applyDistanceFilters();
                     },
                     () => {
                         destinationsWithCoordinates.forEach(({ element }) => {
                             element.textContent = 'Jarak tidak tersedia';
                         });
+                        applyDistanceFilters();
                     },
                     { maximumAge: 300000, timeout: 10000 }
                 );
             }
+        } else {
+            applyDistanceFilters();
         }
     </script>
     <script>

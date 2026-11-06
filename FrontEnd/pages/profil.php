@@ -388,12 +388,12 @@ if ($srcFoto === '' && $emailFoto !== '') {
                             <path d="M11.2 19.6V11.7A8.8 8.8 0 0 1 28.8 11.7V19.6"/>
                             <path d="M20 25.3V31.4"/>
                         </svg>
+                        <span>Ubah Password</span>
                     </a>
-                    <span>Ubah Password</span>
                 </div>
             <form class="menu-profil__item menu-profil__item--logout" id="logout-form" method="post" action="../../Backend/api/logout.php" data-api-url="../../Backend/api/logout.php">
                     <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
-                    <button type="button" class="menu-profil__logout logout-trigger" aria-haspopup="dialog" aria-controls="logout-dialog">
+                    <button type="submit" class="menu-profil__logout logout-trigger" style="color:red;" aria-haspopup="dialog" aria-controls="logout-dialog">
                         <svg class="menu-profil__ikon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M3.5 19.4 17.7 5.5V13.2H35.8Q36.6 13.2 36.6 14V24.3Q36.6 25.1 35.8 25.1H17.7V33.8Z"/>
                         </svg>

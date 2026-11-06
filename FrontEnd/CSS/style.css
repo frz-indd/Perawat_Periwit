@@ -301,6 +301,30 @@ body {
     background: #327e74;
 }
 
+.home-page .hero-content .home-search-validation {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 56.3%;
+    margin: 4px auto 0;
+    color: #ff3333;
+    font-family: var(--font-main);
+    font-size: 13px;
+    line-height: 1.2;
+    text-align: left;
+}
+
+.home-page .hero-content .home-search-validation[hidden] {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .home-page .hero-content .home-search-validation {
+        width: calc(100% - 32px);
+        max-width: 640px;
+    }
+}
+
 
 /* =====================================================
    MAIN CONTENT
