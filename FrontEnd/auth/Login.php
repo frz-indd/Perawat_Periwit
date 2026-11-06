@@ -1,47 +1,38 @@
 
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (isset($_SESSION['id_user'])) {
+    header("Location: ../../index.php");
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Login | Explore Majaku</title>
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
-
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-    >
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap"
-        rel="stylesheet"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="../CSS/theme.css?v=auth-design-9">
-    <link rel="stylesheet" href="../CSS/auth.css?v=auth-design-9">
+    <link rel="stylesheet" href="../CSS/login.css">
 </head>
+<body>
 
-<body class="auth-page">
+<header class="header">
+    <a href="../../index.php" class="brand">Explore Majaku</a>
+</header>
 
-    <header class="auth-header">
-        <a href="../../index.php" class="brand-name">
-            Explore Majaku
-        </a>
-    </header>
+<main class="auth-container">
 
-    <main class="auth-wrapper">
-
-        <section class="auth-image-section">
-            <div class="image-overlay"></div>
-
+    <section class="auth-image">
+        <div class="image-overlay">
             <div class="image-content">
                 <h1>
                     Jelajahi<br>
@@ -56,153 +47,110 @@
                     favoritmu!
                 </p>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="auth-form-section">
-            <div class="auth-form-container">
+    <section class="auth-form-section">
 
-                <h2 class="auth-title">LOGIN</h2>
+        <div class="form-wrapper">
 
-                <form
-                    id="loginForm"
-                    action="../../Backend/api/fungsi_login.php"
-                    data-api-url="../../Backend/api/fungsi_login.php"
-                    method="post"
-                    novalidate
-                >
+            <h2>LOGIN</h2>
 
-                    <div class="form-group">
-                        <label for="loginIdentity">Email atau No telepon</label>
+            <div id="alertBox" class="alert-box" role="alert" aria-live="polite"></div>
 
+            <form id="loginForm" novalidate>
+
+                <div class="form-group">
+                    <label for="identity">Email atau No telepon</label>
+
+                    <input
+                        type="text"
+                        id="identity"
+                        name="identity"
+                        placeholder="Masukkan Email or No Telephon"
+                        autocomplete="username"
+                    >
+
+                    <small class="error-message" id="identityError"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+
+                    <div class="password-wrapper">
                         <input
-                            type="text"
-                            id="loginIdentity"
-                            name="email"
-                            class="auth-input"
-                            placeholder="Masukkan Email or No Telepon"
-                            autocomplete="username"
-                            maxlength="255"
-                            required
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Masukkan Password"
+                            autocomplete="current-password"
                         >
 
-                        <div class="invalid-feedback">
-                            Email/No telepon wajib diisi
-                        </div>
+                        <button
+                            type="button"
+                            class="toggle-password"
+                            data-target="password"
+                            aria-label="Tampilkan password"
+                        >
+                            <i class="eye-icon"></i>
+                        </button>
                     </div>
 
-                    <div class="form-group">
-                        <label for="loginPassword">Password</label>
-
-                        <div class="password-wrapper">
-                            <input
-                                type="password"
-                                id="loginPassword"
-                                name="password"
-                                class="auth-input"
-                                placeholder="Masukkan Password"
-                                autocomplete="current-password"
-                                required
-                            >
-
-                            <button
-                                type="button"
-                                class="password-toggle"
-                                data-target="loginPassword"
-                                aria-label="Tampilkan password"
-                            >
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </div>
-
-                        <div class="invalid-feedback">
-                            Password wajib diisi
-                        </div>
-                    </div>
-
-                    <div class="login-options">
-                        <div class="remember-me">
-                            <input
-                                type="checkbox"
-                                id="rememberMe"
-                            >
-
-                            <label for="rememberMe">Ingat Saya</label>
-                        </div>
-
-                        <a href="#" class="forgot-password">
-                            Lupa Kata Sandi?
-                        </a>
-                    </div>
-
-                    <div
-                        id="loginMessage"
-                        class="alert alert-danger d-none"
-                        role="alert"
-                        aria-live="polite"
-                    ></div>
-
-                    <button type="submit" class="auth-button">
-                        Login
-                    </button>
-
-                </form>
-
-                <div class="divider">
-                    <span></span>
-                    <p>Atau</p>
-                    <span></span>
+                    <small class="error-message" id="passwordError"></small>
                 </div>
 
-                <button
-                    type="button"
-                    class="social-button"
-                    id="googleLogin"
-                    data-api-url="../../Backend/api/google_login.php?intent=login"
-                >
-                    <span class="google-icon">
-                        <svg viewBox="0 0 24 24" width="28" height="28">
-                            <path fill="#4285F4" d="M21.35 12.27c0-.79-.07-1.55-.22-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.42z"/>
-                            <path fill="#34A853" d="M12 21.5c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.52A9.74 9.74 0 0 0 12 21.5z"/>
-                            <path fill="#FBBC05" d="M6.54 13.58A5.85 5.85 0 0 1 6.23 12c0-.55.1-1.09.31-1.58V7.9H3.3A9.74 9.74 0 0 0 2.25 12c0 1.57.38 3.05 1.05 4.1l3.24-2.52z"/>
-                            <path fill="#EA4335" d="M12 6.39c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.43 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.7 5.4l3.24 2.52C7.31 8.11 9.46 6.39 12 6.39z"/>
-                        </svg>
-                    </span>
-
-                    <span>Masuk dengan Google</span>
+                <button type="submit" id="loginButton" class="submit-button">
+                    <span class="button-text">Login</span>
+                    <span class="button-loader"></span>
                 </button>
 
-                <div class="switch-auth">
-                    <span>Belum punya akun?</span>
-                    <a href="Register.php">DAFTAR</a>
-                </div>
+            </form>
 
+            <div class="divider">
+                <span></span>
+                <p>Atau</p>
+                <span></span>
             </div>
-        </section>
 
-    </main>
+            <a href="../../Backend/api/google_login.php" class="google-button">
+                <img
+                    src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                    alt="Google"
+                >
+                <span>Login dengan Google</span>
+            </a>
 
-    <div
-        class="auth-success-modal"
-        id="authSuccessModal"
-        hidden
+            <p class="register-text">
+                Belum Punya Akun?
+                <a href="Register.php">REGISTER</a>
+            </p>
+
+        </div>
+    </section>
+
+</main>
+
+<script src="../Js/login.js"></script>
+<!-- ================= SUCCESS MODAL ================= -->
+<div
+    class="auth-success-modal"
+    id="authSuccessModal"
+    hidden
+>
+    <section
+        class="auth-success-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="authSuccessTitle"
+        aria-describedby="authSuccessDescription"
     >
-        <section
-            class="auth-success-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="authSuccessTitle"
-            aria-describedby="authSuccessDescription"
-        >
-            <span class="auth-success-icon" aria-hidden="true"></span>
-            <h2 id="authSuccessTitle"></h2>
-            <p id="authSuccessDescription"></p>
-            <button type="button" class="auth-success-button" id="authSuccessConfirm">
-                OK
-            </button>
-        </section>
-    </div>
-
-    <script src="../Js/auth.js?v=auth-design-9"></script>
-
+        <span class="auth-success-icon" aria-hidden="true"></span>
+        <h2 id="authSuccessTitle"></h2>
+        <p id="authSuccessDescription"></p>
+        <button type="button" class="auth-success-button" id="authSuccessConfirm">
+            OK
+        </button>
+    </section>
+</div>
 </body>
 </html>
