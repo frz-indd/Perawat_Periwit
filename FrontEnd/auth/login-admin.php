@@ -1,0 +1,427 @@
+<?php
+$appName = 'Explore Majaku';
+$apiLoginUrl = '../../api/admin/login';
+$loginUrl = 'login-admin.php';
+$dashboardUrl = '../pages/dashboard-admin.php';
+$forgotPasswordUrl = '#';
+$homeUrl = '../../index.php';
+$isUnauthorized = ($_GET['status'] ?? '') === '401';
+$pageTitle = $isUnauthorized ? 'Akses Ditolak' : 'Login Admin';
+
+$clientConfig = [
+    'apiLoginUrl' => $apiLoginUrl,
+    'dashboardUrl' => $dashboardUrl,
+];
+
+function e(string $value): string
+{
+    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+}
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title><?= e($pageTitle) ?> | <?= e($appName) ?></title>
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="../CSS/theme.css?v=admin-design-1">
+    <link rel="stylesheet" href="../CSS/login-admin.css?v=admin-design-4">
+</head>
+
+<body class="admin-auth-page <?= $isUnauthorized ? 'page-unauthorized' : 'page-login' ?>">
+
+    <header class="auth-header">
+        <a href="<?= e($homeUrl) ?>" class="brand-name">
+            <?= e($appName) ?>
+        </a>
+    </header>
+
+    <?php if ($isUnauthorized): ?>
+
+    <main class="unauthorized">
+        <svg class="unauthorized__icon" viewBox="0 0 142 141" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M29 52V35a28 28 0 0 1 56 0v17" stroke="#166C5C" stroke-width="14" stroke-linecap="round"/>
+            <rect x="7" y="59" width="100" height="75" rx="17" stroke="#166C5C" stroke-width="14"/>
+            <path d="M56 87v18" stroke="#166C5C" stroke-width="10" stroke-linecap="round"/>
+            <path d="M108.500 85 139 138H78Z" fill="#F70B0B" stroke="#F70B0B" stroke-width="6" stroke-linejoin="round"/>
+            <path d="M108.500 100v16" stroke="#166C5C" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="108.500" cy="127" r="3.500" fill="#166C5C"/>
+        </svg>
+
+        <h1 class="unauthorized__title">Akses ditolak (401 Unauthorized)</h1>
+
+        <p class="unauthorized__text">
+            Anda tidak memiliki hak akses untuk membuka halaman ini. Silakan masuk menggunakan akun admin.
+        </p>
+
+        <a class="btn-back" href="<?= e($loginUrl) ?>">Kembali ke Login</a>
+    </main>
+
+    <?php else: ?>
+
+    <main class="login-page">
+
+        <section class="login-card" aria-labelledby="loginTitle">
+
+            <h1 class="login-card__title" id="loginTitle">LOGIN ADMIN</h1>
+
+            <form id="loginForm" method="post" novalidate>
+
+                <div class="field field--username">
+                    <label class="field__label" for="username">Username</label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        class="field__input"
+                        placeholder="Masukkan Username"
+                        autocomplete="username"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        maxlength="255"
+                        aria-describedby="usernameError"
+                    >
+
+                    <p class="field__error" id="usernameError" role="alert" hidden></p>
+                </div>
+
+                <div class="field field--password">
+                    <label class="field__label" for="password">Password</label>
+
+                    <div class="field__control">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="field__input field__input--password"
+                            placeholder="Masukkan Password"
+                            autocomplete="current-password"
+                            aria-describedby="passwordError"
+                        >
+
+                        <button
+                            type="button"
+                            class="field__toggle"
+                            id="passwordToggle"
+                            aria-label="Tampilkan password"
+                            aria-pressed="false"
+                        >
+                            <i class="bi bi-eye-fill" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
+                    <p class="field__error" id="passwordError" role="alert" hidden></p>
+                </div>
+
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember" name="remember">
+                        <label for="remember">Ingat Saya</label>
+                    </div>
+
+                    <a href="<?= e($forgotPasswordUrl) ?>" class="forgot-password">
+                        Lupa password?
+                    </a>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-login" id="submitButton">
+                        <span class="btn-login__spinner" aria-hidden="true"></span>
+                        <span class="btn-login__label">Login</span>
+                    </button>
+                </div>
+
+            </form>
+
+        </section>
+
+        <section class="login-hero">
+            <h2 class="login-hero__title">
+                <span>Kelola wisata,</span>
+                <span>Kenalkan pesona</span>
+                <span>Majalengka dan</span>
+                <span>Kuningan</span>
+            </h2>
+
+            <p class="login-hero__text">
+                Platform pengelolaan informasi destinasi wisata untuk menghadirkan informasi yang mudah diakses dan selalu diperbarui.
+            </p>
+        </section>
+
+    </main>
+
+    <script>
+    (function () {
+        'use strict';
+
+        const config = <?= json_encode($clientConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+        const TOKEN_KEY = 'admin_token';
+        const COOKIE_MAX_AGE = 60 * 60 * 24;
+
+        const MESSAGES = {
+            usernameRequired: 'Username wajib di isi',
+            passwordRequired: 'Password wajib di isi',
+            usernameInvalid: 'Username yang anda masukkan salah',
+            passwordInvalid: 'Password yang anda masukkan salah',
+            loading: 'Memproses...',
+            idle: 'Login'
+        };
+
+        const form = document.getElementById('loginForm');
+        const elements = {
+            username: document.getElementById('username'),
+            password: document.getElementById('password'),
+            remember: document.getElementById('remember'),
+            usernameError: document.getElementById('usernameError'),
+            passwordError: document.getElementById('passwordError'),
+            submit: document.getElementById('submitButton'),
+            submitLabel: document.querySelector('#submitButton .btn-login__label'),
+            toggle: document.getElementById('passwordToggle'),
+            toggleIcon: document.querySelector('#passwordToggle i')
+        };
+
+        const state = {
+            username: '',
+            password: '',
+            remember: false,
+            usernameError: '',
+            passwordError: '',
+            isLoading: false
+        };
+
+        function safely(callback) {
+            try {
+                return callback();
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function clearToken() {
+            safely(function () { window.localStorage.removeItem(TOKEN_KEY); });
+            safely(function () { window.sessionStorage.removeItem(TOKEN_KEY); });
+            document.cookie = TOKEN_KEY + '=; path=/; max-age=0; SameSite=Lax';
+        }
+
+        function saveToken(token, remember) {
+            clearToken();
+
+            const storage = remember ? 'localStorage' : 'sessionStorage';
+            safely(function () { window[storage].setItem(TOKEN_KEY, token); });
+
+            let cookie = TOKEN_KEY + '=' + encodeURIComponent(token) + '; path=/; SameSite=Lax';
+            if (remember) {
+                cookie += '; max-age=' + COOKIE_MAX_AGE;
+            }
+            if (window.location.protocol === 'https:') {
+                cookie += '; Secure';
+            }
+            document.cookie = cookie;
+        }
+
+        function setState(patch) {
+            Object.keys(patch).forEach(function (key) {
+                state[key] = patch[key];
+            });
+            render();
+        }
+
+        function renderFieldError(input, output, message) {
+            const field = input.closest('.field');
+
+            output.textContent = message;
+            output.hidden = !message;
+
+            if (field) {
+                field.classList.toggle('has-error', Boolean(message));
+            }
+
+            if (message) {
+                input.setAttribute('aria-invalid', 'true');
+            } else {
+                input.removeAttribute('aria-invalid');
+            }
+        }
+
+        function render() {
+            renderFieldError(elements.username, elements.usernameError, state.usernameError);
+            renderFieldError(elements.password, elements.passwordError, state.passwordError);
+
+            elements.submit.disabled = state.isLoading;
+            elements.submit.classList.toggle('is-loading', state.isLoading);
+            elements.submit.setAttribute('aria-busy', String(state.isLoading));
+            elements.submitLabel.textContent = state.isLoading ? MESSAGES.loading : MESSAGES.idle;
+        }
+
+        function validate() {
+            return {
+                usernameError: state.username.trim() ? '' : MESSAGES.usernameRequired,
+                passwordError: state.password ? '' : MESSAGES.passwordRequired
+            };
+        }
+
+        function extractToken(payload) {
+            if (!payload || typeof payload !== 'object') {
+                return null;
+            }
+            const source = payload.data && typeof payload.data === 'object' ? payload.data : payload;
+            return payload.token || source.token || source.admin_token || payload.admin_token || null;
+        }
+
+        function parseJson(response) {
+            return response.json().catch(function () {
+                return null;
+            });
+        }
+
+        function detectField(payload) {
+            if (!payload || typeof payload !== 'object') {
+                return '';
+            }
+            if (payload.field === 'username' || payload.field === 'password') {
+                return payload.field;
+            }
+
+            const text = String(payload.message || payload.error || '').toLowerCase();
+            const hasUsername = text.indexOf('username') !== -1;
+            const hasPassword = text.indexOf('password') !== -1;
+
+            if (hasUsername && !hasPassword) {
+                return 'username';
+            }
+            if (hasPassword && !hasUsername) {
+                return 'password';
+            }
+            return '';
+        }
+
+        function handleUnauthorized(payload) {
+            if (detectField(payload) === 'username') {
+                setState({ isLoading: false, usernameError: MESSAGES.usernameInvalid });
+                elements.username.focus();
+                return;
+            }
+
+            setState({ isLoading: false, passwordError: MESSAGES.passwordInvalid });
+            elements.password.focus();
+        }
+
+        function handleValidationError() {
+            const validation = validate();
+            setState({
+                isLoading: false,
+                usernameError: validation.usernameError,
+                passwordError: validation.passwordError
+            });
+            (validation.usernameError ? elements.username : elements.password).focus();
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+
+            if (state.isLoading) {
+                return;
+            }
+
+            const validation = validate();
+            if (validation.usernameError || validation.passwordError) {
+                setState({
+                    usernameError: validation.usernameError,
+                    passwordError: validation.passwordError
+                });
+                (validation.usernameError ? elements.username : elements.password).focus();
+                return;
+            }
+
+            setState({ isLoading: true, usernameError: '', passwordError: '' });
+
+            try {
+                const response = await fetch(config.apiLoginUrl, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: state.username.trim(),
+                        password: state.password
+                    })
+                });
+
+                const payload = await parseJson(response);
+
+                if (response.ok) {
+                    const token = extractToken(payload);
+                    if (!token) {
+                        setState({ isLoading: false });
+                        return;
+                    }
+                    saveToken(token, state.remember);
+                    window.location.href = config.dashboardUrl;
+                    return;
+                }
+
+                if (response.status === 401) {
+                    handleUnauthorized(payload);
+                    return;
+                }
+
+                if (response.status === 422) {
+                    handleValidationError();
+                    return;
+                }
+
+                setState({ isLoading: false });
+            } catch (error) {
+                setState({ isLoading: false });
+            }
+        }
+
+        function handlePasswordToggle() {
+            const isHidden = elements.password.type === 'password';
+            elements.password.type = isHidden ? 'text' : 'password';
+            elements.toggleIcon.className = isHidden ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill';
+            elements.toggle.setAttribute('aria-pressed', String(isHidden));
+            elements.toggle.setAttribute('aria-label', isHidden ? 'Sembunyikan password' : 'Tampilkan password');
+        }
+
+        elements.username.addEventListener('input', function (event) {
+            setState({ username: event.target.value, usernameError: '' });
+        });
+
+        elements.password.addEventListener('input', function (event) {
+            setState({ password: event.target.value, passwordError: '' });
+        });
+
+        elements.remember.addEventListener('change', function (event) {
+            setState({ remember: event.target.checked });
+        });
+
+        elements.toggle.addEventListener('click', handlePasswordToggle);
+        form.addEventListener('submit', handleSubmit);
+
+        render();
+    })();
+    </script>
+
+    <?php endif; ?>
+
+</body>
+</html>

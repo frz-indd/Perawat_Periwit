@@ -1,0 +1,523 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #166C5C;
+    --primary-hover: #125A4D;
+    --accent: #398B7C;
+    --white: #FFFFFF;
+    --danger: #F70B0B;
+    --ink: #1B2B28;
+    --placeholder: #8C8C8C;
+    --border: #C9C9C9;
+    --header-height: 8.3rem;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+html {
+    height: 100%;
+    overflow: hidden;
+    font-size: min(0.6944vw, 0.9766vh);
+    -webkit-text-size-adjust: 100%;
+}
+
+body.admin-auth-page {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    margin: 0;
+    overflow: hidden;
+    font-family: var(--font-main, 'Poppins', sans-serif);
+    color: var(--primary);
+    background: var(--white);
+}
+
+.auth-header {
+    position: relative;
+    z-index: 10;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: var(--header-height);
+    background: var(--white);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.brand-name {
+    font-family: var(--font-logo, 'Kaushan Script', cursive);
+    font-size: 4.3rem;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--primary);
+    text-decoration: none;
+    transform: translateX(2rem);
+}
+
+.login-page {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7.2rem;
+    padding: 0 0 1.7rem;
+    overflow: hidden;
+    background:
+        url('../assets/images/gununglandscape.jpg') center / cover no-repeat,
+        linear-gradient(180deg, #5E9BD3 0%, #A9CBE8 34%, #6FA37A 62%, #2F7A3E 82%, #1F5F2C 100%);
+}
+
+.login-card {
+    flex: 0 0 63.3rem;
+    width: 63.3rem;
+    padding: 5.7rem 4rem 9.9rem;
+    border-radius: 5.5rem;
+    background: rgba(199, 233, 227, 0.62);
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+}
+
+.login-card__title {
+    margin: 0 0 4.26rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 3.2rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    color: var(--primary);
+}
+
+.field {
+    position: relative;
+}
+
+.field--username {
+    margin-bottom: 3.3rem;
+}
+
+.field--password {
+    margin-bottom: 2.6rem;
+}
+
+.field__label {
+    display: block;
+    height: 2.6rem;
+    margin: 0 0 0.8rem;
+    padding-left: 0.7rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 2.6rem;
+    color: var(--primary);
+}
+
+.field--password .field__label {
+    margin-bottom: 0.4rem;
+    padding-left: 0.9rem;
+}
+
+.field__control {
+    position: relative;
+}
+
+.field__input {
+    display: block;
+    width: 100%;
+    height: 6.8rem;
+    padding: 0 2rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 2.1rem;
+    color: var(--ink);
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 0.4rem;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field__input::placeholder {
+    color: var(--placeholder);
+    opacity: 1;
+}
+
+.field__input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(57, 139, 124, 0.3);
+}
+
+.field__input--password {
+    padding-right: 6rem;
+}
+
+.field__toggle {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    display: grid;
+    place-items: center;
+    width: 3.6rem;
+    height: 3.6rem;
+    padding: 0;
+    font-size: 2.2rem;
+    color: #8A8A8A;
+    background: transparent;
+    border: 0;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transform: translateY(-50%);
+}
+
+.field__toggle:hover {
+    color: var(--primary);
+}
+
+.field__toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.field__error {
+    position: absolute;
+    top: 100%;
+    left: 0.9rem;
+    margin: 0.4rem 0 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    line-height: 2.3rem;
+    white-space: nowrap;
+    color: var(--danger);
+}
+
+.field--password .field__error {
+    margin-top: 0.1rem;
+}
+
+.form-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    height: 2.4rem;
+    padding: 0 1.4rem 0 0.8rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 2rem;
+    line-height: 2.4rem;
+    color: var(--primary);
+}
+
+.field--password.has-error + .form-options {
+    transform: translateY(0.55rem);
+}
+
+.remember-me {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.remember-me input {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: 0 0 auto;
+    width: 1.8rem;
+    height: 1.8rem;
+    margin: 0;
+    background: var(--white) center / 100% no-repeat;
+    border: 0.15rem solid var(--primary);
+    border-radius: 0.45rem;
+    cursor: pointer;
+}
+
+.remember-me input:checked {
+    background-color: var(--primary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.500 8.500l3 3 6-7'/%3E%3C/svg%3E");
+}
+
+.remember-me label {
+    margin: 0;
+    color: var(--primary);
+    cursor: pointer;
+}
+
+.forgot-password {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+.forgot-password:focus-visible,
+.remember-me input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.form-actions {
+    position: relative;
+    margin-top: 7.5rem;
+}
+
+.btn-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
+    height: 7.3rem;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 600;
+    color: var(--white);
+    background: var(--primary);
+    border: 0;
+    border-radius: 0.4rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.btn-login:hover:not(:disabled) {
+    background: var(--primary-hover);
+}
+
+.btn-login:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.btn-login:disabled {
+    opacity: 0.85;
+    cursor: not-allowed;
+}
+
+.btn-login__spinner {
+    display: none;
+    width: 2.2rem;
+    height: 2.2rem;
+    border: 3px solid rgba(255, 255, 255, 0.4);
+    border-top-color: var(--white);
+    border-radius: 50%;
+    animation: login-spin 0.7s linear infinite;
+}
+
+.btn-login.is-loading .btn-login__spinner {
+    display: inline-block;
+}
+
+@keyframes login-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.login-hero {
+    flex: 0 0 64.8rem;
+    min-width: 0;
+    color: var(--white);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    transform: translateY(-0.9rem);
+}
+
+.login-hero__title {
+    margin: 0 0 1.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 5rem;
+    font-weight: 500;
+    line-height: 7.5rem;
+}
+
+.login-hero__title span {
+    display: block;
+}
+
+.login-hero__text {
+    max-width: 58rem;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 3rem;
+    font-weight: 400;
+    line-height: 4.5rem;
+}
+
+.unauthorized {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 12.4rem 1.5rem 0;
+    overflow: hidden;
+    text-align: center;
+    background: var(--white);
+}
+
+.unauthorized__icon {
+    flex: 0 0 auto;
+    display: block;
+    width: 14.2rem;
+    height: 14.1rem;
+    margin-bottom: 4.4rem;
+}
+
+.unauthorized__title {
+    margin: 0 0 2.7rem;
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 4.8rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--danger);
+}
+
+.unauthorized__text {
+    max-width: 66rem;
+    margin: 0 0 2.7rem;
+    font-family: 'Fragment Mono', monospace;
+    font-size: 3.1rem;
+    font-weight: 400;
+    line-height: 3.6rem;
+    color: #111111;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 29.6rem;
+    height: 6.6rem;
+    padding: 0;
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 2.9rem;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--white);
+    text-decoration: none;
+    background: var(--primary);
+    border: 0;
+    border-radius: 1.9rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.btn-back:hover {
+    background: var(--primary-hover);
+    color: var(--white);
+}
+
+.btn-back:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+}
+
+@media (max-width: 960px) {
+
+    :root {
+        --header-height: 7rem;
+    }
+
+    html {
+        font-size: clamp(6.5px, min(2.55vw, 1.1vh), 10px);
+    }
+
+    .brand-name {
+        font-size: 3.6rem;
+        transform: none;
+    }
+
+    .login-page {
+        gap: 0;
+        padding: 0 1.6rem;
+    }
+
+    .login-card {
+        flex: 0 1 46rem;
+        width: min(46rem, 100%);
+        padding: 4.5rem 2.4rem 5rem;
+        border-radius: 4rem;
+    }
+
+    .login-card__title {
+        margin-bottom: 3.2rem;
+        font-size: 2.8rem;
+    }
+
+    .field__label {
+        font-size: 1.8rem;
+    }
+
+    .field__input {
+        font-size: 1.9rem;
+    }
+
+    .field__error {
+        font-size: 1.6rem;
+    }
+
+    .form-options {
+        font-size: 1.8rem;
+    }
+
+    .form-actions {
+        margin-top: 5rem;
+    }
+
+    .btn-login {
+        font-size: 2.2rem;
+    }
+
+    .login-hero {
+        display: none;
+    }
+
+    .unauthorized {
+        padding-top: 8rem;
+    }
+
+    .unauthorized__icon {
+        width: 11rem;
+        height: 10.9rem;
+        margin-bottom: 3rem;
+    }
+
+    .unauthorized__title {
+        font-size: 3.2rem;
+    }
+
+    .unauthorized__text {
+        max-width: 100%;
+        font-size: 2.2rem;
+        line-height: 2.8rem;
+    }
+
+    .btn-back {
+        width: 26rem;
+        height: 5.6rem;
+        font-size: 2.4rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
