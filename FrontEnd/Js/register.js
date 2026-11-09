@@ -1,304 +1,99 @@
+document.getElementById('togglePassword').addEventListener('click', function () {
+    const pass = document.getElementById('passwordInput');
+    const eye = document.getElementById('eyePass');
+    pass.type = pass.type === 'password' ? 'text' : 'password';
+    eye.classList.toggle('bi-eye'); eye.classList.toggle('bi-eye-slash');
+});
 
-document.addEventListener("DOMContentLoaded", function () {
+document.getElementById('toggleConfirmPassword').addEventListener('click', function () {
+    const pass = document.getElementById('confirmPasswordInput');
+    const eye = document.getElementById('eyeConfirm');
+    pass.type = pass.type === 'password' ? 'text' : 'password';
+    eye.classList.toggle('bi-eye'); eye.classList.toggle('bi-eye-slash');
+});
 
-    const form = document.getElementById("registerForm");
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const emailInput = document.getElementById('emailInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const confirmPasswordInput = document.getElementById('confirmPasswordInput');
 
-    const identity = document.getElementById("identity");
-    const password = document.getElementById("password");
-    const confirmPassword = document.getElementById("confirmPassword");
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+    const confirmPasswordError = document.getElementById('confirmPasswordError');
 
-    const identityError = document.getElementById("identityError");
-    const passwordError = document.getElementById("passwordError");
-    const confirmPasswordError = document.getElementById("confirmPasswordError");
+    emailError.innerText = ''; passwordError.innerText = ''; confirmPasswordError.innerText = '';
+    emailInput.classList.remove('is-invalid-custom');
+    passwordInput.classList.remove('is-invalid-custom');
+    confirmPasswordInput.classList.remove('is-invalid-custom');
 
-    const registerButton = document.getElementById("registerButton");
-    const alertBox = document.getElementById("alertBox");
+    let isValid = true;
+    const emailVal = emailInput.value.trim();
+    const passVal = passwordInput.value;
+    const confirmVal = confirmPasswordInput.value;
 
-    const API_URL = "../../Backend/api/fungsi_register.php";
-
-    // Menampilkan error
-    function showError(input, errorElement, message) {
-        errorElement.textContent = message;
-        input.classList.toggle("invalid", message !== "");
+    if (!emailVal) {
+        emailError.innerText = 'Email/No telepone wajib di isi';
+        emailInput.classList.add('is-invalid-custom');
+        isValid = false;
+    } else if (!emailVal.includes('@') && isNaN(emailVal)) {
+        emailError.innerText = 'Masukkan alamat email / no telepon yang valid';
+        emailInput.classList.add('is-invalid-custom');
+        isValid = false;
     }
 
-    // Menghapus error
-    function clearError(input, errorElement) {
-        errorElement.textContent = "";
-        input.classList.remove("invalid");
+    if (!passVal) {
+        passwordError.innerText = 'Password wajib di isi';
+        passwordInput.classList.add('is-invalid-custom');
+        isValid = false;
+    } else if (passVal.length < 8) {
+        passwordError.innerText = 'Password harus terdiri dari minimal 8 karakter';
+        passwordInput.classList.add('is-invalid-custom');
+        isValid = false;
     }
 
-    // Alert
-    function showAlert(message, type = "error") {
-        alertBox.textContent = message;
-        alertBox.className = "alert-box show " + type;
+    if (!confirmVal) {
+        confirmPasswordError.innerText = 'Verifikasi password wajib di isi';
+        confirmPasswordInput.classList.add('is-invalid-custom');
+        isValid = false;
+    } else if (passVal !== confirmVal) {
+        confirmPasswordError.innerText = 'Konfirmasi password tidak sesuai';
+        confirmPasswordInput.classList.add('is-invalid-custom');
+        isValid = false;
     }
 
-    function clearAlert() {
-        alertBox.textContent = "";
-        alertBox.className = "alert-box";
-    }
-
-    function showSuccessModal(title, description, onConfirm) {
-        const modal = document.getElementById("authSuccessModal");
-        const titleElement = document.getElementById("authSuccessTitle");
-        const descriptionElement = document.getElementById(
-            "authSuccessDescription"
-        );
-        const confirmButton = document.getElementById("authSuccessConfirm");
-
-        titleElement.textContent = title;
-        descriptionElement.textContent = description;
-        modal.hidden = false;
-
-        confirmButton.onclick = function () {
-            modal.hidden = true;
-            onConfirm();
-        };
-
-        confirmButton.focus();
-    }
-
-    // Validasi email / nomor telepon
-    function validateIdentity() {
-
-        const value = identity.value.trim();
-
-        if (value === "") {
-            showError(
-                identity,
-                identityError,
-                "Email/No telepon wajib di isi"
-            );
-            return false;
-        }
-
-        if (value.includes("@")) {
-
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-            if (!emailPattern.test(value)) {
-                showError(
-                    identity,
-                    identityError,
-                    "Format email tidak valid"
-                );
-                return false;
-            }
-
-        } else {
-
-            const phone = value.replace(/[\s()-]/g, "");
-
-            const phonePattern = /^\+628[1-9][0-9]{6,11}$/;
-
-            if (!phonePattern.test(phone)) {
-                showError(
-                    identity,
-                    identityError,
-                    "Nomor telepon harus menggunakan awalan +62"
-                );
-                return false;
-            }
-        }
-
-        clearError(identity, identityError);
-        return true;
-    }
-
-    // Validasi password
-    function validatePassword() {
-
-        const value = password.value;
-
-        if (value.trim() === "") {
-            showError(
-                password,
-                passwordError,
-                "Password wajib di isi"
-            );
-            return false;
-        }
-
-        if (value.length < 8) {
-            showError(
-                password,
-                passwordError,
-                "Password harus terdiri dari minimal 8 karakter"
-            );
-            return false;
-        }
-
-        clearError(password, passwordError);
-        return true;
-    }
-
-    // Validasi konfirmasi password
-    function validateConfirmPassword() {
-
-        const value = confirmPassword.value;
-
-        if (value.trim() === "") {
-            showError(
-                confirmPassword,
-                confirmPasswordError,
-                "Verifikasi password wajib di isi"
-            );
-            return false;
-        }
-
-        if (value !== password.value) {
-            showError(
-                confirmPassword,
-                confirmPasswordError,
-                "Konfirmasi password tidak sesuai"
-            );
-            return false;
-        }
-
-        clearError(confirmPassword, confirmPasswordError);
-        return true;
-    }
-
-    // Input berubah
-    identity.addEventListener("input", function () {
-        clearAlert();
-
-        if (identityError.textContent !== "") {
-            validateIdentity();
-        }
-    });
-
-    password.addEventListener("input", function () {
-        clearAlert();
-
-        if (passwordError.textContent !== "") {
-            validatePassword();
-        }
-
-        if (confirmPassword.value !== "") {
-            validateConfirmPassword();
-        }
-    });
-
-    confirmPassword.addEventListener("input", function () {
-        clearAlert();
-
-        if (confirmPasswordError.textContent !== "") {
-            validateConfirmPassword();
-        }
-    });
-
-    // Toggle password
-    document.querySelectorAll(".toggle-password").forEach(button => {
-
-        button.addEventListener("click", function () {
-
-            const target = document.getElementById(
-                this.dataset.target
-            );
-
-            if (target.type === "password") {
-
-                target.type = "text";
-                this.classList.add("active");
-                this.setAttribute("aria-label", "Sembunyikan password");
-
-            } else {
-
-                target.type = "password";
-                this.classList.remove("active");
-                this.setAttribute("aria-label", "Tampilkan password");
-            }
-        });
-    });
-
-    // Submit register
-    form.addEventListener("submit", async function (event) {
-
-        event.preventDefault();
-        clearAlert();
-
-        const identityValid = validateIdentity();
-        const passwordValid = validatePassword();
-        const confirmValid = validateConfirmPassword();
-
-        if (!identityValid || !passwordValid || !confirmValid) {
-            return;
-        }
-
-        registerButton.disabled = true;
-        registerButton.classList.add("loading");
-
+    if (isValid) {
+        // Integrasi API: POST /Backend/api/fungsi_register.php
         try {
+            const formData = new URLSearchParams();
+            formData.append('identity', emailVal);
+            formData.append('password', passVal);
+            formData.append('confirmPassword', confirmVal);
 
-            const formData = new FormData();
-
-            formData.append("identity", identity.value.trim());
-            formData.append("password", password.value);
-            formData.append("confirmPassword", confirmPassword.value);
-
-            const response = await fetch(API_URL, {
-                method: "POST",
-                body: formData,
-                credentials: "same-origin"
+            const response = await fetch('/Backend/api/fungsi_register.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
             });
 
-            const result = await response.json();
-
-            if (result.status === "success") {
-    // === MASUKKAN / GUNAKAN DI SINI (UNTUK REGISTER) ===
-    showSuccessModal(
-        "Register Berhasil!",
-        "Akun kamu berhasil dibuat. Silakan Login untuk melanjutkan",
-        function () {
-            window.location.assign("Login.php");
-        }
-    );
-    return;
-}
-
-            if (result.status === "email_exists") {
-
-                showError(
-                    identity,
-                    identityError,
-                    "Email sudah terdaftar. Silakan gunakan email lain."
-                );
-
-            } else if (result.status === "phone_exists") {
-
-                showError(
-                    identity,
-                    identityError,
-                    "Nomor telepon sudah terdaftar. Silakan gunakan nomor lain."
-                );
-
-            } else if (result.status === "validation_error") {
-
-                showAlert(result.message);
-
+            if (response.status === 201) {
+                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
+            } else if (response.status === 409) {
+                emailError.innerText = 'Email/ No Telepon sudah terdaftar. silahkan gunakan email/ No telp lain';
+                emailInput.classList.add('is-invalid-custom');
             } else {
-
-                showAlert(
-                    result.message ||
-                    "Terjadi kesalahan pada server. Silakan coba lagi."
-                );
+                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
             }
-
         } catch (error) {
-
-            console.error("Register error:", error);
-
-            showAlert(
-                "Tidak dapat terhubung ke server. Silakan coba lagi."
-            );
-
-        } finally {
-
-            registerButton.disabled = false;
-            registerButton.classList.remove("loading");
+            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            successModal.show();
         }
-    });
-
+    }
 });
+
+function redirectToLogin() {
+    window.location.href = 'login.html';
+}
