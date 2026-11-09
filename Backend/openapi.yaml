@@ -261,6 +261,11 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '409':
+          description: Email telah dipakai pengguna lain.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
         '500':
           $ref: '#/components/responses/ServerError'
   /api/user/change-password:
@@ -301,20 +306,6 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
         '401':
           $ref: '#/components/responses/Unauthenticated'
-        '422':
-          description: Password tidak memenuhi kriteria atau password lama salah.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/ErrorResponse' }
-        '500':
-          $ref: '#/components/responses/ServerError'
-        '400':
-          description: JSON tidak valid.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/ErrorResponse' }
-        '401':
-          $ref: '#/components/responses/Unauthenticated'
         '404':
           description: Pengguna tidak ditemukan.
           content:
@@ -322,18 +313,13 @@ paths:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
         '405':
           $ref: '#/components/responses/MethodNotAllowed'
-        '409':
-          description: Email telah dipakai pengguna lain.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/ErrorResponse' }
         '415':
           description: Content-Type harus application/json.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
         '422':
-          description: Nama/email tidak valid.
+          description: Password tidak memenuhi kriteria atau password lama salah.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
