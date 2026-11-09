@@ -1,10 +1,15 @@
 <?php
 $appName = 'Explore Majaku';
-$apiLoginUrl = '../../api/admin/login';
-$loginUrl = 'login-admin.php';
-$dashboardUrl = '../pages/dashboard-admin.php';
+$scriptPath = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+$frontEndPosition = strpos($scriptPath, '/FrontEnd/');
+$appBasePath = $frontEndPosition !== false
+    ? substr($scriptPath, 0, $frontEndPosition)
+    : rtrim(dirname(dirname($scriptPath)), '/.');
+$apiLoginUrl = $appBasePath . '/api/admin/login';
+$loginUrl = $appBasePath . '/FrontEnd/auth/login-admin.php';
+$dashboardUrl = $appBasePath . '/FrontEnd/pages/dashboard-admin.php';
 $forgotPasswordUrl = '#';
-$homeUrl = '../../index.php';
+$homeUrl = $appBasePath . '/index.php';
 $isUnauthorized = ($_GET['status'] ?? '') === '401';
 $pageTitle = $isUnauthorized ? 'Akses Ditolak' : 'Login Admin';
 
@@ -40,7 +45,7 @@ function e(string $value): string
     >
 
     <link rel="stylesheet" href="../CSS/theme.css?v=admin-design-1">
-    <link rel="stylesheet" href="../CSS/login-admin.css?v=admin-design-4">
+    <link rel="stylesheet" href="../CSS/login-admin.css?v=admin-design-8">
 </head>
 
 <body class="admin-auth-page <?= $isUnauthorized ? 'page-unauthorized' : 'page-login' ?>">
@@ -129,6 +134,8 @@ function e(string $value): string
                     <p class="field__error" id="passwordError" role="alert" hidden></p>
                 </div>
 
+                <p class="login-error" id="loginError" role="alert" hidden></p>
+
                 <div class="form-options">
                     <div class="remember-me">
                         <input type="checkbox" id="remember" name="remember">
@@ -175,10 +182,15 @@ function e(string $value): string
         const COOKIE_MAX_AGE = 60 * 60 * 24;
 
         const MESSAGES = {
-            usernameRequired: 'Username wajib di isi',
-            passwordRequired: 'Password wajib di isi',
-            usernameInvalid: 'Username yang anda masukkan salah',
-            passwordInvalid: 'Password yang anda masukkan salah',
+            usernameRequired: 'Username wajib diisi.',
+            passwordRequired: 'Password wajib diisi.',
+            usernameInvalid: 'Username yang Anda masukkan salah.',
+            passwordInvalid: 'Password yang Anda masukkan salah.',
+            credentialsInvalid: 'Username atau password yang Anda masukkan salah.',
+            requestFailed: 'Login tidak dapat diproses. Silakan coba lagi.',
+            connectionFailed: 'Tidak dapat terhubung ke server. Silakan coba lagi.',
+            tokenMissing: 'Token login tidak diterima. Silakan coba lagi.',
+            storageFailed: 'Sesi tidak dapat disimpan. Aktifkan penyimpanan browser lalu coba lagi.',
             loading: 'Memproses...',
             idle: 'Login'
         };
@@ -190,6 +202,7 @@ function e(string $value): string
             remember: document.getElementById('remember'),
             usernameError: document.getElementById('usernameError'),
             passwordError: document.getElementById('passwordError'),
+            loginError: document.getElementById('loginError'),
             submit: document.getElementById('submitButton'),
             submitLabel: document.querySelector('#submitButton .btn-login__label'),
             toggle: document.getElementById('passwordToggle'),
@@ -200,6 +213,7 @@ function e(string $value): string
             username: '',
             password: '',
             remember: false,
+            errorMessage: '',
             usernameError: '',
             passwordError: '',
             isLoading: false
@@ -207,9 +221,10 @@ function e(string $value): string
 
         function safely(callback) {
             try {
-                return callback();
-            } catch (error) {
-                return null;
+                callback();
+                return true;
+            } catch (storageError) {
+                return false;
             }
         }
 
@@ -223,7 +238,9 @@ function e(string $value): string
             clearToken();
 
             const storage = remember ? 'localStorage' : 'sessionStorage';
-            safely(function () { window[storage].setItem(TOKEN_KEY, token); });
+            const stored = safely(function () {
+                window[storage].setItem(TOKEN_KEY, token);
+            });
 
             let cookie = TOKEN_KEY + '=' + encodeURIComponent(token) + '; path=/; SameSite=Lax';
             if (remember) {
@@ -233,6 +250,12 @@ function e(string $value): string
                 cookie += '; Secure';
             }
             document.cookie = cookie;
+            const cookieStored = document.cookie.split('; ').some(function (entry) {
+                return entry.indexOf(TOKEN_KEY + '=') === 0;
+            });
+            if (!stored && !cookieStored) {
+                throw new Error('Token could not be persisted.');
+            }
         }
 
         function setState(patch) {
@@ -262,6 +285,8 @@ function e(string $value): string
         function render() {
             renderFieldError(elements.username, elements.usernameError, state.usernameError);
             renderFieldError(elements.password, elements.passwordError, state.passwordError);
+            elements.loginError.textContent = state.errorMessage;
+            elements.loginError.hidden = !state.errorMessage;
 
             elements.submit.disabled = state.isLoading;
             elements.submit.classList.toggle('is-loading', state.isLoading);
@@ -281,7 +306,8 @@ function e(string $value): string
                 return null;
             }
             const source = payload.data && typeof payload.data === 'object' ? payload.data : payload;
-            return payload.token || source.token || source.admin_token || payload.admin_token || null;
+            const token = payload.token || source.token || source.admin_token || payload.admin_token;
+            return typeof token === 'string' && token.trim() ? token : null;
         }
 
         function parseJson(response) {
@@ -294,11 +320,23 @@ function e(string $value): string
             if (!payload || typeof payload !== 'object') {
                 return '';
             }
-            if (payload.field === 'username' || payload.field === 'password') {
-                return payload.field;
+            const source = payload.data && typeof payload.data === 'object'
+                ? payload.data
+                : payload;
+            if (source.field === 'username' || source.field === 'password') {
+                return source.field;
             }
 
-            const text = String(payload.message || payload.error || '').toLowerCase();
+            const errors = source.errors;
+            if (errors && typeof errors === 'object') {
+                const hasUsername = Object.prototype.hasOwnProperty.call(errors, 'username');
+                const hasPassword = Object.prototype.hasOwnProperty.call(errors, 'password');
+                if (hasUsername !== hasPassword) {
+                    return hasUsername ? 'username' : 'password';
+                }
+            }
+
+            const text = String(source.message || source.error || '').toLowerCase();
             const hasUsername = text.indexOf('username') !== -1;
             const hasPassword = text.indexOf('password') !== -1;
 
@@ -311,25 +349,73 @@ function e(string $value): string
             return '';
         }
 
+        function fieldMessage(payload, field, fallback) {
+            const source = payload && payload.data && typeof payload.data === 'object'
+                ? payload.data
+                : payload;
+            if (!source || typeof source !== 'object') {
+                return fallback;
+            }
+
+            const errors = source.errors;
+            if (errors && typeof errors[field] === 'string' && errors[field].trim()) {
+                return errors[field];
+            }
+            return fallback;
+        }
+
         function handleUnauthorized(payload) {
-            if (detectField(payload) === 'username') {
-                setState({ isLoading: false, usernameError: MESSAGES.usernameInvalid });
+            const field = detectField(payload);
+            if (field === 'username') {
+                setState({
+                    isLoading: false,
+                    errorMessage: '',
+                    usernameError: fieldMessage(payload, field, MESSAGES.usernameInvalid),
+                    passwordError: ''
+                });
                 elements.username.focus();
                 return;
             }
 
-            setState({ isLoading: false, passwordError: MESSAGES.passwordInvalid });
-            elements.password.focus();
-        }
+            if (field === 'password') {
+                setState({
+                    isLoading: false,
+                    errorMessage: '',
+                    usernameError: '',
+                    passwordError: fieldMessage(payload, field, MESSAGES.passwordInvalid)
+                });
+                elements.password.focus();
+                return;
+            }
 
-        function handleValidationError() {
-            const validation = validate();
             setState({
                 isLoading: false,
-                usernameError: validation.usernameError,
-                passwordError: validation.passwordError
+                errorMessage: MESSAGES.credentialsInvalid,
+                usernameError: '',
+                passwordError: ''
             });
-            (validation.usernameError ? elements.username : elements.password).focus();
+        }
+
+        function handleValidationError(payload) {
+            const validation = validate();
+            const field = detectField(payload);
+            setState({
+                isLoading: false,
+                errorMessage: '',
+                usernameError: validation.usernameError || (
+                    field === 'username' ? fieldMessage(payload, field, MESSAGES.usernameInvalid) : ''
+                ),
+                passwordError: validation.passwordError || (
+                    field === 'password' ? fieldMessage(payload, field, MESSAGES.passwordInvalid) : ''
+                )
+            });
+            if (validation.usernameError || validation.passwordError || field) {
+                (validation.usernameError || field === 'username'
+                    ? elements.username
+                    : elements.password).focus();
+            } else if (payload && typeof payload.message === 'string') {
+                setState({ errorMessage: payload.message });
+            }
         }
 
         async function handleSubmit(event) {
@@ -339,9 +425,12 @@ function e(string $value): string
                 return;
             }
 
+            state.username = elements.username.value;
+            state.password = elements.password.value;
             const validation = validate();
             if (validation.usernameError || validation.passwordError) {
                 setState({
+                    errorMessage: '',
                     usernameError: validation.usernameError,
                     passwordError: validation.passwordError
                 });
@@ -349,7 +438,12 @@ function e(string $value): string
                 return;
             }
 
-            setState({ isLoading: true, usernameError: '', passwordError: '' });
+            setState({
+                isLoading: true,
+                errorMessage: '',
+                usernameError: '',
+                passwordError: ''
+            });
 
             try {
                 const response = await fetch(config.apiLoginUrl, {
@@ -370,10 +464,15 @@ function e(string $value): string
                 if (response.ok) {
                     const token = extractToken(payload);
                     if (!token) {
-                        setState({ isLoading: false });
+                        setState({ isLoading: false, errorMessage: MESSAGES.tokenMissing });
                         return;
                     }
-                    saveToken(token, state.remember);
+                    try {
+                        saveToken(token, state.remember);
+                    } catch (storageError) {
+                        setState({ isLoading: false, errorMessage: MESSAGES.storageFailed });
+                        return;
+                    }
                     window.location.href = config.dashboardUrl;
                     return;
                 }
@@ -384,13 +483,18 @@ function e(string $value): string
                 }
 
                 if (response.status === 422) {
-                    handleValidationError();
+                    handleValidationError(payload);
                     return;
                 }
 
-                setState({ isLoading: false });
+                setState({
+                    isLoading: false,
+                    errorMessage: payload && typeof payload.message === 'string'
+                        ? payload.message
+                        : MESSAGES.requestFailed
+                });
             } catch (error) {
-                setState({ isLoading: false });
+                setState({ isLoading: false, errorMessage: MESSAGES.connectionFailed });
             }
         }
 
@@ -403,11 +507,11 @@ function e(string $value): string
         }
 
         elements.username.addEventListener('input', function (event) {
-            setState({ username: event.target.value, usernameError: '' });
+            setState({ username: event.target.value, usernameError: '', errorMessage: '' });
         });
 
         elements.password.addEventListener('input', function (event) {
-            setState({ password: event.target.value, passwordError: '' });
+            setState({ password: event.target.value, passwordError: '', errorMessage: '' });
         });
 
         elements.remember.addEventListener('change', function (event) {

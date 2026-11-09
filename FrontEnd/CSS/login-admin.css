@@ -204,6 +204,15 @@ body.admin-auth-page {
     margin-top: 0.1rem;
 }
 
+.login-error {
+    margin: -1.8rem 0 2.6rem;
+    padding-left: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.8rem;
+    line-height: 2.3rem;
+    color: var(--danger);
+}
+
 .form-options {
     display: flex;
     align-items: center;
@@ -327,7 +336,7 @@ body.admin-auth-page {
 }
 
 .login-hero {
-    flex: 0 0 64.8rem;
+    flex: 0 0 56rem;
     min-width: 0;
     color: var(--white);
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
@@ -466,6 +475,10 @@ body.admin-auth-page {
     }
 
     .field__error {
+        font-size: 1.6rem;
+    }
+
+    .login-error {
         font-size: 1.6rem;
     }
 
