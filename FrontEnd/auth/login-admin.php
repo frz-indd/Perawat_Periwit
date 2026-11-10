@@ -7,7 +7,7 @@ $appBasePath = $frontEndPosition !== false
     : rtrim(dirname(dirname($scriptPath)), '/.');
 $apiLoginUrl = $appBasePath . '/api/admin/login';
 $loginUrl = $appBasePath . '/FrontEnd/auth/login-admin.php';
-$dashboardUrl = $appBasePath . '/FrontEnd/pages/dashboard-admin.php';
+$adminDataWisataUrl = $appBasePath . '/FrontEnd/admin/data-wisata.php';
 $forgotPasswordUrl = '#';
 $homeUrl = $appBasePath . '/index.php';
 $isUnauthorized = ($_GET['status'] ?? '') === '401';
@@ -15,7 +15,7 @@ $pageTitle = $isUnauthorized ? 'Akses Ditolak' : 'Login Admin';
 
 $clientConfig = [
     'apiLoginUrl' => $apiLoginUrl,
-    'dashboardUrl' => $dashboardUrl,
+    'adminDataWisataUrl' => $adminDataWisataUrl,
 ];
 
 function e(string $value): string
@@ -473,7 +473,7 @@ function e(string $value): string
                         setState({ isLoading: false, errorMessage: MESSAGES.storageFailed });
                         return;
                     }
-                    window.location.href = config.dashboardUrl;
+                    window.location.href = config.adminDataWisataUrl;
                     return;
                 }
 

@@ -1,99 +1,169 @@
-document.getElementById('togglePassword').addEventListener('click', function () {
-    const pass = document.getElementById('passwordInput');
-    const eye = document.getElementById('eyePass');
-    pass.type = pass.type === 'password' ? 'text' : 'password';
-    eye.classList.toggle('bi-eye'); eye.classList.toggle('bi-eye-slash');
-});
+const registerForm = document.getElementById('registerForm');
 
-document.getElementById('toggleConfirmPassword').addEventListener('click', function () {
-    const pass = document.getElementById('confirmPasswordInput');
-    const eye = document.getElementById('eyeConfirm');
-    pass.type = pass.type === 'password' ? 'text' : 'password';
-    eye.classList.toggle('bi-eye'); eye.classList.toggle('bi-eye-slash');
-});
+if (registerForm) {
+    const identity = document.getElementById('registerIdentity');
+    const password = document.getElementById('registerPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const message = document.getElementById('registerMessage');
+    const submitButton = registerForm.querySelector('[type="submit"]');
+    const submitLabel = submitButton.textContent.trim();
+    const identityFeedback = identity
+        .closest('.form-group')
+        .querySelector('.invalid-feedback');
+    const passwordFeedback = password
+        .closest('.form-group')
+        .querySelector('.invalid-feedback');
+    const confirmFeedback = document.getElementById('confirmPasswordError');
+    let isSubmitting = false;
 
-document.getElementById('registerForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const emailInput = document.getElementById('emailInput');
-    const passwordInput = document.getElementById('passwordInput');
-    const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+    const googleResult = new URLSearchParams(
+        window.location.search
+    ).get('google');
+    const googleMessages = {
+        email_exists:
+            'Email Google ini sudah terdaftar. Silakan login dengan email tersebut.',
+        not_configured: 'Login Google belum dikonfigurasi di server.',
+        cancelled: 'Pendaftaran dengan Google dibatalkan.'
+    };
 
-    const emailError = document.getElementById('emailError');
-    const passwordError = document.getElementById('passwordError');
-    const confirmPasswordError = document.getElementById('confirmPasswordError');
-
-    emailError.innerText = ''; passwordError.innerText = ''; confirmPasswordError.innerText = '';
-    emailInput.classList.remove('is-invalid-custom');
-    passwordInput.classList.remove('is-invalid-custom');
-    confirmPasswordInput.classList.remove('is-invalid-custom');
-
-    let isValid = true;
-    const emailVal = emailInput.value.trim();
-    const passVal = passwordInput.value;
-    const confirmVal = confirmPasswordInput.value;
-
-    if (!emailVal) {
-        emailError.innerText = 'Email/No telepone wajib di isi';
-        emailInput.classList.add('is-invalid-custom');
-        isValid = false;
-    } else if (!emailVal.includes('@') && isNaN(emailVal)) {
-        emailError.innerText = 'Masukkan alamat email / no telepon yang valid';
-        emailInput.classList.add('is-invalid-custom');
-        isValid = false;
+    if (googleMessages[googleResult]) {
+        Auth.showMessage(message, googleMessages[googleResult]);
     }
 
-    if (!passVal) {
-        passwordError.innerText = 'Password wajib di isi';
-        passwordInput.classList.add('is-invalid-custom');
-        isValid = false;
-    } else if (passVal.length < 8) {
-        passwordError.innerText = 'Password harus terdiri dari minimal 8 karakter';
-        passwordInput.classList.add('is-invalid-custom');
-        isValid = false;
-    }
+    registerForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
 
-    if (!confirmVal) {
-        confirmPasswordError.innerText = 'Verifikasi password wajib di isi';
-        confirmPasswordInput.classList.add('is-invalid-custom');
-        isValid = false;
-    } else if (passVal !== confirmVal) {
-        confirmPasswordError.innerText = 'Konfirmasi password tidak sesuai';
-        confirmPasswordInput.classList.add('is-invalid-custom');
-        isValid = false;
-    }
+        if (isSubmitting) return;
 
-    if (isValid) {
-        // Integrasi API: POST /Backend/api/fungsi_register.php
-        try {
-            const formData = new URLSearchParams();
-            formData.append('identity', emailVal);
-            formData.append('password', passVal);
-            formData.append('confirmPassword', confirmVal);
+        Auth.hideMessage(message);
 
-            const response = await fetch('/Backend/api/fungsi_register.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formData
-            });
+        const identityValue = identity.value.trim();
+        const passwordValue = password.value;
+        const confirmValue = confirmPassword.value;
+        let valid = true;
 
-            if (response.status === 201) {
-                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
-                successModal.show();
-            } else if (response.status === 409) {
-                emailError.innerText = 'Email/ No Telepon sudah terdaftar. silahkan gunakan email/ No telp lain';
-                emailInput.classList.add('is-invalid-custom');
-            } else {
-                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
-                successModal.show();
-            }
-        } catch (error) {
-            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
-            successModal.show();
+        if (!identityValue) {
+            Auth.setInvalid(
+                identity,
+                identityFeedback,
+                'Email/No telepon wajib di isi.'
+            );
+            valid = false;
+        } else if (
+            identityValue.includes('@')
+                ? !Auth.isValidEmail(identityValue)
+                : !Auth.isValidPhone(identityValue)
+        ) {
+            Auth.setInvalid(
+                identity,
+                identityFeedback,
+                'Masukkan alamat email / no telepon yang valid.'
+            );
+            valid = false;
+        } else {
+            Auth.setValid(identity, identityFeedback);
         }
-    }
-});
 
-function redirectToLogin() {
-    window.location.href = 'login.html';
+        if (!passwordValue.trim()) {
+            Auth.setInvalid(
+                password,
+                passwordFeedback,
+                'Password wajib di isi.'
+            );
+            valid = false;
+        } else if (passwordValue.length < 8) {
+            Auth.setInvalid(
+                password,
+                passwordFeedback,
+                'Password harus terdiri dari minimal 8 karakter.'
+            );
+            valid = false;
+        } else {
+            Auth.setValid(password, passwordFeedback);
+        }
+
+        if (!confirmValue.trim()) {
+            Auth.setInvalid(
+                confirmPassword,
+                confirmFeedback,
+                'Verifikasi password wajib di isi.'
+            );
+            valid = false;
+        } else if (passwordValue !== confirmValue) {
+            Auth.setInvalid(
+                confirmPassword,
+                confirmFeedback,
+                'Konfirmasi password tidak sesuai.'
+            );
+            valid = false;
+        } else {
+            Auth.setValid(confirmPassword, confirmFeedback);
+        }
+
+        if (!valid) return;
+
+        isSubmitting = true;
+        Auth.setFormSubmitting(registerForm, submitButton, true, submitLabel);
+
+        try {
+            const result = await Auth.sendForm(registerForm);
+
+            if (result.status === 'success') {
+                Auth.showSuccessModal(
+                    'Register Berhasil!',
+                    'Akun kamu berhasil dibuat. Silakan Login untuk melanjutkan',
+                    function () {
+                        window.location.assign('Login.php');
+                    }
+                );
+                return;
+            }
+
+            if (
+                result.status === 'email_exists' ||
+                result.status === 'phone_exists'
+            ) {
+                Auth.setInvalid(
+                    identity,
+                    identityFeedback,
+                    result.message ||
+                        'Email/No telepon sudah terdaftar. Silakan gunakan yang lain.'
+                );
+                return;
+            }
+
+            if (result.status === 'validation_error') {
+                const error = result.message || 'Data pendaftaran tidak valid.';
+
+                if (result.field === 'identity') {
+                    Auth.setInvalid(identity, identityFeedback, error);
+                } else if (result.field === 'password') {
+                    Auth.setInvalid(password, passwordFeedback, error);
+                } else if (result.field === 'confirmPassword') {
+                    Auth.setInvalid(confirmPassword, confirmFeedback, error);
+                } else {
+                    Auth.showMessage(message, error);
+                }
+                return;
+            }
+
+            Auth.showMessage(
+                message,
+                'Terjadi kesalahan server. Silakan coba lagi beberapa saat.'
+            );
+        } catch {
+            Auth.showMessage(
+                message,
+                'Terjadi kesalahan server. Silakan coba lagi beberapa saat.'
+            );
+        } finally {
+            isSubmitting = false;
+            Auth.setFormSubmitting(
+                registerForm,
+                submitButton,
+                false,
+                submitLabel
+            );
+        }
+    });
 }

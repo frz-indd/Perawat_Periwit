@@ -1,84 +1,212 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Login | Explore Majaku</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="style.css">
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="../CSS/auth.css?v=shared-layout-4">
+    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
 </head>
+
 <body>
 
-    <div class="container-fluid p-0">
-        <div class="row g-0 auth-wrapper">
-            <div class="col-lg-6 auth-banner d-none d-lg-flex">
-                <h1 class="display-5 fw-bold mb-3">Jelajahi majalengka dan kuningan dengan Mudah</h1>
-                <p class="lead">Temukan Rekomendasi Wisata dan jadikan wisata favoritmu!</p>
+    <header class="auth-header">
+        <a href="../index.html" class="brand-name">
+            Explore Majaku
+        </a>
+    </header>
+
+    <main class="auth-wrapper">
+
+        <section class="auth-image-section">
+            <div class="image-overlay"></div>
+
+            <div class="image-content">
+                <h1>
+                    Jelajahi<br>
+                    majalengka dan<br>
+                    kuningan dengan<br>
+                    Mudah
+                </h1>
+
+                <p>
+                    Temukan Rekomendasi<br>
+                    Wisata dan jadikan wisata<br>
+                    favoritmu!
+                </p>
             </div>
-            
-            <div class="col-lg-6 d-flex flex-column justify-content-between p-4 p-md-5 bg-white">
-                <div><h4 class="text-center fw-serif fst-italic text-success mb-4">Explore Majaku</h4></div>
-                
-                <div class="w-100 mx-auto" style="max-width: 400px;">
-                    <h3 class="fw-bold mb-4 text-center">LOGIN</h3>
-                    <form id="loginForm" novalidate>
-                        <div class="mb-3">
-                            <label class="form-label text-muted small">Email atau No telepon</label>
-                            <input type="text" class="form-control py-2" id="loginEmailInput" placeholder="Masukkan Email atau No Telepon">
-                            <span id="loginEmailError" class="error-message"></span>
+        </section>
+
+        <section class="auth-form-section">
+            <div class="auth-form-container">
+
+                <h2 class="auth-title">LOGIN</h2>
+
+                <form
+                    id="loginForm"
+                    action="../../Backend/api/fungsi_login.php"
+                    data-api-url="../../Backend/api/fungsi_login.php"
+                    method="post"
+                    novalidate
+                >
+
+                    <div class="form-group">
+                        <label for="loginIdentity">
+                            Email atau Nomor Telepon
+                        </label>
+
+                        <input
+                            type="text"
+                            id="loginIdentity"
+                            name="identity"
+                            class="auth-input"
+                            placeholder="Masukkan email atau nomor telepon"
+                            autocomplete="username"
+                            maxlength="255"
+                            required
+                        >
+
+                        <div class="invalid-feedback">
+                            Email atau nomor telepon wajib diisi.
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted small">Password</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control py-2" id="loginPasswordInput" placeholder="Masukkan Password">
-                                <span class="input-group-text bg-white" id="toggleLoginPassword" style="cursor: pointer;"><i class="bi bi-eye" id="eyeLoginPass"></i></span>
-                            </div>
-                            <span id="loginPasswordError" class="error-message"></span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mb-4 small">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="remember">
-                                <label class="form-check-label" for="remember">Ingat Saya</label>
-                            </div>
-                            <a href="#" class="text-decoration-none text-muted">Lupa password?</a>
-                        </div>
-                        <button type="submit" class="btn btn-custom-primary w-100 py-2 mb-3">Login</button>
-                        
-                        <div class="text-center text-muted my-3 position-relative">
-                            <hr><span class="position-absolute top-50 start-50 translate-middle bg-white px-3 small">Atau</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+
+                        <div class="password-wrapper">
+                            <input
+                                type="password"
+                                id="loginPassword"
+                                name="password"
+                                class="auth-input"
+                                placeholder="Masukkan password kamu"
+                                autocomplete="current-password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                data-target="loginPassword"
+                                aria-label="Tampilkan password"
+                            >
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
                         </div>
 
-                        <!-- Endpoint API: GET /Backend/api/google_login.php -->
-                        <a href="/Backend/api/google_login.php" class="btn btn-outline-dark w-100 py-2 mb-4 d-flex align-items-center justify-content-center gap-2 text-decoration-none">
-                            <i class="bi bi-google text-danger"></i> Masuk dengan Google
+                        <div class="invalid-feedback">
+                            Password wajib diisi.
+                        </div>
+                    </div>
+
+                    <div class="login-options">
+                        <div class="remember-me">
+                            <input
+                                type="checkbox"
+                                id="rememberMe"
+                            >
+
+                            <label for="rememberMe">Ingat Saya</label>
+                        </div>
+
+                        <a href="#" class="forgot-password">
+                            Lupa Kata Sandi?
                         </a>
+                    </div>
 
-                        <p class="text-center small text-muted">
-                            Belum punya akun? <a href="register.html" class="text-success fw-bold text-decoration-none">REGISTER</a>
-                        </p>
-                    </form>
+                    <div
+                        id="loginMessage"
+                        class="alert alert-danger mt-3 d-none"
+                        role="alert"
+                        aria-live="polite"
+                    ></div>
+
+                    <button type="submit" class="auth-button">
+                        Login
+                    </button>
+
+                </form>
+
+                <div class="divider">
+                    <span></span>
+                    <p>Atau</p>
+                    <span></span>
                 </div>
-                <div></div>
+
+                <button
+                    type="button"
+                    class="social-button"
+                    id="googleLogin"
+                    data-api-url="../../Backend/api/google_login.php?intent=login"
+                >
+                    <span class="google-icon">
+                        <svg viewBox="0 0 24 24" width="28" height="28">
+                            <path fill="#4285F4" d="M21.35 12.27c0-.79-.07-1.55-.22-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.42z"/>
+                            <path fill="#34A853" d="M12 21.5c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.52A9.74 9.74 0 0 0 12 21.5z"/>
+                            <path fill="#FBBC05" d="M6.54 13.58A5.85 5.85 0 0 1 6.23 12c0-.55.1-1.09.31-1.58V7.9H3.3A9.74 9.74 0 0 0 2.25 12c0 1.57.38 3.05 1.05 4.1l3.24-2.52z"/>
+                            <path fill="#EA4335" d="M12 6.39c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.43 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.7 5.4l3.24 2.52C7.31 8.11 9.46 6.39 12 6.39z"/>
+                        </svg>
+                    </span>
+
+                    <span>Masuk dengan Google</span>
+                </button>
+
+                <div class="switch-auth">
+                    <span>Belum punya akun?</span>
+                    <a href="Register.php">REGISTER</a>
+                </div>
+
             </div>
-        </div>
+        </section>
+
+    </main>
+
+    <div
+        class="auth-success-modal"
+        id="authSuccessModal"
+        hidden
+    >
+        <section
+            class="auth-success-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="authSuccessTitle"
+            aria-describedby="authSuccessDescription"
+        >
+            <span class="auth-success-icon" aria-hidden="true"></span>
+            <h2 id="authSuccessTitle"></h2>
+            <p id="authSuccessDescription"></p>
+            <button type="button" class="auth-success-button" id="authSuccessConfirm">
+                OK
+            </button>
+        </section>
     </div>
 
-    <!-- Modal Sukses Login -->
-    <div class="modal fade" id="loginSuccessModal" tabindex="-1" data-bs-backdrop="static">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-4 text-center border-0 shadow-lg rounded-4">
-                <div class="modal-body">
-                    <div class="success-icon-box"><i class="bi bi-check-lg"></i></div>
-                    <h4 class="fw-bold text-success mb-3" style="color: #0d5c46 !important;">Login Berhasil!</h4>
-                    <p class="text-muted mb-4 small px-3">Selamat datang kembali di Explore Majaku</p>
-                    <button type="button" class="btn btn-custom-primary w-100 py-2 fw-medium" onclick="redirectToHome()">OK</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <script src="../Js/auth.js?v=auth-split-1"></script>
+    <script src="../Js/login.js?v=auth-split-1"></script>
+    <script src="../Js/api-endpoint-labels.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="login.js"></script>
 </body>
 </html>

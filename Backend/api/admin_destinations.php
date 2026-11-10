@@ -7,6 +7,9 @@ require_once __DIR__ . '/../middleware/auth.php'; // adminOnly()
 require_once __DIR__ . '/../database/koneksi.php';
 
 $method = $_SERVER['REQUEST_METHOD'] ?? '';
+if ($method === 'POST' && ($_POST['_method'] ?? '') === 'PUT') {
+    $method = 'PUT';
+}
 $adminPayload = adminOnly(); // ensure admin
 
 // Helper to send JSON response
@@ -19,10 +22,16 @@ function jsonResponse(array $data, int $status = 200): void {
 switch ($method) {
     case 'GET':
         // Filters: search, kabupaten, category, page
-        $search = $_GET['search'] ?? null;
-        $kabupaten = $_GET['kabupaten'] ?? null;
-        $category = $_GET['category'] ?? null;
-        $page = isset($_GET['page']) && ctype_digit($_GET['page']) ? (int)$_GET['page'] : 1;
+        $search = isset($_GET['search']) && is_string($_GET['search']) ? $_GET['search'] : null;
+        $kabupaten = isset($_GET['kabupaten']) && is_string($_GET['kabupaten']) ? $_GET['kabupaten'] : null;
+        $category = isset($_GET['category']) && is_string($_GET['category']) ? $_GET['category'] : null;
+        $id = $_GET['id'] ?? null;
+        $page = isset($_GET['page'])
+            && is_string($_GET['page'])
+            && ctype_digit($_GET['page'])
+            && (int) $_GET['page'] > 0
+            ? (int)$_GET['page']
+            : 1;
         $limit = 20;
         $offset = ($page - 1) * $limit;
 
@@ -44,9 +53,23 @@ switch ($method) {
             $params[] = (int)$category;
             $types .= 'i';
         }
+        if (is_string($id) && preg_match('/^[A-Za-z0-9_-]{1,16}$/', $id) === 1) {
+            $where[] = 'w.id_wisata = ?';
+            $params[] = $id;
+            $types .= 's';
+        }
         $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
-        $sql = "SELECT w.id_wisata, w.nama_wisata, w.gambar, w.maps_url, w.deskripsi, w.harga_tiket, w.domisili AS wilayah, w.alamat, w.jam_buka, w.jam_tutup, w.latitude, w.longitude, k.Id_kategori, k.nama_kategori, kb.id_kabupaten, kb.nama_kabupaten
+        $countStmt = $conn->prepare("SELECT COUNT(*) AS total FROM wisata w $whereSql");
+        if ($types !== '') {
+            $countStmt->bind_param($types, ...$params);
+        }
+        $countStmt->execute();
+        $total = (int) $countStmt->get_result()->fetch_assoc()['total'];
+
+        $sql = "SELECT w.id_wisata, w.nama_wisata, w.gambar, w.maps_url, w.deskripsi, w.harga_tiket, w.domisili AS wilayah, w.alamat, w.jam_buka, w.jam_tutup, w.latitude, w.longitude,
+                       (SELECT AVG(ul.rating) FROM ulasan ul WHERE ul.Id_wisata = w.id_wisata) AS rating,
+                       k.Id_kategori, k.nama_kategori, kb.id_kabupaten, kb.nama_kabupaten
                 FROM wisata w
                 LEFT JOIN kategori k ON k.Id_kategori = w.id_kategori
                 LEFT JOIN kabupaten kb ON kb.id_kabupaten = w.id_kabupaten
@@ -69,6 +92,7 @@ switch ($method) {
                 'maps_url' => $row['maps_url'],
                 'description' => $row['deskripsi'],
                 'price' => $row['harga_tiket'] !== null ? (float) $row['harga_tiket'] : null,
+                'rating' => $row['rating'] !== null ? (float) $row['rating'] : null,
                 'region' => $row['wilayah'],
                 'address' => $row['alamat'],
                 'open_time' => $row['jam_buka'],
@@ -85,7 +109,13 @@ switch ($method) {
                 ] : null,
             ];
         }
-        jsonResponse(['status' => 'success', 'data' => $destinations]);
+        jsonResponse([
+            'status' => 'success',
+            'data' => $destinations,
+            'total' => $total,
+            'page' => $page,
+            'per_page' => $limit,
+        ]);
         break;
 
     case 'POST':
@@ -111,8 +141,8 @@ switch ($method) {
             jsonResponse(['status' => 'error', 'message' => 'Gambar wajib diunggah.'], 400);
         }
         $file = $_FILES['image'];
-        if ($file['size'] > 2 * 1024 * 1024) { // 2MB
-            jsonResponse(['status' => 'error', 'message' => 'Ukuran file gambar melebihi 2MB.'], 400);
+        if ($file['size'] > 10 * 1024 * 1024) {
+            jsonResponse(['status' => 'error', 'message' => 'Ukuran file gambar melebihi 10MB.'], 400);
         }
         $allowed = ['image/jpeg' => '.jpg', 'image/png' => '.png'];
         $mime = mime_content_type($file['tmp_name']);
@@ -129,22 +159,22 @@ switch ($method) {
             jsonResponse(['status' => 'error', 'message' => 'Gagal menyimpan file gambar.'], 500);
         }
         // Insert record
-        $stmt = $conn->prepare('INSERT INTO wisata (nama_wisata, id_kategori, id_kabupaten, gambar, maps_url, deskripsi, harga_tiket, alamat, jam_buka, jam_tutup, latitude, longitude, aktif) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)');
-        $stmt->bind_param('siisssddssddi', $name, $categoryId, $kabupatenId, $filename, $mapsUrl, $description, $price, $address, $openTime, $closeTime, $latitude, $longitude);
+        $newId = 'DEST' . strtoupper(bin2hex(random_bytes(6)));
+        $stmt = $conn->prepare('INSERT INTO wisata (id_wisata, nama_wisata, id_kategori, id_kabupaten, gambar, maps_url, deskripsi, harga_tiket, alamat, jam_buka, jam_tutup, latitude, longitude, aktif) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)');
+        $stmt->bind_param('ssiisssdsssdd', $newId, $name, $categoryId, $kabupatenId, $filename, $mapsUrl, $description, $price, $address, $openTime, $closeTime, $latitude, $longitude);
         $stmt->execute();
-        $newId = $stmt->insert_id;
         jsonResponse(['status' => 'success', 'message' => 'Destinasi berhasil dibuat.', 'data' => ['id' => (string) $newId]], 201);
         break;
 
     case 'PUT':
         // Expect id in query string
         $id = $_GET['id'] ?? null;
-        if (!$id || !ctype_digit((string)$id)) {
+        if (!is_string($id) || preg_match('/^[A-Za-z0-9_-]{1,16}$/', $id) !== 1) {
             jsonResponse(['status' => 'error', 'message' => 'ID destinasi tidak valid.'], 400);
         }
         // Fetch existing record for image handling
         $sel = $conn->prepare('SELECT gambar FROM wisata WHERE id_wisata = ?');
-        $sel->bind_param('i', $id);
+        $sel->bind_param('s', $id);
         $sel->execute();
         $sel->bind_result($oldImage);
         if (!$sel->fetch()) {
@@ -177,8 +207,8 @@ switch ($method) {
         // Handle image replacement if a file is uploaded
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES['image'];
-            if ($file['size'] > 2 * 1024 * 1024) {
-                jsonResponse(['status' => 'error', 'message' => 'Ukuran file gambar melebihi 2MB.'], 400);
+            if ($file['size'] > 10 * 1024 * 1024) {
+                jsonResponse(['status' => 'error', 'message' => 'Ukuran file gambar melebihi 10MB.'], 400);
             }
             $allowed = ['image/jpeg' => '.jpg', 'image/png' => '.png'];
             $mime = mime_content_type($file['tmp_name']);
@@ -203,8 +233,8 @@ switch ($method) {
         if (empty($fields)) {
             jsonResponse(['status' => 'error', 'message' => 'Tidak ada data yang diberikan untuk diubah.'], 400);
         }
-        $params[] = $id; // for WHERE
-        $types .= 'i';
+        $params[] = (string) $id; // for WHERE
+        $types .= 's';
         $sql = 'UPDATE wisata SET ' . implode(', ', $fields) . ' WHERE id_wisata = ?';
         $stmt = $conn->prepare($sql);
         $stmt->bind_param($types, ...$params);
@@ -214,12 +244,12 @@ switch ($method) {
 
     case 'DELETE':
         $id = $_GET['id'] ?? null;
-        if (!$id || !ctype_digit((string)$id)) {
+        if (!is_string($id) || preg_match('/^[A-Za-z0-9_-]{1,16}$/', $id) !== 1) {
             jsonResponse(['status' => 'error', 'message' => 'ID destinasi tidak valid.'], 400);
         }
         // Retrieve image filename for deletion
         $sel = $conn->prepare('SELECT gambar FROM wisata WHERE id_wisata = ?');
-        $sel->bind_param('i', $id);
+        $sel->bind_param('s', $id);
         $sel->execute();
         $sel->bind_result($oldImage);
         if (!$sel->fetch()) {
@@ -228,7 +258,7 @@ switch ($method) {
         $sel->close();
         // Delete record
         $del = $conn->prepare('DELETE FROM wisata WHERE id_wisata = ?');
-        $del->bind_param('i', $id);
+        $del->bind_param('s', $id);
         $del->execute();
         // Delete image file if exists
         $uploadDir = __DIR__ . '/../../uploads/';
@@ -244,4 +274,3 @@ switch ($method) {
         jsonResponse(['status' => 'error', 'message' => 'Metode tidak diizinkan.']);
 }
 ?>
-
