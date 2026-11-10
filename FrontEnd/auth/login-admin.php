@@ -7,7 +7,7 @@ $appBasePath = $frontEndPosition !== false
     : rtrim(dirname(dirname($scriptPath)), '/.');
 $apiLoginUrl = $appBasePath . '/api/admin/login';
 $loginUrl = $appBasePath . '/FrontEnd/auth/login-admin.php';
-$adminDataWisataUrl = $appBasePath . '/FrontEnd/admin/data-wisata.php';
+$dashboardUrl = $appBasePath . '/FrontEnd/admin/admin-dashboard.php';
 $forgotPasswordUrl = '#';
 $homeUrl = $appBasePath . '/index.php';
 $isUnauthorized = ($_GET['status'] ?? '') === '401';
@@ -15,7 +15,7 @@ $pageTitle = $isUnauthorized ? 'Akses Ditolak' : 'Login Admin';
 
 $clientConfig = [
     'apiLoginUrl' => $apiLoginUrl,
-    'adminDataWisataUrl' => $adminDataWisataUrl,
+    'dashboardUrl' => $dashboardUrl,
 ];
 
 function e(string $value): string
@@ -182,11 +182,10 @@ function e(string $value): string
         const COOKIE_MAX_AGE = 60 * 60 * 24;
 
         const MESSAGES = {
-            usernameRequired: 'Username wajib diisi.',
-            passwordRequired: 'Password wajib diisi.',
-            usernameInvalid: 'Username yang Anda masukkan salah.',
-            passwordInvalid: 'Password yang Anda masukkan salah.',
-            credentialsInvalid: 'Username atau password yang Anda masukkan salah.',
+            usernameRequired: 'Username wajib di isi',
+            passwordRequired: 'Password wajib di isi',
+            usernameInvalid: 'Username yang anda masukkan salah',
+            passwordInvalid: 'Password yang anda masukkan salah',
             requestFailed: 'Login tidak dapat diproses. Silakan coba lagi.',
             connectionFailed: 'Tidak dapat terhubung ke server. Silakan coba lagi.',
             tokenMissing: 'Token login tidak diterima. Silakan coba lagi.',
@@ -390,9 +389,9 @@ function e(string $value): string
 
             setState({
                 isLoading: false,
-                errorMessage: MESSAGES.credentialsInvalid,
-                usernameError: '',
-                passwordError: ''
+                errorMessage: '',
+                usernameError: MESSAGES.usernameInvalid,
+                passwordError: MESSAGES.passwordInvalid
             });
         }
 
@@ -473,7 +472,7 @@ function e(string $value): string
                         setState({ isLoading: false, errorMessage: MESSAGES.storageFailed });
                         return;
                     }
-                    window.location.href = config.adminDataWisataUrl;
+                    window.location.href = config.dashboardUrl;
                     return;
                 }
 
