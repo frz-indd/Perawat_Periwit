@@ -21,6 +21,8 @@ tags:
   - name: Destinasi
   - name: Ulasan
   - name: Favorit
+  - name: Admin
+  - name: Fasilitas
 paths:
   /Backend/api/fungsi_login.php:
     post:
@@ -414,6 +416,139 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
+  /api/admin/dashboard/summary:
+    get:
+      tags: [Admin]
+      summary: Ringkasan statistik dashboard admin
+      description: Menghitung total wisata, kategori, pengguna, dan ulasan melalui agregasi database.
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          description: Ringkasan statistik dashboard.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data:
+                    type: object
+                    properties:
+                      total_wisata: { type: integer, example: 12 }
+                      total_kategori: { type: integer, example: 4 }
+                      total_pengguna: { type: integer, example: 25 }
+                      total_ulasan: { type: integer, example: 31 }
+        '403': { description: Token admin tidak valid atau akses ditolak. }
+        '500': { $ref: '#/components/responses/ServerError' }
+  /api/admin/reviews:
+    get:
+      tags: [Admin, Ulasan]
+      summary: Daftar seluruh ulasan untuk admin
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200': { description: Daftar ulasan dengan nama pengguna dan wisata. }
+        '403': { description: Token admin tidak valid atau akses ditolak. }
+  /api/admin/reviews/{id}:
+    get:
+      tags: [Admin, Ulasan]
+      summary: Detail ulasan
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200': { description: Detail ulasan. }
+        '403': { description: Token admin tidak valid atau akses ditolak. }
+        '404': { description: Ulasan tidak ditemukan. }
+    delete:
+      tags: [Admin, Ulasan]
+      summary: Hapus ulasan
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200': { description: Ulasan berhasil dihapus dan rating wisata dihitung ulang. }
+        '403': { description: Token admin tidak valid atau akses ditolak. }
+        '404': { description: Ulasan tidak ditemukan. }
+  /api/admin/facilities:
+    get:
+      tags: [Admin, Fasilitas]
+      summary: Daftar master fasilitas
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          description: Daftar fasilitas.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Facility' }
+        '403': { description: Token admin tidak valid atau akses ditolak. }
+    post:
+      tags: [Admin, Fasilitas]
+      summary: Tambah master fasilitas
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FacilityInput' }
+      responses:
+        '201': { description: Fasilitas berhasil ditambahkan. }
+        '422': { description: Nama fasilitas duplikat atau input tidak valid. }
+        '403': { description: Token admin tidak valid atau akses ditolak. }
+  /api/admin/facilities/{id}:
+    get:
+      tags: [Admin, Fasilitas]
+      summary: Detail master fasilitas
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200': { description: Detail fasilitas. }
+        '404': { description: Fasilitas tidak ditemukan. }
+    put:
+      tags: [Admin, Fasilitas]
+      summary: Perbarui master fasilitas
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FacilityInput' }
+      responses:
+        '200': { description: Fasilitas berhasil diperbarui. }
+        '422': { description: Nama fasilitas duplikat atau input tidak valid. }
+        '404': { description: Fasilitas tidak ditemukan. }
+    delete:
+      tags: [Admin, Fasilitas]
+      summary: Hapus master fasilitas
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200': { description: Fasilitas berhasil dihapus. }
+        '404': { description: Fasilitas tidak ditemukan. }
+
   /api/destinations/search:
     get:
       tags: [Destinasi]
@@ -689,6 +824,11 @@ paths:
 
 components:
   securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT admin dari endpoint login admin.
     PhpSession:
       type: apiKey
       in: cookie
@@ -814,6 +954,19 @@ components:
         latitude: { type: number, nullable: true, minimum: -90, maximum: 90 }
         longitude: { type: number, nullable: true, minimum: -180, maximum: 180 }
         koordinat_lengkap: { type: boolean }
+    FacilityInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 150 }
+        icon_code: { type: string, nullable: true, maxLength: 100 }
+        description: { type: string, nullable: true }
+    Facility:
+      allOf:
+        - $ref: '#/components/schemas/FacilityInput'
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
     Tourism:
       type: object
       properties:
