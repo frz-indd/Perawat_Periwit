@@ -32,7 +32,13 @@ switch ($method) {
             && (int) $_GET['page'] > 0
             ? (int)$_GET['page']
             : 1;
-        $limit = 20;
+        $requestedLimit = isset($_GET['per_page'])
+            && is_string($_GET['per_page'])
+            && ctype_digit($_GET['per_page'])
+            && (int) $_GET['per_page'] > 0
+            ? (int) $_GET['per_page']
+            : 20;
+        $limit = min($requestedLimit, 100);
         $offset = ($page - 1) * $limit;
 
         $where = [];

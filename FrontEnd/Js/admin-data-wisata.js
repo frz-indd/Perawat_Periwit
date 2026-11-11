@@ -3,7 +3,7 @@
 
     const config = window.adminWisataConfig;
     const tokenKey = 'admin_token';
-    const pageSize = 20;
+    const pageSize = 5;
     const elements = {
         rows: document.getElementById('destinationRows'),
         summary: document.getElementById('resultSummary'),
@@ -12,14 +12,14 @@
         searchButton: document.getElementById('searchButton'),
         region: document.getElementById('regionFilter'),
         category: document.getElementById('categoryFilter'),
-        previous: document.getElementById('previousPage'),
-        next: document.getElementById('nextPage'),
+        pagination: document.getElementById('paginationLinks'),
         deleteButton: document.getElementById('confirmDeleteButton'),
         sidebar: document.getElementById('adminSidebar'),
         backdrop: document.getElementById('sidebarBackdrop')
     };
     const state = {
         page: 1,
+        pageSize: pageSize,
         count: 0,
         total: 0,
         deleteId: null,
@@ -117,7 +117,7 @@
         }
 
         elements.rows.innerHTML = destinations.map(function (item, index) {
-            const rowNumber = (state.page - 1) * pageSize + index + 1;
+            const rowNumber = (state.page - 1) * state.pageSize + index + 1;
             const photo = imageUrl(item.image);
             const mapsUrl = item.maps_url && /^https?:\/\//i.test(item.maps_url)
                 ? item.maps_url
@@ -149,10 +149,38 @@
     }
 
     function updatePagination() {
-        elements.previous.disabled = state.page <= 1;
-        elements.next.disabled = state.count < pageSize || state.page * pageSize >= state.total;
-        const first = state.count ? ((state.page - 1) * pageSize) + 1 : 0;
-        const last = ((state.page - 1) * pageSize) + state.count;
+        const totalPages = Math.ceil(state.total / state.pageSize);
+        const pages = [];
+        for (let page = 1; page <= totalPages; page += 1) {
+            if (page === 1 || page === totalPages || Math.abs(page - state.page) <= 1) {
+                pages.push(page);
+            }
+        }
+
+        const links = [];
+        let previousPage = 0;
+        pages.forEach(function (page) {
+            if (previousPage && page - previousPage > 1) {
+                links.push('<li class="page-item page-item-ellipsis"><span class="page-link">...</span></li>');
+            }
+            const isCurrent = page === state.page;
+            links.push('<li class="page-item' + (isCurrent ? ' active' : '') + '"' + (isCurrent ? ' aria-current="page"' : '') + '>'
+                + '<button class="page-link" type="button" data-page="' + page + '" aria-label="Halaman ' + page + '"' + (isCurrent ? ' aria-current="page"' : '') + '>' + page + '</button>'
+                + '</li>');
+            previousPage = page;
+        });
+
+        const previousDisabled = state.page <= 1;
+        const nextDisabled = state.page >= totalPages;
+        elements.pagination.innerHTML = '<li class="page-item' + (previousDisabled ? ' disabled' : '') + '">'
+            + '<button class="page-link" type="button" data-page="' + (state.page - 1) + '" aria-label="Halaman sebelumnya"' + (previousDisabled ? ' disabled' : '') + '><i class="bi bi-chevron-left"></i></button>'
+            + '</li>' + links.join('')
+            + '<li class="page-item' + (nextDisabled ? ' disabled' : '') + '">'
+            + '<button class="page-link" type="button" data-page="' + (state.page + 1) + '" aria-label="Halaman berikutnya"' + (nextDisabled ? ' disabled' : '') + '><i class="bi bi-chevron-right"></i></button>'
+            + '</li>';
+
+        const first = state.count ? ((state.page - 1) * state.pageSize) + 1 : 0;
+        const last = ((state.page - 1) * state.pageSize) + state.count;
         elements.summary.textContent = 'Menampilkan ' + first + '-' + last + ' dari ' + state.total + ' wisata';
     }
 
@@ -161,6 +189,7 @@
         elements.message.classList.add('d-none');
         const params = new URLSearchParams({
             page: String(state.page),
+            per_page: String(pageSize),
             search: elements.search.value.trim(),
             kabupaten: elements.region.value,
             category: elements.category.value
@@ -171,6 +200,7 @@
             const destinations = Array.isArray(payload.data) ? payload.data : [];
             state.count = destinations.length;
             state.total = Number(payload.total);
+            state.pageSize = Number(payload.per_page) || pageSize;
             if (!Number.isFinite(state.total)) {
                 state.total = destinations.length;
             }
@@ -223,15 +253,12 @@
         state.page = 1;
         loadDestinations();
     });
-    elements.previous.addEventListener('click', function () {
-        if (state.page > 1) {
-            state.page -= 1;
-            loadDestinations();
-        }
-    });
-    elements.next.addEventListener('click', function () {
-        if (!elements.next.disabled) {
-            state.page += 1;
+    elements.pagination.addEventListener('click', function (event) {
+        const button = event.target.closest('button[data-page]');
+        if (!button || button.disabled) return;
+        const page = Number(button.getAttribute('data-page'));
+        if (Number.isInteger(page) && page > 0 && page !== state.page) {
+            state.page = page;
             loadDestinations();
         }
     });

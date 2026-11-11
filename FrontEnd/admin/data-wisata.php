@@ -33,7 +33,7 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet">
-    <link href="../CSS/admin-data-wisata.css?v=1" rel="stylesheet">
+    <link href="../CSS/admin-data-wisata.css?v=2" rel="stylesheet">
 </head>
 <body class="admin-wisata-page">
     <aside class="admin-sidebar" id="adminSidebar">
@@ -59,6 +59,10 @@ function e(string $value): string
         <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="Buka navigasi"><i class="bi bi-list"></i></button>
         <span class="admin-mobile-brand">Explore Majaku</span>
         <button class="mobile-logout-button" id="mobileLogoutButton" type="button" aria-label="Logout"><i class="bi bi-box-arrow-right"></i></button>
+    </header>
+
+    <header class="admin-topbar">
+        <span><i class="bi bi-person-circle" aria-hidden="true"></i> Admin 1</span>
     </header>
 
     <main class="admin-main">
@@ -111,9 +115,10 @@ function e(string $value): string
             <div class="admin-table-footer">
                 <p id="resultSummary" class="mb-0" aria-live="polite"></p>
                 <nav aria-label="Halaman data wisata">
-                    <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item"><button id="previousPage" class="page-link" type="button" aria-label="Halaman sebelumnya"><i class="bi bi-chevron-left"></i></button></li>
-                        <li class="page-item"><button id="nextPage" class="page-link" type="button" aria-label="Halaman berikutnya"><i class="bi bi-chevron-right"></i></button></li>
+                    <ul id="paginationLinks" class="pagination pagination-sm mb-0">
+                        <li class="page-item disabled"><button class="page-link" type="button" aria-label="Halaman sebelumnya" disabled><i class="bi bi-chevron-left"></i></button></li>
+                        <li class="page-item active" aria-current="page"><button class="page-link" type="button">1</button></li>
+                        <li class="page-item disabled"><button class="page-link" type="button" aria-label="Halaman berikutnya" disabled><i class="bi bi-chevron-right"></i></button></li>
                     </ul>
                 </nav>
             </div>
@@ -141,6 +146,6 @@ function e(string $value): string
         window.adminWisataConfig = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../Js/admin-data-wisata.js?v=1"></script>
+    <script src="../Js/admin-data-wisata.js?v=2"></script>
 </body>
 </html>
