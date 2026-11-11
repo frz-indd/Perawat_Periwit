@@ -24,6 +24,9 @@
         title: document.getElementById('formTitle')
     };
     let previewUrl = '';
+    if (new URLSearchParams(window.location.search).has('id')) {
+        elements.form.dataset.apiMethod = 'PUT';
+    }
 
     function getToken() {
         try {

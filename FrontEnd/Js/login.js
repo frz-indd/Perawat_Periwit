@@ -3,7 +3,28 @@ const loginForm = document.getElementById('loginForm');
 if (loginForm) {
     const identity = document.getElementById('loginIdentity');
     const password = document.getElementById('loginPassword');
+    const rememberMe = document.getElementById('rememberMe');
     const message = document.getElementById('loginMessage');
+    const REMEMBER_IDENTITY_KEY = 'explore_majaku_last_login_identity_v1';
+
+    // Identitas login hanya disimpan di profil browser/perangkat ini, bukan di database.
+    try {
+        const rememberedIdentity = window.localStorage.getItem(REMEMBER_IDENTITY_KEY);
+        if (rememberedIdentity && identity) {
+            identity.value = rememberedIdentity;
+            if (rememberMe) rememberMe.checked = true;
+        }
+    } catch (storageError) {
+        console.warn('Penyimpanan identitas login tidak tersedia di browser ini.');
+    }
+
+    if (rememberMe) {
+        rememberMe.addEventListener('change', function () {
+            if (!rememberMe.checked) {
+                try { window.localStorage.removeItem(REMEMBER_IDENTITY_KEY); } catch (storageError) {}
+            }
+        });
+    }
     const submitButton = loginForm.querySelector('[type="submit"]');
     const submitLabel = submitButton.textContent.trim();
     const identityFeedback = identity
@@ -92,6 +113,16 @@ if (loginForm) {
             const result = await Auth.sendForm(loginForm);
 
             if (result.status === 'success') {
+                try {
+                    if (rememberMe && rememberMe.checked) {
+                        window.localStorage.setItem(REMEMBER_IDENTITY_KEY, identityValue);
+                    } else {
+                        window.localStorage.removeItem(REMEMBER_IDENTITY_KEY);
+                    }
+                } catch (storageError) {
+                    console.warn('Identitas login tidak dapat disimpan pada browser ini.');
+                }
+
                 Auth.showSuccessModal(
                     'Login Berhasil!',
                     'Selamat datang kembali di Explore MajaKu',

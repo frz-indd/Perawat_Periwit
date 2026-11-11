@@ -137,34 +137,6 @@ $sql = "SELECT $selectClause
             }
             $destinations[] = $item;
         }
-            $destinations[] = [
-                'id' => is_numeric($row['id_wisata']) ? (int)$row['id_wisata'] : (string)$row['id_wisata'],
-                'name' => $row['nama_wisata'],
-                'kabupaten' => $row['nama_kabupaten'] ?? ($row['wilayah'] ?? ''),
-                'category' => $row['nama_kategori'] ?? '',
-                'price' => $row['harga_tiket'] !== null ? (float) $row['harga_tiket'] : 0,
-                'rating' => $row['rating'] !== null ? round((float) $row['rating'], 1) : 0.0,
-                'maps_url' => $row['maps_url'] ?? '',
-                'image_url' => !empty($row['gambar']) ? '/uploads/' . ltrim($row['gambar'], '/') : '',
-                'image' => $row['gambar'],
-                // Conditionally include description only when not searching
-                // description omitted to avoid unrelated data in search results
-                'region' => $row['wilayah'],
-                'address' => $row['alamat'],
-                'open_time' => $row['jam_buka'],
-                'close_time' => $row['jam_tutup'],
-                'latitude' => $row['latitude'] !== null ? (float) $row['latitude'] : null,
-                'longitude' => $row['longitude'] !== null ? (float) $row['longitude'] : null,
-                'category_detail' => $row['Id_kategori'] ? [
-                    'id' => (int) $row['Id_kategori'],
-                    'name' => $row['nama_kategori']
-                ] : null,
-                'kabupaten_detail' => $row['id_kabupaten'] ? [
-                    'id' => (int) $row['id_kabupaten'],
-                    'name' => $row['nama_kabupaten']
-                ] : null,
-            ];
-        }
         $totalPage = $limit > 0 ? (int) ceil($total / $limit) : 1;
         jsonResponse([
             'status' => 'success',

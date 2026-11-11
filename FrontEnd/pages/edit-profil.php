@@ -1,4 +1,6 @@
 <?php
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 session_start();
 require_once __DIR__ . '/navbar-profile-session.php';
 
@@ -777,5 +779,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       if (aksi) aksi.focus();
     })();
   </script>
+<script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

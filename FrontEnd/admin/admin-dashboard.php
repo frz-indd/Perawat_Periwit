@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 $scriptPath = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
 $frontEndPosition = strpos($scriptPath, '/FrontEnd/');
@@ -9,9 +11,11 @@ $appBasePath = $frontEndPosition !== false
 
 $pageConfig = [
     'apiDashboardUrl' => $appBasePath . '/api/admin/dashboard',
+    'apiLogoutUrl' => $appBasePath . '/api/admin/logout',
     'apiSummaryUrl' => $appBasePath . '/api/admin/dashboard/summary',
     'loginUrl' => $appBasePath . '/FrontEnd/auth/login-admin.php',
     'homeUrl' => $appBasePath . '/index.php',
+    'appBasePath' => $appBasePath,
 ];
 
 function e(string $value): string
@@ -30,8 +34,8 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet">
-    <link href="../CSS/admin-data-wisata.css?v=1" rel="stylesheet">
-    <link href="../CSS/admin-dashboard.css?v=1" rel="stylesheet">
+    <link href="../CSS/admin-data-wisata.css?v=20261111-3" rel="stylesheet">
+    <link href="../CSS/admin-dashboard.css?v=20261111-3" rel="stylesheet">
     <style>
         .admin-route-pending .admin-sidebar,
         .admin-route-pending .admin-mobile-bar,
@@ -72,21 +76,21 @@ function e(string $value): string
         <nav class="admin-nav" aria-label="Navigasi admin">
             <a class="admin-nav__item is-active" href="admin-dashboard.php" aria-current="page"><i class="bi bi-house-door"></i><span>Dashboard</span></a>
             <a class="admin-nav__item" href="data-wisata.php"><i class="bi bi-bar-chart-fill"></i><span>Data Wisata</span></a>
-            <a class="admin-nav__item is-disabled" href="#" aria-disabled="true"><i class="bi bi-grid-fill"></i><span>Kategori</span></a>
-            <a class="admin-nav__item is-disabled" href="#" aria-disabled="true"><i class="bi bi-star-fill"></i><span>Fasilitas</span></a>
-            <a class="admin-nav__item is-disabled" href="#" aria-disabled="true"><i class="bi bi-chat-square-text"></i><span>Ulasan</span></a>
-            <a class="admin-nav__item is-disabled" href="#" aria-disabled="true"><i class="bi bi-people"></i><span>Pengguna</span></a>
+            <a class="admin-nav__item" href="admin-resource.php?section=kategori"><i class="bi bi-grid-fill"></i><span>Kategori</span></a>
+            <a class="admin-nav__item" href="admin-resource.php?section=fasilitas"><i class="bi bi-star-fill"></i><span>Fasilitas</span></a>
+            <a class="admin-nav__item" href="admin-resource.php?section=ulasan"><i class="bi bi-chat-square-text"></i><span>Ulasan</span></a>
+            <a class="admin-nav__item" href="admin-resource.php?section=pengguna"><i class="bi bi-people"></i><span>Pengguna</span></a>
         </nav>
         <div class="admin-sidebar__bottom">
-            <a class="admin-nav__item is-disabled" href="#" aria-disabled="true"><i class="bi bi-person-circle"></i><span>Profil admin</span></a>
-            <button class="admin-nav__item admin-logout" id="logoutButton" type="button"><i class="bi bi-box-arrow-right"></i><span>Logout</span></button>
+            <a class="admin-nav__item" href="admin-resource.php?section=profil"><i class="bi bi-person-circle"></i><span>Profil admin</span></a>
+            <button class="admin-nav__item admin-logout" id="logoutButton" type="button" data-api-url="<?= e($pageConfig['apiLogoutUrl']) ?>" data-api-method="POST"><i class="bi bi-box-arrow-right"></i><span>Logout</span></button>
         </div>
     </aside>
 
     <header class="admin-mobile-bar">
         <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="Buka navigasi"><i class="bi bi-list"></i></button>
         <span class="admin-mobile-brand">Explore Majaku</span>
-        <button class="mobile-logout-button" id="mobileLogoutButton" type="button" aria-label="Logout"><i class="bi bi-box-arrow-right"></i></button>
+        <button class="mobile-logout-button" id="mobileLogoutButton" type="button" data-api-url="<?= e($pageConfig['apiLogoutUrl']) ?>" data-api-method="POST" aria-label="Logout"><i class="bi bi-box-arrow-right"></i></button>
     </header>
 
     <main class="admin-main" aria-label="Konten dashboard admin">
@@ -112,6 +116,16 @@ function e(string $value): string
                 </div>
                 <p class="dashboard-summary__message" id="summaryMessage" role="status">Memuat ringkasan dashboard...</p>
             </section>
+
+            <section class="dashboard-recent" aria-labelledby="recentTitle">
+                <div class="dashboard-recent__heading"><h2 id="recentTitle">Wisata Terbaru</h2><a href="data-wisata.php">Lihat semua <i class="bi bi-arrow-right"></i></a></div>
+                <div class="table-responsive dashboard-recent__table-wrap">
+                    <table class="table dashboard-recent__table align-middle mb-0">
+                        <thead><tr><th>Foto</th><th>Nama wisata</th><th>Wilayah</th><th>Kategori</th><th>Ditambahkan pada tanggal</th></tr></thead>
+                        <tbody id="recentDestinationRows"><tr><td colspan="5" class="dashboard-recent__state">Memuat wisata terbaru...</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -121,7 +135,9 @@ function e(string $value): string
     (function () {
         'use strict';
 
+        // Konfigurasi URL API dan halaman login
         const config = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+
         const tokenKey = 'admin_token';
 
         function readStorage(storageName) {
@@ -186,6 +202,25 @@ function e(string $value): string
             element.classList.toggle('is-error', Boolean(isError));
         }
 
+        function renderRecentDestinations(items) {
+            const tbody = document.getElementById('recentDestinationRows');
+            if (!items.length) {
+                tbody.innerHTML = '<tr><td colspan="5" class="dashboard-recent__state">Belum ada data wisata.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = items.map(function (item) {
+                const photoUrl = item.foto && !/^https?:\/\//i.test(item.foto) ? config.appBasePath + '/' + String(item.foto).replace(/^\/+/, '') : item.foto;
+                const photo = photoUrl ? '<img src="' + escapeHtml(photoUrl) + '" alt="Foto ' + escapeHtml(item.nama_wisata) + '" loading="lazy">' : '<span class="dashboard-recent__no-photo"><i class="bi bi-image"></i></span>';
+                return '<tr><td class="dashboard-recent__photo">' + photo + '</td><td>' + escapeHtml(item.nama_wisata || '-') + '</td><td>' + escapeHtml(item.wilayah || '-') + '</td><td>' + escapeHtml(item.kategori || '-') + '</td><td>' + escapeHtml(item.tanggal_ditambahkan || '-') + '</td></tr>';
+            }).join('');
+        }
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, function (char) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char];
+            });
+        }
+
         async function loadSummary(token) {
             const metrics = document.getElementById('dashboardMetrics');
             metrics.setAttribute('aria-busy', 'true');
@@ -212,9 +247,13 @@ function e(string $value): string
                     document.querySelector('[data-metric="' + key + '"]').textContent =
                         new Intl.NumberFormat('id-ID').format(value);
                 });
-                setSummaryMessage('Ringkasan berhasil diperbarui.', false);
+                renderRecentDestinations(Array.isArray(payload.data.wisata_terbaru) ? payload.data.wisata_terbaru : []);
+                setSummaryMessage('', false);
             } catch (error) {
-                setSummaryMessage(error.message || 'Tidak dapat memuat ringkasan dashboard.', true);
+                const message = error.message || 'Tidak dapat memuat ringkasan dashboard.';
+                setSummaryMessage(message, true);
+                const tbody = document.getElementById('recentDestinationRows');
+                tbody.innerHTML = '<tr><td colspan="5" class="dashboard-recent__state dashboard-recent__state--error">Data wisata belum dapat dimuat. Periksa API dan koneksi database.</td></tr>';
             } finally {
                 metrics.setAttribute('aria-busy', 'false');
             }
@@ -259,9 +298,21 @@ function e(string $value): string
             }
         }
 
-        function logout() {
-            clearToken();
-            redirectToLogin(false);
+        async function logout() {
+            const token = getToken();
+            try {
+                if (token) {
+                    await fetch(config.apiLogoutUrl, {
+                        method: 'POST', credentials: 'same-origin',
+                        headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
+                    });
+                }
+            } catch (error) {
+                // Token tetap dibersihkan lokal; token server akan tetap kedaluwarsa sesuai exp.
+            } finally {
+                clearToken();
+                redirectToLogin(false);
+            }
         }
 
         function setMobileSidebar(open) {
@@ -295,5 +346,6 @@ function e(string $value): string
         protectRoute(token);
     })();
     </script>
+<script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

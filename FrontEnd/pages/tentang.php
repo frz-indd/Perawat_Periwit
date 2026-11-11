@@ -196,5 +196,6 @@ require_once __DIR__ . '/navbar-profile-session.php';
             });
         })();
     </script>
+<script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

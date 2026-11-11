@@ -268,9 +268,20 @@
 
     document.getElementById('logoutButton').addEventListener('click', logout);
     document.getElementById('mobileLogoutButton').addEventListener('click', logout);
-    function logout() {
-        clearToken();
-        window.location.replace(config.loginUrl);
+    async function logout() {
+        try {
+            if (token) {
+                await fetch(config.apiLogoutUrl, {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
+                });
+            }
+        } catch (error) {
+            // Tetap bersihkan token lokal; token server akan kedaluwarsa sesuai exp.
+        } finally {
+            clearToken();
+            window.location.replace(config.loginUrl);
+        }
     }
 
     document.getElementById('sidebarCollapse').addEventListener('click', function () {

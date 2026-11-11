@@ -89,7 +89,14 @@ try {
     }
 
     $id = (int)$admin['id'];
+    $expiresAt = time() + 86400;
     $token = generateJwt(['id' => $id, 'sub' => $id, 'username' => (string)$admin['username'], 'role' => 'admin'], 86400);
+    // Migrasi admin_sessions wajib diterapkan agar logout dapat mencabut JWT di server.
+    $tokenHash = hash('sha256', $token);
+    $sessionInsert = $conn->prepare('INSERT INTO admin_sessions (admin_id, token_hash, expires_at) VALUES (?, ?, FROM_UNIXTIME(?))');
+    $sessionInsert->bind_param('isi', $id, $tokenHash, $expiresAt);
+    $sessionInsert->execute();
+    $sessionInsert->close();
     $respond(200, [
         'status' => 'success', 'message' => 'Login berhasil.', 'token' => $token,
         'user' => ['id' => $id, 'name' => (string)($admin['name'] ?? $admin['username']), 'email' => (string)($admin['email'] ?? ''), 'username' => (string)$admin['username'], 'role' => 'admin']

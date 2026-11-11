@@ -1,5 +1,7 @@
 <?php
 $appName = 'Explore Majaku';
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 $scriptPath = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
 $frontEndPosition = strpos($scriptPath, '/FrontEnd/');
 $appBasePath = $frontEndPosition !== false
@@ -15,6 +17,7 @@ $pageTitle = $isUnauthorized ? 'Akses Ditolak' : 'Login Admin';
 
 $clientConfig = [
     'apiLoginUrl' => $apiLoginUrl,
+    'apiLogoutUrl' => $appBasePath . '/api/admin/logout',
     'dashboardUrl' => $dashboardUrl,
 ];
 
@@ -85,7 +88,7 @@ function e(string $value): string
 
             <h1 class="login-card__title" id="loginTitle">LOGIN ADMIN</h1>
 
-            <form id="loginForm" method="post" novalidate>
+            <form id="loginForm" method="post" novalidate data-api-url="<?= e($apiLoginUrl) ?>" data-api-method="POST">
 
                 <div class="field field--username">
                     <label class="field__label" for="username">Username</label>
@@ -148,7 +151,7 @@ function e(string $value): string
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn-login" id="submitButton">
+                    <button type="submit" class="btn-login" id="submitButton" data-api-url="<?= e($apiLoginUrl) ?>" data-api-method="POST">
                         <span class="btn-login__spinner" aria-hidden="true"></span>
                         <span class="btn-login__label">Login</span>
                     </button>
@@ -178,8 +181,32 @@ function e(string $value): string
         'use strict';
 
         const config = <?= json_encode($clientConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+        // Masuk kembali ke halaman login berarti mengakhiri sesi admin yang masih tersimpan.
         const TOKEN_KEY = 'admin_token';
         const COOKIE_MAX_AGE = 60 * 60 * 24;
+        const REMEMBER_ADMIN_USERNAME_KEY = 'explore_majaku_admin_last_username_v1';
+
+        function readExistingToken() {
+            try {
+                const stored = window.localStorage.getItem(TOKEN_KEY) || window.sessionStorage.getItem(TOKEN_KEY);
+                if (stored) return stored;
+            } catch (error) {}
+            const cookie = document.cookie.split('; ').find(function (entry) { return entry.indexOf(TOKEN_KEY + '=') === 0; });
+            return cookie ? decodeURIComponent(cookie.slice(TOKEN_KEY.length + 1)) : '';
+        }
+        function revokeExistingToken() {
+            const oldToken = readExistingToken();
+            if (oldToken) {
+                fetch(config.apiLogoutUrl, {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'Authorization': 'Bearer ' + oldToken, 'Accept': 'application/json' },
+                    keepalive: true
+                }).catch(function () {});
+            }
+            safely(function () { window.localStorage.removeItem(TOKEN_KEY); });
+            safely(function () { window.sessionStorage.removeItem(TOKEN_KEY); });
+            document.cookie = TOKEN_KEY + '=; path=/; max-age=0; SameSite=Lax';
+        }
 
         const MESSAGES = {
             usernameRequired: 'Username wajib di isi',
@@ -193,6 +220,9 @@ function e(string $value): string
             loading: 'Memproses...',
             idle: 'Login'
         };
+
+        revokeExistingToken();
+        window.addEventListener('pageshow', function (event) { if (event.persisted) revokeExistingToken(); });
 
         const form = document.getElementById('loginForm');
         const elements = {
@@ -208,8 +238,18 @@ function e(string $value): string
             toggleIcon: document.querySelector('#passwordToggle i')
         };
 
+        try {
+            const rememberedUsername = window.localStorage.getItem(REMEMBER_ADMIN_USERNAME_KEY);
+            if (rememberedUsername) {
+                elements.username.value = rememberedUsername;
+                elements.remember.checked = true;
+            }
+        } catch (storageError) {
+            // Penyimpanan browser dapat dinonaktifkan; login tetap dapat digunakan.
+        }
+
         const state = {
-            username: '',
+            username: elements.username.value || '',
             password: '',
             remember: false,
             errorMessage: '',
@@ -468,6 +508,11 @@ function e(string $value): string
                     }
                     try {
                         saveToken(token, state.remember);
+                        if (state.remember) {
+                            window.localStorage.setItem(REMEMBER_ADMIN_USERNAME_KEY, state.username.trim());
+                        } else {
+                            window.localStorage.removeItem(REMEMBER_ADMIN_USERNAME_KEY);
+                        }
                     } catch (storageError) {
                         setState({ isLoading: false, errorMessage: MESSAGES.storageFailed });
                         return;
@@ -515,6 +560,9 @@ function e(string $value): string
 
         elements.remember.addEventListener('change', function (event) {
             setState({ remember: event.target.checked });
+            if (!event.target.checked) {
+                try { window.localStorage.removeItem(REMEMBER_ADMIN_USERNAME_KEY); } catch (storageError) {}
+            }
         });
 
         elements.toggle.addEventListener('click', handlePasswordToggle);
@@ -523,6 +571,7 @@ function e(string $value): string
         render();
     })();
     </script>
+    <script src="../Js/api-endpoint-labels.js?v=api-tooltip-2"></script>
 
     <?php endif; ?>
 
