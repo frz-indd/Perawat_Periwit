@@ -9,6 +9,7 @@ $appBasePath = $frontEndPosition !== false
 
 $pageConfig = [
     'apiDashboardUrl' => $appBasePath . '/api/admin/dashboard',
+    'apiSummaryUrl' => $appBasePath . '/api/admin/dashboard/summary',
     'loginUrl' => $appBasePath . '/FrontEnd/auth/login-admin.php',
     'homeUrl' => $appBasePath . '/index.php',
 ];
@@ -30,6 +31,7 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet">
     <link href="../CSS/admin-data-wisata.css?v=1" rel="stylesheet">
+    <link href="../CSS/admin-dashboard.css?v=1" rel="stylesheet">
     <style>
         .admin-route-pending .admin-sidebar,
         .admin-route-pending .admin-mobile-bar,
@@ -94,7 +96,22 @@ function e(string $value): string
                     <h1>Dashboard</h1>
                     <p>“Selamat datang, Admin”</p>
                 </div>
+                <div class="admin-user-indicator"><i class="bi bi-person-circle"></i><span>Admin</span></div>
             </div>
+
+            <section class="dashboard-summary" aria-labelledby="summaryTitle">
+                <div class="dashboard-summary__heading">
+                    <div><h2 id="summaryTitle">Ringkasan Data</h2><p>Statistik utama Explore Majaku</p></div>
+                    <span class="dashboard-summary__status"><i class="bi bi-arrow-repeat"></i> Data terbaru</span>
+                </div>
+                <div class="dashboard-metrics" id="dashboardMetrics" aria-live="polite" aria-busy="true">
+                    <article class="metric-card metric-card--wisata"><div class="metric-card__icon"><i class="bi bi-geo-alt-fill"></i></div><div class="metric-card__content"><p>Total Wisata</p><strong data-metric="total_wisata">—</strong><span>Destinasi terdaftar</span></div></article>
+                    <article class="metric-card metric-card--kategori"><div class="metric-card__icon"><i class="bi bi-grid-fill"></i></div><div class="metric-card__content"><p>Total Kategori</p><strong data-metric="total_kategori">—</strong><span>Kategori tersedia</span></div></article>
+                    <article class="metric-card metric-card--ulasan"><div class="metric-card__icon"><i class="bi bi-chat-left-text-fill"></i></div><div class="metric-card__content"><p>Total Ulasan</p><strong data-metric="total_ulasan">—</strong><span>Ulasan pengguna</span></div></article>
+                    <article class="metric-card metric-card--pengguna"><div class="metric-card__icon"><i class="bi bi-people-fill"></i></div><div class="metric-card__content"><p>Total Pengguna</p><strong data-metric="total_pengguna">—</strong><span>Akun terdaftar</span></div></article>
+                </div>
+                <p class="dashboard-summary__message" id="summaryMessage" role="status">Memuat ringkasan dashboard...</p>
+            </section>
         </div>
     </main>
 
@@ -161,6 +178,48 @@ function e(string $value): string
             document.querySelector('.admin-main').appendChild(notice);
         }
 
+        const metricKeys = ['total_wisata', 'total_kategori', 'total_ulasan', 'total_pengguna'];
+
+        function setSummaryMessage(message, isError) {
+            const element = document.getElementById('summaryMessage');
+            element.textContent = message;
+            element.classList.toggle('is-error', Boolean(isError));
+        }
+
+        async function loadSummary(token) {
+            const metrics = document.getElementById('dashboardMetrics');
+            metrics.setAttribute('aria-busy', 'true');
+            try {
+                const response = await fetch(config.apiSummaryUrl, {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token }
+                });
+                const payload = await response.json().catch(function () { return null; });
+                if (response.status === 401 || response.status === 403) {
+                    clearToken();
+                    redirectToLogin(true);
+                    return;
+                }
+                if (!response.ok || !payload || payload.status !== 'success' ||
+                    !payload.data || typeof payload.data !== 'object') {
+                    throw new Error(payload && payload.message ? payload.message :
+                        'Ringkasan dashboard gagal dimuat (HTTP ' + response.status + ').');
+                }
+                metricKeys.forEach(function (key) {
+                    const value = Number(payload.data[key]);
+                    if (!Number.isFinite(value) || value < 0) throw new Error('Format data statistik tidak valid.');
+                    document.querySelector('[data-metric="' + key + '"]').textContent =
+                        new Intl.NumberFormat('id-ID').format(value);
+                });
+                setSummaryMessage('Ringkasan berhasil diperbarui.', false);
+            } catch (error) {
+                setSummaryMessage(error.message || 'Tidak dapat memuat ringkasan dashboard.', true);
+            } finally {
+                metrics.setAttribute('aria-busy', 'false');
+            }
+        }
+
         async function protectRoute(token) {
             try {
                 const response = await fetch(config.apiDashboardUrl, {
@@ -194,6 +253,7 @@ function e(string $value): string
                 }
 
                 document.body.classList.remove('admin-route-pending');
+                loadSummary(token);
             } catch (requestError) {
                 showGuardError('Tidak dapat terhubung ke server untuk memverifikasi sesi.');
             }
