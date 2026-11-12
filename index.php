@@ -302,5 +302,6 @@ $destinasiLain = array_slice($wisata, 4, 4);
         }
     </script>
 
+<script src="FrontEnd/Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

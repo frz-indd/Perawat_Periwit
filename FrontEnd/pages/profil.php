@@ -1,4 +1,6 @@
 <?php
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 session_start();
 require_once __DIR__ . '/navbar-profile-session.php';
 date_default_timezone_set('Asia/Jakarta');
@@ -823,5 +825,6 @@ if ($fotoProfil !== '') {
             if (btnOk) btnOk.addEventListener('click', dlgTerhapus.tutup);
         })();
     </script>
+<script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

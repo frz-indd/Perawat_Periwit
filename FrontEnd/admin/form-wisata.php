@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 $scriptPath = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
 $frontEndPosition = strpos($scriptPath, '/FrontEnd/');
@@ -49,7 +51,7 @@ $destinationId = isset($_GET['id'])
         </header>
 
         <div id="formMessage" class="alert d-none" role="alert"></div>
-        <form id="destinationForm" class="admin-destination-form" novalidate>
+        <form id="destinationForm" class="admin-destination-form" data-api-url="<?= e($pageConfig['apiDestinationsUrl']) ?>" data-api-method="POST" novalidate>
             <input id="destinationId" type="hidden" value="<?= e($destinationId) ?>">
             <div class="admin-form-fields">
                 <div class="admin-field">
@@ -113,5 +115,6 @@ $destinationId = isset($_GET['id'])
         window.adminWisataConfig = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
     <script src="../Js/admin-form-wisata.js?v=1"></script>
+<script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

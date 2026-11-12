@@ -71,5 +71,6 @@ $escape = static fn (string $value): string => htmlspecialchars(
             <?php endforeach; ?>
         </section>
     </main>
+<script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

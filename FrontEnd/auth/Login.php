@@ -1,9 +1,35 @@
 
+<?php
+// Membuka halaman login saat sesi user masih aktif dianggap sebagai permintaan keluar.
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+if (!empty($_SESSION['id_user'])) {
+    $_SESSION = [];
+    if (ini_get('session.use_cookies')) {
+        $cookie = session_get_cookie_params();
+        setcookie(session_name(), '', [
+            'expires' => time() - 42000,
+            'path' => $cookie['path'],
+            'domain' => $cookie['domain'],
+            'secure' => $cookie['secure'],
+            'httponly' => $cookie['httponly'],
+            'samesite' => $cookie['samesite'] ?? 'Lax'
+        ]);
+    }
+    session_destroy();
+    session_start();
+}
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+if (empty($_SESSION['csrf'])) { $_SESSION['csrf'] = bin2hex(random_bytes(32)); }
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="logout-csrf" content="<?= htmlspecialchars($_SESSION['csrf'], ENT_QUOTES, 'UTF-8') ?>">
 
     <title>Login | Explore Majaku</title>
 
@@ -126,6 +152,7 @@
                             <input
                                 type="checkbox"
                                 id="rememberMe"
+                                name="rememberMe"
                             >
 
                             <label for="rememberMe">Ingat Saya</label>
@@ -206,7 +233,18 @@
 
     <script src="../Js/auth.js?v=auth-split-1"></script>
     <script src="../Js/login.js?v=auth-split-1"></script>
-    <script src="../Js/api-endpoint-labels.js"></script>
+    <script>
+    // Jika browser memulihkan halaman login dari BFCache setelah user login,
+    // akhiri sesi server agar tombol Back tidak mempertahankan autentikasi.
+    window.addEventListener('pageshow', function (event) {
+        if (!event.persisted) return;
+        const csrf = document.querySelector('meta[name="logout-csrf"]')?.content || '';
+        if (!csrf) return;
+        const body = new FormData(); body.append('csrf', csrf);
+        fetch('../../Backend/api/logout.php', { method: 'POST', body, credentials: 'same-origin', keepalive: true }).catch(function () {});
+    });
+    </script>
+    <script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 
 </body>
 </html>

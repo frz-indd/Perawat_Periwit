@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 $scriptPath = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
 $frontEndPosition = strpos($scriptPath, '/FrontEnd/');
@@ -11,6 +13,7 @@ $pageConfig = [
     'apiDestinationsUrl' => $appBasePath . '/api/admin/destinations',
     'apiCategoriesUrl' => $appBasePath . '/api/admin/categories',
     'apiRegionsUrl' => $appBasePath . '/api/admin/regions',
+    'apiLogoutUrl' => $appBasePath . '/api/admin/logout',
     'loginUrl' => $appBasePath . '/FrontEnd/auth/login-admin.php',
     'formUrl' => $appBasePath . '/FrontEnd/admin/form-wisata.php',
     'uploadBaseUrl' => $appBasePath . '/uploads/',
@@ -42,23 +45,23 @@ function e(string $value): string
             <i class="bi bi-chevron-left"></i>
         </button>
         <nav class="admin-nav" aria-label="Navigasi admin">
-            <a class="admin-nav__item is-disabled" href="#" aria-disabled="true"><i class="bi bi-house-door"></i><span>Dashboard</span></a>
+            <a class="admin-nav__item" href="admin-dashboard.php"><i class="bi bi-house-door"></i><span>Dashboard</span></a>
             <a class="admin-nav__item is-active" href="data-wisata.php" aria-current="page"><i class="bi bi-bar-chart-fill"></i><span>Data Wisata</span></a>
-            <a class="admin-nav__item is-disabled" href="#" aria-disabled="true"><i class="bi bi-grid-fill"></i><span>Kategori</span></a>
-            <a class="admin-nav__item is-disabled" href="#" aria-disabled="true"><i class="bi bi-star-fill"></i><span>Fasilitas</span></a>
-            <a class="admin-nav__item is-disabled" href="#" aria-disabled="true"><i class="bi bi-chat-square-text"></i><span>Ulasan</span></a>
-            <a class="admin-nav__item is-disabled" href="#" aria-disabled="true"><i class="bi bi-people"></i><span>Pengguna</span></a>
+            <a class="admin-nav__item" href="admin-resource.php?section=kategori"><i class="bi bi-grid-fill"></i><span>Kategori</span></a>
+            <a class="admin-nav__item" href="admin-resource.php?section=fasilitas"><i class="bi bi-star-fill"></i><span>Fasilitas</span></a>
+            <a class="admin-nav__item" href="admin-resource.php?section=ulasan"><i class="bi bi-chat-square-text"></i><span>Ulasan</span></a>
+            <a class="admin-nav__item" href="admin-resource.php?section=pengguna"><i class="bi bi-people"></i><span>Pengguna</span></a>
         </nav>
         <div class="admin-sidebar__bottom">
-            <a class="admin-nav__item is-disabled" href="#" aria-disabled="true"><i class="bi bi-person-circle"></i><span>Profil admin</span></a>
-            <button class="admin-nav__item admin-logout" id="logoutButton" type="button"><i class="bi bi-box-arrow-right"></i><span>Logout</span></button>
+            <a class="admin-nav__item" href="admin-resource.php?section=profil"><i class="bi bi-person-circle"></i><span>Profil admin</span></a>
+            <button class="admin-nav__item admin-logout" id="logoutButton" type="button" data-api-url="<?= e($pageConfig['apiLogoutUrl']) ?>" data-api-method="POST"><i class="bi bi-box-arrow-right"></i><span>Logout</span></button>
         </div>
     </aside>
 
     <header class="admin-mobile-bar">
         <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="Buka navigasi"><i class="bi bi-list"></i></button>
         <span class="admin-mobile-brand">Explore Majaku</span>
-        <button class="mobile-logout-button" id="mobileLogoutButton" type="button" aria-label="Logout"><i class="bi bi-box-arrow-right"></i></button>
+        <button class="mobile-logout-button" id="mobileLogoutButton" type="button" data-api-url="<?= e($pageConfig['apiLogoutUrl']) ?>" data-api-method="POST" aria-label="Logout"><i class="bi bi-box-arrow-right"></i></button>
     </header>
 
     <header class="admin-topbar">
@@ -88,7 +91,7 @@ function e(string $value): string
                 <select id="categoryFilter" class="form-select" aria-label="Filter kategori">
                     <option value="">Semua Kategori</option>
                 </select>
-                <button id="searchButton" class="btn admin-search-button" type="button"><i class="bi bi-search"></i><span>Cari</span></button>
+                <button id="searchButton" class="btn admin-search-button" type="button" data-api-url="<?= e($pageConfig['apiDestinationsUrl']) ?>" data-api-method="GET"><i class="bi bi-search"></i><span>Cari</span></button>
             </div>
 
             <div id="pageMessage" class="alert admin-alert d-none" role="status"></div>
@@ -115,10 +118,38 @@ function e(string $value): string
             <div class="admin-table-footer">
                 <p id="resultSummary" class="mb-0" aria-live="polite"></p>
                 <nav aria-label="Halaman data wisata">
-                    <ul id="paginationLinks" class="pagination pagination-sm mb-0">
-                        <li class="page-item disabled"><button class="page-link" type="button" aria-label="Halaman sebelumnya" disabled><i class="bi bi-chevron-left"></i></button></li>
-                        <li class="page-item active" aria-current="page"><button class="page-link" type="button">1</button></li>
-                        <li class="page-item disabled"><button class="page-link" type="button" aria-label="Halaman berikutnya" disabled><i class="bi bi-chevron-right"></i></button></li>
+<ul id="paginationLinks" class="pagination pagination-sm mb-0">
+    <li class="page-item disabled">
+        <button
+            id="previousPage"
+            class="page-link"
+            type="button"
+            data-api-url="<?= e($pageConfig['apiDestinationsUrl']) ?>"
+            data-api-method="GET"
+            aria-label="Halaman sebelumnya"
+            disabled
+        >
+            <i class="bi bi-chevron-left"></i>
+        </button>
+    </li>
+
+    <li class="page-item active" aria-current="page">
+        <button class="page-link" type="button">1</button>
+    </li>
+
+    <li class="page-item">
+        <button
+            id="nextPage"
+            class="page-link"
+            type="button"
+            data-api-url="<?= e($pageConfig['apiDestinationsUrl']) ?>"
+            data-api-method="GET"
+            aria-label="Halaman berikutnya"
+        >
+            <i class="bi bi-chevron-right"></i>
+        </button>
+    </li>
+</ul>
                     </ul>
                 </nav>
             </div>
@@ -136,7 +167,7 @@ function e(string $value): string
                 <div class="modal-body">Data destinasi wisata ini akan dihapus secara permanen.</div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteButton">Hapus data</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteButton" data-api-url="<?= e($pageConfig['apiDestinationsUrl']) ?>" data-api-method="DELETE">Hapus data</button>
                 </div>
             </div>
         </div>
@@ -146,6 +177,7 @@ function e(string $value): string
         window.adminWisataConfig = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../Js/admin-data-wisata.js?v=2"></script>
+    <script src="../Js/admin-data-wisata.js?v=1"></script>
+<script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

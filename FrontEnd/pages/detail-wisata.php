@@ -1402,5 +1402,6 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             });
         })();
     </script>
+<script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

@@ -73,9 +73,29 @@ switch ($method) {
         $countStmt->execute();
         $total = (int) $countStmt->get_result()->fetch_assoc()['total'];
 
-        $sql = "SELECT w.id_wisata, w.nama_wisata, w.gambar, w.maps_url, w.deskripsi, w.harga_tiket, w.domisili AS wilayah, w.alamat, w.jam_buka, w.jam_tutup, w.latitude, w.longitude,
-                       (SELECT AVG(ul.rating) FROM ulasan ul WHERE ul.Id_wisata = w.id_wisata) AS rating,
-                       k.Id_kategori, k.nama_kategori, kb.id_kabupaten, kb.nama_kabupaten
+        $selectFields = [
+    'w.id_wisata',
+    'w.nama_wisata',
+    'w.gambar',
+    'w.maps_url',
+    // Include description only when not searching by name
+    ($search === null ? 'w.deskripsi' : null),
+    'w.harga_tiket',
+    'w.domisili AS wilayah',
+    'w.alamat',
+    'w.jam_buka',
+    'w.jam_tutup',
+    'w.latitude',
+    'w.longitude',
+    '(SELECT AVG(ul.rating) FROM ulasan ul WHERE ul.Id_wisata = w.id_wisata) AS rating',
+    'k.Id_kategori',
+    'k.nama_kategori',
+    'kb.id_kabupaten',
+    'kb.nama_kabupaten'
+];
+$selectFields = array_filter($selectFields, fn($f) => $f !== null);
+$selectClause = implode(', ', $selectFields);
+$sql = "SELECT $selectClause
                 FROM wisata w
                 LEFT JOIN kategori k ON k.Id_kategori = w.id_kategori
                 LEFT JOIN kabupaten kb ON kb.id_kabupaten = w.id_kabupaten
@@ -91,36 +111,45 @@ switch ($method) {
         $result = $stmt->get_result();
         $destinations = [];
         while ($row = $result->fetch_assoc()) {
-            $destinations[] = [
-                'id' => (string) $row['id_wisata'],
+            $item = [
+                'id' => is_numeric($row['id_wisata']) ? (int)$row['id_wisata'] : (string)$row['id_wisata'],
                 'name' => $row['nama_wisata'],
+                'kabupaten' => $row['nama_kabupaten'] ?? ($row['wilayah'] ?? ''),
+                'category' => $row['nama_kategori'] ?? '',
+                'price' => $row['harga_tiket'] !== null ? (float) $row['harga_tiket'] : 0,
+                'rating' => $row['rating'] !== null ? round((float) $row['rating'], 1) : 0.0,
+                'maps_url' => $row['maps_url'] ?? '',
+                'image_url' => !empty($row['gambar']) ? '/uploads/' . ltrim($row['gambar'], '/') : '',
                 'image' => $row['gambar'],
-                'maps_url' => $row['maps_url'],
-                'description' => $row['deskripsi'],
-                'price' => $row['harga_tiket'] !== null ? (float) $row['harga_tiket'] : null,
-                'rating' => $row['rating'] !== null ? (float) $row['rating'] : null,
+                // description omitted for search results
                 'region' => $row['wilayah'],
                 'address' => $row['alamat'],
                 'open_time' => $row['jam_buka'],
                 'close_time' => $row['jam_tutup'],
                 'latitude' => $row['latitude'] !== null ? (float) $row['latitude'] : null,
                 'longitude' => $row['longitude'] !== null ? (float) $row['longitude'] : null,
-                'category' => $row['Id_kategori'] ? [
+                'category_detail' => $row['Id_kategori'] ? [
                     'id' => (int) $row['Id_kategori'],
                     'name' => $row['nama_kategori']
                 ] : null,
-                'kabupaten' => $row['id_kabupaten'] ? [
+                'kabupaten_detail' => $row['id_kabupaten'] ? [
                     'id' => (int) $row['id_kabupaten'],
                     'name' => $row['nama_kabupaten']
                 ] : null,
             ];
+            // Include description only when not searching
+            if ($search === null) {
+                $item['description'] = $row['deskripsi'];
+            }
+            $destinations[] = $item;
         }
+        $totalPage = $limit > 0 ? (int) ceil($total / $limit) : 1;
         jsonResponse([
             'status' => 'success',
+            'total_data' => $total,
+            'total_page' => $totalPage,
+            'current_page' => $page,
             'data' => $destinations,
-            'total' => $total,
-            'page' => $page,
-            'per_page' => $limit,
         ]);
         break;
 
@@ -140,20 +169,20 @@ switch ($method) {
 
         // Basic validation
         if ($name === '' || $categoryId === null || $kabupatenId === null) {
-            jsonResponse(['status' => 'error', 'message' => 'Semua field wajib diisi dengan benar.'], 400);
+            jsonResponse(['message' => 'Semua field wajib diisi dengan benar.'], 400);
         }
         // Validate image
         if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
-            jsonResponse(['status' => 'error', 'message' => 'Gambar wajib diunggah.'], 400);
+            jsonResponse(['message' => 'Semua field wajib diisi dengan benar.'], 400);
         }
         $file = $_FILES['image'];
-        if ($file['size'] > 10 * 1024 * 1024) {
-            jsonResponse(['status' => 'error', 'message' => 'Ukuran file gambar melebihi 10MB.'], 400);
+        if ($file['size'] > 2 * 1024 * 1024) { // Max 2MB
+            jsonResponse(['message' => 'Semua field wajib diisi dengan benar.'], 400);
         }
         $allowed = ['image/jpeg' => '.jpg', 'image/png' => '.png'];
         $mime = mime_content_type($file['tmp_name']);
         if (!array_key_exists($mime, $allowed)) {
-            jsonResponse(['status' => 'error', 'message' => 'Format gambar tidak didukung. Hanya JPG atau PNG.'], 400);
+            jsonResponse(['message' => 'Semua field wajib diisi dengan benar.'], 400);
         }
         $uploadDir = __DIR__ . '/../../uploads/';
         if (!is_dir($uploadDir)) {
@@ -213,13 +242,13 @@ switch ($method) {
         // Handle image replacement if a file is uploaded
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES['image'];
-            if ($file['size'] > 10 * 1024 * 1024) {
-                jsonResponse(['status' => 'error', 'message' => 'Ukuran file gambar melebihi 10MB.'], 400);
+            if ($file['size'] > 2 * 1024 * 1024) { // Max 2MB
+                jsonResponse(['message' => 'Semua field wajib diisi dengan benar.'], 400);
             }
             $allowed = ['image/jpeg' => '.jpg', 'image/png' => '.png'];
             $mime = mime_content_type($file['tmp_name']);
             if (!array_key_exists($mime, $allowed)) {
-                jsonResponse(['status' => 'error', 'message' => 'Format gambar tidak didukung.'], 400);
+                jsonResponse(['message' => 'Semua field wajib diisi dengan benar.'], 400);
             }
             $uploadDir = __DIR__ . '/../../uploads/';
             if (!is_dir($uploadDir)) { mkdir($uploadDir, 0755, true); }

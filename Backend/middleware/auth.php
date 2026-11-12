@@ -72,5 +72,29 @@ function adminOnly(): array
         exit;
     }
 
+    // JWT hanya sah selama hash-nya tercatat aktif di database.
+    // Penting: koneksi harus berada di scope global agar endpoint yang
+    // memanggil adminOnly() dapat memakai kembali variabel $conn.
+    global $conn;
+    require_once dirname(__DIR__) . '/database/koneksi.php';
+    if (!isset($conn) || !($conn instanceof mysqli)) {
+        http_response_code(503);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['message' => 'Layanan autentikasi admin tidak tersedia.']);
+        exit;
+    }
+    $tokenHash = hash('sha256', $token);
+    $check = $conn->prepare('SELECT id FROM admin_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > NOW() LIMIT 1');
+    $check->bind_param('s', $tokenHash);
+    $check->execute();
+    $activeSession = $check->get_result()->fetch_assoc();
+    $check->close();
+    if (!$activeSession) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['message' => 'Sesi admin sudah berakhir. Silakan login kembali.']);
+        exit;
+    }
+
     return $decoded;
 }
