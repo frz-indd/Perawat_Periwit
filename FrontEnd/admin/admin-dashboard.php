@@ -34,8 +34,8 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet">
-    <link href="../CSS/admin-data-wisata.css?v=20261111-3" rel="stylesheet">
-    <link href="../CSS/admin-dashboard.css?v=20261111-3" rel="stylesheet">
+    <link href="../CSS/admin-data-wisata.css?v=20261112-50261112-5" rel="stylesheet">
+    <link href="../CSS/admin-dashboard.css?v=20261112-50261112-5" rel="stylesheet">
     <style>
         .admin-route-pending .admin-sidebar,
         .admin-route-pending .admin-mobile-bar,

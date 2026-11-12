@@ -1,311 +1,69 @@
 <?php
 declare(strict_types=1);
-
 header('Content-Type: application/json; charset=utf-8');
-
-require_once __DIR__ . '/../middleware/auth.php'; // adminOnly()
+header('Cache-Control: no-store');
+require_once __DIR__ . '/../middleware/auth.php';
 require_once __DIR__ . '/../database/koneksi.php';
+adminOnly();
 
-$method = $_SERVER['REQUEST_METHOD'] ?? '';
-if ($method === 'POST' && ($_POST['_method'] ?? '') === 'PUT') {
-    $method = 'PUT';
+function respond(array $data, int $code=200): void { http_response_code($code); echo json_encode($data, JSON_UNESCAPED_UNICODE|JSON_INVALID_UTF8_SUBSTITUTE); exit; }
+function uploadPhoto(mysqli $conn, string $id): ?string {
+    if (!isset($_FILES['image']) || $_FILES['image']['error'] === UPLOAD_ERR_NO_FILE) return null;
+    $f=$_FILES['image'];
+    if ($f['error'] !== UPLOAD_ERR_OK) respond(['status'=>'error','message'=>'Foto gagal diunggah.'],400);
+    if ($f['size'] > 10*1024*1024) respond(['status'=>'error','message'=>'Ukuran foto maksimal 10MB.'],400);
+    $mime=(new finfo(FILEINFO_MIME_TYPE))->file($f['tmp_name']);
+    $ext=['image/jpeg'=>'jpg','image/png'=>'png'][$mime] ?? null;
+    if (!$ext) respond(['status'=>'error','message'=>'Format foto harus JPG atau PNG.'],400);
+    $dir=__DIR__.'/../../FrontEnd/assets/images/wisata';
+    if (!is_dir($dir) && !mkdir($dir,0755,true)) respond(['status'=>'error','message'=>'Folder penyimpanan foto tidak dapat dibuat.'],500);
+    $name='wisata_'.preg_replace('/[^A-Za-z0-9_-]/','',$id).'_'.bin2hex(random_bytes(5)).'.'.$ext;
+    if (!move_uploaded_file($f['tmp_name'],$dir.'/'.$name)) respond(['status'=>'error','message'=>'Foto gagal disimpan.'],500);
+    return 'FrontEnd/assets/images/wisata/'.$name;
 }
-$adminPayload = adminOnly(); // ensure admin
-
-// Helper to send JSON response
-function jsonResponse(array $data, int $status = 200): void {
-    http_response_code($status);
-    echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
-    exit;
+function destinationId(mysqli $conn, string $domisili): string {
+    $prefix = stripos($domisili,'Majalengka') !== false ? 'M' : 'K';
+    $stmt=$conn->prepare('SELECT COALESCE(MAX(CAST(SUBSTRING(id_wisata,2) AS UNSIGNED)),0)+1 AS next_id FROM wisata WHERE id_wisata LIKE CONCAT(?, "%")');
+    $stmt->bind_param('s',$prefix); $stmt->execute(); $n=(int)$stmt->get_result()->fetch_assoc()['next_id'];
+    return $prefix.str_pad((string)$n,5,'0',STR_PAD_LEFT);
 }
-
-switch ($method) {
-    case 'GET':
-        // Filters: search, kabupaten, category, page
-        $search = isset($_GET['search']) && is_string($_GET['search']) ? $_GET['search'] : null;
-        $kabupaten = isset($_GET['kabupaten']) && is_string($_GET['kabupaten']) ? $_GET['kabupaten'] : null;
-        $category = isset($_GET['category']) && is_string($_GET['category']) ? $_GET['category'] : null;
-        $id = $_GET['id'] ?? null;
-        $page = isset($_GET['page'])
-            && is_string($_GET['page'])
-            && ctype_digit($_GET['page'])
-            && (int) $_GET['page'] > 0
-            ? (int)$_GET['page']
-            : 1;
-        $requestedLimit = isset($_GET['per_page'])
-            && is_string($_GET['per_page'])
-            && ctype_digit($_GET['per_page'])
-            && (int) $_GET['per_page'] > 0
-            ? (int) $_GET['per_page']
-            : 20;
-        $limit = min($requestedLimit, 100);
-        $offset = ($page - 1) * $limit;
-
-        $where = [];
-        $params = [];
-        $types = '';
-        if ($search !== null && $search !== '') {
-            $where[] = 'w.nama_wisata LIKE ?';
-            $params[] = "%$search%";
-            $types .= 's';
-        }
-        if ($kabupaten !== null && ctype_digit((string)$kabupaten)) {
-            $where[] = 'w.id_kabupaten = ?';
-            $params[] = (int)$kabupaten;
-            $types .= 'i';
-        }
-        if ($category !== null && ctype_digit((string)$category)) {
-            $where[] = 'w.id_kategori = ?';
-            $params[] = (int)$category;
-            $types .= 'i';
-        }
-        if (is_string($id) && preg_match('/^[A-Za-z0-9_-]{1,16}$/', $id) === 1) {
-            $where[] = 'w.id_wisata = ?';
-            $params[] = $id;
-            $types .= 's';
-        }
-        $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
-
-        $countStmt = $conn->prepare("SELECT COUNT(*) AS total FROM wisata w $whereSql");
-        if ($types !== '') {
-            $countStmt->bind_param($types, ...$params);
-        }
-        $countStmt->execute();
-        $total = (int) $countStmt->get_result()->fetch_assoc()['total'];
-
-        $selectFields = [
-    'w.id_wisata',
-    'w.nama_wisata',
-    'w.gambar',
-    'w.maps_url',
-    // Include description only when not searching by name
-    ($search === null ? 'w.deskripsi' : null),
-    'w.harga_tiket',
-    'w.domisili AS wilayah',
-    'w.alamat',
-    'w.jam_buka',
-    'w.jam_tutup',
-    'w.latitude',
-    'w.longitude',
-    '(SELECT AVG(ul.rating) FROM ulasan ul WHERE ul.Id_wisata = w.id_wisata) AS rating',
-    'k.Id_kategori',
-    'k.nama_kategori',
-    'kb.id_kabupaten',
-    'kb.nama_kabupaten'
-];
-$selectFields = array_filter($selectFields, fn($f) => $f !== null);
-$selectClause = implode(', ', $selectFields);
-$sql = "SELECT $selectClause
-                FROM wisata w
-                LEFT JOIN kategori k ON k.Id_kategori = w.id_kategori
-                LEFT JOIN kabupaten kb ON kb.id_kabupaten = w.id_kabupaten
-                $whereSql
-                ORDER BY w.nama_wisata
-                LIMIT ? OFFSET ?";
-        $stmt = $conn->prepare($sql);
-        // bind dynamic params + limit/offset
-        $bindTypes = $types . 'ii';
-        $bindValues = array_merge($params, [$limit, $offset]);
-        $stmt->bind_param($bindTypes, ...$bindValues);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $destinations = [];
-        while ($row = $result->fetch_assoc()) {
-            $item = [
-                'id' => is_numeric($row['id_wisata']) ? (int)$row['id_wisata'] : (string)$row['id_wisata'],
-                'name' => $row['nama_wisata'],
-                'kabupaten' => $row['nama_kabupaten'] ?? ($row['wilayah'] ?? ''),
-                'category' => $row['nama_kategori'] ?? '',
-                'price' => $row['harga_tiket'] !== null ? (float) $row['harga_tiket'] : 0,
-                'rating' => $row['rating'] !== null ? round((float) $row['rating'], 1) : 0.0,
-                'maps_url' => $row['maps_url'] ?? '',
-                'image_url' => !empty($row['gambar']) ? '/uploads/' . ltrim($row['gambar'], '/') : '',
-                'image' => $row['gambar'],
-                // description omitted for search results
-                'region' => $row['wilayah'],
-                'address' => $row['alamat'],
-                'open_time' => $row['jam_buka'],
-                'close_time' => $row['jam_tutup'],
-                'latitude' => $row['latitude'] !== null ? (float) $row['latitude'] : null,
-                'longitude' => $row['longitude'] !== null ? (float) $row['longitude'] : null,
-                'category_detail' => $row['Id_kategori'] ? [
-                    'id' => (int) $row['Id_kategori'],
-                    'name' => $row['nama_kategori']
-                ] : null,
-                'kabupaten_detail' => $row['id_kabupaten'] ? [
-                    'id' => (int) $row['id_kabupaten'],
-                    'name' => $row['nama_kabupaten']
-                ] : null,
-            ];
-            // Include description only when not searching
-            if ($search === null) {
-                $item['description'] = $row['deskripsi'];
-            }
-            $destinations[] = $item;
-        }
-        $totalPage = $limit > 0 ? (int) ceil($total / $limit) : 1;
-        jsonResponse([
-            'status' => 'success',
-            'total_data' => $total,
-            'total_page' => $totalPage,
-            'current_page' => $page,
-            'data' => $destinations,
-        ]);
-        break;
-
-    case 'POST':
-        // Expect multipart/form-data
-        $name = trim($_POST['name'] ?? '');
-        $categoryId = isset($_POST['category_id']) && ctype_digit($_POST['category_id']) ? (int)$_POST['category_id'] : null;
-        $kabupatenId = isset($_POST['kabupaten_id']) && ctype_digit($_POST['kabupaten_id']) ? (int)$_POST['kabupaten_id'] : null;
-        $mapsUrl = trim($_POST['maps_url'] ?? '');
-        $description = trim($_POST['description'] ?? '');
-        $price = isset($_POST['price']) ? (float)$_POST['price'] : null;
-        $address = trim($_POST['address'] ?? '');
-        $openTime = trim($_POST['open_time'] ?? '');
-        $closeTime = trim($_POST['close_time'] ?? '');
-        $latitude = isset($_POST['latitude']) && is_numeric($_POST['latitude']) ? (float)$_POST['latitude'] : null;
-        $longitude = isset($_POST['longitude']) && is_numeric($_POST['longitude']) ? (float)$_POST['longitude'] : null;
-
-        // Basic validation
-        if ($name === '' || $categoryId === null || $kabupatenId === null) {
-            jsonResponse(['message' => 'Semua field wajib diisi dengan benar.'], 400);
-        }
-        // Validate image
-        if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
-            jsonResponse(['message' => 'Semua field wajib diisi dengan benar.'], 400);
-        }
-        $file = $_FILES['image'];
-        if ($file['size'] > 2 * 1024 * 1024) { // Max 2MB
-            jsonResponse(['message' => 'Semua field wajib diisi dengan benar.'], 400);
-        }
-        $allowed = ['image/jpeg' => '.jpg', 'image/png' => '.png'];
-        $mime = mime_content_type($file['tmp_name']);
-        if (!array_key_exists($mime, $allowed)) {
-            jsonResponse(['message' => 'Semua field wajib diisi dengan benar.'], 400);
-        }
-        $uploadDir = __DIR__ . '/../../uploads/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        $filename = uniqid('dest_', true) . $allowed[$mime];
-        $destPath = $uploadDir . $filename;
-        if (!move_uploaded_file($file['tmp_name'], $destPath)) {
-            jsonResponse(['status' => 'error', 'message' => 'Gagal menyimpan file gambar.'], 500);
-        }
-        // Insert record
-        $newId = 'DEST' . strtoupper(bin2hex(random_bytes(6)));
-        $stmt = $conn->prepare('INSERT INTO wisata (id_wisata, nama_wisata, id_kategori, id_kabupaten, gambar, maps_url, deskripsi, harga_tiket, alamat, jam_buka, jam_tutup, latitude, longitude, aktif) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)');
-        $stmt->bind_param('ssiisssdsssdd', $newId, $name, $categoryId, $kabupatenId, $filename, $mapsUrl, $description, $price, $address, $openTime, $closeTime, $latitude, $longitude);
-        $stmt->execute();
-        jsonResponse(['status' => 'success', 'message' => 'Destinasi berhasil dibuat.', 'data' => ['id' => (string) $newId]], 201);
-        break;
-
-    case 'PUT':
-        // Expect id in query string
-        $id = $_GET['id'] ?? null;
-        if (!is_string($id) || preg_match('/^[A-Za-z0-9_-]{1,16}$/', $id) !== 1) {
-            jsonResponse(['status' => 'error', 'message' => 'ID destinasi tidak valid.'], 400);
-        }
-        // Fetch existing record for image handling
-        $sel = $conn->prepare('SELECT gambar FROM wisata WHERE id_wisata = ?');
-        $sel->bind_param('s', $id);
-        $sel->execute();
-        $sel->bind_result($oldImage);
-        if (!$sel->fetch()) {
-            jsonResponse(['status' => 'error', 'message' => 'Destinasi tidak ditemukan.'], 404);
-        }
-        $sel->close();
-
-        // Parse input (allow both multipart and json)
-        $payload = [];
-        if (strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false) {
-            $payload = json_decode(file_get_contents('php://input'), true) ?? [];
-        } else {
-            $payload = $_POST;
-        }
-        $fields = [];
-        $types = '';
-        $params = [];
-        // Optional fields
-        if (isset($payload['name'])) { $fields[] = 'nama_wisata = ?'; $types .= 's'; $params[] = trim($payload['name']); }
-        if (isset($payload['category_id']) && ctype_digit((string)$payload['category_id'])) { $fields[] = 'id_kategori = ?'; $types .= 'i'; $params[] = (int)$payload['category_id']; }
-        if (isset($payload['kabupaten_id']) && ctype_digit((string)$payload['kabupaten_id'])) { $fields[] = 'id_kabupaten = ?'; $types .= 'i'; $params[] = (int)$payload['kabupaten_id']; }
-        if (isset($payload['maps_url'])) { $fields[] = 'maps_url = ?'; $types .= 's'; $params[] = trim($payload['maps_url']); }
-        if (isset($payload['description'])) { $fields[] = 'deskripsi = ?'; $types .= 's'; $params[] = trim($payload['description']); }
-        if (isset($payload['price'])) { $fields[] = 'harga_tiket = ?'; $types .= 'd'; $params[] = (float)$payload['price']; }
-        if (isset($payload['address'])) { $fields[] = 'alamat = ?'; $types .= 's'; $params[] = trim($payload['address']); }
-        if (isset($payload['open_time'])) { $fields[] = 'jam_buka = ?'; $types .= 's'; $params[] = trim($payload['open_time']); }
-        if (isset($payload['close_time'])) { $fields[] = 'jam_tutup = ?'; $types .= 's'; $params[] = trim($payload['close_time']); }
-        if (isset($payload['latitude'])) { $fields[] = 'latitude = ?'; $types .= 'd'; $params[] = (float)$payload['latitude']; }
-        if (isset($payload['longitude'])) { $fields[] = 'longitude = ?'; $types .= 'd'; $params[] = (float)$payload['longitude']; }
-        // Handle image replacement if a file is uploaded
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $file = $_FILES['image'];
-            if ($file['size'] > 2 * 1024 * 1024) { // Max 2MB
-                jsonResponse(['message' => 'Semua field wajib diisi dengan benar.'], 400);
-            }
-            $allowed = ['image/jpeg' => '.jpg', 'image/png' => '.png'];
-            $mime = mime_content_type($file['tmp_name']);
-            if (!array_key_exists($mime, $allowed)) {
-                jsonResponse(['message' => 'Semua field wajib diisi dengan benar.'], 400);
-            }
-            $uploadDir = __DIR__ . '/../../uploads/';
-            if (!is_dir($uploadDir)) { mkdir($uploadDir, 0755, true); }
-            $newFilename = uniqid('dest_', true) . $allowed[$mime];
-            $destPath = $uploadDir . $newFilename;
-            if (!move_uploaded_file($file['tmp_name'], $destPath)) {
-                jsonResponse(['status' => 'error', 'message' => 'Gagal menyimpan file gambar baru.'], 500);
-            }
-            // schedule old file deletion
-            if ($oldImage && file_exists($uploadDir . $oldImage)) {
-                @unlink($uploadDir . $oldImage);
-            }
-            $fields[] = 'gambar = ?';
-            $types .= 's';
-            $params[] = $newFilename;
-        }
-        if (empty($fields)) {
-            jsonResponse(['status' => 'error', 'message' => 'Tidak ada data yang diberikan untuk diubah.'], 400);
-        }
-        $params[] = (string) $id; // for WHERE
-        $types .= 's';
-        $sql = 'UPDATE wisata SET ' . implode(', ', $fields) . ' WHERE id_wisata = ?';
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param($types, ...$params);
-        $stmt->execute();
-        jsonResponse(['status' => 'success', 'message' => 'Destinasi berhasil diubah.']);
-        break;
-
-    case 'DELETE':
-        $id = $_GET['id'] ?? null;
-        if (!is_string($id) || preg_match('/^[A-Za-z0-9_-]{1,16}$/', $id) !== 1) {
-            jsonResponse(['status' => 'error', 'message' => 'ID destinasi tidak valid.'], 400);
-        }
-        // Retrieve image filename for deletion
-        $sel = $conn->prepare('SELECT gambar FROM wisata WHERE id_wisata = ?');
-        $sel->bind_param('s', $id);
-        $sel->execute();
-        $sel->bind_result($oldImage);
-        if (!$sel->fetch()) {
-            jsonResponse(['status' => 'error', 'message' => 'Destinasi tidak ditemukan.'], 404);
-        }
-        $sel->close();
-        // Delete record
-        $del = $conn->prepare('DELETE FROM wisata WHERE id_wisata = ?');
-        $del->bind_param('s', $id);
-        $del->execute();
-        // Delete image file if exists
-        $uploadDir = __DIR__ . '/../../uploads/';
-        if ($oldImage && file_exists($uploadDir . $oldImage)) {
-            @unlink($uploadDir . $oldImage);
-        }
-        jsonResponse(['status' => 'success', 'message' => 'Destinasi wisata berhasil dihapus.']);
-        break;
-
-    default:
-        http_response_code(405);
-        header('Allow: GET, POST, PUT, DELETE');
-        jsonResponse(['status' => 'error', 'message' => 'Metode tidak diizinkan.']);
-}
-?>
+$method=$_SERVER['REQUEST_METHOD']??'GET';
+if ($method==='POST' && ($_POST['_method']??'')==='PUT') $method='PUT';
+try {
+ if ($method==='GET') {
+    $search=trim((string)($_GET['search']??'')); $region=trim((string)($_GET['kabupaten']??'')); $category=trim((string)($_GET['category']??'')); $id=trim((string)($_GET['id']??''));
+    $page=max(1,(int)($_GET['page']??1)); $limit=min(100,max(1,(int)($_GET['per_page']??5))); $offset=($page-1)*$limit;
+    $where=['w.aktif=1']; $params=[]; $types='';
+    if($search!==''){ $where[]='w.nama_wisata LIKE ?'; $params[]="%$search%"; $types.='s'; }
+    if($region!==''){ $where[]='w.domisili=?'; $params[]=$region; $types.='s'; }
+    if($category!=='' && ctype_digit($category)){ $where[]='w.id_kategori=?'; $params[]=(int)$category; $types.='i'; }
+    if($id!==''){ $where[]='w.id_wisata=?'; $params[]=$id; $types.='s'; }
+    $whereSql='WHERE '.implode(' AND ',$where);
+    $count=$conn->prepare("SELECT COUNT(*) total FROM wisata w $whereSql"); if($types) $count->bind_param($types,...$params); $count->execute(); $total=(int)$count->get_result()->fetch_assoc()['total'];
+    $sql="SELECT w.id_wisata,w.nama_wisata,w.deskripsi,w.domisili,w.harga_tiket,w.alamat,w.Maps_Wisata,w.jam_buka,w.jam_tutup,w.latitude,w.longitude,w.id_kategori,k.nama_kategori,(SELECT AVG(u.rating) FROM ulasan u WHERE u.Id_wisata=w.id_wisata) rating,(SELECT f.link_foto FROM foto_wisata f WHERE f.id_wisata=w.id_wisata ORDER BY f.Id_foto DESC LIMIT 1) image FROM wisata w LEFT JOIN kategori k ON k.Id_kategori=w.id_kategori $whereSql ORDER BY w.nama_wisata LIMIT ? OFFSET ?";
+    $stmt=$conn->prepare($sql); $bt=$types.'ii'; $bv=array_merge($params,[$limit,$offset]); $stmt->bind_param($bt,...$bv); $stmt->execute(); $rs=$stmt->get_result(); $data=[];
+    while($r=$rs->fetch_assoc()) $data[]=['id'=>$r['id_wisata'],'name'=>$r['nama_wisata'],'region'=>$r['domisili'],'kabupaten'=>$r['domisili'],'category'=>$r['nama_kategori']??'-','category_detail'=>['id'=>(int)$r['id_kategori'],'name'=>$r['nama_kategori']??''],'price'=>(float)$r['harga_tiket'],'rating'=>$r['rating']!==null?round((float)$r['rating'],1):null,'maps_url'=>$r['Maps_Wisata'],'image'=>$r['image'],'image_url'=>$r['image'],'description'=>$r['deskripsi'],'address'=>$r['alamat'],'open_time'=>$r['jam_buka'],'close_time'=>$r['jam_tutup'],'latitude'=>$r['latitude'],'longitude'=>$r['longitude']];
+    respond(['status'=>'success','total'=>$total,'total_data'=>$total,'total_page'=>(int)ceil($total/$limit),'current_page'=>$page,'per_page'=>$limit,'data'=>$data]);
+ }
+ if($method==='POST') {
+    $name=trim((string)($_POST['name']??'')); $region=trim((string)($_POST['domisili']??$_POST['kabupaten_id']??'')); $cat=(int)($_POST['category_id']??0); $price=(float)($_POST['price']??0); $maps=trim((string)($_POST['maps_url']??''));
+    if($name===''||$region===''||$cat<1) respond(['status'=>'error','message'=>'Nama wisata, wilayah, dan kategori wajib diisi.'],400);
+    $check=$conn->prepare('SELECT Id_kategori FROM kategori WHERE Id_kategori=? AND aktif=1'); $check->bind_param('i',$cat); $check->execute(); if(!$check->get_result()->fetch_assoc()) respond(['status'=>'error','message'=>'Kategori tidak ditemukan.'],400);
+    $id=destinationId($conn,$region); $photo=uploadPhoto($conn,$id);
+    $stmt=$conn->prepare('INSERT INTO wisata (id_wisata,id_kategori,nama_wisata,harga_tiket,domisili,Maps_Wisata,aktif) VALUES (?,?,?,?,?,?,1)');
+    $stmt->bind_param('sisdss',$id,$cat,$name,$price,$region,$maps);
+    $stmt->execute();
+    if($photo){ $p=$conn->prepare('INSERT INTO foto_wisata (id_wisata,Nama_Foto,link_foto) VALUES (?,?,?)'); $base=basename($photo); $p->bind_param('sss',$id,$base,$photo); $p->execute(); }
+    respond(['status'=>'success','message'=>'Data wisata berhasil ditambahkan.','data'=>['id'=>$id]],201);
+ }
+ if($method==='PUT') {
+    $id=trim((string)($_GET['id']??'')); if($id==='') respond(['status'=>'error','message'=>'ID wisata tidak valid.'],400);
+    $name=trim((string)($_POST['name']??'')); $region=trim((string)($_POST['domisili']??$_POST['kabupaten_id']??'')); $cat=(int)($_POST['category_id']??0); $price=(float)($_POST['price']??0); $maps=trim((string)($_POST['maps_url']??''));
+    if($name===''||$region===''||$cat<1) respond(['status'=>'error','message'=>'Nama wisata, wilayah, dan kategori wajib diisi.'],400);
+    $stmt=$conn->prepare('UPDATE wisata SET nama_wisata=?,domisili=?,id_kategori=?,harga_tiket=?,Maps_Wisata=? WHERE id_wisata=?'); $stmt->bind_param('ssidss',$name,$region,$cat,$price,$maps,$id); $stmt->execute();
+    $photo=uploadPhoto($conn,$id); if($photo){ $p=$conn->prepare('INSERT INTO foto_wisata (id_wisata,Nama_Foto,link_foto) VALUES (?,?,?)'); $base=basename($photo); $p->bind_param('sss',$id,$base,$photo); $p->execute(); }
+    respond(['status'=>'success','message'=>'Data wisata berhasil diperbarui.']);
+ }
+ if($method==='DELETE') { $id=trim((string)($_GET['id']??'')); if($id==='') respond(['status'=>'error','message'=>'ID wisata tidak valid.'],400); $stmt=$conn->prepare('DELETE FROM wisata WHERE id_wisata=?'); $stmt->bind_param('s',$id); $stmt->execute(); if(!$stmt->affected_rows) respond(['status'=>'error','message'=>'Data wisata tidak ditemukan.'],404); respond(['status'=>'success','message'=>'Data wisata berhasil dihapus.']); }
+ respond(['status'=>'error','message'=>'Metode tidak diizinkan.'],405);
+} catch(Throwable $e) { error_log('admin_destinations: '.$e->getMessage()); respond(['status'=>'error','message'=>'Terjadi kesalahan saat memproses data wisata.'],500); }

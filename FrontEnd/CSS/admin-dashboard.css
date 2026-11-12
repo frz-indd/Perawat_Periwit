@@ -175,15 +175,17 @@ body.admin-dashboard-page {
     padding-left: 10px;
 }
 
-.sidebar-collapsed .admin-brand {
-    overflow: hidden;
-    margin-right: 0;
-    margin-left: 0;
-    font-size: 0;
-}
-
-.sidebar-collapsed .admin-brand::first-letter {
-    font-size: 22px;
+.sidebar-collapsed .admin-brand,
+.sidebar-collapsed .admin-brand::before,
+.sidebar-collapsed .admin-brand::after {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+    content: none !important;
 }
 
 .sidebar-collapsed .admin-nav__item {
