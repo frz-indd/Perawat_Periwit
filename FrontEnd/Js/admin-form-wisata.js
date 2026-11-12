@@ -155,8 +155,8 @@
         });
         if (!item) throw new Error('Data wisata tidak ditemukan.');
         elements.name.value = item.name || '';
-        elements.region.value = item.kabupaten && item.kabupaten.id ? String(item.kabupaten.id) : '';
-        elements.category.value = item.category && item.category.id ? String(item.category.id) : '';
+        elements.region.value = item.region || item.kabupaten || '';
+        elements.category.value = item.category_detail && item.category_detail.id ? String(item.category_detail.id) : '';
         elements.price.value = item.price == null ? '' : String(item.price);
         elements.maps.value = item.maps_url || '';
         setExistingImage(item.image);
@@ -208,7 +208,7 @@
         elements.save.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>Menyimpan...</span>';
         const formData = new FormData();
         formData.append('name', elements.name.value.trim());
-        formData.append('kabupaten_id', elements.region.value);
+        formData.append('domisili', elements.region.value);
         formData.append('category_id', elements.category.value);
         formData.append('maps_url', elements.maps.value.trim());
         if (priceValue !== '') {
@@ -231,15 +231,9 @@
                 formData.forEach(function (value, key) {
                     if (key !== '_method') methodOverride.append(key, value);
                 });
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { Authorization: 'Bearer ' + token },
-                    body: methodOverride
-                });
-                if (!response.ok) {
-                    const payload = await response.json().catch(function () { return {}; });
-                    throw new Error(payload.message || 'Data wisata gagal diperbarui.');
-                }
+                const response = await fetch(url, { method: 'POST', headers: { Authorization: 'Bearer ' + token }, body: methodOverride });
+                const payload = await response.json().catch(function () { throw new Error('Respons server tidak dapat dibaca.'); });
+                if (!response.ok || payload.status === 'error') throw new Error(payload.message || 'Data wisata gagal diperbarui.');
             } else {
                 await request(url, options);
             }

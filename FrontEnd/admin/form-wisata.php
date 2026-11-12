@@ -15,7 +15,7 @@ $pageConfig = [
     'apiRegionsUrl' => $appBasePath . '/api/admin/regions',
     'loginUrl' => $appBasePath . '/FrontEnd/auth/login-admin.php',
     'listUrl' => $appBasePath . '/FrontEnd/admin/data-wisata.php',
-    'uploadBaseUrl' => $appBasePath . '/uploads/',
+    'uploadBaseUrl' => $appBasePath . '/',
 ];
 
 function e(string $value): string
@@ -40,7 +40,7 @@ $destinationId = isset($_GET['id'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet">
-    <link href="../CSS/admin-data-wisata.css?v=1" rel="stylesheet">
+    <link href="../CSS/admin-data-wisata.css?v=20261112-50261112-5" rel="stylesheet">
 </head>
 <body class="admin-form-page">
     <main class="admin-form-container">
@@ -114,7 +114,7 @@ $destinationId = isset($_GET['id'])
     <script>
         window.adminWisataConfig = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
-    <script src="../Js/admin-form-wisata.js?v=1"></script>
+    <script src="../Js/admin-form-wisata.js?v=20261112-4"></script>
 <script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

@@ -16,7 +16,7 @@ $pageConfig = [
     'apiLogoutUrl' => $appBasePath . '/api/admin/logout',
     'loginUrl' => $appBasePath . '/FrontEnd/auth/login-admin.php',
     'formUrl' => $appBasePath . '/FrontEnd/admin/form-wisata.php',
-    'uploadBaseUrl' => $appBasePath . '/uploads/',
+    'uploadBaseUrl' => $appBasePath . '/',
     'homeUrl' => $appBasePath . '/index.php',
 ];
 
@@ -36,7 +36,7 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet">
-    <link href="../CSS/admin-data-wisata.css?v=2" rel="stylesheet">
+    <link href="../CSS/admin-data-wisata.css?v=20261112-50261112-5" rel="stylesheet">
 </head>
 <body class="admin-wisata-page">
     <aside class="admin-sidebar" id="adminSidebar">
@@ -150,7 +150,6 @@ function e(string $value): string
         </button>
     </li>
 </ul>
-                    </ul>
                 </nav>
             </div>
         </div>
@@ -177,7 +176,7 @@ function e(string $value): string
         window.adminWisataConfig = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../Js/admin-data-wisata.js?v=1"></script>
+    <script src="../Js/admin-data-wisata.js?v=20261112-4"></script>
 <script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

@@ -98,8 +98,8 @@
 
     function imageUrl(filename) {
         if (!filename) return '';
-        const safeFilename = String(filename).split(/[\\/]/).pop();
-        return config.uploadBaseUrl + encodeURIComponent(safeFilename);
+        const cleanPath = String(filename).replace(/^\/+/, '');
+        return config.uploadBaseUrl + cleanPath.split('/').map(encodeURIComponent).join('/');
     }
 
     function formatPrice(price) {
@@ -137,8 +137,8 @@
                 + '<td>' + rowNumber + '</td>'
                 + '<td>' + imageCell + '</td>'
                 + '<td>' + escapeHtml(item.name || '-') + '</td>'
-                + '<td>' + escapeHtml(item.kabupaten && item.kabupaten.name || item.region || '-') + '</td>'
-                + '<td>' + escapeHtml(item.category && item.category.name || '-') + '</td>'
+                + '<td>' + escapeHtml(item.region || item.kabupaten || '-') + '</td>'
+                + '<td>' + escapeHtml(typeof item.category === 'string' ? item.category : (item.category && item.category.name) || '-') + '</td>'
                 + '<td>' + formatPrice(item.price) + '</td>'
                 + '<td>' + ratingCell + '</td>'
                 + '<td>' + locationCell + '</td>'
@@ -199,7 +199,7 @@
             const payload = await request(config.apiDestinationsUrl + '?' + params.toString());
             const destinations = Array.isArray(payload.data) ? payload.data : [];
             state.count = destinations.length;
-            state.total = Number(payload.total);
+            state.total = Number(payload.total ?? payload.total_data ?? 0);
             state.pageSize = Number(payload.per_page) || pageSize;
             if (!Number.isFinite(state.total)) {
                 state.total = destinations.length;
