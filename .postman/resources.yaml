@@ -5,3 +5,7 @@ workspace:
 localResources:
   collections:
     - ../Backend/api/postman/Explore MajaKu - Backend API
+
+cloudResources:
+  collections:
+    ../postman/collections/Admin Reviews Collection: bae7a669-7079-48fe-bc0c-a10ddc5307f8

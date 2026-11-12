@@ -1,0 +1,23 @@
+$kind: http-request
+name: API root
+method: GET
+url: 'http://localhost/perawat_periwit/Backend/api'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status is successful (2xx)', function () {
+        pm.expect(pm.response.code).to.be.within(200, 299);
+      });
+      pm.test('Content-Type is JSON', function () {
+        pm.expect(pm.response.headers.get('Content-Type') || '').to.match(/\bapplication\/(?:[\w.-]+\+)?json\b/i);
+      });
+      pm.test('Response is valid JSON', function () {
+        pm.response.json();
+      });
+      pm.test('Response body is not empty', function () {
+        pm.expect(pm.response.text().trim()).to.not.equal('');
+      });
+      pm.test('No server error (5xx)', function () {
+        pm.expect(pm.response.code).to.be.below(500);
+      });

@@ -100,7 +100,7 @@ try {
 
     $update = $conn->prepare(
         "UPDATE wisata
-         SET average_rating = (SELECT ROUND(AVG(rating), 2) FROM ulasan WHERE Id_wisata = ?)
+         SET rating = (SELECT COALESCE(AVG(rating), 0) FROM ulasan WHERE Id_wisata = ?)
          WHERE id_wisata = ?"
     );
     $update->bind_param("ss", $destinationId, $destinationId);
@@ -108,7 +108,7 @@ try {
     $update->close();
 
     $conn->commit();
-    $respond(200, ["status" => "success", "message" => "Ulasan berhasil dihapus.", "data" => ["id_ulasan" => $reviewId]]);
+    $respond(200, ["status" => "success", "message" => "Ulasan berhasil dihapus dan rating destinasi diperbarui.", "data" => ["id_ulasan" => $reviewId]]);
 } catch (Throwable $exception) {
     if (isset($conn) && $conn instanceof mysqli) {
         try { $conn->rollback(); } catch (Throwable $ignored) {}

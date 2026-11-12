@@ -1,0 +1,20 @@
+$kind: http-request
+url: http://localhost:8000/api/admin_reviews.php
+method: GET
+headers:
+  Authorization: Bearer {{admin_token}}
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('GET reviews OK', function () {
+          pm.response.to.have.status(200);
+      });
+      var json = pm.response.json();
+      pm.expect(json.status).to.eql('success');
+      if (json.data && json.data.length > 0) {
+          var first = json.data[0];
+          pm.environment.set('review_id', first.id_ulasan);
+          pm.environment.set('dest_id',   first.id_wisata);
+      }
+    language: text/javascript
+order: 2000

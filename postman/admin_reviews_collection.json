@@ -1,0 +1,115 @@
+{
+  "info": {
+    "_postman_id": "e3c75c84-1234-5678-90ab-cdef12345678",
+    "name": "Admin Reviews Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login Admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "http://localhost:8000/api/admin_login.php",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api","admin_login.php"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\":\"admin@example.com\",\"password\":\"rahasia\"}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Login berhasil', function () {",
+              "    var json = pm.response.json();",
+              "    pm.expect(json.status).to.eql('success');",
+              "    pm.environment.set('admin_token', json.token);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET Reviews",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": {
+          "raw": "http://localhost:8000/api/admin_reviews.php",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api","admin_reviews.php"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('GET reviews OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "var json = pm.response.json();",
+              "pm.expect(json.status).to.eql('success');",
+              "if (json.data && json.data.length > 0) {",
+              "    var first = json.data[0];",
+              "    pm.environment.set('review_id', first.id_ulasan);",
+              "    pm.environment.set('dest_id',   first.id_wisata);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "DELETE Review",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": {
+          "raw": "http://localhost:8000/api/admin_reviews.php?id={{review_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api","admin_reviews.php"],
+          "query": [
+            { "key": "id", "value": "{{review_id}}" }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('DELETE berhasil', function () {",
+              "    pm.response.to.have.status(200);",
+              "    var json = pm.response.json();",
+              "    pm.expect(json.message).to.include('Ulasan berhasil dihapus dan rating destinasi diperbarui.');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ]
+}
+

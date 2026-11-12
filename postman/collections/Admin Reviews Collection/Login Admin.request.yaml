@@ -1,0 +1,18 @@
+$kind: http-request
+url: http://localhost:8000/api/admin_login.php
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: '{"username":"admin@example.com","password":"rahasia"}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Login berhasil', function () {
+          var json = pm.response.json();
+          pm.expect(json.status).to.eql('success');
+          pm.environment.set('admin_token', json.token);
+      });
+    language: text/javascript
+order: 1000
