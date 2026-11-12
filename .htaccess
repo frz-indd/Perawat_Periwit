@@ -1,3 +1,16 @@
+# Security headers (compatible with existing legacy frontend).
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Header always set Cross-Origin-Resource-Policy "same-origin"
+</IfModule>
+
+<FilesMatch "(?i)(^\.|\.(sql|log|bak|old|orig|ini|env|pem|key|conf)$)">
+    Require all denied
+</FilesMatch>
+
 RewriteEngine On
 RewriteRule ^search/?$ FrontEnd/pages/hasil_pencarian.php [QSA,L]
 RewriteRule ^api/destinations/search/?$ Backend/api/destinations_search.php [QSA,L]
@@ -22,3 +35,5 @@ RewriteRule ^api/admin/categories/([^/]+)/?$ Backend/api/admin_categories.php?id
 RewriteRule ^api/admin/regions/?$ Backend/api/admin_regions.php [QSA,L]
 RewriteRule ^api/admin/destinations/?$ Backend/api/admin_destinations.php [QSA,L]
 RewriteRule ^api/admin/destinations/([^/]+)/?$ Backend/api/admin_destinations.php?id=$1 [B,QSA,L]
+RewriteRule ^api/admin/profile/?$ Backend/api/admin_profile.php [QSA,L]
+RewriteRule ^api/admin/change-password/?$ Backend/api/admin_change_password.php [QSA,L]

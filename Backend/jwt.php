@@ -16,20 +16,26 @@ function getJwtSecret(): string
     $localPath = __DIR__ . '/jwt.local.php';
     if (is_file($localPath)) {
         $localConfig = require $localPath;
-        if (is_array($localConfig) && !empty($localConfig['jwt_secret'])) {
-            $secret = (string) $localConfig['jwt_secret'];
-            return $secret;
+        if (is_array($localConfig) && isset($localConfig['jwt_secret']) && is_string($localConfig['jwt_secret'])) {
+            $candidate = trim($localConfig['jwt_secret']);
+            if ($candidate !== '') {
+                $secret = $candidate;
+            }
         }
     }
 
-    $envSecret = getenv('JWT_SECRET');
-    if (is_string($envSecret) && trim($envSecret) !== '') {
-        $secret = trim($envSecret);
-        return $secret;
+    if ($secret === null) {
+        $envSecret = getenv('JWT_SECRET');
+        if (is_string($envSecret) && trim($envSecret) !== '') {
+            $secret = trim($envSecret);
+        }
     }
 
-    // Default fallback secret key untuk development / testing lokal
-    $secret = 'perawat_periwit_majaku_jwt_secret_key_sprint4_2026';
+    // Fail closed: tidak pernah memakai secret default yang diketahui publik.
+    if (!is_string($secret) || strlen($secret) < 32) {
+        throw new RuntimeException('JWT_SECRET belum dikonfigurasi atau terlalu pendek. Gunakan secret acak minimal 32 byte.');
+    }
+
     return $secret;
 }
 
@@ -126,12 +132,12 @@ function verifyJwt(string $token, ?string $secret = null): ?array
 
     // Periksa expiration
     $now = time();
-    if (isset($payload['exp']) && is_numeric($payload['exp']) && $now > (int) $payload['exp']) {
+    if (!isset($payload['exp']) || !is_numeric($payload['exp']) || $now >= (int) $payload['exp']) {
         return null;
     }
 
-    // Periksa not-before jika ada
-    if (isset($payload['nbf']) && is_numeric($payload['nbf']) && $now < (int) $payload['nbf']) {
+    // Periksa not-before jika ada; klaim non-numerik ditolak.
+    if (isset($payload['nbf']) && (!is_numeric($payload['nbf']) || $now < (int) $payload['nbf'])) {
         return null;
     }
 

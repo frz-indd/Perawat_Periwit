@@ -61,7 +61,15 @@ function adminOnly(): array
         exit;
     }
 
-    $decoded = verifyJwt($token);
+    try {
+        $decoded = verifyJwt($token);
+    } catch (Throwable $e) {
+        error_log('JWT verification configuration error: ' . $e->getMessage());
+        http_response_code(503);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['message' => 'Layanan autentikasi belum dikonfigurasi dengan benar.']);
+        exit;
+    }
 
     if ($decoded === null || ($decoded['role'] ?? '') !== 'admin') {
         http_response_code(403);

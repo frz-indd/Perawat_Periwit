@@ -975,6 +975,306 @@
           ]
         }
       ]
+    },
+    {
+      "name": "GET /api/admin/users - search & pagination",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminJwtToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/users?search={{userSearch}}&page={{userPage}}&limit={{userLimit}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "users"
+          ],
+          "query": [
+            {
+              "key": "search",
+              "value": "{{userSearch}}",
+              "description": "Pencarian nama atau email"
+            },
+            {
+              "key": "page",
+              "value": "{{userPage}}"
+            },
+            {
+              "key": "limit",
+              "value": "{{userLimit}}"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Admin users returns paginated data', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.status).to.eql('success');",
+              "  pm.expect(body.data).to.be.an('array');",
+              "  pm.expect(body.pagination).to.have.property('current_page');",
+              "  pm.expect(body.pagination).to.have.property('total_data');",
+              "  body.data.forEach(function (user) {",
+              "    pm.expect(user).to.have.property('id');",
+              "    pm.expect(user).to.have.property('nama');",
+              "    pm.expect(user).to.have.property('email');",
+              "    pm.expect(user).not.to.have.property('password');",
+              "  });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ADMIN-08 Admin Profile & Password",
+      "item": [
+        {
+          "name": "GET admin profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminJwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/profile"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Profile returns 200', function(){pm.response.to.have.status(200);});",
+                  "const d=pm.response.json().data; pm.test('Profile has safe fields',function(){pm.expect(d.id).to.be.a('number');pm.expect(d.name).to.be.a('string');pm.expect(d.username).to.be.a('string');pm.expect(d).not.to.have.property('password');pm.expect(d).not.to.have.property('password_hash');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT update admin profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminJwtToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/profile"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"{{adminProfileName}}\", \"image_url\": \"{{adminProfileImageUrl}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Profile update returns 200',function(){pm.response.to.have.status(200);pm.expect(pm.response.json().data.name).to.eql(pm.collectionVariables.get('adminProfileName'));});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT change admin password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminJwtToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/change-password"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"current_password\": \"{{adminCurrentPassword}}\", \"new_password\": \"{{adminNewPassword}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Password updated',function(){pm.response.to.have.status(200);pm.expect(pm.response.json().message).to.eql('Kata sandi berhasil diperbarui. Silakan login kembali.');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT reject wrong current password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminJwtToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/change-password"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"current_password\": \"PasswordSalah1!\", \"new_password\": \"PasswordBaru2@\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Wrong current password returns exact 400 contract',function(){pm.response.to.have.status(400);pm.expect(pm.response.json().message).to.eql('Kata sandi saat ini yang Anda masukkan salah.');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT reject weak new password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminJwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/change-password"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"current_password\": \"{{adminCurrentPassword}}\", \"new_password\": \"weak\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Weak password is rejected',function(){pm.response.to.have.status(422);pm.expect(pm.response.json().status).to.eql('validation_error');});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET admin profile without token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/profile"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Admin profile requires a token',function(){pm.response.to.have.status(403);});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "variable": [
@@ -1033,6 +1333,21 @@
     {
       "key": "facilityId",
       "value": "1"
+    },
+    {
+      "key": "userSearch",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userPage",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "userLimit",
+      "value": "10",
+      "type": "string"
     }
   ]
 }

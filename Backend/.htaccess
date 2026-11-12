@@ -1,5 +1,10 @@
 Options -Indexes
 
-<FilesMatch "^google_oauth\.local\.php$">
+# Jangan pernah sajikan dump database, konfigurasi, log, backup, atau source non-publik.
+<FilesMatch "(?i)(\.(sql|sqlite|db|log|ini|env|ya?ml|md|bak|old|orig|dist|pem|key|crt|conf|sh|lock)$|^(\.env.*|composer\.(json|lock)|jwt\.local\.php|database\.local\.php|google_oauth\.local\.php)$)">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "(?i)^(\.htaccess|\.htpasswd)$">
     Require all denied
 </FilesMatch>

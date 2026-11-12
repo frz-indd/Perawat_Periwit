@@ -31,6 +31,21 @@ try {
         $respond(503, ['status' => 'error', 'message' => 'Database tidak dapat dihubungi. Periksa Backend/database/database.local.php.']);
     }
 
+    // Rate limit per kombinasi IP + username. Tabel dibuat melalui migration keamanan.
+    $clientIp = (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+    if (filter_var($clientIp, FILTER_VALIDATE_IP) === false) $clientIp = 'unknown';
+    $ipKey = hash('sha256', $clientIp);
+    $usernameKey = hash('sha256', strtolower($username));
+    $rate = $conn->prepare('SELECT failed_attempts, locked_until FROM admin_login_attempts WHERE ip_hash = ? AND username_hash = ? LIMIT 1');
+    $rate->bind_param('ss', $ipKey, $usernameKey);
+    $rate->execute();
+    $rateRow = $rate->get_result()->fetch_assoc();
+    $rate->close();
+    if ($rateRow && !empty($rateRow['locked_until']) && strtotime((string)$rateRow['locked_until']) > time()) {
+        header('Retry-After: ' . max(1, strtotime((string)$rateRow['locked_until']) - time()));
+        $respond(429, ['status' => 'rate_limited', 'message' => 'Terlalu banyak percobaan login. Coba lagi beberapa menit kemudian.']);
+    }
+
     $tableExists = static function (mysqli $db, string $table): bool {
         $stmt = $db->prepare('SELECT COUNT(*) total FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?');
         $stmt->bind_param('s', $table); $stmt->execute();
@@ -66,13 +81,23 @@ try {
         if ($admin) $sourceTable = 'users';
     }
 
-    if (!$admin || strtolower((string)($admin['role'] ?? 'admin')) !== 'admin') {
-        $respond(401, ['status' => 'error', 'field' => 'username', 'message' => 'Username atau password salah.']);
+    $hash = (string)($admin['password_hash'] ?? '');
+    $hashed = $hash !== '' && !empty(password_get_info($hash)['algo']);
+    // Kompatibilitas migrasi: akun plaintext lama hanya diterima sekali lalu langsung di-hash.
+    // Tetap gunakan respons generik agar keberadaan username tidak dapat ditebak.
+    $passwordMatches = $hashed ? password_verify($password, $hash) : ($hash !== '' && hash_equals($hash, $password));
+    if (!$admin) {
+        // Dummy bcrypt verification membantu meratakan waktu respons untuk username yang tidak ada.
+        password_verify($password, '$2y$10$49DQUmYPm5.oKJk8jJL08OdQKKmnCoLnpv.VDrH3L9fikW8UPq1OW');
     }
-    $hash = (string)$admin['password_hash'];
-    $hashed = !empty(password_get_info($hash)['algo']);
-    $valid = $hashed ? password_verify($password, $hash) : hash_equals($hash, $password);
-    if (!$valid) $respond(401, ['status' => 'error', 'field' => 'password', 'message' => 'Username atau password salah.']);
+    $valid = $admin && strtolower((string)($admin['role'] ?? 'admin')) === 'admin' && $passwordMatches;
+    if (!$valid) {
+        $fail = $conn->prepare('INSERT INTO admin_login_attempts (ip_hash, username_hash, failed_attempts, first_failed_at, last_failed_at, locked_until) VALUES (?, ?, 1, NOW(), NOW(), NULL) ON DUPLICATE KEY UPDATE failed_attempts = IF(first_failed_at < NOW() - INTERVAL 15 MINUTE, 1, failed_attempts + 1), first_failed_at = IF(first_failed_at < NOW() - INTERVAL 15 MINUTE, NOW(), first_failed_at), last_failed_at = NOW(), locked_until = IF(IF(first_failed_at < NOW() - INTERVAL 15 MINUTE, 1, failed_attempts + 1) >= 5, DATE_ADD(NOW(), INTERVAL 15 MINUTE), NULL)');
+        $fail->bind_param('ss', $ipKey, $usernameKey); $fail->execute(); $fail->close();
+        $respond(401, ['status' => 'error', 'message' => 'Username atau password salah.']);
+    }
+    $clear = $conn->prepare('DELETE FROM admin_login_attempts WHERE ip_hash = ? AND username_hash = ?');
+    $clear->bind_param('ss', $ipKey, $usernameKey); $clear->execute(); $clear->close();
 
     // Migrasikan otomatis password plaintext / hash lama ke password_hash().
     if (!$hashed || password_needs_rehash($hash, PASSWORD_DEFAULT)) {

@@ -1,0 +1,5 @@
+Backend/jwt.local.php
+Backend/database/database.local.php
+Backend/google_oauth.local.php
+*.log
+*.sql.bak

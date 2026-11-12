@@ -1,4 +1,4 @@
-﻿# Bukti Uji API dengan Postman
+# Bukti Uji API dengan Postman
 
 Tanggal uji: 27 Oktober 2026  
 Alat: Postman CLI 1.77.0  
@@ -64,3 +64,7 @@ Di Postman Desktop, pilih **Import → File**, lalu pilih koleksi JSON berikut:
 [`Perawat_Periwit.postman_collection.json`](api/postman/Perawat_Periwit.postman_collection.json)
 
 Koleksi ini memuat 14 request beserta test script. Variabel `baseUrl` sudah diarahkan ke `http://localhost/Perawat_Periwit`. Isi variabel kredensial di Postman hanya jika ingin menguji login sukses.
+
+## Admin User Management (6.3)
+
+Request `GET /api/admin/users - search & pagination` telah ditambahkan ke koleksi Postman. Jalankan login admin JWT terlebih dahulu, lalu uji dengan variabel `userSearch`, `userPage`, dan `userLimit`. Endpoint mendukung pencarian nama/email dan metadata pagination. Detail parameter, response, dan status code tersedia di `README-ADMIN-USERS.md`.
