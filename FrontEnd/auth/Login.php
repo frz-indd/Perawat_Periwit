@@ -52,7 +52,7 @@ if (empty($_SESSION['csrf'])) { $_SESSION['csrf'] = bin2hex(random_bytes(32)); }
     >
 
     <link rel="stylesheet" href="../CSS/auth.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
+    <link rel="stylesheet" href="../CSS/theme.css?v=nav-final-7">
 </head>
 
 <body>

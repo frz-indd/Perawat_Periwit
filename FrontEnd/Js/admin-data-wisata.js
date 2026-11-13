@@ -6,6 +6,9 @@
     const pageSize = 5;
     const elements = {
         rows: document.getElementById('destinationRows'),
+        statePanel: document.getElementById('destinationStatePanel'),
+        tableWrap: document.getElementById('destinationTableWrap'),
+        tableFooter: document.getElementById('destinationTableFooter'),
         summary: document.getElementById('resultSummary'),
         message: document.getElementById('pageMessage'),
         search: document.getElementById('searchInput'),
@@ -110,11 +113,32 @@
             : '-';
     }
 
+    function showTable() {
+        elements.statePanel.classList.add('d-none');
+        elements.tableWrap.classList.remove('d-none');
+        elements.tableFooter.classList.remove('d-none');
+    }
+
+    function showState(kind, message) {
+        elements.tableWrap.classList.add('d-none');
+        elements.tableFooter.classList.add('d-none');
+        elements.statePanel.classList.remove('d-none');
+        const states = {
+            empty: { icon: 'bi-geo-alt', title: 'Belum ada data destinasi wisata', text: 'Silakan tambahkan destinasi wisata untuk mulai mengelola data.', action: '<a class="destination-state-button" href="' + escapeHtml(config.formUrl) + '">Tambah data wisata</a>' },
+            error: { icon: 'bi-x-circle', title: 'Gagal Memuat data wisata', text: message || 'Maaf, Data Wisata gagal di muat. Silahkan coba kembali.', action: '<button class="destination-state-button" type="button" data-state-action="retry">Coba lagi</button>' },
+            notFound: { icon: 'bi-search', title: 'Data Wisata Tidak Di Temukan', text: 'Maaf, tidak ada data destinasi wisata yang sesuai dengan kata kunci pencarianmu', action: '<button class="destination-state-button" type="button" data-state-action="reset">Coba cari dengan kata lain</button>' }
+        };
+        const item = states[kind];
+        elements.statePanel.innerHTML = '<div class="destination-state-content destination-state-' + kind + '"><i class="bi ' + item.icon + '" aria-hidden="true"></i><h2>' + item.title + '</h2><p>' + escapeHtml(item.text) + '</p>' + item.action + '</div>';
+    }
+
     function renderRows(destinations) {
         if (!destinations.length) {
-            elements.rows.innerHTML = '<tr><td class="table-state" colspan="9">Data wisata tidak ditemukan.</td></tr>';
+            const hasFilter = Boolean(elements.search.value.trim() || elements.region.value || elements.category.value);
+            showState(hasFilter ? 'notFound' : 'empty');
             return;
         }
+        showTable();
 
         elements.rows.innerHTML = destinations.map(function (item, index) {
             const rowNumber = (state.page - 1) * state.pageSize + index + 1;
@@ -142,7 +166,7 @@
                 + '<td>' + formatPrice(item.price) + '</td>'
                 + '<td>' + ratingCell + '</td>'
                 + '<td>' + locationCell + '</td>'
-                + '<td><a class="destination-edit" href="' + escapeHtml(config.formUrl) + '?id=' + encodeURIComponent(item.id) + '" aria-label="Edit ' + escapeHtml(item.name) + '"><i class="bi bi-pencil-fill"></i></a>'
+                + '<td><a class="destination-edit" href="' + escapeHtml(config.formUrl) + '?id=' + encodeURIComponent(item.id) + '" aria-label="Edit ' + escapeHtml(item.name) + '"><i class="bi bi-pencil"></i></a>'
                 + '<button class="destination-delete" type="button" data-delete-id="' + escapeHtml(item.id) + '" aria-label="Hapus ' + escapeHtml(item.name) + '"><i class="bi bi-trash-fill"></i></button></td>'
                 + '</tr>';
         }).join('');
@@ -185,6 +209,7 @@
     }
 
     async function loadDestinations() {
+        showTable();
         elements.rows.innerHTML = '<tr><td class="table-state" colspan="9"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Memuat data wisata...</td></tr>';
         elements.message.classList.add('d-none');
         const params = new URLSearchParams({
@@ -208,8 +233,7 @@
             updatePagination();
         } catch (error) {
             if (error.message !== 'Sesi admin berakhir. Silakan login kembali.') {
-                elements.rows.innerHTML = '<tr><td class="table-state" colspan="9">Data wisata gagal dimuat.</td></tr>';
-                showMessage(error.message || 'Data wisata gagal dimuat.');
+                showState('error', 'Maaf, Data Wisata gagal di muat. Silahkan coba kembali.');
                 elements.summary.textContent = '';
             }
         }
@@ -233,6 +257,16 @@
         fillOptions(elements.category, Array.isArray(results[0].data) ? results[0].data : [], 'Semua Kategori');
         fillOptions(elements.region, Array.isArray(results[1].data) ? results[1].data : [], 'Semua wilayah');
     }
+
+    elements.statePanel.addEventListener('click', function (event) {
+        const action = event.target.closest('[data-state-action]');
+        if (!action) return;
+        if (action.dataset.stateAction === 'retry') { loadDestinations(); }
+        if (action.dataset.stateAction === 'reset') {
+            elements.search.value = ''; elements.region.value = ''; elements.category.value = '';
+            state.page = 1; loadDestinations();
+        }
+    });
 
     elements.searchButton.addEventListener('click', function () {
         state.page = 1;
@@ -324,7 +358,6 @@
     loadFilters()
         .then(loadDestinations)
         .catch(function (error) {
-            elements.rows.innerHTML = '<tr><td class="table-state" colspan="9">Filter data wisata gagal dimuat.</td></tr>';
-            showMessage(error.message || 'Filter data wisata gagal dimuat.');
+            showState('error', 'Filter data wisata gagal dimuat. Silakan coba kembali.');
         });
 }());

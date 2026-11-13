@@ -31,9 +31,8 @@ try {
         $respond(503, ['status' => 'error', 'message' => 'Database tidak dapat dihubungi. Periksa Backend/database/database.local.php.']);
     }
 
-    // Pastikan tabel pendukung login tersedia pada DATABASE yang benar-benar sedang dipakai.
-    // Sebelumnya query rate-limit dijalankan sebelum tabel diperiksa/dibuat, sehingga
-    // MySQL melempar error 1146: Table '...admin_login_attempts' doesn't exist.
+    // Siapkan tabel pendukung login secara idempotent agar instalasi database lama
+    // tetap dapat login tanpa harus menjalankan migration manual terlebih dahulu.
     $conn->query("CREATE TABLE IF NOT EXISTS admin_login_attempts (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         ip_hash CHAR(64) NOT NULL,
@@ -44,8 +43,7 @@ try {
         locked_until DATETIME NULL DEFAULT NULL,
         PRIMARY KEY (id),
         UNIQUE KEY uq_admin_login_ip_username (ip_hash, username_hash),
-        KEY idx_admin_login_locked_until (locked_until),
-        KEY idx_admin_login_last_failed (last_failed_at)
+        KEY idx_admin_login_locked_until (locked_until)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
     $conn->query("CREATE TABLE IF NOT EXISTS admin_sessions (

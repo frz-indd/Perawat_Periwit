@@ -36,7 +36,7 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet">
-    <link href="../CSS/admin-data-wisata.css?v=20261112-50261112-5" rel="stylesheet">
+    <link href="../CSS/admin-data-wisata.css?v=20261113-pencil-outline1" rel="stylesheet">
 </head>
 <body class="admin-wisata-page">
     <aside class="admin-sidebar" id="adminSidebar">
@@ -95,7 +95,8 @@ function e(string $value): string
             </div>
 
             <div id="pageMessage" class="alert admin-alert d-none" role="status"></div>
-            <div class="table-responsive admin-table-wrap">
+            <section id="destinationStatePanel" class="destination-state-panel d-none" aria-live="polite"></section>
+            <div class="table-responsive admin-table-wrap" id="destinationTableWrap">
                 <table class="table admin-table align-middle mb-0">
                     <thead>
                         <tr>
@@ -115,7 +116,7 @@ function e(string $value): string
                     </tbody>
                 </table>
             </div>
-            <div class="admin-table-footer">
+            <div class="admin-table-footer" id="destinationTableFooter">
                 <p id="resultSummary" class="mb-0" aria-live="polite"></p>
                 <nav aria-label="Halaman data wisata">
 <ul id="paginationLinks" class="pagination pagination-sm mb-0">
@@ -176,7 +177,7 @@ function e(string $value): string
         window.adminWisataConfig = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../Js/admin-data-wisata.js?v=20261112-4"></script>
+    <script src="../Js/admin-data-wisata.js?v=20261113-pencil-outline1"></script>
 <script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

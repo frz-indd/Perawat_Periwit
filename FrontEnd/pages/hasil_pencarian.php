@@ -155,32 +155,41 @@ function terpilih($daftar, $nilai)
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
+    <link rel="stylesheet" href="../CSS/theme.css?v=nav-solid-green-8">
     <link rel="stylesheet" href="../CSS/hasil_pencarian.css?v=font-map-3">
+    <link rel="stylesheet" href="../CSS/\1category-item-solid-1">
 </head>
 
-<body>
+<body class="site-public-page site-navbar-page">
 
 <!-- NAVBAR -->
-<header class="navbar">
-    <div class="navbar-container">
+<header class="navbar ep-navbar site-navbar">
+    <div class="navbar-container ep-navbar__inner">
 
-        <a href="../../index.php" class="navbar-logo">
+        <a href="../../index.php" class="navbar-logo ep-logo">
             Explore Majaku
         </a>
 
-        <nav class="navbar-menu">
-            <a href="../../index.php">Beranda</a>
-            <a href="kategori.php?kategori=alam">kategori</a>
-            <a href="tentang.php">Tentang</a>
+        <nav class="navbar-menu ep-menu" aria-label="Menu utama">
+            <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
+            <details name="site-category-menu" class="category-dropdown ep-menu__kategori">
+                <summary><span>Kategori</span><span class="ep-menu__panah" aria-hidden="true"></span></summary>
+                <div class="category-menu">
+                    <a href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a>
+                    <a href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a>
+                    <a href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a>
+                    <a href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a>
+                </div>
+            </details>
+            <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
         </nav>
 
-        <div class="navbar-icons">
-            <a href="hasil_pencarian.php" class="nav-icon" aria-label="Pencarian">
+        <div class="navbar-icons ep-aksi">
+            <a href="hasil_pencarian.php" class="nav-icon ep-ikon ep-ikon--cari" aria-label="Pencarian">
                 <i class="bi bi-search"></i>
             </a>
 
-            <a href="../auth/Login.php" class="nav-icon" aria-label="Akun">
+            <a href="../auth/Login.php" class="nav-icon ep-ikon ep-ikon--cari" aria-label="Akun">
                 <svg class="profile-outline-icon" viewBox="0 0 40 40" aria-hidden="true">
                     <circle cx="20" cy="20" r="17"></circle>
                     <circle cx="20" cy="15" r="5"></circle>

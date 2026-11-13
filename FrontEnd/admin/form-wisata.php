@@ -40,11 +40,10 @@ $destinationId = isset($_GET['id'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet">
-    <link href="../CSS/admin-data-wisata.css?v=20261112-50261112-5" rel="stylesheet">
+    <link href="../CSS/admin-data-wisata.css?v=20261113-editfix4" rel="stylesheet">
 </head>
 <body class="admin-form-page">
     <main class="admin-form-container">
-        <a class="admin-form-back" href="<?= e($pageConfig['listUrl']) ?>"><i class="bi bi-arrow-left"></i> Back</a>
         <header class="admin-form-heading">
             <h1 id="formTitle"><?= $destinationId !== '' ? 'Edit Data Wisata' : 'Tambah Data Wisata' ?></h1>
             <p>Lengkapi informasi destinasi wisata dengan detail dan benar.</p>
@@ -83,6 +82,16 @@ $destinationId = isset($_GET['id'])
                     <input class="form-control" id="destinationMaps" name="maps_url" type="url" maxlength="2048" placeholder="https://maps.google.com/...">
                     <div class="invalid-feedback">Masukkan URL yang valid.</div>
                 </div>
+                <div class="admin-field">
+                    <label for="destinationLongitude">Longitude</label>
+                    <input class="form-control" id="destinationLongitude" name="longitude" type="number" min="-180" max="180" step="any" placeholder="Masukkan koordinat">
+                    <div class="invalid-feedback">Longitude harus antara -180 dan 180.</div>
+                </div>
+                <div class="admin-field">
+                    <label for="destinationLatitude">Latitude</label>
+                    <input class="form-control" id="destinationLatitude" name="latitude" type="number" min="-90" max="90" step="any" placeholder="Masukkan koordinat">
+                    <div class="invalid-feedback">Latitude harus antara -90 dan 90.</div>
+                </div>
             </div>
 
             <div class="admin-upload-column">
@@ -97,7 +106,7 @@ $destinationId = isset($_GET['id'])
                             <circle cx="91" cy="77" r="24" fill="#176f60"/>
                             <path d="M91 65v24M79 77h24" stroke="white" stroke-width="4" stroke-linecap="round"/>
                         </svg>
-                        <span class="admin-upload-prompt">klik untuk mengunggah foto<br>atau drag &amp; drop</span>
+                        <span class="admin-upload-prompt" id="uploadPrompt">klik ikon tambah foto untuk<br>mengunggah foto atau drag &amp; drop</span>
                         <span class="admin-upload-note"><i class="bi bi-info-circle-fill"></i> format JPG/PNG, maksimal 10MB</span>
                         <span class="admin-upload-filename" id="imageFilename"></span>
                     </span>
@@ -107,14 +116,14 @@ $destinationId = isset($_GET['id'])
 
             <div class="admin-form-actions">
                 <a class="btn admin-cancel-button" href="<?= e($pageConfig['listUrl']) ?>"><i class="bi bi-x-lg"></i> Batal</a>
-                <button class="btn admin-save-button" id="saveDestinationButton" type="submit"><i class="bi bi-floppy"></i><span>Simpan data</span></button>
+                <button class="btn admin-save-button" id="saveDestinationButton" type="submit"><i class="bi bi-floppy"></i><span><?= $destinationId !== '' ? 'Simpan perubahan' : 'Simpan data' ?></span></button>
             </div>
         </form>
     </main>
     <script>
         window.adminWisataConfig = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
-    <script src="../Js/admin-form-wisata.js?v=20261112-4"></script>
+    <script src="../Js/admin-form-wisata.js?v=20261113-editfix4"></script>
 <script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>
