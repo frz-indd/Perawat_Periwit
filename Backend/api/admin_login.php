@@ -31,7 +31,38 @@ try {
         $respond(503, ['status' => 'error', 'message' => 'Database tidak dapat dihubungi. Periksa Backend/database/database.local.php.']);
     }
 
-    // Rate limit per kombinasi IP + username. Tabel dibuat melalui migration keamanan.
+    // Pastikan tabel pendukung login tersedia pada DATABASE yang benar-benar sedang dipakai.
+    // Sebelumnya query rate-limit dijalankan sebelum tabel diperiksa/dibuat, sehingga
+    // MySQL melempar error 1146: Table '...admin_login_attempts' doesn't exist.
+    $conn->query("CREATE TABLE IF NOT EXISTS admin_login_attempts (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        ip_hash CHAR(64) NOT NULL,
+        username_hash CHAR(64) NOT NULL,
+        failed_attempts INT UNSIGNED NOT NULL DEFAULT 0,
+        first_failed_at DATETIME NOT NULL,
+        last_failed_at DATETIME NOT NULL,
+        locked_until DATETIME NULL DEFAULT NULL,
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_admin_login_ip_username (ip_hash, username_hash),
+        KEY idx_admin_login_locked_until (locked_until),
+        KEY idx_admin_login_last_failed (last_failed_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $conn->query("CREATE TABLE IF NOT EXISTS admin_sessions (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        admin_id BIGINT UNSIGNED NOT NULL,
+        token_hash CHAR(64) NOT NULL,
+        expires_at DATETIME NOT NULL,
+        revoked_at DATETIME NULL DEFAULT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_admin_sessions_token_hash (token_hash),
+        KEY idx_admin_sessions_admin_id (admin_id),
+        KEY idx_admin_sessions_expiry (expires_at),
+        KEY idx_admin_sessions_revoked (revoked_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // Rate limit per kombinasi IP + username.
     $clientIp = (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
     if (filter_var($clientIp, FILTER_VALIDATE_IP) === false) $clientIp = 'unknown';
     $ipKey = hash('sha256', $clientIp);
