@@ -13,9 +13,9 @@ require_once __DIR__ . '/navbar-profile-session.php';
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
-    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
+    <link rel="stylesheet" href="../CSS/theme.css?v=nav-solid-green-8">
     <link rel="stylesheet" href="../CSS/tentang.css?v=shared-layout-13">
-    <link rel="stylesheet" href="../CSS/navbar-common.css?v=6">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=nav-active-text-green-3">
 </head>
 <body class="about-page halaman-tentang site-navbar-page">
 
@@ -24,7 +24,7 @@ require_once __DIR__ . '/navbar-profile-session.php';
             <a class="ep-logo" href="../../index.php">Explore Majaku</a>
             <nav class="ep-menu" aria-label="Menu utama">
                 <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
-                <details class="category-dropdown ep-menu__kategori">
+                <details name="site-category-menu" class="category-dropdown ep-menu__kategori">
                     <summary>
                         <span>Kategori</span>
                         <span class="ep-menu__panah" aria-hidden="true"></span>
@@ -127,75 +127,7 @@ require_once __DIR__ . '/navbar-profile-session.php';
         </section>
     </main>
 
-    <script>
-        (function () {
-            var toggle = document.getElementById('kategori-toggle');
-            var menu = document.getElementById('kategori-menu');
-            var header = document.querySelector('.ep-navbar');
-            if (!toggle || !menu) return;
 
-            document.body.appendChild(menu);
-
-            function terbuka() {
-                return menu.classList.contains('show');
-            }
-
-            function posisi() {
-                var r = toggle.getBoundingClientRect();
-                var dasar = header ? header.getBoundingClientRect().bottom : r.bottom;
-                var lebar = menu.offsetWidth;
-                var kiri;
-                if (window.innerWidth <= 900) {
-                    kiri = (window.innerWidth - lebar) / 2;
-                } else {
-                    kiri = r.left + r.width * 0.15;
-                }
-                kiri = Math.max(8, Math.min(kiri, window.innerWidth - lebar - 8));
-                menu.style.top = Math.round(dasar + 6) + 'px';
-                menu.style.left = Math.round(kiri) + 'px';
-            }
-
-            function buka() {
-                menu.classList.add('show');
-                menu.style.setProperty('display', 'block', 'important');
-                menu.style.setProperty('visibility', 'visible', 'important');
-                menu.style.setProperty('opacity', '1', 'important');
-                posisi();
-                toggle.classList.add('aktif');
-                toggle.setAttribute('aria-expanded', 'true');
-            }
-
-            function tutup() {
-                menu.classList.remove('show');
-                menu.style.removeProperty('display');
-                menu.style.removeProperty('visibility');
-                menu.style.removeProperty('opacity');
-                toggle.classList.remove('aktif');
-                toggle.setAttribute('aria-expanded', 'false');
-            }
-
-            toggle.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                if (terbuka()) { tutup(); } else { buka(); }
-            });
-
-            document.addEventListener('click', function (e) {
-                if (terbuka() && !menu.contains(e.target) && !toggle.contains(e.target)) tutup();
-            });
-
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && terbuka()) {
-                    tutup();
-                    toggle.focus();
-                }
-            });
-
-            window.addEventListener('resize', function () {
-                if (terbuka()) posisi();
-            });
-        })();
-    </script>
 <script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

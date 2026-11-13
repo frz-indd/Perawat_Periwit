@@ -444,9 +444,9 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
-    <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
+    <link rel="stylesheet" href="../CSS/theme.css?v=nav-final-7">
     <link rel="stylesheet" href="../CSS/detail-wisata.css?v=final-24">
-    <link rel="stylesheet" href="../CSS/navbar-common.css?v=6">
+    <link rel="stylesheet" href="../CSS/\1category-item-solid-1">
 </head>
 <body class="halaman-detail site-navbar-page">
 
@@ -566,7 +566,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <a class="ep-logo" href="../../index.php">Explore Majaku</a>
             <nav class="ep-menu" aria-label="Menu utama">
                 <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
-                <details class="category-dropdown ep-menu__kategori">
+                <details name="site-category-menu" class="category-dropdown ep-menu__kategori">
                     <summary>
                         <span>Kategori</span>
                         <span class="ep-menu__panah" aria-hidden="true"></span>

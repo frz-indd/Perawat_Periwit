@@ -1496,3 +1496,562 @@ body.halaman-detail .hero-wisata {
         font-size: 15px;
     }
 }
+/* =========================================================
+   BERANDA EXPLORE MAJAKU — PENYESUAIAN SESUAI REFERENSI FIGMA
+   Digabung ke theme.css agar tidak menambah stylesheet baru.
+   ========================================================= */
+/* Beranda Explore Majaku — penyelarasan berdasarkan referensi Figma */
+.home-page { background:#fff; color:#080808; }
+.home-page .navbar { height:82px; width:100%; position:relative; }
+.home-page .navbar-container { width:100%; max-width:none; margin:0; padding:0 2.85% 0 2.85%; }
+.home-page .navbar-logo { font-size:42px; font-weight:400; line-height:1; }
+.home-page .navbar-menu { width: min(458px, 40vw); margin-left:auto; margin-right:0; justify-content:space-between; gap:0; }
+.home-page .navbar-menu a,.home-page .category-dropdown>summary { font-size:21px; font-weight:500; }
+.home-page .navbar-icons { margin-left:clamp(140px, 19.3vw, 278px); gap:16px; }
+.home-page .profile-outline-icon { width:40px; height:40px; stroke-width:2.2; }
+.home-page .login-button { width:94px; min-width:94px; height:40px; padding:0; border-radius:11px; font-size:19px; font-weight:500; }
+.home-page .hero { height:262px; background-size:cover; background-position:center center; }
+.home-page .hero-overlay { background:rgba(0,0,0,.30); }
+.home-page .hero-content { padding:0 18px; }
+.home-page .hero-content h1 { margin:0 0 15px; font-family:var(--font-card-title); font-size:38px; font-weight:700; line-height:1.2; }
+.home-page .hero-content p { margin:0 0 18px; font-family:var(--font-mono); font-size:19px; line-height:1.5; }
+.home-page .hero-search-row { width:min(890px, calc(100% - 24px)); margin:0 auto; display:flex; align-items:center; gap:9px; }
+.home-page .search-box { flex:1; width:auto; height:66px; margin:0; padding:5px 9px 5px 50px; border:0; border-radius:20px; background:#d9d9d9; box-shadow:none; }
+.home-page .search-box input { min-width:0; height:100%; font-family:var(--font-mono); font-size:19px; font-style:italic; color:#111; }
+.home-page .search-box input::placeholder { color:#111; opacity:1; }
+.home-page .search-box button { width:66px; height:46px; flex:0 0 66px; border:0; border-radius:17px; background:#176f63; color:#fff; font-size:31px; }
+.home-page .home-filter-button { width:70px; height:66px; flex:0 0 70px; display:flex; align-items:center; justify-content:center; border:0; border-radius:20px; background:#d9d9d9; color:#176f63; font-size:35px; cursor:pointer; transition:background .2s,transform .2s; }
+.home-page .home-filter-button:hover { background:#eee; transform:translateY(-1px); }
+.home-page .home-search-validation { width:min(890px, calc(100% - 24px)); margin:3px auto 0; color:#ff2929; text-align:left; font-family:var(--font-main); font-size:18px; line-height:1.2; }
+.home-page .home-search-validation[hidden] { display:none; }
+.home-page .main-content { width: min(1182px, calc(100% - 80px)); max-width:none; margin:0 auto; padding:60px 0 60px; }
+.home-page .destination-section h2 { margin:0 0 18px; color:#050505; font-family:var(--font-card-title); font-size:30px; font-weight:700; line-height:1.3; }
+.home-page .destination-grid { width:calc(100% - 0px); margin:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:60px; }
+.home-page .destination-card { height:281px; min-width:0; display:block; position:relative; overflow:hidden; border:0; border-radius:0 0 15px 15px; background:#fff; color:#000; box-shadow:0 3px 5px rgba(0,0,0,.24); text-decoration:none; }
+.home-page .destination-card:hover { color:#000; transform:translateY(-2px); }
+.home-page .destination-card>img { display:block; width:100%; height:136px; aspect-ratio:auto; object-fit:cover; border-radius:0 0 15px 15px; }
+.home-page .card-content { position:relative; min-height:145px; padding:8px 17px 24px; }
+.home-page .card-content h3 { margin:0 0 7px; overflow:hidden; color:#000; font-family:var(--font-card-title); font-size:19px; font-weight:700; line-height:1.35; white-space:nowrap; text-overflow:ellipsis; }
+.home-page .rating { display:flex; align-items:center; gap:8px; margin:0 0 8px; white-space:nowrap; }
+.home-page .stars { color:#ffb800; font-family:var(--font-main); font-size:18px; letter-spacing:1px; }
+.home-page .review { color:#000; font-family:var(--font-mono); font-size:13px; }
+.home-page .location { display:flex; align-items:flex-start; gap:9px; color:#080808; font-family:var(--font-main); font-size:13px; font-weight:500; line-height:1.55; }
+.home-page .location .map-pin-icon { width:28px; height:32px; flex:0 0 28px; }
+.home-page .distance { position:absolute; right:12px; bottom:7px; color:#111; font-family:var(--font-form); font-size:11px; }
+.home-page .nearby-section { margin-top:26px; }
+@media (max-width:1200px) {
+ .home-page .navbar-container { padding:0 3%; }
+ .home-page .navbar-logo { font-size:36px; }
+ .home-page .navbar-menu { width: min(390px, 38vw); }
+ .home-page .navbar-menu a,.home-page .category-dropdown>summary { font-size:17px; }
+ .home-page .navbar-icons { margin-left:35px; }
+ .home-page .main-content { width:calc(100% - 64px); }
+ .home-page .destination-grid { gap:28px; }
+ .home-page .card-content { padding-left:11px; padding-right:11px; }
+ .home-page .card-content h3 { font-size:17px; }
+}
+@media (max-width:850px) {
+ .home-page .navbar { height:auto; }
+ .home-page .navbar-container { min-height:72px; height:auto; padding:12px 4%; flex-wrap:wrap; row-gap:12px; }
+ .home-page .navbar-logo { font-size:32px; }
+ .home-page .navbar-menu { order:3; width:100%; height:auto; justify-content:center; gap:30px; }
+ .home-page .navbar-menu a,.home-page .category-dropdown>summary { font-size:15px; }
+ .home-page .navbar-icons { margin-left:auto; }
+ .home-page .hero { height:250px; }
+ .home-page .hero-content h1 { font-size:32px; }
+ .home-page .hero-content p { font-size:15px; }
+ .home-page .hero-search-row { width:min(720px,calc(100% - 24px)); }
+ .home-page .search-box { height:58px; padding-left:20px; }
+ .home-page .search-box input { font-size:15px; }
+ .home-page .home-filter-button { height:58px; width:60px; flex-basis:60px; font-size:29px; }
+ .home-page .main-content { width:calc(100% - 48px); padding-top:38px; }
+ .home-page .destination-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+}
+@media (max-width:520px) {
+ .home-page .navbar-logo { font-size:28px; }
+ .home-page .login-button { width:70px; min-width:70px; height:35px; font-size:14px; }
+ .home-page .profile-outline-icon { width:32px; height:32px; }
+ .home-page .navbar-menu { gap:20px; }
+ .home-page .hero { height:265px; }
+ .home-page .hero-content { padding:0 12px; }
+ .home-page .hero-content h1 { font-size:27px; }
+ .home-page .hero-content p { font-size:12px; }
+ .home-page .hero-search-row { width:100%; gap:6px; }
+ .home-page .search-box { height:52px; padding:4px 5px 4px 13px; border-radius:14px; }
+ .home-page .search-box input { font-size:11px; }
+ .home-page .search-box button { width:43px; height:42px; flex-basis:43px; border-radius:11px; font-size:22px; }
+ .home-page .home-filter-button { width:48px; height:52px; flex-basis:48px; border-radius:14px; font-size:24px; }
+ .home-page .home-search-validation { font-size:13px; }
+ .home-page .main-content { width:calc(100% - 32px); padding-top:30px; }
+ .home-page .destination-section h2 { font-size:23px; }
+ .home-page .destination-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+ .home-page .destination-card { height:258px; }
+ .home-page .destination-card>img { height:116px; }
+ .home-page .card-content { padding:8px 8px 25px; }
+ .home-page .card-content h3 { font-size:14px; }
+ .home-page .stars { font-size:12px; }
+ .home-page .review { font-size:9px; }
+ .home-page .location { gap:5px; font-size:10px; }
+ .home-page .location .map-pin-icon { width:21px; height:25px; flex-basis:21px; }
+}
+
+
+
+/* =========================================================
+   PENYERAGAMAN UKURAN LAYOUT SELURUH HALAMAN USER
+   Header, lebar konten, dan skala tipografi memakai patokan
+   desain Explore Majaku (desktop 1440px).
+   ========================================================= */
+:root {
+    --page-content-width: 1182px;
+    --page-gutter: clamp(20px, 4.5vw, 64px);
+    --site-header-height: 82px;
+}
+
+/* Header user konsisten di beranda, kategori, detail, profil, dan tentang. */
+body:not(.admin-auth-page):not(.admin-form-page):not(.admin-wisata-page)
+.navbar,
+body.site-navbar-page .site-header,
+body.about-page .site-header,
+body.halaman-detail .detail-header {
+    min-height: var(--site-header-height);
+}
+
+body.site-navbar-page .navbar-container,
+body.about-page .main-nav,
+body.halaman-detail .detail-header .detail-nav,
+body.home-page .navbar-container {
+    width: 100%;
+    max-width: none;
+    min-height: var(--site-header-height);
+    margin-inline: auto;
+    padding-inline: var(--page-gutter);
+}
+
+/* Area isi halaman memakai lebar baca yang sama, tanpa memaksa
+   komponen khusus seperti form autentikasi atau dashboard admin. */
+body.site-navbar-page main,
+body.about-page main,
+body.halaman-detail main,
+body.halaman-profil main,
+body.halaman-edit-profil main,
+body.halaman-edit-password main,
+body.home-page .main-content {
+    width: min(var(--page-content-width), calc(100% - (var(--page-gutter) * 2)));
+    max-width: var(--page-content-width);
+    margin-inline: auto;
+}
+
+/* Konsistensi skala dasar di semua halaman publik. */
+body.site-navbar-page, body.about-page, body.halaman-detail,
+body.halaman-profil, body.halaman-edit-profil, body.halaman-edit-password,
+body.home-page {
+    font-size: 16px;
+}
+
+/* Ikon filter dibuat custom mengikuti Figma: tiga garis horizontal
+   dengan panjang bertingkat, bukan glyph Bootstrap sliders. */
+.home-page .home-filter-button {
+    width: 70px;
+    height: 66px;
+    flex: 0 0 70px;
+    border-radius: 20px;
+    background: #d9d9d9;
+    color: #176f63;
+}
+.home-page .filter-lines-icon {
+    display: block;
+    width: 39px;
+    height: 36px;
+    overflow: visible;
+}
+.home-page .filter-lines-icon path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    stroke-linecap: butt;
+}
+.home-page .home-filter-button:hover .filter-lines-icon {
+    transform: none;
+}
+
+@media (max-width: 850px) {
+    :root { --site-header-height: 72px; }
+    body.site-navbar-page main, body.about-page main,
+    body.halaman-detail main, body.halaman-profil main,
+    body.halaman-edit-profil main, body.halaman-edit-password main,
+    body.home-page .main-content {
+        width: calc(100% - 40px);
+    }
+}
+@media (max-width: 520px) {
+    :root { --site-header-height: 64px; }
+    body.site-navbar-page main, body.about-page main,
+    body.halaman-detail main, body.halaman-profil main,
+    body.halaman-edit-profil main, body.halaman-edit-password main,
+    body.home-page .main-content {
+        width: calc(100% - 28px);
+    }
+    .home-page .home-filter-button {
+        width: 48px; height: 52px; flex-basis: 48px; border-radius: 14px;
+    }
+    .home-page .filter-lines-icon { width: 29px; height: 27px; }
+}
+
+/* =========================================================
+   FINAL POLISH — DROPDOWN KATEGORI & VALIDASI SEARCH BERANDA
+   Mengikuti screenshot referensi Explore Majaku.
+   ========================================================= */
+.home-page .category-dropdown { position:relative; }
+.home-page .category-dropdown > summary {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    cursor:pointer;
+    transition:color .18s ease;
+}
+.home-page .category-dropdown > summary i {
+    display:inline-block;
+    font-size:25px;
+    line-height:1;
+    transition:transform .18s ease;
+}
+.home-page .category-dropdown[open] > summary,
+.home-page .category-dropdown > summary:hover,
+.home-page .category-dropdown > summary:focus-visible {
+    color:#176f63;
+}
+.home-page .category-dropdown[open] > summary i { transform:rotate(180deg); }
+.home-page .category-dropdown > .category-menu {
+    position:absolute;
+    top:calc(100% + 36px);
+    left:50%;
+    z-index:1200;
+    display:none;
+    flex-direction:column;
+    width:325px;
+    min-width:325px;
+    padding:0;
+    overflow:hidden;
+    transform:translateX(-50%);
+    border:0;
+    border-radius:0;
+    background:#fff;
+    box-shadow:0 3px 7px rgba(0,0,0,.16);
+}
+.home-page .category-dropdown[open] > .category-menu { display:flex; }
+.home-page .category-dropdown > .category-menu a {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    min-height:36px;
+    margin:0;
+    padding:5px 10px;
+    border:0;
+    border-bottom:1px solid #d0d0d0;
+    border-radius:0;
+    background:#fff;
+    color:#111;
+    font-family:Inter,Arial,sans-serif;
+    font-size:17px;
+    font-weight:400;
+    line-height:1.25;
+    text-align:center;
+    white-space:nowrap;
+}
+.home-page .category-dropdown > .category-menu a:last-child { border-bottom:0; }
+.home-page .category-dropdown > .category-menu a:hover,
+.home-page .category-dropdown > .category-menu a:focus-visible,
+.home-page .category-dropdown > .category-menu a[aria-current="page"] {
+    background:#176f63;
+    color:#fff;
+}
+.home-page .home-search-validation {
+    display:table;
+    width:auto;
+    max-width:min(890px,calc(100% - 24px));
+    margin:3px auto 0;
+    padding:1px 8px 2px;
+    border-radius:12px;
+    background:#dedede;
+    color:#ff2929;
+    font-family:Inter,Arial,sans-serif;
+    font-size:18px;
+    font-weight:400;
+    line-height:1.05;
+    text-align:left;
+}
+.home-page .home-search-validation[hidden] { display:none !important; }
+.home-page .home-search-validation i { margin-right:3px; font-size:15px; }
+@media (max-width:700px) {
+    .home-page .category-dropdown > .category-menu {
+        width:min(325px,calc(100vw - 24px));
+        min-width:min(325px,calc(100vw - 24px));
+        top:calc(100% + 12px);
+    }
+    .home-page .category-dropdown > .category-menu a { font-size:14px; }
+    .home-page .home-search-validation { font-size:13px; }
+}
+
+/* PATCH FINAL: posisi validasi sama dengan sisi kiri search pada Figma */
+.home-page .home-search-validation {
+    display: table !important;
+    width: max-content !important;
+    max-width: calc(100% - 24px);
+    margin: 3px 0 0 max(12px, calc(50% - 395px)) !important;
+    padding: 1px 8px 2px !important;
+    border-radius: 12px !important;
+    background: #dedede !important;
+    color: #ff2929 !important;
+    font-size: 18px !important;
+    line-height: 1.05 !important;
+    text-align: left !important;
+}
+.home-page .home-search-validation[hidden] { display: none !important; }
+@media (max-width: 700px) {
+    .home-page .home-search-validation {
+        margin-left: 12px !important;
+        font-size: 13px !important;
+    }
+}
+
+/* Dropdown kategori konsisten di beranda dan halaman kategori.
+   Native details tetap dipakai agar dapat dibuka/tutup berulang. */
+.home-page .category-dropdown,
+.site-header .category-dropdown { position: relative; }
+.home-page .category-dropdown > summary,
+.site-header .category-dropdown > summary {
+    cursor: pointer;
+    list-style: none;
+    transition: color .18s ease;
+}
+.home-page .category-dropdown > summary::-webkit-details-marker,
+.site-header .category-dropdown > summary::-webkit-details-marker { display: none; }
+.home-page .category-dropdown > summary::marker,
+.site-header .category-dropdown > summary::marker { content: ""; }
+.home-page .category-dropdown[open] > summary,
+.home-page .category-dropdown > summary:hover,
+.site-header .category-dropdown[open] > summary,
+.site-header .category-dropdown > summary:hover,
+.site-header .category-dropdown > summary.active {
+    color: #176f63 !important;
+}
+.home-page .category-dropdown > .category-menu,
+.site-header .category-dropdown > .category-nav {
+    position: absolute !important;
+    top: calc(100% + 36px) !important;
+    left: 50% !important;
+    z-index: 1500 !important;
+    display: none !important;
+    flex-direction: column !important;
+    width: 325px !important;
+    min-width: 325px !important;
+    max-width: calc(100vw - 24px) !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+    transform: translateX(-50%) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: 0 3px 7px rgba(0,0,0,.16) !important;
+    visibility: visible !important;
+}
+.home-page .category-dropdown[open] > .category-menu,
+.site-header .category-dropdown[open] > .category-nav { display: flex !important; }
+.home-page .category-dropdown > .category-menu a,
+.site-header .category-dropdown > .category-nav a {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 100% !important;
+    min-height: 36px !important;
+    margin: 0 !important;
+    padding: 5px 10px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #d0d0d0 !important;
+    border-radius: 0 !important;
+    background: #fff;
+    color: #111;
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 17px !important;
+    font-weight: 400 !important;
+    line-height: 1.25;
+    text-align: center;
+    white-space: nowrap;
+}
+.home-page .category-dropdown > .category-menu a:last-child,
+.site-header .category-dropdown > .category-nav a:last-child { border-bottom: 0 !important; }
+.home-page .category-dropdown > .category-menu a:hover,
+.home-page .category-dropdown > .category-menu a:focus-visible,
+.site-header .category-dropdown > .category-nav a:hover,
+.site-header .category-dropdown > .category-nav a:focus-visible,
+.site-header .category-dropdown > .category-nav a[aria-current="page"] {
+    background: #176f63 !important;
+    color: #fff !important;
+}
+@media (max-width: 700px) {
+    .home-page .category-dropdown > .category-menu,
+    .site-header .category-dropdown > .category-nav {
+        top: calc(100% + 12px) !important;
+        width: min(325px, calc(100vw - 24px)) !important;
+        min-width: min(325px, calc(100vw - 24px)) !important;
+    }
+    .home-page .category-dropdown > .category-menu a,
+    .site-header .category-dropdown > .category-nav a { font-size: 14px !important; }
+}
+
+/* =========================================================
+   FINAL NAVBAR CATEGORY CONSISTENCY
+   Satu ukuran dan satu status aktif untuk Beranda, Kategori,
+   Tentang, serta halaman hasil pencarian.
+   ========================================================= */
+.home-page .navbar-menu > a,
+.home-page .navbar-menu > .category-dropdown > summary,
+.site-header .nav-links > a,
+.site-header .nav-links > .category-dropdown > summary,
+body.site-navbar-page .ep-menu > a,
+body.site-navbar-page .ep-menu > .category-dropdown > summary,
+body:not(.home-page) .navbar-menu > a,
+body:not(.home-page) .navbar-menu > .category-dropdown > summary {
+    font-family: var(--font-main, Poppins, Arial, sans-serif) !important;
+    font-size: clamp(15px, 1.45vw, 21px) !important;
+    font-weight: 500 !important;
+    line-height: 1.35 !important;
+    letter-spacing: 0 !important;
+    color: #111 !important;
+    opacity: 1 !important;
+    text-decoration: none !important;
+}
+
+.home-page .navbar-menu > .category-dropdown > summary,
+.site-header .nav-links > .category-dropdown > summary,
+body.site-navbar-page .ep-menu > .category-dropdown > summary,
+body:not(.home-page) .navbar-menu > .category-dropdown > summary {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    cursor: pointer;
+}
+
+.home-page .navbar-menu > .category-dropdown[open] > summary,
+.home-page .navbar-menu > .category-dropdown > summary:hover,
+.home-page .navbar-menu > .category-dropdown > summary:focus-visible,
+.site-header .nav-links > .category-dropdown[open] > summary,
+.site-header .nav-links > .category-dropdown > summary:hover,
+.site-header .nav-links > .category-dropdown > summary:focus-visible,
+.site-header .nav-links > .category-dropdown > summary.active,
+body.site-navbar-page .ep-menu > .category-dropdown[open] > summary,
+body.site-navbar-page .ep-menu > .category-dropdown > summary:hover,
+body.site-navbar-page .ep-menu > .category-dropdown > summary:focus-visible,
+body:not(.home-page) .navbar-menu > .category-dropdown[open] > summary,
+body:not(.home-page) .navbar-menu > .category-dropdown > summary:hover,
+body:not(.home-page) .navbar-menu > .category-dropdown > summary:focus-visible {
+    color: #176f63 !important;
+    opacity: 1 !important;
+    background: transparent !important;
+    -webkit-text-fill-color: #176f63 !important;
+}
+
+.home-page .navbar-menu > .category-dropdown > summary i,
+.site-header .nav-links > .category-dropdown > summary i {
+    color: currentColor !important;
+    opacity: 1 !important;
+    font-size: .9em !important;
+}
+
+.home-page .category-dropdown > .category-menu,
+.site-header .category-dropdown > .category-nav,
+body.site-navbar-page .category-dropdown > .category-menu,
+body.site-navbar-page .category-dropdown > .category-nav {
+    background: #fff !important;
+    opacity: 1 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.home-page .category-dropdown > .category-menu a,
+.site-header .category-dropdown > .category-nav a,
+body.site-navbar-page .category-dropdown > .category-menu a,
+body.site-navbar-page .category-dropdown > .category-nav a {
+    box-sizing: border-box !important;
+    min-height: 36px !important;
+    color: #111 !important;
+    background: #fff !important;
+    opacity: 1 !important;
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 17px !important;
+    font-weight: 400 !important;
+    line-height: 1.25 !important;
+    text-align: center !important;
+    border-radius: 0 !important;
+}
+
+.home-page .category-dropdown > .category-menu a:hover,
+.home-page .category-dropdown > .category-menu a:focus-visible,
+.home-page .category-dropdown > .category-menu a[aria-current="page"],
+.site-header .category-dropdown > .category-nav a:hover,
+.site-header .category-dropdown > .category-nav a:focus-visible,
+.site-header .category-dropdown > .category-nav a[aria-current="page"],
+body.site-navbar-page .category-dropdown > .category-menu a:hover,
+body.site-navbar-page .category-dropdown > .category-menu a:focus-visible,
+body.site-navbar-page .category-dropdown > .category-menu a[aria-current="page"],
+body.site-navbar-page .category-dropdown > .category-nav a:hover,
+body.site-navbar-page .category-dropdown > .category-nav a:focus-visible,
+body.site-navbar-page .category-dropdown > .category-nav a[aria-current="page"] {
+    color: #fff !important;
+    background: #176f63 !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #fff !important;
+}
+
+@media (max-width: 900px) {
+    .home-page .navbar-menu > a,
+    .home-page .navbar-menu > .category-dropdown > summary,
+    .site-header .nav-links > a,
+    .site-header .nav-links > .category-dropdown > summary,
+    body.site-navbar-page .ep-menu > a,
+    body.site-navbar-page .ep-menu > .category-dropdown > summary,
+    body:not(.home-page) .navbar-menu > a,
+    body:not(.home-page) .navbar-menu > .category-dropdown > summary {
+        font-size: 15px !important;
+    }
+    .home-page .category-dropdown > .category-menu a,
+    .site-header .category-dropdown > .category-nav a,
+    body.site-navbar-page .category-dropdown > .category-menu a,
+    body.site-navbar-page .category-dropdown > .category-nav a {
+        font-size: 14px !important;
+    }
+}
+
+
+/* FINAL FIX: status dropdown Kategori harus hijau solid saat dibuka di SEMUA halaman */
+.category-dropdown[open] > summary,
+.category-dropdown[open] > summary span,
+.category-dropdown[open] > summary i,
+.category-dropdown[open] > summary .ep-menu__panah,
+.category-dropdown > summary[aria-expanded="true"] {
+    color: #176f63 !important;
+    -webkit-text-fill-color: #176f63 !important;
+    opacity: 1 !important;
+    background-color: transparent !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+/* Pastikan state aktif tidak tertimpa oleh CSS halaman atau efek transparansi */
+.home-page .category-dropdown[open] > summary,
+body .category-dropdown[open] > summary,
+.site-header .category-dropdown[open] > summary {
+    color: #176f63 !important;
+    -webkit-text-fill-color: #176f63 !important;
+    opacity: 1 !important;
+}
+
+.category-dropdown > summary { cursor: pointer; }
+.category-dropdown > summary:focus-visible {
+    outline: 2px solid #176f63 !important;
+    outline-offset: 4px;
+}

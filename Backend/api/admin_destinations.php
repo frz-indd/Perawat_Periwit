@@ -47,11 +47,15 @@ try {
  }
  if($method==='POST') {
     $name=trim((string)($_POST['name']??'')); $region=trim((string)($_POST['domisili']??$_POST['kabupaten_id']??'')); $cat=(int)($_POST['category_id']??0); $price=(float)($_POST['price']??0); $maps=trim((string)($_POST['maps_url']??''));
+    $latitudeRaw=trim((string)($_POST['latitude']??'')); $longitudeRaw=trim((string)($_POST['longitude']??''));
     if($name===''||$region===''||$cat<1) respond(['status'=>'error','message'=>'Nama wisata, wilayah, dan kategori wajib diisi.'],400);
+    if(($latitudeRaw==='')!==($longitudeRaw==='')) respond(['status'=>'error','message'=>'Latitude dan longitude harus diisi bersama.'],400);
+    if($latitudeRaw!=='' && (!is_numeric($latitudeRaw)||!is_numeric($longitudeRaw)||(float)$latitudeRaw < -90||(float)$latitudeRaw > 90||(float)$longitudeRaw < -180||(float)$longitudeRaw > 180)) respond(['status'=>'error','message'=>'Koordinat latitude atau longitude tidak valid.'],400);
+    $latitude=$latitudeRaw===''?null:(float)$latitudeRaw; $longitude=$longitudeRaw===''?null:(float)$longitudeRaw;
     $check=$conn->prepare('SELECT Id_kategori FROM kategori WHERE Id_kategori=? AND aktif=1'); $check->bind_param('i',$cat); $check->execute(); if(!$check->get_result()->fetch_assoc()) respond(['status'=>'error','message'=>'Kategori tidak ditemukan.'],400);
     $id=destinationId($conn,$region); $photo=uploadPhoto($conn,$id);
-    $stmt=$conn->prepare('INSERT INTO wisata (id_wisata,id_kategori,nama_wisata,harga_tiket,domisili,Maps_Wisata,aktif) VALUES (?,?,?,?,?,?,1)');
-    $stmt->bind_param('sisdss',$id,$cat,$name,$price,$region,$maps);
+    $stmt=$conn->prepare('INSERT INTO wisata (id_wisata,id_kategori,nama_wisata,harga_tiket,domisili,Maps_Wisata,latitude,longitude,aktif) VALUES (?,?,?,?,?,?,?,?,1)');
+    $stmt->bind_param('sisdssdd',$id,$cat,$name,$price,$region,$maps,$latitude,$longitude);
     $stmt->execute();
     if($photo){ $p=$conn->prepare('INSERT INTO foto_wisata (id_wisata,Nama_Foto,link_foto) VALUES (?,?,?)'); $base=basename($photo); $p->bind_param('sss',$id,$base,$photo); $p->execute(); }
     respond(['status'=>'success','message'=>'Data wisata berhasil ditambahkan.','data'=>['id'=>$id]],201);
@@ -59,8 +63,12 @@ try {
  if($method==='PUT') {
     $id=trim((string)($_GET['id']??'')); if($id==='') respond(['status'=>'error','message'=>'ID wisata tidak valid.'],400);
     $name=trim((string)($_POST['name']??'')); $region=trim((string)($_POST['domisili']??$_POST['kabupaten_id']??'')); $cat=(int)($_POST['category_id']??0); $price=(float)($_POST['price']??0); $maps=trim((string)($_POST['maps_url']??''));
+    $latitudeRaw=trim((string)($_POST['latitude']??'')); $longitudeRaw=trim((string)($_POST['longitude']??''));
     if($name===''||$region===''||$cat<1) respond(['status'=>'error','message'=>'Nama wisata, wilayah, dan kategori wajib diisi.'],400);
-    $stmt=$conn->prepare('UPDATE wisata SET nama_wisata=?,domisili=?,id_kategori=?,harga_tiket=?,Maps_Wisata=? WHERE id_wisata=?'); $stmt->bind_param('ssidss',$name,$region,$cat,$price,$maps,$id); $stmt->execute();
+    if(($latitudeRaw==='')!==($longitudeRaw==='')) respond(['status'=>'error','message'=>'Latitude dan longitude harus diisi bersama.'],400);
+    if($latitudeRaw!=='' && (!is_numeric($latitudeRaw)||!is_numeric($longitudeRaw)||(float)$latitudeRaw < -90||(float)$latitudeRaw > 90||(float)$longitudeRaw < -180||(float)$longitudeRaw > 180)) respond(['status'=>'error','message'=>'Koordinat latitude atau longitude tidak valid.'],400);
+    $latitude=$latitudeRaw===''?null:(float)$latitudeRaw; $longitude=$longitudeRaw===''?null:(float)$longitudeRaw;
+    $stmt=$conn->prepare('UPDATE wisata SET nama_wisata=?,domisili=?,id_kategori=?,harga_tiket=?,Maps_Wisata=?,latitude=?,longitude=? WHERE id_wisata=?'); $stmt->bind_param('ssidssdds',$name,$region,$cat,$price,$maps,$latitude,$longitude,$id); $stmt->execute();
     $photo=uploadPhoto($conn,$id); if($photo){ $p=$conn->prepare('INSERT INTO foto_wisata (id_wisata,Nama_Foto,link_foto) VALUES (?,?,?)'); $base=basename($photo); $p->bind_param('sss',$id,$base,$photo); $p->execute(); }
     respond(['status'=>'success','message'=>'Data wisata berhasil diperbarui.']);
  }

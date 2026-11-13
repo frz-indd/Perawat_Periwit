@@ -26,7 +26,7 @@
     >
 
     <link rel="stylesheet" href="../CSS/auth.css?v=shared-layout-4">
-    <link rel="stylesheet" href="../CSS/theme.css?v=shared-layout-4">
+    <link rel="stylesheet" href="../CSS/theme.css?v=nav-final-7">
 </head>
 
 <body>

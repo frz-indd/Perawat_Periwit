@@ -35,6 +35,12 @@ function e(string $value): string
     <title><?= e($pageTitle) ?> | <?= e($appName) ?></title>
 
     <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous"
+    >
+    <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     >
@@ -130,7 +136,7 @@ function e(string $value): string
                             aria-label="Tampilkan password"
                             aria-pressed="false"
                         >
-                            <i class="bi bi-eye-fill" aria-hidden="true"></i>
+                            <i class="bi bi-eye-slash-fill" aria-hidden="true"></i>
                         </button>
                     </div>
 
@@ -545,7 +551,7 @@ function e(string $value): string
         function handlePasswordToggle() {
             const isHidden = elements.password.type === 'password';
             elements.password.type = isHidden ? 'text' : 'password';
-            elements.toggleIcon.className = isHidden ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill';
+            elements.toggleIcon.className = isHidden ? 'bi bi-eye-fill' : 'bi bi-eye-slash-fill';
             elements.toggle.setAttribute('aria-pressed', String(isHidden));
             elements.toggle.setAttribute('aria-label', isHidden ? 'Sembunyikan password' : 'Tampilkan password');
         }
@@ -571,6 +577,7 @@ function e(string $value): string
         render();
     })();
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="../Js/api-endpoint-labels.js?v=api-tooltip-2"></script>
 
     <?php endif; ?>

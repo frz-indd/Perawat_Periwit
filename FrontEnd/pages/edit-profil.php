@@ -326,8 +326,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Noto+Serif:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261109">
-  <link rel="stylesheet" href="../CSS/theme.css?v=20261019-2">
-  <link rel="stylesheet" href="../CSS/navbar-common.css?v=6">
+  <link rel="stylesheet" href="../CSS/theme.css?v=nav-final-7">
+  <link rel="stylesheet" href="../CSS/\1category-item-solid-1">
 </head>
 <body class="halaman-edit-profil site-navbar-page">
 
@@ -354,7 +354,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <a class="ep-logo" href="../../index.php">Explore Majaku</a>
       <nav class="ep-menu" aria-label="Menu utama">
         <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
-        <details class="category-dropdown ep-menu__kategori">
+        <details name="site-category-menu" class="category-dropdown ep-menu__kategori">
           <summary>
             <span>Kategori</span>
             <span class="ep-menu__panah" aria-hidden="true"></span>

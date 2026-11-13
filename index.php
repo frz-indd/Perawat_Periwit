@@ -28,24 +28,25 @@ $destinasiLain = array_slice($wisata, 4, 4);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <!-- CSS Beranda -->
-    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=font-map-2">
-    <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=shared-layout-4">
+    <link rel="stylesheet" href="FrontEnd/CSS/style.css?v=home-fix-3">
+    <link rel="stylesheet" href="FrontEnd/CSS/theme.css?v=nav-solid-green-8">
+    <link rel="stylesheet" href="FrontEnd/CSS/navbar-common.css?v=nav-active-text-green-3">
 </head>
 
-<body class="home-page">
+<body class="home-page site-navbar-page">
 
     <!-- HEADER -->
-    <header class="navbar">
-        <div class="navbar-container">
+    <header class="navbar ep-navbar site-navbar">
+        <div class="navbar-container ep-navbar__inner">
 
-            <a href="index.php" class="navbar-logo">
+            <a href="index.php" class="navbar-logo ep-logo">
                 Explore Majaku
             </a>
 
-            <nav class="navbar-menu">
-                <a href="index.php" class="active">Beranda</a>
-                <details class="category-dropdown">
-                    <summary>Kategori <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+            <nav class="navbar-menu ep-menu" aria-label="Menu utama">
+                <a href="index.php" class="active ep-menu__beranda" aria-current="page">Beranda</a>
+                <details name="site-category-menu" class="category-dropdown ep-menu__kategori">
+                    <summary><span>Kategori</span><span class="ep-menu__panah" aria-hidden="true"></span></summary>
                     <div class="category-menu">
                         <a href="FrontEnd/pages/kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a>
                         <a href="FrontEnd/pages/kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a>
@@ -53,13 +54,13 @@ $destinasiLain = array_slice($wisata, 4, 4);
                         <a href="FrontEnd/pages/kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a>
                     </div>
                 </details>
-                <a href="FrontEnd/pages/tentang.php">Tentang</a>
+                <a href="FrontEnd/pages/tentang.php" class="ep-menu__tentang">Tentang</a>
             </nav>
 
-            <div class="navbar-icons">
+            <div class="navbar-icons ep-aksi">
 
                 <a href="<?= $isLoggedIn ? 'FrontEnd/pages/profil.php' : 'FrontEnd/auth/Login.php' ?>"
-                   class="profile-icon"
+                   class="profile-icon ep-ikon ep-ikon--profil"
                    aria-label="<?= $isLoggedIn ? 'Profil' : 'Login' ?>">
                     <svg class="profile-outline-icon" viewBox="0 0 40 40" aria-hidden="true">
                         <circle cx="20" cy="20" r="17"></circle>
@@ -93,12 +94,8 @@ $destinasiLain = array_slice($wisata, 4, 4);
                 Temukan destinasi wisata terbaik di majalengka &amp; Kuningan
             </p>
 
-            <form
-                class="search-box"
-                action="search"
-                method="GET"
-                id="searchForm"
-            >
+            <div class="hero-search-row">
+            <form class="search-box" action="search" method="GET" id="searchForm" novalidate>
 
                 <input
                     type="text"
@@ -106,8 +103,7 @@ $destinasiLain = array_slice($wisata, 4, 4);
                     id="searchInput"
                     placeholder="Cari destinasi,kata kunci atau lokasi"
                     aria-label="Cari destinasi wisata"
-                    minlength="2"
-                    required
+                    autocomplete="off"
                 >
 
                 <button type="submit" aria-label="Cari wisata">
@@ -115,19 +111,44 @@ $destinasiLain = array_slice($wisata, 4, 4);
                 </button>
 
             </form>
-
+            <button type="button" class="home-filter-button" id="homeFilterButton" aria-label="Buka filter pencarian" title="Filter pencarian">
+                <svg class="filter-lines-icon" viewBox="0 0 40 36" aria-hidden="true" focusable="false">
+                    <path d="M3 7H37" />
+                    <path d="M9 17H31" />
+                    <path d="M15 27H25" />
+                </svg>
+            </button>
+            </div>
+            <p class="home-search-validation" id="searchValidation" role="alert" hidden>
+                <i class="bi bi-exclamation-circle"></i> Masukkan Minimal 2 Karakter
+            </p>
         </div>
     </section>
 
     <script>
-        document.getElementById('searchForm').addEventListener('submit', function (event) {
-            const input = document.getElementById('searchInput');
-            if (input.value.trim().length < 2) {
+        const homeSearchForm = document.getElementById('searchForm');
+        const homeSearchInput = document.getElementById('searchInput');
+        const homeSearchValidation = document.getElementById('searchValidation');
+        homeSearchForm.addEventListener('submit', function (event) {
+            if (Array.from(homeSearchInput.value.trim()).length < 2) {
                 event.preventDefault();
-                input.setCustomValidity('Masukkan minimal 2 karakter untuk mencari.');
-                input.reportValidity();
-                input.addEventListener('input', () => input.setCustomValidity(''), { once: true });
+                homeSearchValidation.hidden = false;
+                homeSearchInput.setAttribute('aria-invalid', 'true');
+                homeSearchInput.focus();
             }
+        });
+        homeSearchInput.addEventListener('input', function () {
+            if (Array.from(this.value.trim()).length >= 2) {
+                homeSearchValidation.hidden = true;
+                this.setAttribute('aria-invalid', 'false');
+            }
+        });
+        document.getElementById('homeFilterButton').addEventListener('click', function () {
+            const keyword = homeSearchInput.value.trim();
+            const params = new URLSearchParams();
+            if (Array.from(keyword).length >= 2) params.set('q', keyword);
+            params.set('filter', 'open');
+            window.location.href = 'search?' + params.toString();
         });
     </script>
 
@@ -138,7 +159,7 @@ $destinasiLain = array_slice($wisata, 4, 4);
         <!-- DESTINASI UTAMA -->
         <section class="destination-section">
 
-            <h2>Destinasi Wisata</h2>
+            <h2>Rekomendasi Untuk kamu</h2>
 
             <div class="destination-grid">
                 <?php foreach ($destinasiUtama as $destination): ?>
@@ -180,7 +201,7 @@ $destinasiLain = array_slice($wisata, 4, 4);
         <!-- DESTINASI LAINNYA -->
         <section class="destination-section nearby-section">
 
-            <h2>Destinasi Lainnya</h2>
+            <h2>Wisata Terdekat dari lokasi mu</h2>
 
             <div class="destination-grid">
                 <?php foreach ($destinasiLain as $destination): ?>
@@ -220,19 +241,8 @@ $destinasiLain = array_slice($wisata, 4, 4);
 
     </main>
 
-    <!-- VALIDASI PENCARIAN -->
+    <!-- PERHITUNGAN JARAK DESTINASI -->
     <script>
-        const searchForm = document.getElementById('searchForm');
-        const searchInput = document.getElementById('searchInput');
-
-        searchForm.addEventListener('submit', function (event) {
-            if (searchInput.value.trim() === '') {
-                event.preventDefault();
-                alert('Silakan masukkan destinasi yang ingin dicari.');
-                searchInput.focus();
-            }
-        });
-
         const distanceElements = Array.from(
             document.querySelectorAll('.distance[data-latitude][data-longitude]')
         );

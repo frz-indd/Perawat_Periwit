@@ -345,3 +345,310 @@ body.site-navbar-page .ep-aksi > .ep-ikon:hover {
         transform: translateY(2px) rotate(225deg);
     }
 }
+
+
+/* === Explore Majaku: shared public-page layout and category dropdown === */
+:root {
+    --ep-content-width: 1182px;
+    --ep-page-gutter: clamp(18px, 4.5vw, 64px);
+    --ep-brand: #166c5c;
+}
+
+html { scroll-behavior: smooth; }
+body.site-navbar-page,
+body.about-page,
+body.halaman-detail,
+body.halaman-profil,
+body.halaman-edit-profil {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 320px;
+}
+
+body.site-navbar-page *,
+body.site-navbar-page *::before,
+body.site-navbar-page *::after { box-sizing: border-box; }
+
+/* One consistent content grid for the main public pages. */
+body.site-navbar-page .about-content,
+body.site-navbar-page .detail,
+body.site-navbar-page .ep-stage,
+body.site-navbar-page .pw-stage,
+body.site-navbar-page .profile-stage,
+body.site-navbar-page .profil-stage,
+body.site-navbar-page .category-content,
+body.site-navbar-page .search-layout,
+body.site-public-page .category-content,
+body.site-public-page .search-layout {
+    width: min(var(--ep-content-width), calc(100% - (2 * var(--ep-page-gutter)))) !important;
+    max-width: var(--ep-content-width) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+body.site-navbar-page .ep-menu .category-dropdown {
+    position: relative !important;
+    display: block !important;
+    align-self: center;
+    color: #111;
+}
+body.site-navbar-page .ep-menu .category-dropdown > summary {
+    min-height: 32px;
+    color: inherit;
+    transition: color .16s ease;
+}
+body.site-navbar-page .ep-menu .category-dropdown:hover > summary,
+body.site-navbar-page .ep-menu .category-dropdown:focus-within > summary,
+body.site-navbar-page .ep-menu .category-dropdown[open] > summary {
+    color: var(--ep-brand) !important;
+}
+body.site-navbar-page .ep-menu .category-dropdown > .category-menu {
+    top: calc(100% + 22px) !important;
+    left: 50% !important;
+    min-width: 325px !important;
+    width: 325px !important;
+    max-width: min(325px, calc(100vw - 24px)) !important;
+    transform: translateX(-50%) !important;
+    overflow: hidden;
+    border: 0 !important;
+    background: #fff !important;
+    box-shadow: 0 3px 8px rgba(0,0,0,.20) !important;
+}
+body.site-navbar-page .ep-menu .category-menu a {
+    min-height: 36px !important;
+    padding: 5px 12px !important;
+    border-bottom: 1px solid #d7d7d7 !important;
+    color: #111 !important;
+    background: #fff !important;
+    font-size: 16px !important;
+    line-height: 1.35 !important;
+    white-space: normal !important;
+    transition: color .15s ease, background-color .15s ease;
+}
+body.site-navbar-page .ep-menu .category-menu a:last-child { border-bottom: 0 !important; }
+body.site-navbar-page .ep-menu .category-menu a:hover,
+body.site-navbar-page .ep-menu .category-menu a:focus-visible,
+body.site-navbar-page .ep-menu .category-menu a[aria-current="page"] {
+    color: var(--ep-brand) !important;
+    background: #f1f7f5 !important;
+}
+
+@media (max-width: 900px) {
+    :root { --ep-page-gutter: 18px; }
+    body.site-navbar-page .ep-menu .category-dropdown > .category-menu {
+        top: calc(100% + 8px) !important;
+        min-width: min(325px, calc(100vw - 24px)) !important;
+        width: min(325px, calc(100vw - 24px)) !important;
+    }
+    body.site-navbar-page .about-content,
+    body.site-navbar-page .detail,
+    body.site-navbar-page .ep-stage,
+    body.site-navbar-page .pw-stage,
+    body.site-navbar-page .profile-stage,
+    body.site-navbar-page .profil-stage,
+    body.site-navbar-page .category-content,
+    body.site-navbar-page .search-layout,
+    body.site-public-page .category-content,
+    body.site-public-page .search-layout {
+        width: calc(100% - 36px) !important;
+    }
+}
+
+/* Shared navigation state: identical on Home, Category and About pages. */
+body.site-navbar-page .ep-menu .category-dropdown[open] > summary,
+body.site-navbar-page .ep-menu .category-dropdown[open] > summary span,
+body.site-navbar-page .ep-menu .category-dropdown[open] > summary i,
+body.site-navbar-page .ep-menu .category-dropdown:focus-within > summary,
+body.site-navbar-page .ep-menu .category-dropdown:focus-within > summary span {
+    color: #166c5c !important;
+}
+body.site-navbar-page .ep-menu .category-dropdown > summary { transition: color .18s ease; }
+body.site-navbar-page .ep-menu .category-dropdown > .category-menu a { border-bottom: 1px solid #d9d9d9; }
+body.site-navbar-page .ep-menu .category-dropdown > .category-menu a:last-child { border-bottom: 0; }
+
+/* One responsive content frame for all public pages. */
+:root { --site-content-width: 1182px; --site-gutter: clamp(16px, 4.45vw, 64px); }
+body.site-navbar-page main,
+body.home-page main,
+body.site-navbar-page .main-content {
+    box-sizing: border-box;
+}
+body.site-navbar-page main > :where(.about-content,.category-content,.detail-container,.profile-container,.edit-profile-container,.edit-password-container,.search-content),
+body.home-page .main-content {
+    width: min(calc(100% - (2 * var(--site-gutter))), var(--site-content-width));
+    max-width: var(--site-content-width);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 900px) {
+    :root { --site-navbar-height: 72px; --site-gutter: 24px; }
+    body.site-navbar-page .ep-navbar__inner { padding-inline: 24px; }
+    body.site-navbar-page .ep-menu { column-gap: clamp(28px, 7vw, 72px); }
+    body.site-navbar-page .ep-menu > a,
+    body.site-navbar-page .ep-menu > .category-dropdown { font-size: 14px; }
+}
+@media (max-width: 640px) {
+    :root { --site-navbar-height: 66px; --site-gutter: 16px; }
+    body.site-navbar-page { padding-top: var(--site-navbar-height) !important; }
+    body.site-navbar-page .ep-navbar__inner { padding-inline: 14px; }
+    body.site-navbar-page .ep-navbar__inner > .ep-logo { font-size: clamp(20px, 5.4vw, 26px); }
+    body.site-navbar-page .ep-menu {
+        position: static !important;
+        display: flex !important;
+        flex: 1 1 auto;
+        justify-content: center;
+        gap: clamp(10px, 3vw, 18px);
+        width: auto;
+        margin-inline: 8px;
+        transform: none !important;
+        font-size: 12px;
+    }
+    body.site-navbar-page .ep-menu > a,
+    body.site-navbar-page .ep-menu > .category-dropdown { font-size: 12px; }
+    body.site-navbar-page .ep-menu .ep-menu__panah { width: 7px; height: 7px; }
+    body.site-navbar-page .ep-menu .category-dropdown > .category-menu {
+        position: fixed;
+        top: var(--site-navbar-height);
+        left: 50%;
+        width: min(325px, calc(100vw - 28px));
+        min-width: 0;
+        transform: translateX(-50%);
+    }
+    body.site-navbar-page .ep-menu .category-menu a { min-height: 36px; font-size: 13px; white-space: normal; }
+    body.site-navbar-page .ep-aksi { gap: 5px; }
+    body.site-navbar-page .ep-aksi > .ep-ikon,
+    body.site-navbar-page .ep-aksi > .ep-ikon--profil { width: 30px !important; height: 30px !important; }
+    body.site-navbar-page .main-content,
+    body.site-navbar-page main > :where(.about-content,.category-content,.detail-container,.profile-container,.edit-profile-container,.edit-password-container,.search-content) { width: calc(100% - 32px); }
+}
+@media (max-width: 390px) {
+    body.site-navbar-page .ep-navbar__inner { padding-inline: 10px; }
+    body.site-navbar-page .ep-navbar__inner > .ep-logo { font-size: 19px; }
+    body.site-navbar-page .ep-menu { gap: 8px; margin-inline: 5px; }
+    body.site-navbar-page .ep-menu > a,
+    body.site-navbar-page .ep-menu > .category-dropdown { font-size: 11px; }
+}
+
+/* Layout normalization across public pages */
+body.site-navbar-page :where(.main-content,.about-content,.category-content,.detail,.search-layout,.profile-content,.profile-wrapper,.edit-profile-wrapper,.edit-password-wrapper) {
+    box-sizing: border-box;
+    width: min(calc(100% - (2 * var(--site-gutter))), var(--site-content-width)) !important;
+    max-width: var(--site-content-width) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+body.site-navbar-page .about-content { margin-top: clamp(28px, 3.3vw, 48px) !important; }
+body.site-navbar-page .search-layout { gap: clamp(18px, 2.5vw, 32px); }
+body.site-navbar-page img { max-width: 100%; }
+@media (max-width: 900px) {
+    body.site-navbar-page :where(.destination-grid,.category-content .destination-grid,.benefit-grid,.info-grid) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    body.site-navbar-page :where(.about-purpose,.search-layout,.info-grid) { min-width: 0; }
+}
+@media (max-width: 640px) {
+    body.site-navbar-page :where(.destination-grid,.category-content .destination-grid,.benefit-grid,.about-purpose,.info-grid) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    body.site-navbar-page :where(.about-content,.category-content,.detail,.search-layout,.main-content) {
+        width: calc(100% - 32px) !important;
+        max-width: none !important;
+    }
+    body.site-navbar-page :where(.about-hero,.hero,.hero-wisata) { min-height: 190px; }
+    body.site-navbar-page :where(.about-hero-images img,.hero-images img) { object-fit: cover; }
+}
+
+/* FINAL: dropdown Kategori aktif memakai hijau solid seperti state awal desain. */
+body.site-navbar-page .ep-menu > details.category-dropdown[open] > summary,
+body.site-navbar-page .ep-menu > details.category-dropdown[open] > summary span,
+body.site-navbar-page .ep-menu > details.category-dropdown[open] > summary .ep-menu__panah {
+    color: #176f63 !important;
+    -webkit-text-fill-color: #176f63 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+    text-shadow: none !important;
+}
+body.site-navbar-page .ep-menu > details.category-dropdown[open] > summary {
+    background: transparent !important;
+    background-image: none !important;
+}
+body.site-navbar-page .ep-menu > details.category-dropdown[open] > summary span {
+    background: none !important;
+    background-clip: border-box !important;
+    -webkit-background-clip: border-box !important;
+}
+
+/* FINAL: dropdown Kategori aktif memakai hijau solid seperti state desain. */
+body.site-navbar-page .ep-menu > details.category-dropdown[open] > summary,
+body.site-navbar-page .ep-menu > details.category-dropdown[open] > summary span,
+body.site-navbar-page .ep-menu > details.category-dropdown[open] > summary .ep-menu__panah {
+    color: #176f63 !important;
+    -webkit-text-fill-color: #176f63 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+    text-shadow: none !important;
+}
+body.site-navbar-page .ep-menu > details.category-dropdown[open] > summary {
+    background: transparent !important;
+    background-image: none !important;
+}
+body.site-navbar-page .ep-menu > details.category-dropdown[open] > summary span {
+    background: none !important;
+    background-clip: border-box !important;
+    -webkit-background-clip: border-box !important;
+}
+
+
+/* Selected category item: solid green state, matching the active main navigation. */
+body.site-navbar-page .ep-menu .category-menu a[aria-current="page"],
+body.site-navbar-page .ep-menu .category-menu a[aria-current="page"]:hover,
+body.site-navbar-page .ep-menu .category-menu a[aria-current="page"]:focus-visible {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    background: #176f63 !important;
+    background-color: #176f63 !important;
+    opacity: 1 !important;
+    border-color: #176f63 !important;
+}
+body.site-navbar-page .ep-menu .category-menu a:hover,
+body.site-navbar-page .ep-menu .category-menu a:focus-visible {
+    color: #176f63 !important;
+    -webkit-text-fill-color: #176f63 !important;
+    background: #e7f1ee !important;
+}
+
+
+/* Active main navigation: Beranda, Kategori, and Tentang share the same text-only green state. */
+body.site-navbar-page .ep-menu > a[aria-current="page"],
+body.site-navbar-page .ep-menu > a.active {
+    display: inline !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    color: #166c5c !important;
+    -webkit-text-fill-color: #166c5c !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+}
+
+
+/* Dropdown category: solid green immediately on hover/focus/press, not only after selection. */
+body.site-navbar-page .ep-menu .category-menu a:hover,
+body.site-navbar-page .ep-menu .category-menu a:focus,
+body.site-navbar-page .ep-menu .category-menu a:focus-visible,
+body.site-navbar-page .ep-menu .category-menu a:active,
+body.site-navbar-page .ep-menu .category-menu a[aria-current="page"] {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    background: #176f63 !important;
+    background-color: #176f63 !important;
+    border-color: #176f63 !important;
+    opacity: 1 !important;
+}
