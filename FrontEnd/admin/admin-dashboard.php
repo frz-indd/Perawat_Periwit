@@ -33,9 +33,9 @@ function e(string $value): string
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@500;600;700&family=Noto+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="../CSS/admin-data-wisata.css?v=20261112-50261112-5" rel="stylesheet">
-    <link href="../CSS/admin-dashboard.css?v=20261116-logout-modal-2" rel="stylesheet">
+    <link href="../CSS/admin-dashboard.css?v=20261116-dashboard-cards" rel="stylesheet">
     <style>
         .admin-route-pending .admin-sidebar,
         .admin-route-pending .admin-mobile-bar,
@@ -98,30 +98,93 @@ function e(string $value): string
             <div class="admin-page-heading">
                 <div>
                     <h1>Dashboard</h1>
-                    <p>“Selamat datang, Admin”</p>
+                    <p>
+                        Selamat datang, Admin!
+                        <svg class="admin-page-heading__icon" viewBox="0 0 32 32" aria-hidden="true">
+                            <path d="M4 14.5 21 5v18L4 17.5z" fill="#f5a31a"/>
+                            <path d="M4 14.5h4.5v3.2H4z" fill="#d9870a"/>
+                            <path d="M8.2 18.2h4.4l1.6 6.6a1.6 1.6 0 0 1-1.2 2l-1.6.4a1.6 1.6 0 0 1-1.9-1.1z" fill="#f5a31a"/>
+                            <rect x="21" y="4.5" width="3.4" height="19" rx="1.7" fill="#d9870a"/>
+                            <path d="M27 8.5l3-2M27.5 14h3.6M27 19.5l3 2" stroke="#2f7fd3" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+                        </svg>
+                    </p>
                 </div>
-                <div class="admin-user-indicator"><i class="bi bi-person-circle"></i><span>Admin</span></div>
             </div>
 
             <section class="dashboard-summary" aria-labelledby="summaryTitle">
-                <div class="dashboard-summary__heading">
-                    <div><h2 id="summaryTitle">Ringkasan Data</h2><p>Statistik utama Explore Majaku</p></div>
-                    <span class="dashboard-summary__status"><i class="bi bi-arrow-repeat"></i> Data terbaru</span>
-                </div>
+                <h2 class="visually-hidden" id="summaryTitle">Ringkasan Data</h2>
                 <div class="dashboard-metrics" id="dashboardMetrics" aria-live="polite" aria-busy="true">
-                    <article class="metric-card metric-card--wisata"><div class="metric-card__icon"><i class="bi bi-geo-alt-fill"></i></div><div class="metric-card__content"><p>Total Wisata</p><strong data-metric="total_wisata">—</strong><span>Destinasi terdaftar</span></div></article>
-                    <article class="metric-card metric-card--kategori"><div class="metric-card__icon"><i class="bi bi-grid-fill"></i></div><div class="metric-card__content"><p>Total Kategori</p><strong data-metric="total_kategori">—</strong><span>Kategori tersedia</span></div></article>
-                    <article class="metric-card metric-card--ulasan"><div class="metric-card__icon"><i class="bi bi-chat-left-text-fill"></i></div><div class="metric-card__content"><p>Total Ulasan</p><strong data-metric="total_ulasan">—</strong><span>Ulasan pengguna</span></div></article>
-                    <article class="metric-card metric-card--pengguna"><div class="metric-card__icon"><i class="bi bi-people-fill"></i></div><div class="metric-card__content"><p>Total Pengguna</p><strong data-metric="total_pengguna">—</strong><span>Akun terdaftar</span></div></article>
+                    <article class="metric-card metric-card--wisata">
+                        <div class="metric-card__top">
+                            <div class="metric-card__icon" aria-hidden="true">
+                                <svg viewBox="0 0 44 44">
+                                    <path d="M0 44V20a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v24z" fill="currentColor"/>
+                                    <path d="M16 44V4a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v40z" fill="currentColor"/>
+                                    <path d="M32 44V12a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v32z" fill="currentColor"/>
+                                </svg>
+                            </div>
+                            <div class="metric-card__content"><p>Total Wisata</p><strong data-metric="total_wisata">—</strong></div>
+                        </div>
+                        <div class="metric-card__trend" data-trend="total_wisata" hidden></div>
+                    </article>
+                    <article class="metric-card metric-card--kategori">
+                        <div class="metric-card__top">
+                            <div class="metric-card__icon" aria-hidden="true">
+                                <svg viewBox="0 0 44 44">
+                                    <rect x="0" y="0" width="20" height="20" rx="5" fill="currentColor"/>
+                                    <circle cx="34" cy="10" r="10" fill="currentColor"/>
+                                    <circle cx="10" cy="34" r="10" fill="currentColor"/>
+                                    <rect x="24" y="24" width="20" height="20" rx="5" fill="currentColor"/>
+                                </svg>
+                            </div>
+                            <div class="metric-card__content"><p>Total Kategori</p><strong data-metric="total_kategori">—</strong></div>
+                        </div>
+                        <div class="metric-card__trend" data-trend="total_kategori" hidden></div>
+                    </article>
+                    <article class="metric-card metric-card--ulasan">
+                        <div class="metric-card__top">
+                            <div class="metric-card__icon" aria-hidden="true">
+                                <svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 3h32a3.5 3.5 0 0 1 3.5 3.5v22A3.5 3.5 0 0 1 38 32H28l-8 9v-9H6a3.5 3.5 0 0 1-3.5-3.5v-22A3.5 3.5 0 0 1 6 3z"/>
+                                    <path d="M10 12h6M21 12h13M10 18h24M10 24h14"/>
+                                </svg>
+                            </div>
+                            <div class="metric-card__content"><p>Total Ulasan</p><strong data-metric="total_ulasan">—</strong></div>
+                        </div>
+                        <div class="metric-card__trend" data-trend="total_ulasan" hidden></div>
+                    </article>
+                    <article class="metric-card metric-card--pengguna">
+                        <div class="metric-card__top">
+                            <div class="metric-card__icon" aria-hidden="true">
+                                <svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="22" cy="9" r="6"/>
+                                    <path d="M12 38v-4a9 9 0 0 1 9-9h2a9 9 0 0 1 9 9v4z"/>
+                                    <circle cx="7.5" cy="17" r="4.5"/>
+                                    <path d="M2 36v-2.5a6.5 6.5 0 0 1 5.5-6.4"/>
+                                    <circle cx="36.5" cy="17" r="4.5"/>
+                                    <path d="M42 36v-2.5a6.5 6.5 0 0 0-5.5-6.4"/>
+                                </svg>
+                            </div>
+                            <div class="metric-card__content"><p>Total Pengguna</p><strong data-metric="total_pengguna">—</strong></div>
+                        </div>
+                        <div class="metric-card__trend" data-trend="total_pengguna" hidden></div>
+                    </article>
                 </div>
                 <p class="dashboard-summary__message" id="summaryMessage" role="status">Memuat ringkasan dashboard...</p>
             </section>
 
             <section class="dashboard-recent" aria-labelledby="recentTitle">
                 <div class="dashboard-recent__heading"><h2 id="recentTitle">Wisata Terbaru</h2><a href="data-wisata.php">Lihat semua <i class="bi bi-arrow-right"></i></a></div>
-                <div class="table-responsive dashboard-recent__table-wrap">
-                    <table class="table dashboard-recent__table align-middle mb-0">
-                        <thead><tr><th>Foto</th><th>Nama wisata</th><th>Wilayah</th><th>Kategori</th><th>Ditambahkan pada tanggal</th></tr></thead>
+                <div class="dashboard-recent__table-wrap">
+                    <table class="dashboard-recent__table">
+                        <colgroup>
+                            <col style="width:18%">
+                            <col style="width:22%">
+                            <col style="width:13%">
+                            <col style="width:23%">
+                            <col style="width:24%">
+                        </colgroup>
+                        <thead><tr><th>Foto</th><th>Nama wisata</th><th>Wilayah</th><th>Kategori</th><th>Ditambahkan<br>Pada Tanggal</th></tr></thead>
                         <tbody id="recentDestinationRows"><tr><td colspan="5" class="dashboard-recent__state">Memuat wisata terbaru...</td></tr></tbody>
                     </table>
                 </div>
@@ -216,10 +279,41 @@ function e(string $value): string
 
         const metricKeys = ['total_wisata', 'total_kategori', 'total_ulasan', 'total_pengguna'];
 
+        const trendIcons = {
+            up: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14V2M3 7l5-5 5 5"/></svg>',
+            down: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v12M3 9l5 5 5-5"/></svg>',
+            flat: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg>'
+        };
+
         function setSummaryMessage(message, isError) {
             const element = document.getElementById('summaryMessage');
             element.textContent = message;
             element.classList.toggle('is-error', Boolean(isError));
+        }
+
+        function renderTrend(key, source) {
+            const element = document.querySelector('[data-trend="' + key + '"]');
+            if (!element) {
+                return;
+            }
+            const raw = source && typeof source === 'object' ? source[key] : undefined;
+            const value = Number(raw);
+            if (raw === undefined || raw === null || raw === '' || !Number.isFinite(value)) {
+                element.hidden = true;
+                element.innerHTML = '';
+                return;
+            }
+            let icon = trendIcons.flat;
+            let text = 'Tetap';
+            if (value > 0) {
+                icon = trendIcons.up;
+                text = '+' + new Intl.NumberFormat('id-ID').format(value) + ' dr bulan lalu';
+            } else if (value < 0) {
+                icon = trendIcons.down;
+                text = new Intl.NumberFormat('id-ID').format(value) + ' dr bulan lalu';
+            }
+            element.innerHTML = icon + '<span>' + escapeHtml(text) + '</span>';
+            element.hidden = false;
         }
 
         function renderRecentDestinations(items) {
@@ -261,11 +355,13 @@ function e(string $value): string
                     throw new Error(payload && payload.message ? payload.message :
                         'Ringkasan dashboard gagal dimuat (HTTP ' + response.status + ').');
                 }
+                const trendSource = payload.data.tren || payload.data.perubahan || payload.data.trend || null;
                 metricKeys.forEach(function (key) {
                     const value = Number(payload.data[key]);
                     if (!Number.isFinite(value) || value < 0) throw new Error('Format data statistik tidak valid.');
                     document.querySelector('[data-metric="' + key + '"]').textContent =
                         new Intl.NumberFormat('id-ID').format(value);
+                    renderTrend(key, trendSource);
                 });
                 renderRecentDestinations(Array.isArray(payload.data.wisata_terbaru) ? payload.data.wisata_terbaru : []);
                 setSummaryMessage('', false);
