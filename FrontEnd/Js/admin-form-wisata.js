@@ -13,6 +13,8 @@
         category: document.getElementById('destinationCategory'),
         price: document.getElementById('destinationPrice'),
         maps: document.getElementById('destinationMaps'),
+        longitude: document.getElementById('destinationLongitude'),
+        latitude: document.getElementById('destinationLatitude'),
         image: document.getElementById('destinationImage'),
         upload: document.getElementById('uploadZone'),
         preview: document.getElementById('imagePreview'),
@@ -108,9 +110,11 @@
             previewUrl = URL.createObjectURL(file);
             elements.preview.src = previewUrl;
             elements.preview.classList.remove('d-none');
-            elements.emptyUpload.classList.add('d-none');
+            elements.emptyUpload.classList.remove('d-none');
             elements.upload.classList.add('has-preview');
             elements.filename.textContent = filename || file.name;
+            const prompt = document.getElementById('uploadPrompt');
+            if (prompt) prompt.innerHTML = 'klik Area foto untuk mengubah<br>foto atau drag &amp; drop';
         } else {
             elements.preview.removeAttribute('src');
             elements.preview.classList.add('d-none');
@@ -124,9 +128,11 @@
         if (!filename) return;
         elements.preview.src = config.uploadBaseUrl + String(filename).replace(/^[/\\]+/, '').split('/').map(encodeURIComponent).join('/');
         elements.preview.classList.remove('d-none');
-        elements.emptyUpload.classList.add('d-none');
+        elements.emptyUpload.classList.remove('d-none');
         elements.upload.classList.add('has-preview');
-        elements.filename.textContent = 'Foto saat ini (pilih untuk mengganti)';
+        elements.filename.textContent = '';
+        const prompt = document.getElementById('uploadPrompt');
+        if (prompt) prompt.innerHTML = 'klik Area foto untuk mengubah<br>foto atau drag &amp; drop';
     }
 
     function validateImage() {
@@ -155,10 +161,40 @@
         });
         if (!item) throw new Error('Data wisata tidak ditemukan.');
         elements.name.value = item.name || '';
-        elements.region.value = item.region || item.kabupaten || '';
-        elements.category.value = item.category_detail && item.category_detail.id ? String(item.category_detail.id) : '';
+
+        // API dapat mengirim wilayah/kategori sebagai ID, objek, atau nama teks.
+        // Cocokkan juga nama dengan label option agar select tetap terpilih.
+        function selectRelatedValue(select, candidates) {
+            for (const candidate of candidates) {
+                if (candidate === undefined || candidate === null || candidate === '') continue;
+                const value = typeof candidate === 'object'
+                    ? (candidate.id ?? candidate.value ?? candidate.name ?? '')
+                    : candidate;
+                if (value === '') continue;
+                const exactValue = Array.from(select.options).find(function (option) {
+                    return String(option.value) === String(value);
+                });
+                if (exactValue) return exactValue.value;
+                const normalized = String(value).trim().toLocaleLowerCase('id');
+                const matchingLabel = Array.from(select.options).find(function (option) {
+                    return option.value !== '' && option.textContent.trim().toLocaleLowerCase('id') === normalized;
+                });
+                if (matchingLabel) return matchingLabel.value;
+            }
+            return '';
+        }
+
+        elements.region.value = selectRelatedValue(elements.region, [
+            item.kabupaten_id, item.region_id, item.region_detail, item.region, item.kabupaten,
+            item.nama_wilayah, item.wilayah, item.kabupaten_nama
+        ]);
+        elements.category.value = selectRelatedValue(elements.category, [
+            item.category_id, item.category_detail, item.category, item.category_name, item.nama_kategori
+        ]);
         elements.price.value = item.price == null ? '' : String(item.price);
         elements.maps.value = item.maps_url || '';
+        elements.longitude.value = item.longitude == null ? '' : String(item.longitude);
+        elements.latitude.value = item.latitude == null ? '' : String(item.latitude);
         setExistingImage(item.image);
     }
 
@@ -201,7 +237,10 @@
         const priceValue = elements.price.value.trim();
         const valid = elements.form.checkValidity()
             && (priceValue === '' || (Number.isFinite(Number(priceValue)) && Number(priceValue) >= 0))
-            && validateImage();
+            && validateImage()
+            && (elements.longitude.value.trim() === '' || (Number.isFinite(Number(elements.longitude.value)) && Number(elements.longitude.value) >= -180 && Number(elements.longitude.value) <= 180))
+            && (elements.latitude.value.trim() === '' || (Number.isFinite(Number(elements.latitude.value)) && Number(elements.latitude.value) >= -90 && Number(elements.latitude.value) <= 90))
+            && (elements.longitude.value.trim() === elements.latitude.value.trim() || (elements.longitude.value.trim() !== '' && elements.latitude.value.trim() !== ''));
         if (!valid) return;
 
         elements.save.disabled = true;
@@ -211,6 +250,8 @@
         formData.append('domisili', elements.region.value);
         formData.append('category_id', elements.category.value);
         formData.append('maps_url', elements.maps.value.trim());
+        formData.append('longitude', elements.longitude.value.trim());
+        formData.append('latitude', elements.latitude.value.trim());
         if (priceValue !== '') {
             formData.append('price', priceValue);
         }
@@ -242,7 +283,7 @@
             showMessage(error.message || 'Data wisata gagal disimpan.');
         } finally {
             elements.save.disabled = false;
-            elements.save.innerHTML = '<i class="bi bi-floppy"></i><span>Simpan data</span>';
+            elements.save.innerHTML = '<i class="bi bi-floppy"></i><span>' + (destinationId ? 'Simpan perubahan' : 'Simpan data') + '</span>';
         }
     });
 
@@ -251,6 +292,7 @@
             await loadSelectOptions();
             if (elements.id.value) {
                 elements.title.textContent = 'Edit Data Wisata';
+                elements.save.querySelector('span').textContent = 'Simpan perubahan';
                 document.title = 'Edit Data Wisata | Explore Majaku Admin';
                 elements.image.removeAttribute('required');
                 await loadDestination(elements.id.value);

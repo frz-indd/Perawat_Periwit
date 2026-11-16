@@ -19,33 +19,7 @@ adminOnly();
 
 if (!$conn instanceof mysqli) {
     http_response_code(500);
-    echo json_encode(['message' => 'Koneksi database tidak tersedia. Periksa Backend/database/koneksi.php.'], JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
-// Beri pesan yang jelas jika migration master fasilitas belum dijalankan
-// atau diimpor ke database yang berbeda.
-$facilityTableCheck = $conn->query("SHOW TABLES LIKE 'facilities'");
-if (!$facilityTableCheck || $facilityTableCheck->num_rows === 0) {
-    http_response_code(503);
-    echo json_encode([
-        'message' => 'Tabel facilities belum ditemukan pada database aktif. Pilih database project di phpMyAdmin, lalu import Backend/database/facilities_migration.sql.'
-    ], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
-    exit;
-}
-
-$requiredFacilityColumns = ['id', 'name', 'icon_code', 'description', 'created_at'];
-$facilityColumnResult = $conn->query('SHOW COLUMNS FROM facilities');
-$availableFacilityColumns = [];
-while ($facilityColumn = $facilityColumnResult->fetch_assoc()) {
-    $availableFacilityColumns[] = $facilityColumn['Field'];
-}
-$missingFacilityColumns = array_values(array_diff($requiredFacilityColumns, $availableFacilityColumns));
-if ($missingFacilityColumns) {
-    http_response_code(503);
-    echo json_encode([
-        'message' => 'Struktur tabel facilities belum sesuai. Kolom yang belum tersedia: ' . implode(', ', $missingFacilityColumns) . '. Jalankan ulang facilities_migration.sql pada database project.'
-    ], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    echo json_encode(['message' => 'Koneksi database tidak tersedia.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

@@ -1,0 +1,21 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/Backend/api/fungsi_login.php'
+order: 9000
+headers:
+  Accept: application/json
+body:
+  type: urlencoded
+  content:
+    role: admin
+    username: '{{adminUsername}}'
+    password: '{{adminPassword}}'
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      pm.collectionVariables.unset('adminCsrf');
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const ok=pm.response.code===200; pm.test('Admin login succeeds or validates missing credentials',function(){pm.response.to.have.status(ok?200:422);if(ok){const d=pm.response.json().data;pm.expect(d.role).to.eql('admin');pm.expect(d.csrf).to.be.a('string').and.not.empty;pm.collectionVariables.set('adminCsrf',d.csrf);}else{pm.expect(pm.response.json().status).to.eql('validation_error');}});

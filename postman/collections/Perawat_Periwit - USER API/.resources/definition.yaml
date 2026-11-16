@@ -1,0 +1,7 @@
+$kind: collection
+description: Koleksi khusus endpoint USER. Base URL default http://localhost/Perawat_Periwit. Isi loginEmail dan loginPassword sesuai akun user lokal. Koleksi ini tidak memuat endpoint admin.
+variables:
+  baseUrl: http://localhost/Perawat_Periwit
+  loginEmail: ""
+  loginPassword: ""
+  profileUpdateBody: ""

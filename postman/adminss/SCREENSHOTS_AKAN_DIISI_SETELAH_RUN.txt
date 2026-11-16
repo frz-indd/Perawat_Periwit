@@ -1,0 +1,1 @@
+Simpan screenshot Postman asli untuk setiap request di folder ini setelah menjalankan koleksi pada XAMPP lokal. Jangan gunakan screenshot contoh sebagai hasil uji.

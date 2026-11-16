@@ -1,0 +1,17 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/api/admin/facilities'
+order: 21000
+headers:
+  Accept: application/json
+  Authorization: 'Bearer {{adminJwtToken}}'
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {"name": "Toilet", "icon_code": "fa-restroom", "description": "Uji duplikasi"}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Duplicate facility name returns HTTP 422', function () { pm.response.to.have.status(422); pm.expect(pm.response.json().message).to.eql('Nama fasilitas sudah ada di sistem.'); });

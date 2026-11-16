@@ -1,0 +1,17 @@
+$kind: http-request
+method: PUT
+url: '{{baseUrl}}/api/admin/facilities/{{facilityId}}'
+order: 22000
+headers:
+  Accept: application/json
+  Authorization: 'Bearer {{adminJwtToken}}'
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {"name": "Toilet Umum", "icon_code": "fa-restroom", "description": "Fasilitas toilet umum"}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Update facility returns 200 or 422', function () { pm.expect([200,422]).to.include(pm.response.code); });

@@ -1,0 +1,1076 @@
+{
+  "info": {
+    "_postman_id": "7a0e2d9a-5e7a-4f8b-a1c4-000000000002",
+    "name": "Perawat_Periwit — API USER",
+    "description": "Koleksi endpoint pengguna dan publik; jalankan registrasi/login user untuk endpoint terproteksi.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET /users/me tanpa login",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/me"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Anonymous GET returns 401', function () {",
+              "  pm.response.to.have.status(401);",
+              "  pm.expect(pm.response.json().status).to.eql('unauthenticated');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /categories aktif",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/categories"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Active categories include ID, name, and image', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const categories = pm.response.json().data;",
+              "  pm.expect(categories).to.be.an('array').that.is.not.empty;",
+              "  categories.forEach(function (c) { pm.expect(c.id_kategori).to.be.a('number'); pm.expect(c.nama).to.be.a('string').and.not.empty; pm.expect(c).to.have.property('gambar'); });",
+              "  pm.collectionVariables.set('categoryId', categories[0].id_kategori);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET wisata berdasarkan kategori",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/categories/{{categoryId}}/wisata"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Tourism is returned for selected category', function () {",
+              "  pm.response.to.have.status(200); const d = pm.response.json().data;",
+              "  pm.expect(d.kategori.id_kategori).to.eql(Number(pm.collectionVariables.get('categoryId'))); pm.expect(d.wisata).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET wisata menolak ID kategori invalid",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/categories/not-a-number/wisata"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Malformed category ID returns 400', function () { pm.response.to.have.status(400); pm.expect(pm.response.json().status).to.eql('invalid_category_id'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET wisata menangani kategori tidak ditemukan",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/categories/999999/wisata"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Unknown category ID returns 404', function () { pm.response.to.have.status(404); pm.expect(pm.response.json().status).to.eql('category_not_found'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /wisata menyertakan foto",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Backend/api/wisata.php"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Tourism rows include IDs and photos', function () { pm.response.to.have.status(200); const rows=pm.response.json().data; pm.expect(rows).to.be.an('array').that.is.not.empty; rows.forEach(x => {pm.expect(x.id_wisata).to.match(/^[KM][0-9]{5,}$/); pm.expect(x.gambar).to.be.a('string').and.not.empty;}); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET lokasi destinasi",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/destinations/{{destinationId}}/location"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Location returns valid coordinate fields', function () { pm.response.to.have.status(200); const d=pm.response.json().data; pm.expect(d).to.have.property('alamat'); pm.expect(d.koordinat_lengkap).to.be.a('boolean'); if(d.koordinat_lengkap){pm.expect(d.latitude).to.be.within(-90,90);pm.expect(d.longitude).to.be.within(-180,180);}else{pm.expect(d.latitude).to.eql(null);pm.expect(d.longitude).to.eql(null);} });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT /users/me tanpa login",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/me"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"nama\":\"Nama Uji\",\"email\":\"uji@example.com\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Anonymous PUT returns 401',function(){pm.response.to.have.status(401);pm.expect(pm.response.json().status).to.eql('unauthenticated');});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST login pengguna (kredensial opsional)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Backend/api/fungsi_login.php"
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "email",
+              "value": "{{loginEmail}}",
+              "type": "text"
+            },
+            {
+              "key": "password",
+              "value": "{{loginPassword}}",
+              "type": "text"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.unset('userAuthenticated');",
+              "pm.collectionVariables.unset('profileName');",
+              "pm.collectionVariables.unset('profileEmail');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const ok=pm.response.code===200; pm.test('User login succeeds or validates missing credentials',function(){pm.response.to.have.status(ok?200:422);if(ok){pm.expect(pm.response.json().status).to.eql('success');pm.collectionVariables.set('userAuthenticated','true');}else{pm.expect(pm.response.json().status).to.eql('validation_error');}});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /users/me mengikuti status login",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/me"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const auth=pm.collectionVariables.get('userAuthenticated')==='true';pm.test('Profile access matches login state',function(){pm.response.to.have.status(auth?200:401);if(auth){const d=pm.response.json().data;pm.expect(d.id_user).to.be.a('number');pm.expect(d.nama).to.be.a('string').and.not.empty;pm.expect(d.email).to.be.a('string').and.not.empty;pm.collectionVariables.set('profileName',d.nama);pm.collectionVariables.set('profileEmail',d.email);}else{pm.expect(pm.response.json().status).to.eql('unauthenticated');}});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT /users/me menolak payload tidak valid",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/me"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"nama\":\"\",\"email\":\"bukan-email\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const auth=pm.collectionVariables.get('userAuthenticated')==='true';pm.test('Invalid profile payload returns expected status',function(){pm.response.to.have.status(auth?422:401);pm.expect(pm.response.json().status).to.eql(auth?'validation_error':'unauthenticated');});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT /users/me mempertahankan profil saat terautentikasi",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/me"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{{profileUpdateBody}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('profileUpdateBody',JSON.stringify({nama:pm.collectionVariables.get('profileName'),email:pm.collectionVariables.get('profileEmail')}));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const auth=pm.collectionVariables.get('userAuthenticated')==='true';pm.test('Profile update matches authentication state',function(){pm.response.to.have.status(auth?200:401);if(auth){const d=pm.response.json().data;pm.expect(d.nama).to.eql(pm.collectionVariables.get('profileName'));pm.expect(d.email).to.eql(pm.collectionVariables.get('profileEmail'));}else{pm.expect(pm.response.json().status).to.eql('unauthenticated');}});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST /Backend/api/fungsi_register.php — Registrasi pengguna",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Backend/api/fungsi_register.php",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "Backend",
+            "api",
+            "fungsi_register.php"
+          ]
+        },
+        "description": "Password minimal 8 karakter. Nama kosong akan diisi dari bagian email sebelum @.",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /Backend/api/google_login.php — Mulai login atau registrasi Google",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Backend/api/google_login.php",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "Backend",
+            "api",
+            "google_login.php"
+          ]
+        },
+        "description": "Browser dialihkan ke Google OAuth atau kembali ke halaman auth jika OAuth belum dikonfigurasi."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /Backend/api/google_callback.php — Callback OAuth Google",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Backend/api/google_callback.php",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "Backend",
+            "api",
+            "google_callback.php"
+          ]
+        },
+        "description": "Callback Google; state terikat pada session dan hanya dapat dipakai sekali."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /users/me — Ambil profil pengguna yang sedang login",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/me",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "me"
+          ]
+        },
+        "description": "Ambil profil pengguna yang sedang login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT /users/me — Perbarui nama dan email pengguna",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users/me",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "me"
+          ]
+        },
+        "description": "Perbarui nama dan email pengguna",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nama\": \"contoh\",\n  \"email\": \"contoh\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT /api/user/change-password — Ubah password pengguna yang sedang login",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/user/change-password",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "user",
+            "change-password"
+          ]
+        },
+        "description": "Password baru minimal 8 karakter dengan huruf besar, huruf kecil, angka, dan karakter khusus.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"currentPassword\": \"contoh\",\n  \"newPassword\": \"contoh\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /Backend/api/wisata.php — Daftar wisata",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Backend/api/wisata.php",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "Backend",
+            "api",
+            "wisata.php"
+          ]
+        },
+        "description": "Daftar wisata"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /categories — Daftar kategori aktif",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/categories",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "categories"
+          ]
+        },
+        "description": "Daftar kategori aktif"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /categories/{id}/wisata — Wisata dalam kategori aktif",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/categories/{id}/wisata",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "categories",
+            "{{id}}",
+            "wisata"
+          ]
+        },
+        "description": "Wisata dalam kategori aktif"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /api/destinations/search — Cari destinasi wisata berdasarkan nama dan deskripsi",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/destinations/search",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "destinations",
+            "search"
+          ]
+        },
+        "description": "Pencarian mencocokkan q dengan pola LIKE %q% pada kolom nama_wisata dan deskripsi. Jalankan destination_search_indexes.sql untuk menambahkan index kolom pencarian."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST /api/favorites — Tambahkan atau hapus favorit destinasi",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/favorites",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "favorites"
+          ]
+        },
+        "description": "Menyisipkan atau menghapus relasi favorit untuk pengguna yang sedang login. Backend menggunakan tabel favorit (Id_user, Id_wisata) yang memetakan user_id dan destination_id.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"destination_id\": \"contoh\",\n  \"action\": \"contoh\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /api/destinations/{id}/location — Ambil alamat dan koordinat destinasi",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/destinations/{id}/location",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "destinations",
+            "{{id}}",
+            "location"
+          ]
+        },
+        "description": "Ambil alamat dan koordinat destinasi"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT /api/destinations/{id}/location — Perbarui alamat dan koordinat destinasi (admin)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/destinations/{id}/location",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "destinations",
+            "{{id}}",
+            "location"
+          ]
+        },
+        "description": "Perbarui alamat dan koordinat destinasi (admin)",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST /api/destinations/{id}/reviews — Tambahkan ulasan destinasi (pengguna)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/destinations/{id}/reviews",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "destinations",
+            "{{id}}",
+            "reviews"
+          ]
+        },
+        "description": "Field `komentar` dapat dipakai sebagai alias untuk `text`.",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST /Backend/api/logout.php — Logout dan hapus session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Backend/api/logout.php",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "Backend",
+            "api",
+            "logout.php"
+          ]
+        },
+        "description": "Endpoint mengembalikan redirect, bukan JSON.",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "csrf",
+              "value": "contoh"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Server returned a response (not 5xx)', function () {",
+              "  pm.expect(pm.response.code).to.be.below(500);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost/Perawat_Periwit",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "destinationId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "facilityId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "1",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+$kind: http-request
+name: PUT /users/me menolak payload tidak valid
+url: ""
+method: PUT
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: '{"nama":"","email":"bukan-email"}'
+scripts:
+  - type: afterResponse
+    code: const auth=pm.collectionVariables.get('userAuthenticated')==='true';pm.test('Invalid profile payload returns expected status',function(){pm.response.to.have.status(auth?422:401);pm.expect(pm.response.json().status).to.eql(auth?'validation_error':'unauthenticated');});
+    language: text/javascript
+order: 5000

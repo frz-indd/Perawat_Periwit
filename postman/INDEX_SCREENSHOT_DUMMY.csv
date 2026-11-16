@@ -1,0 +1,35 @@
+﻿No,Kategori,Nama Request,Method,URL,Status Contoh,Keterangan
+1,admin,POST login admin JWT (untuk CRUD fasilitas),POST,http://localhost/api/admin/login,200,SIMULASI - bukan hasil eksekusi
+2,user,GET /users/me tanpa login,GET,http://localhost/users/me,200,SIMULASI - bukan hasil eksekusi
+3,public,GET /categories aktif,GET,http://localhost/categories,200,SIMULASI - bukan hasil eksekusi
+4,public,GET wisata berdasarkan kategori,GET,http://localhost/categories/{{categoryId}}/wisata,200,SIMULASI - bukan hasil eksekusi
+5,public,GET wisata menolak ID kategori invalid,GET,http://localhost/categories/not-a-number/wisata,422,SIMULASI - bukan hasil eksekusi
+6,public,GET wisata menangani kategori tidak ditemukan,GET,http://localhost/categories/999999/wisata,200,SIMULASI - bukan hasil eksekusi
+7,public,GET /wisata menyertakan foto,GET,http://localhost/Backend/api/wisata.php,200,SIMULASI - bukan hasil eksekusi
+8,public,GET lokasi destinasi,GET,http://localhost/api/destinations/{{destinationId}}/location,200,SIMULASI - bukan hasil eksekusi
+9,admin,POST login admin (kredensial opsional),POST,http://localhost/Backend/api/fungsi_login.php,200,SIMULASI - bukan hasil eksekusi
+10,admin,PUT lokasi memvalidasi session admin dan koordinat,PUT,http://localhost/api/destinations/{{destinationId}}/location,200,SIMULASI - bukan hasil eksekusi
+11,user,PUT /users/me tanpa login,PUT,http://localhost/users/me,200,SIMULASI - bukan hasil eksekusi
+12,user,POST login pengguna (kredensial opsional),POST,http://localhost/Backend/api/fungsi_login.php,200,SIMULASI - bukan hasil eksekusi
+13,user,GET /users/me mengikuti status login,GET,http://localhost/users/me,200,SIMULASI - bukan hasil eksekusi
+14,user,PUT /users/me menolak payload tidak valid,PUT,http://localhost/users/me,422,SIMULASI - bukan hasil eksekusi
+15,user,PUT /users/me mempertahankan profil saat terautentikasi,PUT,http://localhost/users/me,200,SIMULASI - bukan hasil eksekusi
+16,admin,POST /api/admin/login JWT (kredensial opsional),POST,http://localhost/api/admin/login,200,SIMULASI - bukan hasil eksekusi
+17,admin,GET /api/admin/dashboard RBAC (proteksi middleware adminOnly),GET,http://localhost/api/admin/dashboard,200,SIMULASI - bukan hasil eksekusi
+18,admin,GET master fasilitas,GET,http://localhost/api/admin/facilities,200,SIMULASI - bukan hasil eksekusi
+19,admin,GET detail fasilitas,GET,http://localhost/api/admin/facilities/{{facilityId}},200,SIMULASI - bukan hasil eksekusi
+20,admin,POST tambah fasilitas,POST,http://localhost/api/admin/facilities,200,SIMULASI - bukan hasil eksekusi
+21,admin,POST duplikasi nama fasilitas (harus 422),POST,http://localhost/api/admin/facilities,200,SIMULASI - bukan hasil eksekusi
+22,admin,PUT ubah fasilitas,PUT,http://localhost/api/admin/facilities/{{facilityId}},200,SIMULASI - bukan hasil eksekusi
+23,admin,DELETE hapus fasilitas,DELETE,http://localhost/api/admin/facilities/{{facilityId}},200,SIMULASI - bukan hasil eksekusi
+24,admin,GET dashboard summary,GET,http://localhost/api/admin/dashboard/summary,200,SIMULASI - bukan hasil eksekusi
+25,admin,GET all admin reviews,GET,http://localhost/api/admin/reviews,200,SIMULASI - bukan hasil eksekusi
+26,admin,GET one admin review,GET,http://localhost/api/admin/reviews/{{reviewId}},200,SIMULASI - bukan hasil eksekusi
+27,admin,DELETE admin review,DELETE,http://localhost/api/admin/reviews/{{reviewId}},200,SIMULASI - bukan hasil eksekusi
+28,admin,GET /api/admin/users - search & pagination,GET,http://localhost/api/admin/users?search={{userSearch}}&page={{userPage}}&limit={{userLimit}},200,SIMULASI - bukan hasil eksekusi
+29,admin,GET admin profile,GET,http://localhost/api/admin/profile,200,SIMULASI - bukan hasil eksekusi
+30,admin,PUT update admin profile,PUT,http://localhost/api/admin/profile,200,SIMULASI - bukan hasil eksekusi
+31,admin,PUT change admin password,PUT,http://localhost/api/admin/change-password,200,SIMULASI - bukan hasil eksekusi
+32,admin,PUT reject wrong current password,PUT,http://localhost/api/admin/change-password,422,SIMULASI - bukan hasil eksekusi
+33,admin,PUT reject weak new password,PUT,http://localhost/api/admin/change-password,422,SIMULASI - bukan hasil eksekusi
+34,admin,GET admin profile without token,GET,http://localhost/api/admin/profile,200,SIMULASI - bukan hasil eksekusi

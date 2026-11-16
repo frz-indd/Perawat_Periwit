@@ -1,0 +1,38 @@
+$kind: http-request
+name: 'POST /api/admin/login JWT (kredensial opsional)'
+method: POST
+url: '{{baseUrl}}/api/admin/login'
+order: 16000
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+        "username": "{{adminUsername}}",
+        "password": "{{adminPassword}}"
+    }
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      pm.collectionVariables.unset('adminJwtToken');
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const ok = pm.response.code === 200;
+      pm.test('Admin login JWT succeeds or validates missing credentials', function () {
+        pm.response.to.have.status(ok ? 200 : 422);
+        if (ok) {
+          const res = pm.response.json();
+          pm.expect(res.status).to.eql('success');
+          pm.expect(res.message).to.eql('Login berhasil.');
+          pm.expect(res.token).to.be.a('string').and.not.empty;
+          pm.expect(res.user).to.be.an('object');
+          pm.expect(res.user.role).to.eql('admin');
+          pm.collectionVariables.set('adminJwtToken', res.token);
+        } else {
+          pm.expect(pm.response.json().status).to.eql('validation_error');
+        }
+      });

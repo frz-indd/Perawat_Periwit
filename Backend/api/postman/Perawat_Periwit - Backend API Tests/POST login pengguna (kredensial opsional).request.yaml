@@ -1,0 +1,22 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/Backend/api/fungsi_login.php'
+order: 12000
+headers:
+  Accept: application/json
+body:
+  type: urlencoded
+  content:
+    email: '{{loginEmail}}'
+    password: '{{loginPassword}}'
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      pm.collectionVariables.unset('userAuthenticated');
+      pm.collectionVariables.unset('profileName');
+      pm.collectionVariables.unset('profileEmail');
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const ok=pm.response.code===200; pm.test('User login succeeds or validates missing credentials',function(){pm.response.to.have.status(ok?200:422);if(ok){pm.expect(pm.response.json().status).to.eql('success');pm.collectionVariables.set('userAuthenticated','true');}else{pm.expect(pm.response.json().status).to.eql('validation_error');}});

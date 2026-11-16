@@ -1028,3 +1028,366 @@ body.admin-form-page {
 .admin-table thead th:last-child { border-top-right-radius: 24px; }
 .admin-table tbody tr:last-child td:first-child { border-bottom-left-radius: 24px; }
 .admin-table tbody tr:last-child td:last-child { border-bottom-right-radius: 24px; }
+
+
+/* Form tambah/edit wisata — penyelarasan dengan desain terbaru */
+.admin-form-page { font-family: Georgia, 'Times New Roman', serif !important; }
+.admin-form-container { width: min(100% - 64px, 1160px); padding: 82px 0 56px; }
+.admin-form-heading { margin: 0 0 30px; }
+.admin-form-heading h1 { font-size: 38px; line-height: 1.15; }
+.admin-form-heading p { font-size: 18px; }
+.admin-destination-form { grid-template-columns: minmax(390px, 490px) minmax(440px, 560px); justify-content: space-between; column-gap: 70px; row-gap: 0; margin: 0; }
+.admin-form-fields { gap: 27px; }
+.admin-field label { margin: 0 0 1px 2px; font-size: 25px; line-height: 1.15; }
+.admin-field .form-control, .admin-field .form-select { height: 47px; padding: 8px 20px; font-size: 20px; border-color: #176f60; border-radius: 10px; }
+.admin-field .form-select { background-position: right 20px center; }
+.admin-upload-column { padding-top: 88px; }
+.admin-upload-zone { height: 516px; padding: 8px; border-radius: 20px; }
+.admin-upload-empty { width: 100%; gap: 20px; padding: 0 16px; }
+.upload-picture-icon { width: 150px; height: 125px; }
+.admin-upload-prompt { font-size: 29px; line-height: 1.35; }
+.admin-upload-note { font-size: 18px; padding: 6px 14px; }
+.admin-upload-preview { width: 100%; height: 300px; flex: 0 0 300px; object-fit: cover; border-radius: 17px; }
+.admin-upload-zone.has-preview { display: flex; flex-direction: column; justify-content: flex-start; gap: 26px; }
+.admin-upload-zone.has-preview .admin-upload-filename { max-width: 95%; font-size: 15px; }
+.admin-upload-zone.has-preview .admin-upload-prompt { font-size: 28px; }
+.admin-form-actions { grid-column: 1 / -1; justify-content: flex-end; gap: 26px; margin-top: 0; }
+.admin-form-actions .btn { min-height: 55px; padding: 8px 19px; font-size: 24px; }
+.admin-save-button { min-width: 268px; }
+.admin-cancel-button { min-width: 136px; }
+@media (min-width: 1400px) {
+ .admin-form-container { width: min(100% - 100px, 1160px); }
+}
+@media (max-width: 1100px) {
+ .admin-form-container { width: min(100% - 48px, 900px); padding-top: 42px; }
+ .admin-destination-form { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 32px; }
+ .admin-field label { font-size: 21px; }
+ .admin-upload-zone { height: 440px; }
+ .admin-upload-prompt { font-size: 24px; }
+ .admin-upload-preview { height: 250px; flex-basis: 250px; }
+}
+@media (max-width: 700px) {
+ .admin-form-container { width: calc(100% - 32px); padding: 28px 0 36px; }
+ .admin-form-heading { margin: 0 0 24px; }
+ .admin-form-heading h1 { font-size: 30px; }
+ .admin-form-heading p { font-size: 15px; }
+ .admin-destination-form { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+ .admin-form-fields { gap: 18px; }
+ .admin-field label { font-size: 20px; }
+ .admin-field .form-control, .admin-field .form-select { height: 44px; font-size: 16px; }
+ .admin-upload-column { padding-top: 0; }
+ .admin-upload-zone { height: 340px; }
+ .admin-upload-prompt { font-size: 22px; }
+ .admin-upload-note { font-size: 14px; }
+ .admin-upload-preview { height: 220px; flex-basis: 220px; }
+ .admin-form-actions { grid-column: 1; justify-content: flex-end; gap: 10px; }
+ .admin-form-actions .btn { min-height: 46px; font-size: 16px; }
+ .admin-save-button { min-width: 0; }
+}
+
+/* Empty, error, and no-result states for the Data Wisata page */
+.destination-state-panel {
+    min-height: 540px;
+    display: grid;
+    place-items: center;
+    margin: 34px 4px 0;
+    padding: 38px 20px;
+    background: #fff;
+    border: 1px solid #a5a5a5;
+    border-radius: 25px;
+}
+.destination-state-panel.d-none { display: none !important; }
+.destination-state-content { display: flex; flex-direction: column; align-items: center; max-width: 620px; text-align: center; }
+.destination-state-content > i { margin-bottom: 18px; color: var(--admin-green); font-size: 72px; line-height: 1; }
+.destination-state-content h2 { margin: 0 0 10px; color: var(--admin-green); font-family: 'Frank Ruhl Libre', Georgia, serif; font-size: 34px; font-weight: 700; }
+.destination-state-content p { max-width: 560px; margin: 0 0 22px; color: #111; font-family: 'Courier New', monospace; font-size: 20px; line-height: 1.35; }
+.destination-state-button { display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 8px 18px; color: #fff; background: var(--admin-green); border: 0; border-radius: 20px; font-family: 'Frank Ruhl Libre', Georgia, serif; font-size: 23px; font-weight: 700; text-decoration: none; cursor: pointer; }
+.destination-state-button:hover { color: #fff; background: var(--admin-green-dark); }
+.destination-state-error > i, .destination-state-error h2 { color: #f00; }
+.destination-state-error > i { font-size: 88px; }
+@media (max-width: 768px) {
+ .destination-state-panel { min-height: 420px; margin: 22px 0 0; border-radius: 18px; }
+ .destination-state-content h2 { font-size: 27px; }
+ .destination-state-content p { font-size: 16px; }
+ .destination-state-button { min-height: 44px; font-size: 19px; }
+}
+
+
+/* Penyesuaian akhir sesuai referensi: dropdown filter dan form tambah/edit. */
+.admin-filters #regionFilter,
+.admin-filters #categoryFilter {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .22);
+}
+
+/* Area unggah: proporsi panel kosong dan pratinjau dibuat konsisten. */
+.admin-upload-zone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0;
+    padding: 8px;
+}
+
+.admin-upload-empty {
+    position: relative;
+    display: flex !important;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0;
+    padding: 76px 16px 0;
+}
+
+.admin-upload-empty::before {
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 287px;
+    background: #a9c4be;
+    border-radius: 24px;
+    content: '';
+}
+
+.upload-picture-icon {
+    position: relative;
+    z-index: 1;
+    width: 150px;
+    height: 125px;
+    flex: 0 0 125px;
+    margin-top: 0;
+}
+
+.admin-upload-prompt,
+.admin-upload-note,
+.admin-upload-filename {
+    position: relative;
+    z-index: 1;
+}
+
+.admin-upload-prompt {
+    margin-top: 115px;
+    font-size: 29px;
+    line-height: 1.35;
+}
+
+.admin-upload-note {
+    margin-top: 18px;
+    font-size: 18px;
+    padding: 6px 14px;
+}
+
+.admin-upload-preview {
+    display: block;
+    width: 100%;
+    height: 300px;
+    flex: 0 0 300px;
+    object-fit: cover;
+    border-radius: 20px;
+}
+
+.admin-upload-zone.has-preview {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 20px;
+    background: var(--admin-green-light);
+}
+
+.admin-upload-zone.has-preview .admin-upload-preview {
+    width: 100%;
+    height: 300px;
+    flex: 0 0 300px;
+}
+
+.admin-upload-zone.has-preview .admin-upload-empty {
+    height: auto;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    gap: 18px;
+    padding: 0 12px 8px;
+}
+
+.admin-upload-zone.has-preview .admin-upload-empty::before,
+.admin-upload-zone.has-preview .upload-picture-icon {
+    display: none;
+}
+
+.admin-upload-zone.has-preview .admin-upload-prompt {
+    font-size: 28px;
+    line-height: 1.35;
+}
+
+@media (max-width: 1100px) {
+    .admin-upload-empty::before { height: 235px; }
+    .admin-upload-empty { padding-bottom: 35px; }
+    .admin-upload-preview,
+    .admin-upload-zone.has-preview .admin-upload-preview { height: 250px; flex-basis: 250px; }
+    .admin-upload-prompt { font-size: 24px; }
+    .admin-upload-note { font-size: 15px; }
+}
+
+@media (max-width: 700px) {
+    .admin-upload-zone { min-height: 340px; height: 340px; }
+    .admin-upload-empty::before { height: 190px; }
+    .admin-upload-empty { padding: 25px 10px; gap: 0; justify-content: center; }
+    .admin-upload-prompt { margin-top: 24px; }
+    .admin-upload-note { margin-top: 14px; }
+    .upload-picture-icon { width: 120px; height: 100px; flex-basis: 100px; }
+    .admin-upload-prompt { font-size: 21px; }
+    .admin-upload-note { font-size: 13px; }
+    .admin-upload-preview,
+    .admin-upload-zone.has-preview .admin-upload-preview { height: 210px; flex-basis: 210px; }
+    .admin-upload-zone.has-preview { gap: 14px; }
+    .admin-upload-zone.has-preview .admin-upload-empty { padding: 0 8px 8px; }
+    .admin-upload-zone.has-preview .admin-upload-prompt { font-size: 20px; }
+}
+
+
+/* Jarak akhir form tambah/edit: beri ruang antara area foto dan tombol aksi. */
+.admin-form-container {
+    padding-bottom: 76px;
+}
+.admin-form-actions {
+    margin-top: 24px !important;
+    gap: 30px !important;
+    padding-bottom: 8px;
+}
+.admin-upload-column {
+    padding-bottom: 0;
+}
+.admin-upload-zone {
+    margin-bottom: 0;
+}
+.destination-edit i {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}
+@media (max-width: 700px) {
+    .admin-form-container { padding-bottom: 42px; }
+    .admin-form-actions {
+        margin-top: 12px !important;
+        gap: 14px !important;
+    }
+}
+
+
+/* FIX FORM EDIT: foto dan instruksi upload harus tampil utuh bersamaan. */
+.admin-upload-zone.has-preview {
+    height: 516px !important;
+    min-height: 516px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+    padding: 8px !important;
+    overflow: visible !important;
+}
+.admin-upload-zone.has-preview .admin-upload-preview {
+    display: block !important;
+    width: 100% !important;
+    height: 300px !important;
+    min-height: 0 !important;
+    flex: 0 0 300px !important;
+    object-fit: cover !important;
+    border-radius: 17px !important;
+}
+.admin-upload-zone.has-preview .admin-upload-empty {
+    display: flex !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    padding: 0 12px 8px !important;
+}
+.admin-upload-zone.has-preview .admin-upload-empty::before,
+.admin-upload-zone.has-preview .upload-picture-icon {
+    display: none !important;
+}
+.admin-upload-zone.has-preview .admin-upload-prompt {
+    display: block !important;
+    margin: 0 !important;
+    font-size: 27px !important;
+    line-height: 1.3 !important;
+    text-align: center !important;
+}
+.admin-upload-zone.has-preview .admin-upload-note {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    font-size: 17px !important;
+    white-space: nowrap;
+}
+.admin-upload-zone.has-preview .admin-upload-filename {
+    display: none !important;
+}
+
+/* Tombol edit: latar hijau solid, ikon pensil putih. */
+.destination-edit {
+    color: #fff !important;
+    background: #176f60 !important;
+    border: 0 !important;
+}
+.destination-edit i,
+.destination-edit:hover i,
+.destination-edit:focus i {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}
+@media (max-width: 1100px) {
+    .admin-upload-zone.has-preview {
+        height: 440px !important;
+        min-height: 440px !important;
+    }
+    .admin-upload-zone.has-preview .admin-upload-preview {
+        height: 245px !important;
+        flex-basis: 245px !important;
+    }
+    .admin-upload-zone.has-preview .admin-upload-prompt { font-size: 23px !important; }
+    .admin-upload-zone.has-preview .admin-upload-note { font-size: 14px !important; }
+}
+@media (max-width: 700px) {
+    .admin-upload-zone.has-preview {
+        height: 390px !important;
+        min-height: 390px !important;
+    }
+    .admin-upload-zone.has-preview .admin-upload-preview {
+        height: 210px !important;
+        flex-basis: 210px !important;
+    }
+    .admin-upload-zone.has-preview .admin-upload-prompt { font-size: 20px !important; }
+    .admin-upload-zone.has-preview .admin-upload-note {
+        max-width: 100%;
+        font-size: 12px !important;
+    }
+}
+
+
+/* Ikon edit outline: garis pensil putih, bagian dalam transparan sehingga hijau tombol terlihat. */
+.destination-edit {
+    color: #ffffff !important;
+    background-color: #176f60 !important;
+    border: 0 !important;
+}
+.destination-edit i {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+}
+.destination-edit:hover,
+.destination-edit:focus-visible,
+.destination-edit:active {
+    color: #ffffff !important;
+    background-color: #176f60 !important;
+}

@@ -1,0 +1,21 @@
+$kind: http-request
+url: ""
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: urlencoded
+  content:
+    email: "{{loginEmail}}"
+    password: "{{loginPassword}}"
+scripts:
+  - type: beforeRequest
+    code: |-
+      pm.collectionVariables.unset('userAuthenticated');
+      pm.collectionVariables.unset('profileName');
+      pm.collectionVariables.unset('profileEmail');
+    language: text/javascript
+  - type: afterResponse
+    code: const ok=pm.response.code===200; pm.test('User login succeeds or validates missing credentials',function(){pm.response.to.have.status(ok?200:422);if(ok){pm.expect(pm.response.json().status).to.eql('success');pm.collectionVariables.set('userAuthenticated','true');}else{pm.expect(pm.response.json().status).to.eql('validation_error');}});
+    language: text/javascript
+order: 3000

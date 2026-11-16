@@ -1,0 +1,16 @@
+name: Perawat_Periwit Localhost
+values:
+  - key: baseUrl
+    value: 'http://localhost/Perawat_Periwit'
+  - key: adminUsername
+    value: admin
+  - key: adminPassword
+    value: ''
+  - key: userEmail
+    value: ''
+  - key: userPassword
+    value: ''
+  - key: destinationId
+    value: '1'
+  - key: categoryId
+    value: '1'
