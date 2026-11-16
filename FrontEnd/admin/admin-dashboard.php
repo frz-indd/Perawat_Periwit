@@ -35,7 +35,7 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet">
     <link href="../CSS/admin-data-wisata.css?v=20261112-50261112-5" rel="stylesheet">
-    <link href="../CSS/admin-dashboard.css?v=20261112-50261112-5" rel="stylesheet">
+    <link href="../CSS/admin-dashboard.css?v=20261116-logout-modal-2" rel="stylesheet">
     <style>
         .admin-route-pending .admin-sidebar,
         .admin-route-pending .admin-mobile-bar,
@@ -131,11 +131,31 @@ function e(string $value): string
 
     <div class="admin-sidebar-backdrop" id="sidebarBackdrop"></div>
 
+    <div class="logout-modal" id="logoutModal" hidden>
+        <div class="logout-modal__backdrop" id="logoutModalBackdrop"></div>
+        <div class="logout-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle" aria-describedby="logoutModalText">
+            <div class="logout-modal__icon" aria-hidden="true">
+                <svg viewBox="0 0 34 34">
+                    <path fill="currentColor" fill-rule="evenodd" d="M12 0h10a1 1 0 0 1 1 1v5H11V1a1 1 0 0 1 1-1zM13.2 2.6h7.6v3.4h-7.6z"/>
+                    <rect x="0" y="4.8" width="33.8" height="2.5" rx="1.25" fill="currentColor"/>
+                    <path d="M3.8 6h26.2v25.6a1.7 1.7 0 0 1-1.7 1.7H5.5a1.7 1.7 0 0 1-1.7-1.7z" fill="currentColor"/>
+                    <rect x="11.5" y="11.8" width="3" height="14.8" rx="1.5" fill="#c9d6ce"/>
+                    <rect x="19" y="11.8" width="3" height="14.8" rx="1.5" fill="#c9d6ce"/>
+                </svg>
+            </div>
+            <h2 class="logout-modal__title" id="logoutModalTitle">Apakah Anda yakin ingin keluar dari admin panel Explore MajaKu?</h2>
+            <p class="logout-modal__text" id="logoutModalText">Sesi anda akan berakhir</p>
+            <div class="logout-modal__actions">
+                <button class="logout-modal__button logout-modal__button--confirm" id="logoutConfirmButton" type="button">Ya, Keluar</button>
+                <button class="logout-modal__button logout-modal__button--cancel" id="logoutCancelButton" type="button">Batal</button>
+            </div>
+        </div>
+    </div>
+
     <script>
     (function () {
         'use strict';
 
-        // Konfigurasi URL API dan halaman login
         const config = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
         const tokenKey = 'admin_token';
@@ -308,11 +328,37 @@ function e(string $value): string
                     });
                 }
             } catch (error) {
-                // Token tetap dibersihkan lokal; token server akan tetap kedaluwarsa sesuai exp.
             } finally {
                 clearToken();
                 redirectToLogin(false);
             }
+        }
+
+        const logoutModal = document.getElementById('logoutModal');
+        const logoutConfirmButton = document.getElementById('logoutConfirmButton');
+        const logoutCancelButton = document.getElementById('logoutCancelButton');
+        let lastFocusedElement = null;
+
+        function openLogoutModal() {
+            lastFocusedElement = document.activeElement;
+            setMobileSidebar(false);
+            logoutModal.hidden = false;
+            document.body.classList.add('logout-modal-open');
+            window.requestAnimationFrame(function () {
+                logoutModal.classList.add('is-visible');
+                logoutCancelButton.focus();
+            });
+        }
+
+        function closeLogoutModal() {
+            logoutModal.classList.remove('is-visible');
+            document.body.classList.remove('logout-modal-open');
+            window.setTimeout(function () {
+                logoutModal.hidden = true;
+                if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+                    lastFocusedElement.focus();
+                }
+            }, 180);
         }
 
         function setMobileSidebar(open) {
@@ -321,8 +367,23 @@ function e(string $value): string
             button.setAttribute('aria-label', open ? 'Tutup navigasi' : 'Buka navigasi');
         }
 
-        document.getElementById('logoutButton').addEventListener('click', logout);
-        document.getElementById('mobileLogoutButton').addEventListener('click', logout);
+        document.getElementById('logoutButton').addEventListener('click', openLogoutModal);
+        document.getElementById('mobileLogoutButton').addEventListener('click', openLogoutModal);
+
+        logoutCancelButton.addEventListener('click', closeLogoutModal);
+        document.getElementById('logoutModalBackdrop').addEventListener('click', closeLogoutModal);
+        logoutConfirmButton.addEventListener('click', function () {
+            logoutConfirmButton.disabled = true;
+            logoutCancelButton.disabled = true;
+            logoutConfirmButton.textContent = 'Memproses...';
+            logout();
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && !logoutModal.hidden && !logoutConfirmButton.disabled) {
+                closeLogoutModal();
+            }
+        });
 
         document.getElementById('sidebarCollapse').addEventListener('click', function () {
             const collapsed = document.body.classList.toggle('sidebar-collapsed');
