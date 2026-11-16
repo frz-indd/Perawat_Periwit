@@ -5,7 +5,7 @@
 :root {
     --kategori-green: #176f60;
     --kategori-topbar-h: 82px;
-    --kategori-sidebar-w: clamp(250px, 23.5vw, 338px);
+    --kategori-sidebar-w: 254px;
     --admin-sidebar-width: var(--kategori-sidebar-w);
     --kategori-content-max: 973px;
 }
@@ -174,7 +174,7 @@ body.admin-wisata-page.admin-resource-page .admin-content {
 @media (min-width: 768px) and (max-width: 1100px) {
     :root {
         --kategori-topbar-h: 62px;
-        --kategori-sidebar-w: clamp(190px, 23.5vw, 255px);
+        --kategori-sidebar-w: 220px;
         --admin-sidebar-width: var(--kategori-sidebar-w);
     }
     .admin-sidebar {

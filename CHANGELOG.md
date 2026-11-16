@@ -40,3 +40,10 @@
 - Ditambahkan endpoint terproteksi `POST /api/favorites` untuk menambah (`action: add`) atau menghapus (`action: remove`) relasi favorit destinasi.
 - Endpoint mengambil `user_id` dari session login, memvalidasi token CSRF, dan memakai tabel `favorit` dengan kolom `Id_user` dan `Id_wisata` yang sesuai dengan skema proyek.
 - Kontrak OpenAPI dan `api_kontrak.txt` diperbarui.
+
+## Integrasi API halaman Admin Fasilitas (2026-11-16)
+- Menghubungkan halaman `admin-resource.php?section=fasilitas` ke endpoint `/api/admin/facilities` menggunakan JWT admin.
+- Menambahkan tampilan daftar, tambah, edit (mengambil detail berdasarkan ID), dan hapus fasilitas.
+- Menambahkan penanganan error API, validasi nama fasilitas, konfirmasi hapus, dan refresh daftar setelah mutasi.
+- Menambahkan CSS khusus untuk tabel dan form modal fasilitas dengan tampilan responsif.
+- Endpoint backend dan rewrite URL yang sudah tersedia tetap dipertahankan; migration `facilities_migration.sql` tetap perlu dijalankan pada database yang dipakai.
