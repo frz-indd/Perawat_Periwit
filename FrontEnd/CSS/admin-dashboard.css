@@ -314,6 +314,7 @@ body.admin-dashboard-page {
 .admin-route-error .admin-sidebar,
 .admin-route-error .admin-mobile-bar,
 .admin-route-error .admin-sidebar-backdrop,
+.admin-route-error .admin-topbar,
 .admin-route-error .admin-content {
     display: none;
 }
@@ -340,19 +341,31 @@ body.admin-wisata-page {
 }
 
 body.admin-wisata-page .admin-main {
-    padding: 20px 26px 30px 24px;
+    padding: 0 0 30px;
+}
+
+.admin-topbar {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 66px;
+    margin: 0 0 22px;
+    padding: 0 26px 0 24px;
+    background: #fff;
+    border-bottom: 1px solid #d4d4d4;
+    box-shadow: 0 3px 4px rgba(0, 0, 0, .22);
 }
 
 body.admin-wisata-page .admin-content {
     width: 100%;
     max-width: none;
+    padding: 0 26px 0 24px;
 }
 
 body.admin-wisata-page .admin-page-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
+    display: block;
     min-height: 0;
     margin: 0 0 14px;
     padding: 0 2px;
@@ -700,7 +713,17 @@ body.admin-wisata-page .dashboard-recent__table tbody td.dashboard-recent__state
 
 @media (max-width: 900px) {
     body.admin-wisata-page .admin-main {
-        padding: 20px 16px 30px;
+        padding: 0 0 30px;
+    }
+
+    .admin-topbar {
+        height: 56px;
+        margin-bottom: 18px;
+        padding: 0 16px;
+    }
+
+    body.admin-wisata-page .admin-content {
+        padding: 0 16px;
     }
 }
 

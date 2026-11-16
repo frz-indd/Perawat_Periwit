@@ -35,7 +35,7 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@500;600;700&family=Noto+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="../CSS/admin-data-wisata.css?v=20261112-50261112-5" rel="stylesheet">
-    <link href="../CSS/admin-dashboard.css?v=20261116-trend-admin" rel="stylesheet">
+    <link href="../CSS/admin-dashboard.css?v=20261116-topbar" rel="stylesheet">
     <style>
         .admin-route-pending .admin-sidebar,
         .admin-route-pending .admin-mobile-bar,
@@ -46,6 +46,7 @@ function e(string $value): string
         .admin-route-error .admin-sidebar,
         .admin-route-error .admin-mobile-bar,
         .admin-route-error .admin-sidebar-backdrop,
+        .admin-route-error .admin-topbar,
         .admin-route-error .admin-content {
             display: none;
         }
@@ -94,6 +95,10 @@ function e(string $value): string
     </header>
 
     <main class="admin-main" aria-label="Konten dashboard admin">
+        <header class="admin-topbar">
+            <div class="admin-user-indicator"><i class="bi bi-person-circle"></i><span>Admin</span></div>
+        </header>
+
         <div class="admin-content">
             <div class="admin-page-heading">
                 <div>
@@ -109,7 +114,6 @@ function e(string $value): string
                         </svg>
                     </p>
                 </div>
-                <div class="admin-user-indicator"><i class="bi bi-person-circle"></i><span>Admin</span></div>
             </div>
 
             <section class="dashboard-summary" aria-labelledby="summaryTitle">
