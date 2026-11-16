@@ -117,7 +117,7 @@ function escapeHtml(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Frank+Ruhl+Libre:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Kaushan+Script&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../CSS/kategori.css?v=category-active-4">
+    <link rel="stylesheet" href="../CSS/kategori.css?v=category-active-5">
     <link rel="stylesheet" href="../CSS/theme.css?v=nav-solid-green-8">
     <link rel="stylesheet" href="../CSS/navbar-common.css?v=nav-active-text-green-3">
 </head>
