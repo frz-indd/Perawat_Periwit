@@ -16,6 +16,7 @@ $pageConfig = [
     'loginUrl' => $appBasePath . '/FrontEnd/auth/login-admin.php',
     'homeUrl' => $appBasePath . '/index.php',
     'appBasePath' => $appBasePath,
+    'refreshIntervalMs' => 60000,
 ];
 
 function e(string $value): string
@@ -35,38 +36,7 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@500;600;700&family=Noto+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="../CSS/admin-data-wisata.css?v=20261112-50261112-5" rel="stylesheet">
-    <link href="../CSS/admin-dashboard.css?v=20261116-topbar" rel="stylesheet">
-    <style>
-        .admin-route-pending .admin-sidebar,
-        .admin-route-pending .admin-mobile-bar,
-        .admin-route-pending .admin-main {
-            visibility: hidden;
-        }
-
-        .admin-route-error .admin-sidebar,
-        .admin-route-error .admin-mobile-bar,
-        .admin-route-error .admin-sidebar-backdrop,
-        .admin-route-error .admin-topbar,
-        .admin-route-error .admin-content {
-            display: none;
-        }
-
-        .admin-route-error .admin-main {
-            display: grid;
-            min-height: 100vh;
-            margin-left: 0;
-            padding: 24px;
-            place-items: center;
-        }
-
-        .admin-route-error__message {
-            max-width: 560px;
-            margin: 0;
-            color: #a32020;
-            font-size: 16px;
-            text-align: center;
-        }
-    </style>
+    <link href="../CSS/admin-dashboard.css?v=20261116-final" rel="stylesheet">
 </head>
 <body class="admin-wisata-page admin-route-pending">
     <aside class="admin-sidebar" id="adminSidebar">
@@ -94,11 +64,11 @@ function e(string $value): string
         <button class="mobile-logout-button" id="mobileLogoutButton" type="button" data-api-url="<?= e($pageConfig['apiLogoutUrl']) ?>" data-api-method="POST" aria-label="Logout"><i class="bi bi-box-arrow-right"></i></button>
     </header>
 
-    <main class="admin-main" aria-label="Konten dashboard admin">
-        <header class="admin-topbar">
-            <div class="admin-user-indicator"><i class="bi bi-person-circle"></i><span>Admin</span></div>
-        </header>
+    <header class="admin-topbar">
+        <span><i class="bi bi-person-circle" aria-hidden="true"></i> Admin 1</span>
+    </header>
 
+    <main class="admin-main" aria-label="Konten dashboard admin">
         <div class="admin-content">
             <div class="admin-page-heading">
                 <div>
@@ -179,15 +149,18 @@ function e(string $value): string
             </section>
 
             <section class="dashboard-recent" aria-labelledby="recentTitle">
-                <div class="dashboard-recent__heading"><h2 id="recentTitle">Wisata Terbaru</h2></div>
+                <div class="dashboard-recent__heading">
+                    <h2 id="recentTitle">Wisata Terbaru</h2>
+                    <span class="dashboard-recent__updated" id="lastUpdated"></span>
+                </div>
                 <div class="dashboard-recent__table-wrap">
                     <table class="dashboard-recent__table">
                         <colgroup>
-                            <col style="width:18%">
-                            <col style="width:22%">
+                            <col style="width:19.5%">
+                            <col style="width:23.5%">
                             <col style="width:13%">
-                            <col style="width:23%">
-                            <col style="width:24%">
+                            <col style="width:24.5%">
+                            <col style="width:19.5%">
                         </colgroup>
                         <thead><tr><th>Foto</th><th>Nama wisata</th><th>Wilayah</th><th>Kategori</th><th>Ditambahkan<br>Pada Tanggal</th></tr></thead>
                         <tbody id="recentDestinationRows"><tr><td colspan="5" class="dashboard-recent__state">Memuat wisata terbaru...</td></tr></tbody>
@@ -225,8 +198,9 @@ function e(string $value): string
         'use strict';
 
         const config = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
-
         const tokenKey = 'admin_token';
+        let refreshTimer = null;
+        let isLoading = false;
 
         function readStorage(storageName) {
             try {
@@ -241,14 +215,12 @@ function e(string $value): string
             if (storedToken) {
                 return storedToken;
             }
-
             const cookie = document.cookie.split('; ').find(function (entry) {
                 return entry.indexOf(tokenKey + '=') === 0;
             });
             if (!cookie) {
                 return '';
             }
-
             try {
                 return decodeURIComponent(cookie.slice(tokenKey.length + 1));
             } catch (cookieError) {
@@ -257,18 +229,13 @@ function e(string $value): string
         }
 
         function clearToken() {
-            try {
-                window.localStorage.removeItem(tokenKey);
-            } catch (storageError) {
-            }
-            try {
-                window.sessionStorage.removeItem(tokenKey);
-            } catch (storageError) {
-            }
+            try { window.localStorage.removeItem(tokenKey); } catch (storageError) {}
+            try { window.sessionStorage.removeItem(tokenKey); } catch (storageError) {}
             document.cookie = tokenKey + '=; path=/; max-age=0; SameSite=Lax';
         }
 
         function redirectToLogin(unauthorized) {
+            stopAutoRefresh();
             window.location.replace(unauthorized ? config.loginUrl + '?status=401' : config.loginUrl);
         }
 
@@ -289,6 +256,42 @@ function e(string $value): string
             down: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v12M3 9l5 5 5-5"/></svg>',
             flat: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg>'
         };
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, function (char) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char];
+            });
+        }
+
+        function pad(number) {
+            return String(number).padStart(2, '0');
+        }
+
+        // Tanggal dari database (YYYY-MM-DD, dengan/tanpa jam) otomatis menjadi dd/mm/yyyy.
+        function formatDate(value) {
+            if (!value) {
+                return '-';
+            }
+            const text = String(value).trim();
+            const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (iso) {
+                return iso[3] + '/' + iso[2] + '/' + iso[1];
+            }
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(text)) {
+                return text;
+            }
+            const parsed = new Date(text);
+            if (!Number.isNaN(parsed.getTime())) {
+                return pad(parsed.getDate()) + '/' + pad(parsed.getMonth() + 1) + '/' + parsed.getFullYear();
+            }
+            return text;
+        }
+
+        function setLastUpdated() {
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = 'Diperbarui ' + pad(now.getDate()) + '/' +
+                pad(now.getMonth() + 1) + '/' + now.getFullYear() + ' ' + pad(now.getHours()) + '.' + pad(now.getMinutes());
+        }
 
         function setSummaryMessage(message, isError) {
             const element = document.getElementById('summaryMessage');
@@ -325,24 +328,26 @@ function e(string $value): string
             }
             tbody.innerHTML = items.map(function (item) {
                 const photoUrl = item.foto && !/^https?:\/\//i.test(item.foto) ? config.appBasePath + '/' + String(item.foto).replace(/^\/+/, '') : item.foto;
-                const photo = photoUrl ? '<img src="' + escapeHtml(photoUrl) + '" alt="Foto ' + escapeHtml(item.nama_wisata) + '" loading="lazy">' : '<span class="dashboard-recent__no-photo"><i class="bi bi-image"></i></span>';
-                return '<tr><td class="dashboard-recent__photo">' + photo + '</td><td>' + escapeHtml(item.nama_wisata || '-') + '</td><td>' + escapeHtml(item.wilayah || '-') + '</td><td>' + escapeHtml(item.kategori || '-') + '</td><td>' + escapeHtml(item.tanggal_ditambahkan || '-') + '</td></tr>';
+                const photo = photoUrl ? '<img src="' + escapeHtml(photoUrl) + '" alt="Foto ' + escapeHtml(item.nama_wisata || '') + '" loading="lazy">' : '<span class="dashboard-recent__no-photo"><i class="bi bi-image"></i></span>';
+                const addedAt = item.tanggal_ditambahkan || item.created_at || item.tanggal || '';
+                return '<tr><td class="dashboard-recent__photo">' + photo + '</td><td>' + escapeHtml(item.nama_wisata || '-') + '</td><td>' + escapeHtml(item.wilayah || '-') + '</td><td>' + escapeHtml(item.kategori || '-') + '</td><td>' + escapeHtml(formatDate(addedAt)) + '</td></tr>';
             }).join('');
         }
 
-        function escapeHtml(value) {
-            return String(value).replace(/[&<>"']/g, function (char) {
-                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char];
-            });
-        }
-
-        async function loadSummary(token) {
+        async function loadSummary(token, silent) {
+            if (isLoading) {
+                return;
+            }
+            isLoading = true;
             const metrics = document.getElementById('dashboardMetrics');
-            metrics.setAttribute('aria-busy', 'true');
+            if (!silent) {
+                metrics.setAttribute('aria-busy', 'true');
+            }
             try {
                 const response = await fetch(config.apiSummaryUrl, {
                     method: 'GET',
                     credentials: 'same-origin',
+                    cache: 'no-store',
                     headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token }
                 });
                 const payload = await response.json().catch(function () { return null; });
@@ -366,13 +371,32 @@ function e(string $value): string
                 });
                 renderRecentDestinations(Array.isArray(payload.data.wisata_terbaru) ? payload.data.wisata_terbaru : []);
                 setSummaryMessage('', false);
+                setLastUpdated();
             } catch (error) {
-                const message = error.message || 'Tidak dapat memuat ringkasan dashboard.';
-                setSummaryMessage(message, true);
-                const tbody = document.getElementById('recentDestinationRows');
-                tbody.innerHTML = '<tr><td colspan="5" class="dashboard-recent__state dashboard-recent__state--error">Data wisata belum dapat dimuat. Periksa API dan koneksi database.</td></tr>';
+                setSummaryMessage(error.message || 'Tidak dapat memuat ringkasan dashboard.', true);
+                if (!silent) {
+                    document.getElementById('recentDestinationRows').innerHTML = '<tr><td colspan="5" class="dashboard-recent__state dashboard-recent__state--error">Data wisata belum dapat dimuat. Periksa API dan koneksi database.</td></tr>';
+                }
             } finally {
                 metrics.setAttribute('aria-busy', 'false');
+                isLoading = false;
+            }
+        }
+
+        // Muat ulang data otomatis tiap interval, hanya saat tab sedang dibuka.
+        function startAutoRefresh(token) {
+            stopAutoRefresh();
+            refreshTimer = window.setInterval(function () {
+                if (!document.hidden) {
+                    loadSummary(token, true);
+                }
+            }, config.refreshIntervalMs);
+        }
+
+        function stopAutoRefresh() {
+            if (refreshTimer) {
+                window.clearInterval(refreshTimer);
+                refreshTimer = null;
             }
         }
 
@@ -381,10 +405,7 @@ function e(string $value): string
                 const response = await fetch(config.apiDashboardUrl, {
                     method: 'GET',
                     credentials: 'same-origin',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    }
+                    headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token }
                 });
 
                 if (response.status === 401 || response.status === 403) {
@@ -393,9 +414,7 @@ function e(string $value): string
                     return;
                 }
 
-                const payload = await response.json().catch(function () {
-                    return null;
-                });
+                const payload = await response.json().catch(function () { return null; });
                 if (!response.ok) {
                     showGuardError(payload && payload.message
                         ? payload.message + ' (HTTP ' + response.status + ')'
@@ -409,7 +428,8 @@ function e(string $value): string
                 }
 
                 document.body.classList.remove('admin-route-pending');
-                loadSummary(token);
+                loadSummary(token, false);
+                startAutoRefresh(token);
             } catch (requestError) {
                 showGuardError('Tidak dapat terhubung ke server untuk memverifikasi sesi.');
             }
@@ -417,6 +437,7 @@ function e(string $value): string
 
         async function logout() {
             const token = getToken();
+            stopAutoRefresh();
             try {
                 if (token) {
                     await fetch(config.apiLogoutUrl, {
@@ -466,7 +487,6 @@ function e(string $value): string
 
         document.getElementById('logoutButton').addEventListener('click', openLogoutModal);
         document.getElementById('mobileLogoutButton').addEventListener('click', openLogoutModal);
-
         logoutCancelButton.addEventListener('click', closeLogoutModal);
         document.getElementById('logoutModalBackdrop').addEventListener('click', closeLogoutModal);
         logoutConfirmButton.addEventListener('click', function () {
@@ -501,6 +521,14 @@ function e(string $value): string
             redirectToLogin(false);
             return;
         }
+
+        // Saat tab kembali dibuka, langsung segarkan data.
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden && !document.body.classList.contains('admin-route-pending')) {
+                loadSummary(token, true);
+            }
+        });
+
         protectRoute(token);
     })();
     </script>
