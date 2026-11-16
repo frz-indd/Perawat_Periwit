@@ -73,18 +73,18 @@ require_once __DIR__ . '/navbar-profile-session.php';
 
         <section class="about-content" aria-label="Informasi tentang Explore Majaku">
             <article class="about-card about-intro">
-                <h2>Tentang Kami</h2>
-                <p>Explore MajaKu adalah platform informasi wisata yang membantu pengguna menemukan dan<br class="br-d">mengenal berbagai destinasi wisata di Majalengka dan Kuningan. Kami menyediakan informasi<br class="br-d">destinasi, lokasi, fasilitas, harga tiket, jam operasional, dan ulasan untuk memudahkan wisatawan</p>
+                <h2 data-about="intro-title">Tentang Kami</h2>
+                <p data-about="intro-content">Explore MajaKu adalah platform informasi wisata yang membantu pengguna menemukan dan mengenal berbagai destinasi wisata di Majalengka dan Kuningan. Kami menyediakan informasi destinasi, lokasi, fasilitas, harga tiket, jam operasional, dan ulasan untuk memudahkan wisatawan</p>
             </article>
 
             <div class="about-purpose">
                 <article class="about-card about-visi">
-                    <h2>Visi</h2>
-                    <p>Menjadi platform wisata terpercaya yang<br class="br-d">mendukung pengembangan pariwisata wilayah<br class="br-d">majalengka kuningan</p>
+                    <h2 data-about="vision-title">Visi</h2>
+                    <p data-about="vision-content">Menjadi platform wisata terpercaya yang mendukung pengembangan pariwisata wilayah Majalengka dan Kuningan.</p>
                 </article>
                 <article class="about-card about-misi">
-                    <h2>Misi</h2>
-                    <p>Menyediakan informasi wisata yang akurat<br class="br-d">dan terkini, Memudahkan wisatawan dalam<br class="br-d">merencanakan perjalanan,</p>
+                    <h2 data-about="mission-title">Misi</h2>
+                    <p data-about="mission-content">Menyediakan informasi wisata yang akurat dan terkini. Memudahkan wisatawan dalam merencanakan perjalanan.</p>
                 </article>
             </div>
 
@@ -127,7 +127,8 @@ require_once __DIR__ . '/navbar-profile-session.php';
         </section>
     </main>
 
-
+<p class="about-api-notice" data-about-error role="status" hidden></p>
+<script src="../Js/tentang.js?v=1"></script>
 <script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>
