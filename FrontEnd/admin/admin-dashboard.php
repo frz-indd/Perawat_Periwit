@@ -35,7 +35,7 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@500;600;700&family=Noto+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="../CSS/admin-data-wisata.css?v=20261112-50261112-5" rel="stylesheet">
-    <link href="../CSS/admin-dashboard.css?v=20261116-dashboard-cards" rel="stylesheet">
+    <link href="../CSS/admin-dashboard.css?v=20261116-trend-admin" rel="stylesheet">
     <style>
         .admin-route-pending .admin-sidebar,
         .admin-route-pending .admin-mobile-bar,
@@ -109,6 +109,7 @@ function e(string $value): string
                         </svg>
                     </p>
                 </div>
+                <div class="admin-user-indicator"><i class="bi bi-person-circle"></i><span>Admin</span></div>
             </div>
 
             <section class="dashboard-summary" aria-labelledby="summaryTitle">
@@ -125,7 +126,7 @@ function e(string $value): string
                             </div>
                             <div class="metric-card__content"><p>Total Wisata</p><strong data-metric="total_wisata">—</strong></div>
                         </div>
-                        <div class="metric-card__trend" data-trend="total_wisata" hidden></div>
+                        <div class="metric-card__trend" data-trend="total_wisata"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg><span>Tetap</span></div>
                     </article>
                     <article class="metric-card metric-card--kategori">
                         <div class="metric-card__top">
@@ -139,7 +140,7 @@ function e(string $value): string
                             </div>
                             <div class="metric-card__content"><p>Total Kategori</p><strong data-metric="total_kategori">—</strong></div>
                         </div>
-                        <div class="metric-card__trend" data-trend="total_kategori" hidden></div>
+                        <div class="metric-card__trend" data-trend="total_kategori"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg><span>Tetap</span></div>
                     </article>
                     <article class="metric-card metric-card--ulasan">
                         <div class="metric-card__top">
@@ -151,7 +152,7 @@ function e(string $value): string
                             </div>
                             <div class="metric-card__content"><p>Total Ulasan</p><strong data-metric="total_ulasan">—</strong></div>
                         </div>
-                        <div class="metric-card__trend" data-trend="total_ulasan" hidden></div>
+                        <div class="metric-card__trend" data-trend="total_ulasan"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg><span>Tetap</span></div>
                     </article>
                     <article class="metric-card metric-card--pengguna">
                         <div class="metric-card__top">
@@ -167,14 +168,14 @@ function e(string $value): string
                             </div>
                             <div class="metric-card__content"><p>Total Pengguna</p><strong data-metric="total_pengguna">—</strong></div>
                         </div>
-                        <div class="metric-card__trend" data-trend="total_pengguna" hidden></div>
+                        <div class="metric-card__trend" data-trend="total_pengguna"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg><span>Tetap</span></div>
                     </article>
                 </div>
                 <p class="dashboard-summary__message" id="summaryMessage" role="status">Memuat ringkasan dashboard...</p>
             </section>
 
             <section class="dashboard-recent" aria-labelledby="recentTitle">
-                <div class="dashboard-recent__heading"><h2 id="recentTitle">Wisata Terbaru</h2><a href="data-wisata.php">Lihat semua <i class="bi bi-arrow-right"></i></a></div>
+                <div class="dashboard-recent__heading"><h2 id="recentTitle">Wisata Terbaru</h2></div>
                 <div class="dashboard-recent__table-wrap">
                     <table class="dashboard-recent__table">
                         <colgroup>
@@ -298,22 +299,18 @@ function e(string $value): string
             }
             const raw = source && typeof source === 'object' ? source[key] : undefined;
             const value = Number(raw);
-            if (raw === undefined || raw === null || raw === '' || !Number.isFinite(value)) {
-                element.hidden = true;
-                element.innerHTML = '';
-                return;
-            }
             let icon = trendIcons.flat;
             let text = 'Tetap';
-            if (value > 0) {
-                icon = trendIcons.up;
-                text = '+' + new Intl.NumberFormat('id-ID').format(value) + ' dr bulan lalu';
-            } else if (value < 0) {
-                icon = trendIcons.down;
-                text = new Intl.NumberFormat('id-ID').format(value) + ' dr bulan lalu';
+            if (raw !== undefined && raw !== null && raw !== '' && Number.isFinite(value)) {
+                if (value > 0) {
+                    icon = trendIcons.up;
+                    text = '+' + new Intl.NumberFormat('id-ID').format(value) + ' dr bulan lalu';
+                } else if (value < 0) {
+                    icon = trendIcons.down;
+                    text = new Intl.NumberFormat('id-ID').format(value) + ' dr bulan lalu';
+                }
             }
             element.innerHTML = icon + '<span>' + escapeHtml(text) + '</span>';
-            element.hidden = false;
         }
 
         function renderRecentDestinations(items) {

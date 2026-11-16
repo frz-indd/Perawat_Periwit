@@ -349,7 +349,10 @@ body.admin-wisata-page .admin-content {
 }
 
 body.admin-wisata-page .admin-page-heading {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
     min-height: 0;
     margin: 0 0 14px;
     padding: 0 2px;
@@ -382,6 +385,23 @@ body.admin-wisata-page .admin-page-heading p {
     flex: none;
     width: 26px;
     height: 26px;
+}
+
+body.admin-wisata-page .admin-user-indicator {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 9px;
+    color: #176f60;
+    font-family: 'Poppins', Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+body.admin-wisata-page .admin-user-indicator i {
+    font-size: 30px;
+    line-height: 1;
 }
 
 .visually-hidden {
@@ -511,10 +531,6 @@ body.admin-wisata-page .metric-card__content strong {
     line-height: 1.2;
 }
 
-.metric-card__trend[hidden] {
-    display: none;
-}
-
 .metric-card__trend svg {
     flex: none;
     width: 16px;
@@ -556,12 +572,6 @@ body.admin-wisata-page .dashboard-recent__heading h2 {
     font-size: 23px;
     font-weight: 700;
     line-height: 1.2;
-}
-
-body.admin-wisata-page .dashboard-recent__heading a {
-    color: #176f60;
-    font-size: 12px;
-    text-decoration: none;
 }
 
 body.admin-wisata-page .dashboard-recent__table-wrap {
@@ -701,6 +711,14 @@ body.admin-wisata-page .dashboard-recent__table tbody td.dashboard-recent__state
 
     body.admin-wisata-page .admin-page-heading p {
         font-size: 15px;
+    }
+
+    body.admin-wisata-page .admin-user-indicator {
+        font-size: 13px;
+    }
+
+    body.admin-wisata-page .admin-user-indicator i {
+        font-size: 26px;
     }
 
     body.admin-wisata-page .dashboard-metrics {
