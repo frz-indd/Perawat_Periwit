@@ -5,7 +5,7 @@
 :root {
     --kategori-green: #176f60;
     --kategori-topbar-h: 82px;
-    --kategori-sidebar-w: clamp(250px, 23.5vw, 338px);
+    --kategori-sidebar-w: 254px;
     --admin-sidebar-width: var(--kategori-sidebar-w);
     --kategori-content-max: 973px;
 }
@@ -171,23 +171,12 @@ body.admin-wisata-page.admin-resource-page .admin-content {
 .kategori-note i { flex: 0 0 auto; margin-top: 3px; font-size: .95em; }
 
 /* Laptop / tablet landscape: sidebar tetap terlihat dan tabel mengecil alami */
-@media (min-width: 768px) and (max-width: 1100px) {
+@media (min-width: 901px) and (max-width: 1100px) {
     :root {
         --kategori-topbar-h: 62px;
-        --kategori-sidebar-w: clamp(190px, 23.5vw, 255px);
+        --kategori-sidebar-w: 220px;
         --admin-sidebar-width: var(--kategori-sidebar-w);
     }
-    .admin-sidebar {
-        width: var(--kategori-sidebar-w) !important;
-        padding: 34px 18px 20px;
-        transform: none !important;
-    }
-    .admin-brand { margin: 0 2px 48px; font-size: clamp(21px, 2.8vw, 28px); }
-    .admin-nav { gap: 4px; }
-    .admin-nav__item { min-height: 34px; padding: 5px 9px; gap: 8px; font-size: clamp(13px, 1.5vw, 16px); }
-    .admin-nav__item > i { width: 20px; font-size: 18px; }
-    .admin-sidebar__bottom::before { margin-bottom: 24px; }
-    .admin-mobile-bar { display: none !important; }
     .kategori-topbar { display: flex !important; }
     body.admin-wisata-page.admin-resource-page .admin-main {
         margin-left: var(--kategori-sidebar-w);
@@ -203,7 +192,7 @@ body.admin-wisata-page.admin-resource-page .admin-content {
 }
 
 /* Android / iPhone / layar kecil: navigasi drawer dan tabel menjadi kartu ringkas */
-@media (max-width: 767.98px) {
+@media (max-width: 900px) {
     :root { --kategori-topbar-h: 0px; }
     .kategori-topbar { display: none !important; }
     body.admin-wisata-page.admin-resource-page .admin-main,
@@ -214,10 +203,6 @@ body.admin-wisata-page.admin-resource-page .admin-content {
         padding-top: 24px !important;
     }
     body.admin-wisata-page.admin-resource-page .admin-content { width: 100%; max-width: none; }
-    .admin-mobile-bar {
-        padding-left: max(15px, env(safe-area-inset-left));
-        padding-right: max(15px, env(safe-area-inset-right));
-    }
     .kategori-heading { margin: 0 0 12px !important; }
     .kategori-heading h1 { font-size: clamp(23px, 6vw, 30px) !important; }
     .kategori-heading p { font-size: clamp(12px, 3.2vw, 14px); line-height: 1.35; }
@@ -307,7 +292,7 @@ body.admin-wisata-page.admin-resource-page .admin-content {
 /* iOS Safari: hormati safe area dan cegah lebar viewport melebar */
 @supports (-webkit-touch-callout: none) {
     body.admin-wisata-page.admin-resource-page { overflow-x: clip; }
-    @media (max-width: 767.98px) {
+    @media (max-width: 900px) {
         body.admin-wisata-page.admin-resource-page .admin-main {
             padding-left: max(16px, env(safe-area-inset-left)) !important;
             padding-right: max(16px, env(safe-area-inset-right)) !important;
