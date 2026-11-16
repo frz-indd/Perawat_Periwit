@@ -10,23 +10,42 @@
     --kategori-content-max: 973px;
 }
 
-/* Header admin */
+/* Header admin kategori: mengikuti alur halaman seperti navbar Ulasan.
+   Navbar ikut bergerak saat halaman di-scroll, bukan fixed di viewport. */
 .kategori-topbar {
-    position: fixed;
-    z-index: 15;
-    top: 0;
-    right: 0;
-    left: var(--admin-sidebar-width, var(--kategori-sidebar-w));
+    position: relative;
+    z-index: 1;
+    top: auto;
+    right: auto;
+    left: auto;
     height: var(--kategori-topbar-h);
+    margin: 0 -34px 48px;
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    padding: 0 clamp(18px, 3vw, 48px);
+    padding: 0 58px;
     background: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,.2);
-    transition: left .18s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,.28);
+    transition: none;
 }
-.sidebar-collapsed .kategori-topbar { left: 74px; }
+.sidebar-collapsed .kategori-topbar { left: auto; }
+
+/* Konten kategori memakai jarak atas yang sama dengan halaman Ulasan. */
+body.admin-wisata-page.admin-resource-page:not(.admin-resource-reviews):not(.admin-resource-facilities) .admin-main {
+    min-height: 100vh;
+    margin-left: var(--admin-sidebar-width, var(--kategori-sidebar-w));
+    padding: 0 34px 38px !important;
+    box-sizing: border-box;
+}
+body.admin-wisata-page.admin-resource-page .admin-content {
+    width: 100%;
+    max-width: var(--kategori-content-max);
+    margin: 0;
+}
+.sidebar-collapsed.admin-resource-page .admin-main,
+.sidebar-collapsed.admin-wisata-page .admin-main {
+    margin-left: 74px;
+}
 .kategori-topbar .admin-user-indicator {
     display: flex;
     align-items: center;
@@ -298,4 +317,30 @@ body.admin-wisata-page.admin-resource-page .admin-content {
             padding-right: max(16px, env(safe-area-inset-right)) !important;
         }
     }
+}
+
+
+/* Navbar kategori admin mengikuti perilaku navbar Ulasan: berada dalam alur
+   dokumen dan ikut tergulir, dengan margin responsif yang sama. */
+@media (max-width: 1000px) {
+    body.admin-wisata-page.admin-resource-page:not(.admin-resource-reviews):not(.admin-resource-facilities) .admin-main {
+        padding: 0 22px 30px !important;
+    }
+    .kategori-topbar {
+        height: 82px;
+        margin: 0 -22px 32px;
+        padding: 0 30px;
+    }
+}
+@media (max-width: 650px) {
+    body.admin-wisata-page.admin-resource-page:not(.admin-resource-reviews):not(.admin-resource-facilities) .admin-main {
+        padding: 0 14px 28px !important;
+    }
+    .kategori-topbar {
+        height: 65px;
+        margin: 0 -14px 25px;
+        padding: 0 18px;
+    }
+    .kategori-topbar .admin-user-indicator { font-size: 18px; }
+    .kategori-topbar .admin-user-indicator i { font-size: 30px; }
 }
