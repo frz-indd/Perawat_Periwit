@@ -88,38 +88,43 @@ try {
 
     $admin = null;
     $sourceTable = '';
-    // Skema dump proyek memakai tabel admin dengan kolom Id_admin, Nama_admin, Username, Password.
-    if ($tableExists($conn, 'admin')) {
+
+    // Prioritaskan tabel user yang disatukan (role = 1 untuk admin)
+    if ($tableExists($conn, 'user')) {
+        $stmt = $conn->prepare("SELECT Id_user AS id, Nama_user AS name, Username AS username, Password AS password_hash, Email AS email, role FROM `user` WHERE (Username = ? OR Email = ?) AND role = 1 LIMIT 1");
+        $stmt->bind_param('ss', $username, $username);
+        $stmt->execute();
+        $admin = $stmt->get_result()->fetch_assoc() ?: null;
+        $stmt->close();
+        if ($admin) {
+            $sourceTable = 'user';
+        }
+    }
+
+    // Fallback: periksa tabel admin jika belum ditemukan di tabel user
+    if (!$admin && $tableExists($conn, 'admin')) {
         $email = $columnExists($conn, 'admin', 'Email') ? '`Email`' : "''";
         $role = $columnExists($conn, 'admin', 'role') ? '`role`' : "'admin'";
-        $stmt = $conn->prepare("SELECT Id_admin id, Nama_admin name, Username username, Password password_hash, $email email, $role role FROM admin WHERE Username = ? LIMIT 1");
-        $stmt->bind_param('s', $username); $stmt->execute();
-        $admin = $stmt->get_result()->fetch_assoc() ?: null; $stmt->close();
-        if ($admin) $sourceTable = 'admin';
-    }
-    // Alternatif jika instalasi menyimpan akun admin di tabel users.
-    if (!$admin && $tableExists($conn, 'users')) {
-        foreach (['id','username','password','role'] as $col) {
-            if (!$columnExists($conn, 'users', $col)) throw new RuntimeException("Kolom users.$col belum tersedia.");
+        $stmt = $conn->prepare("SELECT Id_admin AS id, Nama_admin AS name, Username AS username, Password AS password_hash, $email AS email, $role AS role FROM admin WHERE Username = ? LIMIT 1");
+        $stmt->bind_param('s', $username);
+        $stmt->execute();
+        $admin = $stmt->get_result()->fetch_assoc() ?: null;
+        $stmt->close();
+        if ($admin) {
+            $sourceTable = 'admin';
         }
-        $name = $columnExists($conn, 'users', 'name') ? '`name`' : '`username`';
-        $email = $columnExists($conn, 'users', 'email') ? '`email`' : "''";
-        $stmt = $conn->prepare("SELECT id, $name name, username, password password_hash, $email email, role FROM users WHERE username = ? LIMIT 1");
-        $stmt->bind_param('s', $username); $stmt->execute();
-        $admin = $stmt->get_result()->fetch_assoc() ?: null; $stmt->close();
-        if ($admin) $sourceTable = 'users';
     }
 
     $hash = (string)($admin['password_hash'] ?? '');
     $hashed = $hash !== '' && !empty(password_get_info($hash)['algo']);
-    // Kompatibilitas migrasi: akun plaintext lama hanya diterima sekali lalu langsung di-hash.
-    // Tetap gunakan respons generik agar keberadaan username tidak dapat ditebak.
     $passwordMatches = $hashed ? password_verify($password, $hash) : ($hash !== '' && hash_equals($hash, $password));
     if (!$admin) {
         // Dummy bcrypt verification membantu meratakan waktu respons untuk username yang tidak ada.
         password_verify($password, '$2y$10$49DQUmYPm5.oKJk8jJL08OdQKKmnCoLnpv.VDrH3L9fikW8UPq1OW');
     }
-    $valid = $admin && strtolower((string)($admin['role'] ?? 'admin')) === 'admin' && $passwordMatches;
+    $roleVal = $admin['role'] ?? null;
+    $isValidRole = ($roleVal === 1 || $roleVal === '1' || strtolower((string)$roleVal) === 'admin');
+    $valid = $admin && $isValidRole && $passwordMatches;
     if (!$valid) {
         $fail = $conn->prepare('INSERT INTO admin_login_attempts (ip_hash, username_hash, failed_attempts, first_failed_at, last_failed_at, locked_until) VALUES (?, ?, 1, NOW(), NOW(), NULL) ON DUPLICATE KEY UPDATE failed_attempts = IF(first_failed_at < NOW() - INTERVAL 15 MINUTE, 1, failed_attempts + 1), first_failed_at = IF(first_failed_at < NOW() - INTERVAL 15 MINUTE, NOW(), first_failed_at), last_failed_at = NOW(), locked_until = IF(IF(first_failed_at < NOW() - INTERVAL 15 MINUTE, 1, failed_attempts + 1) >= 5, DATE_ADD(NOW(), INTERVAL 15 MINUTE), NULL)');
         $fail->bind_param('ss', $ipKey, $usernameKey); $fail->execute(); $fail->close();
@@ -136,7 +141,7 @@ try {
             if ($sourceTable === 'admin') {
                 $up = $conn->prepare('UPDATE admin SET Password = ? WHERE Id_admin = ?');
             } else {
-                $up = $conn->prepare('UPDATE users SET password = ? WHERE id = ?');
+                $up = $conn->prepare('UPDATE `user` SET Password = ? WHERE Id_user = ?');
             }
             $up->bind_param('si', $newHash, $id); $up->execute(); $up->close();
         }
@@ -144,16 +149,29 @@ try {
 
     $id = (int)$admin['id'];
     $expiresAt = time() + 86400;
-    $token = generateJwt(['id' => $id, 'sub' => $id, 'username' => (string)$admin['username'], 'role' => 'admin'], 86400);
-    // Migrasi admin_sessions wajib diterapkan agar logout dapat mencabut JWT di server.
+    // Sertakan role = 1 dan role = admin dalam token untuk kompatibilitas penuh
+    $token = generateJwt(['id' => $id, 'sub' => $id, 'username' => (string)$admin['username'], 'role' => 1, 'role_name' => 'admin'], 86400);
     $tokenHash = hash('sha256', $token);
-    $sessionInsert = $conn->prepare('INSERT INTO admin_sessions (admin_id, token_hash, expires_at) VALUES (?, ?, FROM_UNIXTIME(?))');
-    $sessionInsert->bind_param('isi', $id, $tokenHash, $expiresAt);
-    $sessionInsert->execute();
-    $sessionInsert->close();
+
+    // Simpan ke user_sessions
+    if ($tableExists($conn, 'user_sessions')) {
+        $sessionInsert = $conn->prepare('INSERT INTO user_sessions (user_id, token_hash, expires_at) VALUES (?, ?, FROM_UNIXTIME(?))');
+        $sessionInsert->bind_param('isi', $id, $tokenHash, $expiresAt);
+        $sessionInsert->execute();
+        $sessionInsert->close();
+    }
+
+    // Kompatibilitas dengan admin_sessions
+    if ($tableExists($conn, 'admin_sessions')) {
+        $sessionAdminInsert = $conn->prepare('INSERT INTO admin_sessions (admin_id, token_hash, expires_at) VALUES (?, ?, FROM_UNIXTIME(?))');
+        $sessionAdminInsert->bind_param('isi', $id, $tokenHash, $expiresAt);
+        $sessionAdminInsert->execute();
+        $sessionAdminInsert->close();
+    }
+
     $respond(200, [
         'status' => 'success', 'message' => 'Login berhasil.', 'token' => $token,
-        'user' => ['id' => $id, 'name' => (string)($admin['name'] ?? $admin['username']), 'email' => (string)($admin['email'] ?? ''), 'username' => (string)$admin['username'], 'role' => 'admin']
+        'user' => ['id' => $id, 'name' => (string)($admin['name'] ?? $admin['username']), 'email' => (string)($admin['email'] ?? ''), 'username' => (string)$admin['username'], 'role' => 1, 'role_name' => 'admin']
     ]);
 } catch (Throwable $e) {
     error_log('Admin login error: ' . $e->getMessage());

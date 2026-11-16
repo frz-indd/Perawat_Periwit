@@ -38,13 +38,15 @@ try {
             SELECT
                 u.Id_ulasan AS id_ulasan,
                 u.Id_user AS id_user,
+                usr.Nama_user AS nama_pengguna,
                 usr.Nama_user AS nama_user,
                 u.Id_wisata AS destination_id,
+                w.nama_wisata AS nama_wisata,
                 w.nama_wisata AS destination_name,
                 u.rating AS rating,
                 u.komentar AS komentar,
                 u.tanggal_ulasan AS tanggal_ulasan,
-                w.average_rating AS destination_average_rating
+                COALESCE(w.average_rating, w.rating, 0) AS destination_average_rating
             FROM ulasan u
             INNER JOIN `user` usr ON usr.Id_user = u.Id_user
             INNER JOIN wisata w ON w.id_wisata = u.Id_wisata
@@ -101,10 +103,11 @@ try {
 
     $update = $conn->prepare(
         "UPDATE wisata
-         SET rating = (SELECT COALESCE(AVG(rating), 0) FROM ulasan WHERE Id_wisata = ?)
+         SET rating = (SELECT COALESCE(AVG(rating), 0) FROM ulasan WHERE Id_wisata = ?),
+             average_rating = (SELECT ROUND(COALESCE(AVG(rating), 0), 2) FROM ulasan WHERE Id_wisata = ?)
          WHERE id_wisata = ?"
     );
-    $update->bind_param("ss", $destinationId, $destinationId);
+    $update->bind_param("sss", $destinationId, $destinationId, $destinationId);
     $update->execute();
     $update->close();
 

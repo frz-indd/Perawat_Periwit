@@ -54,7 +54,15 @@ function dashboardCount(mysqli $db, ?string $table, string $label): int
 {
     if ($table === null) throw new RuntimeException("Tabel {$label} tidak ditemukan di database.");
     $safe = dashboardQuote($table);
-    $result = $db->query("SELECT COUNT(*) AS total FROM {$safe}");
+    $where = "";
+    if (in_array($table, ['user', 'users', 'pengguna'], true)) {
+        $cols = dashboardColumns($db, $table);
+        $roleCol = dashboardColumn($cols, ['role']);
+        if ($roleCol !== null) {
+            $where = " WHERE " . dashboardQuote($roleCol) . " = 0 OR " . dashboardQuote($roleCol) . " = 'user' OR " . dashboardQuote($roleCol) . " = '0'";
+        }
+    }
+    $result = $db->query("SELECT COUNT(*) AS total FROM {$safe}{$where}");
     return (int) ($result->fetch_assoc()['total'] ?? 0);
 }
 

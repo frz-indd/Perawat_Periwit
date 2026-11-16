@@ -102,14 +102,9 @@ try {
     $types = '';
     $params = [];
 
-    // Tabel `user` legacy berisi akun pengguna saja; jika role tersedia,
-    // tetap batasi hasil ke role user. Untuk tabel `users`, role wajib user.
+    // Batasi hasil ke pengguna biasa (role = 0 atau legacy 'user')
     if ($roleColumn !== null) {
-        $where[] = adminUsersQuote($roleColumn) . ' = ?';
-        $types .= 's';
-        $params[] = 'user';
-    } elseif ($table === 'users') {
-        throw new RuntimeException('Kolom role wajib tersedia pada tabel users.');
+        $where[] = '(' . adminUsersQuote($roleColumn) . ' = 0 OR ' . adminUsersQuote($roleColumn) . " = 'user' OR " . adminUsersQuote($roleColumn) . " = '0')";
     }
 
     if ($search !== '') {

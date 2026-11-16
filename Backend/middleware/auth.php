@@ -71,7 +71,9 @@ function adminOnly(): array
         exit;
     }
 
-    if ($decoded === null || ($decoded['role'] ?? '') !== 'admin') {
+    $role = $decoded['role'] ?? null;
+    $isAdmin = ($role === 'admin' || $role === 1 || $role === '1');
+    if ($decoded === null || !$isAdmin) {
         http_response_code(403);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode([
@@ -92,17 +94,38 @@ function adminOnly(): array
         exit;
     }
     $tokenHash = hash('sha256', $token);
-    $check = $conn->prepare('SELECT id FROM admin_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > NOW() LIMIT 1');
-    $check->bind_param('s', $tokenHash);
-    $check->execute();
-    $activeSession = $check->get_result()->fetch_assoc();
-    $check->close();
+    $activeSession = null;
+
+    // Periksa di tabel user_sessions terlebih dahulu
+    $checkUserSession = $conn->prepare('SELECT id FROM user_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > NOW() LIMIT 1');
+    if ($checkUserSession !== false) {
+        $checkUserSession->bind_param('s', $tokenHash);
+        $checkUserSession->execute();
+        $activeSession = $checkUserSession->get_result()->fetch_assoc();
+        $checkUserSession->close();
+    }
+
+    // Fallback periksa di tabel admin_sessions jika belum ada di user_sessions
+    if (!$activeSession) {
+        $checkAdminSession = $conn->prepare('SELECT id FROM admin_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > NOW() LIMIT 1');
+        if ($checkAdminSession !== false) {
+            $checkAdminSession->bind_param('s', $tokenHash);
+            $checkAdminSession->execute();
+            $activeSession = $checkAdminSession->get_result()->fetch_assoc();
+            $checkAdminSession->close();
+        }
+    }
+
     if (!$activeSession) {
         http_response_code(403);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['message' => 'Sesi admin sudah berakhir. Silakan login kembali.']);
         exit;
     }
+
+    // Pastikan payload memiliki role yang kompatibel dengan UI frontend dan API
+    $decoded['role_id'] = 1;
+    $decoded['role'] = 'admin';
 
     return $decoded;
 }
