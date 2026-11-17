@@ -105,3 +105,10 @@ Deploy kedua file PHP, `.htaccess`, OpenAPI, dan Postman Collection. Jalankan mi
 
 
 **Keamanan sesi:** setelah password berhasil diganti, semua sesi JWT admin dicabut. Admin wajib login kembali menggunakan password baru.
+
+
+## Integrasi halaman Profil Admin (Frontend)
+
+Halaman profil admin tersedia pada `FrontEnd/admin/admin-resource.php?section=profil` dan menggunakan token `admin_token` yang sama dengan dashboard admin. Halaman memanggil `GET/PUT /api/admin/profile` untuk membaca dan mengubah nama admin, serta `PUT /api/admin/change-password` untuk mengganti password. Validasi sisi browser mencakup field wajib, minimal 8 karakter, kombinasi huruf besar/kecil/angka/karakter khusus sesuai kontrak API, password baru tidak sama dengan password lama, dan konfirmasi harus cocok. Validasi keamanan tetap diulang pada API.
+
+Untuk menampilkan email admin, kolom `Email` (atau `email`) dibaca secara opsional oleh endpoint profil; bila kolom tidak tersedia, UI menampilkan tanda strip.

@@ -32,6 +32,7 @@ Contoh: `GET /api/admin/users?search=faris&page=1&limit=10`
       "created_at": "12 Apr 2025"
     }
   ],
+  "total_users": 25,
   "pagination": {
     "current_page": 1,
     "per_page": 10,
@@ -42,6 +43,8 @@ Contoh: `GET /api/admin/users?search=faris&page=1&limit=10`
   }
 }
 ```
+
+`total_users` berisi jumlah seluruh akun pengguna yang dihitung langsung dari database (tidak terpengaruh halaman aktif maupun kata pencarian). `pagination.total_data` berisi jumlah hasil yang cocok dengan kata pencarian dan dipakai untuk pagination.
 
 `created_at` bernilai `null` untuk akun lama yang dibuat sebelum migration dan tidak memiliki riwayat tanggal pendaftaran. Jalankan `database/admin_users_migration.sql` satu kali agar akun baru otomatis mencatat waktu pendaftaran. Kolom password tidak pernah disertakan dalam response.
 

@@ -57,6 +57,7 @@ try {
     $idCol = $legacy ? 'Id_admin' : 'id';
     $nameCol = $legacy ? 'Nama_admin' : 'name';
     $usernameCol = 'username';
+    $emailCol = adminProfileColumnExists($conn, $table, 'Email') ? 'Email' : (adminProfileColumnExists($conn, $table, 'email') ? 'email' : null);
     $imageCol = $legacy
         ? (adminProfileColumnExists($conn, $table, 'Foto_admin') ? 'Foto_admin' : (adminProfileColumnExists($conn, $table, 'image_url') ? 'image_url' : null))
         : (adminProfileColumnExists($conn, $table, 'image_url') ? 'image_url' : (adminProfileColumnExists($conn, $table, 'profile_image') ? 'profile_image' : null));
@@ -70,7 +71,8 @@ try {
 
     $selectImage = $imageCol !== null ? '`' . $imageCol . '`' : 'NULL';
     if ($method === 'GET') {
-        $sql = "SELECT `$idCol` id, `$nameCol` name, `$usernameCol` username, $selectImage image_url FROM `$table` WHERE `$idCol` = ? LIMIT 1";
+        $selectEmail = $emailCol !== null ? '`' . $emailCol . '`' : 'NULL';
+        $sql = "SELECT `$idCol` id, `$nameCol` name, `$usernameCol` username, $selectEmail email, $selectImage image_url FROM `$table` WHERE `$idCol` = ? LIMIT 1";
         $stmt = $conn->prepare($sql);
         $id = (int)$adminId;
         $stmt->bind_param('i', $id);
@@ -80,6 +82,7 @@ try {
         if (!$row) $respond(404, ['status' => 'not_found', 'message' => 'Data admin tidak ditemukan.']);
         $respond(200, ['status' => 'success', 'message' => 'Profil admin berhasil diambil.', 'data' => [
             'id' => (int)$row['id'], 'name' => (string)$row['name'], 'username' => (string)$row['username'],
+            'email' => $row['email'] !== null && $row['email'] !== '' ? (string)$row['email'] : null,
             'image_url' => $row['image_url'] !== null && $row['image_url'] !== '' ? (string)$row['image_url'] : null
         ]]);
     }

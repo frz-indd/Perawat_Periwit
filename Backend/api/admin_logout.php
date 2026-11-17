@@ -29,20 +29,25 @@ if (!isset($conn) || !($conn instanceof mysqli)) {
     exit;
 }
 
-// Tandai token sebagai revoked (blacklist) di user_sessions dan admin_sessions
+// Cabut token admin dari tabel sesi admin.
 $now = date('Y-m-d H:i:s');
-$revokeStmt = $conn->prepare('UPDATE user_sessions SET revoked_at = ? WHERE token_hash = ? AND revoked_at IS NULL');
-if ($revokeStmt !== false) {
-    $revokeStmt->bind_param('ss', $now, $tokenHash);
-    $revokeStmt->execute();
-    $revokeStmt->close();
-}
-
-$revokeAdminStmt = $conn->prepare('UPDATE admin_sessions SET revoked_at = ? WHERE token_hash = ? AND revoked_at IS NULL');
-if ($revokeAdminStmt !== false) {
+try {
+    $revokeAdminStmt = $conn->prepare(
+        'UPDATE admin_sessions
+         SET revoked_at = ?
+         WHERE token_hash = ? AND revoked_at IS NULL'
+    );
     $revokeAdminStmt->bind_param('ss', $now, $tokenHash);
     $revokeAdminStmt->execute();
     $revokeAdminStmt->close();
+} catch (mysqli_sql_exception $e) {
+    error_log('Admin logout session update failed: ' . $e->getMessage());
+    http_response_code(503);
+    echo json_encode([
+        'status' => 'service_unavailable',
+        'message' => 'Tabel sesi admin belum tersedia.'
+    ], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    exit;
 }
 
 // Hapus cookie HTTP‑Only (jika ada). Nama cookie biasanya 'jwt' atau 'token'.

@@ -45,8 +45,7 @@ try {
                 w.nama_wisata AS destination_name,
                 u.rating AS rating,
                 u.komentar AS komentar,
-                u.tanggal_ulasan AS tanggal_ulasan,
-                COALESCE(w.average_rating, w.rating, 0) AS destination_average_rating
+                u.tanggal_ulasan AS tanggal_ulasan
             FROM ulasan u
             INNER JOIN `user` usr ON usr.Id_user = u.Id_user
             INNER JOIN wisata w ON w.id_wisata = u.Id_wisata
@@ -101,15 +100,8 @@ try {
     $delete->execute();
     $delete->close();
 
-    $update = $conn->prepare(
-        "UPDATE wisata
-         SET rating = (SELECT COALESCE(AVG(rating), 0) FROM ulasan WHERE Id_wisata = ?),
-             average_rating = (SELECT ROUND(COALESCE(AVG(rating), 0), 2) FROM ulasan WHERE Id_wisata = ?)
-         WHERE id_wisata = ?"
-    );
-    $update->bind_param("sss", $destinationId, $destinationId, $destinationId);
-    $update->execute();
-    $update->close();
+    // Skema database saat ini tidak memiliki kolom rating agregat pada tabel wisata.
+    // Rating destinasi dihitung dari tabel ulasan saat diperlukan, jadi tidak perlu UPDATE.
 
     $conn->commit();
     $respond(200, ["status" => "success", "message" => "Ulasan berhasil dihapus dan rating destinasi diperbarui.", "data" => ["id_ulasan" => $reviewId]]);

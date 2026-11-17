@@ -96,16 +96,32 @@ function adminOnly(): array
     $tokenHash = hash('sha256', $token);
     $activeSession = null;
 
-    // Periksa di tabel user_sessions terlebih dahulu
-    $checkUserSession = $conn->prepare('SELECT id FROM user_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > NOW() LIMIT 1');
-    if ($checkUserSession !== false) {
-        $checkUserSession->bind_param('s', $tokenHash);
-        $checkUserSession->execute();
-        $activeSession = $checkUserSession->get_result()->fetch_assoc();
-        $checkUserSession->close();
+    // Login admin mencatat token di admin_sessions.
+    // Jangan mengakses user_sessions karena tabel itu bukan bagian dari
+    // skema admin standar proyek ini.
+    try {
+        $checkAdminSession = $conn->prepare(
+            'SELECT id FROM admin_sessions
+             WHERE token_hash = ?
+               AND revoked_at IS NULL
+               AND expires_at > NOW()
+             LIMIT 1'
+        );
+        $checkAdminSession->bind_param('s', $tokenHash);
+        $checkAdminSession->execute();
+        $activeSession = $checkAdminSession->get_result()->fetch_assoc();
+        $checkAdminSession->close();
+    } catch (mysqli_sql_exception $e) {
+        error_log('Admin session lookup failed: ' . $e->getMessage());
+        http_response_code(503);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'status' => 'service_unavailable',
+            'message' => 'Tabel sesi admin belum tersedia. Jalankan Backend/database/admin_sessions_migration.sql.'
+        ], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        exit;
     }
 
-    // Fallback periksa di tabel admin_sessions jika belum ada di user_sessions
     if (!$activeSession) {
         $checkAdminSession = $conn->prepare('SELECT id FROM admin_sessions WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > NOW() LIMIT 1');
         if ($checkAdminSession !== false) {
