@@ -89,10 +89,31 @@ try {
     $admin = null;
     $sourceTable = '';
 
-    // Prioritaskan tabel user yang disatukan (role = 1 untuk admin)
-    if ($tableExists($conn, 'user')) {
-        $stmt = $conn->prepare("SELECT Id_user AS id, Nama_user AS name, Username AS username, Password AS password_hash, Email AS email, role FROM `user` WHERE (Username = ? OR Email = ?) AND role = 1 LIMIT 1");
-        $stmt->bind_param('ss', $username, $username);
+    // Tabel user pada database standar proyek berisi akun pengguna biasa
+    // dan tidak memiliki kolom Username/role. Hanya query tabel ini jika
+    // instalasi memang menggunakan skema gabungan yang mendukung akun admin.
+    $userAdminSchemaReady = $tableExists($conn, 'user')
+        && $columnExists($conn, 'user', 'Id_user')
+        && $columnExists($conn, 'user', 'Nama_user')
+        && $columnExists($conn, 'user', 'Username')
+        && $columnExists($conn, 'user', 'Password')
+        && $columnExists($conn, 'user', 'role');
+
+    if ($userAdminSchemaReady) {
+        $emailSelect = $columnExists($conn, 'user', 'Email') ? '`Email`' : "''";
+        $stmt = $conn->prepare(
+            "SELECT Id_user AS id, Nama_user AS name, Username AS username,
+                    Password AS password_hash, $emailSelect AS email, role
+             FROM `user`
+             WHERE (Username = ? OR " . ($emailSelect !== "''" ? "Email = ?" : "Username = ?") . ")
+               AND (role = 1 OR role = 'admin')
+             LIMIT 1"
+        );
+        if ($emailSelect !== "''") {
+            $stmt->bind_param('ss', $username, $username);
+        } else {
+            $stmt->bind_param('ss', $username, $username);
+        }
         $stmt->execute();
         $admin = $stmt->get_result()->fetch_assoc() ?: null;
         $stmt->close();
@@ -153,21 +174,15 @@ try {
     $token = generateJwt(['id' => $id, 'sub' => $id, 'username' => (string)$admin['username'], 'role' => 1, 'role_name' => 'admin'], 86400);
     $tokenHash = hash('sha256', $token);
 
-    // Simpan ke user_sessions
-    if ($tableExists($conn, 'user_sessions')) {
-        $sessionInsert = $conn->prepare('INSERT INTO user_sessions (user_id, token_hash, expires_at) VALUES (?, ?, FROM_UNIXTIME(?))');
-        $sessionInsert->bind_param('isi', $id, $tokenHash, $expiresAt);
-        $sessionInsert->execute();
-        $sessionInsert->close();
-    }
-
-    // Kompatibilitas dengan admin_sessions
-    if ($tableExists($conn, 'admin_sessions')) {
-        $sessionAdminInsert = $conn->prepare('INSERT INTO admin_sessions (admin_id, token_hash, expires_at) VALUES (?, ?, FROM_UNIXTIME(?))');
-        $sessionAdminInsert->bind_param('isi', $id, $tokenHash, $expiresAt);
-        $sessionAdminInsert->execute();
-        $sessionAdminInsert->close();
-    }
+    // Sesi admin disimpan pada admin_sessions. Tabel user_sessions tidak
+    // diperlukan untuk autentikasi administrator pada skema proyek ini.
+    $sessionAdminInsert = $conn->prepare(
+        'INSERT INTO admin_sessions (admin_id, token_hash, expires_at)
+         VALUES (?, ?, FROM_UNIXTIME(?))'
+    );
+    $sessionAdminInsert->bind_param('isi', $id, $tokenHash, $expiresAt);
+    $sessionAdminInsert->execute();
+    $sessionAdminInsert->close();
 
     $respond(200, [
         'status' => 'success', 'message' => 'Login berhasil.', 'token' => $token,

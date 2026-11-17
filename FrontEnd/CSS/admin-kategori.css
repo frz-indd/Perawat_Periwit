@@ -7,7 +7,7 @@
     --kategori-topbar-h: 82px;
     --kategori-sidebar-w: 254px;
     --admin-sidebar-width: var(--kategori-sidebar-w);
-    --kategori-content-max: 973px;
+    --kategori-content-max: 100%;
 }
 
 /* Header admin kategori: mengikuti alur halaman seperti navbar Ulasan.
@@ -39,7 +39,7 @@ body.admin-wisata-page.admin-resource-page:not(.admin-resource-reviews):not(.adm
 }
 body.admin-wisata-page.admin-resource-page .admin-content {
     width: 100%;
-    max-width: var(--kategori-content-max);
+    max-width: none;
     margin: 0;
 }
 .sidebar-collapsed.admin-resource-page .admin-main,
@@ -68,7 +68,7 @@ body.admin-wisata-page.admin-resource-page .admin-main {
 }
 body.admin-wisata-page.admin-resource-page .admin-content {
     width: 100%;
-    max-width: var(--kategori-content-max);
+    max-width: none;
     margin: 0;
 }
 .sidebar-collapsed.admin-resource-page .admin-main,
@@ -202,7 +202,7 @@ body.admin-wisata-page.admin-resource-page .admin-content {
         padding: calc(var(--kategori-topbar-h) + 28px) 18px 28px 24px;
         padding-top: calc(var(--kategori-topbar-h) + 28px) !important;
     }
-    body.admin-wisata-page.admin-resource-page .admin-content { max-width: var(--kategori-content-max); }
+    body.admin-wisata-page.admin-resource-page .admin-content { max-width: none; }
     .kategori-table-wrap { border-radius: 16px; }
     .kategori-table thead th { height: 54px; font-size: clamp(15px, 1.8vw, 20px); }
     .kategori-table thead th:last-child { font-size: clamp(13px, 1.5vw, 18px); }

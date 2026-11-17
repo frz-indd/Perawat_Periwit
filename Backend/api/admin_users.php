@@ -117,12 +117,20 @@ try {
     }
 
     $whereSql = $where ? ' WHERE ' . implode(' AND ', $where) : '';
+    // Total hasil pencarian (untuk pagination) dan total seluruh pengguna
+    // dihitung langsung dari database, bukan dari jumlah baris halaman aktif.
     $countSql = 'SELECT COUNT(*) AS total FROM ' . $tableSql . $whereSql;
     $countStmt = $conn->prepare($countSql);
     if ($types !== '') $countStmt->bind_param($types, ...$params);
     $countStmt->execute();
     $total = (int) ($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
     $countStmt->close();
+
+    $allWhereSql = $roleColumn !== null
+        ? ' WHERE (' . adminUsersQuote($roleColumn) . " = 0 OR " . adminUsersQuote($roleColumn) . " = 'user' OR " . adminUsersQuote($roleColumn) . " = '0')"
+        : '';
+    $allCountResult = $conn->query('SELECT COUNT(*) AS total FROM ' . $tableSql . $allWhereSql);
+    $totalUsers = (int) ($allCountResult->fetch_assoc()['total'] ?? 0);
 
     $totalPages = $total > 0 ? (int) ceil($total / $limit) : 0;
     if ($totalPages === 0) $page = 1;
@@ -164,6 +172,7 @@ try {
         'status' => 'success',
         'message' => 'Daftar pengguna berhasil diambil.',
         'data' => $users,
+        'total_users' => $totalUsers,
         'pagination' => [
             'current_page' => $page,
             'per_page' => $limit,
