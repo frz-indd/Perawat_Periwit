@@ -88,32 +88,74 @@ try {
     }
 
     $contentType = strtolower(trim(explode(';', (string)($_SERVER['CONTENT_TYPE'] ?? ''))[0]));
-    if ($contentType !== 'application/json') $respond(415, ['status' => 'unsupported_media_type', 'message' => 'Gunakan Content-Type: application/json.']);
-    $input = json_decode((string)file_get_contents('php://input'), true);
-    if (!is_array($input) || json_last_error() !== JSON_ERROR_NONE) $respond(400, ['status' => 'invalid_json', 'message' => 'Body harus berupa JSON yang valid.']);
-
-    $name = $input['name'] ?? $input['nama'] ?? null;
-    $imageProvided = array_key_exists('image_url', $input);
-    $imageUrl = $imageProvided ? $input['image_url'] : null;
-    if (!is_string($name) || ($imageProvided && $imageUrl !== null && !is_string($imageUrl))) {
-        $respond(422, ['status' => 'validation_error', 'message' => 'Nama wajib berupa teks dan image_url (jika dikirim) harus berupa URL teks atau null.']);
+    $uploadedImagePath = null;
+    if ($contentType === 'multipart/form-data') {
+        $input = $_POST;
+        $name = $input['name'] ?? null;
+        $username = $input['username'] ?? null;
+        $imageProvided = isset($_FILES['profile_photo']) && (int)($_FILES['profile_photo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+        $imageUrl = null;
+        if ($imageProvided) {
+            $file = $_FILES['profile_photo'];
+            if ((int)$file['error'] !== UPLOAD_ERR_OK) $respond(422, ['status' => 'validation_error', 'message' => 'Foto profil gagal diunggah.']);
+            if ((int)$file['size'] > 10 * 1024 * 1024) $respond(422, ['status' => 'validation_error', 'message' => 'Ukuran foto maksimal 10 MB.']);
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file((string)$file['tmp_name']);
+            $extensions = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
+            if (!isset($extensions[$mime])) $respond(422, ['status' => 'validation_error', 'message' => 'Foto harus berformat JPG atau PNG.']);
+            $uploadDir = dirname(__DIR__, 2) . '/FrontEnd/assets/uploads/admin-profile';
+            if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) throw new RuntimeException('Folder upload foto profil tidak dapat dibuat.');
+            $fileName = 'admin-' . (int)$adminId . '-' . bin2hex(random_bytes(8)) . '.' . $extensions[$mime];
+            if (!move_uploaded_file((string)$file['tmp_name'], $uploadDir . '/' . $fileName)) throw new RuntimeException('Foto profil tidak dapat disimpan.');
+            $imageUrl = '../assets/uploads/admin-profile/' . $fileName;
+        }
+    } elseif ($contentType === 'application/json') {
+        $input = json_decode((string)file_get_contents('php://input'), true);
+        if (!is_array($input) || json_last_error() !== JSON_ERROR_NONE) $respond(400, ['status' => 'invalid_json', 'message' => 'Body harus berupa JSON yang valid.']);
+        $name = $input['name'] ?? $input['nama'] ?? null;
+        $username = $input['username'] ?? null;
+        $imageProvided = array_key_exists('image_url', $input);
+        $imageUrl = $imageProvided ? $input['image_url'] : null;
+    } else {
+        $respond(415, ['status' => 'unsupported_media_type', 'message' => 'Gunakan JSON atau unggahan foto multipart/form-data.']);
+    }
+    if (!is_string($name) || ($username !== null && !is_string($username)) || ($imageProvided && $imageUrl !== null && !is_string($imageUrl))) {
+        $respond(422, ['status' => 'validation_error', 'message' => 'Nama dan username harus berupa teks, serta image_url (jika dikirim) harus berupa URL teks atau null.']);
     }
     $name = trim($name);
+    $username = $username !== null ? trim($username) : null;
     $nameLength = function_exists('mb_strlen') ? mb_strlen($name, 'UTF-8') : strlen($name);
     if ($name === '' || $nameLength > 255) $respond(422, ['status' => 'validation_error', 'message' => 'Nama wajib diisi dan maksimal 255 karakter.']);
+    if ($username !== null && ($username === '' || strlen($username) > 100 || preg_match('/^[A-Za-z0-9_.-]+$/', $username) !== 1)) $respond(422, ['status' => 'validation_error', 'message' => 'Username wajib 1-100 karakter dan hanya boleh berisi huruf, angka, titik, garis bawah, atau tanda hubung.']);
     if ($imageProvided && $imageUrl !== null) {
         $imageUrl = trim($imageUrl);
         if ($imageUrl === '') $imageUrl = null;
-        elseif (strlen($imageUrl) > 2048 || filter_var($imageUrl, FILTER_VALIDATE_URL) === false || !in_array(strtolower((string)parse_url($imageUrl, PHP_URL_SCHEME)), ['http', 'https'], true)) {
+        elseif ($contentType !== 'multipart/form-data' && (strlen($imageUrl) > 2048 || filter_var($imageUrl, FILTER_VALIDATE_URL) === false || !in_array(strtolower((string)parse_url($imageUrl, PHP_URL_SCHEME)), ['http', 'https'], true))) {
             $respond(422, ['status' => 'validation_error', 'message' => 'image_url harus berupa URL HTTP atau HTTPS yang valid (maksimal 2048 karakter).']);
         }
     }
 
     $id = (int)$adminId;
-    if ($imageProvided) {
+    if ($username !== null) {
+        $duplicate = $conn->prepare("SELECT `$idCol` FROM `$table` WHERE `$usernameCol` = ? AND `$idCol` <> ? LIMIT 1");
+        $duplicate->bind_param('si', $username, $id);
+        $duplicate->execute();
+        $usernameTaken = (bool)$duplicate->get_result()->fetch_assoc();
+        $duplicate->close();
+        if ($usernameTaken) $respond(409, ['status' => 'conflict', 'message' => 'Username sudah digunakan admin lain.']);
+    }
+    if ($imageProvided && $username !== null) {
+        $sql = "UPDATE `$table` SET `$nameCol` = ?, `$usernameCol` = ?, `$imageCol` = ? WHERE `$idCol` = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('sssi', $name, $username, $imageUrl, $id);
+    } elseif ($imageProvided) {
         $sql = "UPDATE `$table` SET `$nameCol` = ?, `$imageCol` = ? WHERE `$idCol` = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('ssi', $name, $imageUrl, $id);
+    } elseif ($username !== null) {
+        $sql = "UPDATE `$table` SET `$nameCol` = ?, `$usernameCol` = ? WHERE `$idCol` = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('ssi', $name, $username, $id);
     } else {
         $sql = "UPDATE `$table` SET `$nameCol` = ? WHERE `$idCol` = ?";
         $stmt = $conn->prepare($sql);
@@ -140,7 +182,7 @@ try {
         $savedImage = $photoRow['image_url'] ?? null;
     }
     $respond(200, ['status' => 'success', 'message' => 'Profil admin berhasil diperbarui.', 'data' => [
-        'id' => $id, 'name' => $name, 'image_url' => $savedImage
+        'id' => $id, 'name' => $name, 'username' => $username, 'image_url' => $savedImage
     ]]);
 } catch (Throwable $e) {
     error_log('Admin profile API error: ' . $e->getMessage());

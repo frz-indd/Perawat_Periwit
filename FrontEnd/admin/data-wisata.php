@@ -36,7 +36,7 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet">
-    <link href="../CSS/admin-data-wisata.css?v=20261113-pencil-outline1" rel="stylesheet">
+    <link href="../CSS/admin-data-wisata.css?v=20261118-popup1" rel="stylesheet">
 </head>
 <body class="admin-wisata-page">
     <aside class="admin-sidebar" id="adminSidebar">
@@ -157,18 +157,13 @@ function e(string $value): string
     </main>
 
     <div class="admin-sidebar-backdrop" id="sidebarBackdrop"></div>
-    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header border-0">
-                    <h2 class="modal-title fs-5" id="deleteConfirmTitle">Hapus data wisata?</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-                </div>
-                <div class="modal-body">Data destinasi wisata ini akan dihapus secara permanen.</div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteButton" data-api-url="<?= e($pageConfig['apiDestinationsUrl']) ?>" data-api-method="DELETE">Hapus data</button>
-                </div>
+    <div class="wisata-popup-backdrop" id="wisataPopup" role="dialog" aria-modal="true" aria-labelledby="wisataPopupTitle" aria-hidden="true">
+        <div class="wisata-popup">
+            <div class="wisata-popup-icon" id="wisataPopupIcon" aria-hidden="true">×</div>
+            <h2 class="wisata-popup-title" id="wisataPopupTitle">Gagal di Hapus !</h2>
+            <p class="wisata-popup-description" id="wisataPopupText">Data wisata gagal dihapus dari data wisata</p>
+            <div class="wisata-popup-actions" id="wisataPopupActions">
+                <button class="wisata-popup-button" type="button" id="wisataPopupPrimary">Coba Lagi</button>
             </div>
         </div>
     </div>
@@ -177,7 +172,7 @@ function e(string $value): string
         window.adminWisataConfig = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../Js/admin-data-wisata.js?v=20261113-pencil-outline1"></script>
+    <script src="../Js/admin-data-wisata.js?v=20261118-popup1"></script>
 <script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>
