@@ -16,20 +16,55 @@
         region: document.getElementById('regionFilter'),
         category: document.getElementById('categoryFilter'),
         pagination: document.getElementById('paginationLinks'),
-        deleteButton: document.getElementById('confirmDeleteButton'),
         sidebar: document.getElementById('adminSidebar'),
-        backdrop: document.getElementById('sidebarBackdrop')
+        backdrop: document.getElementById('sidebarBackdrop'),
+        popup: document.getElementById('wisataPopup'),
+        popupIcon: document.getElementById('wisataPopupIcon'),
+        popupTitle: document.getElementById('wisataPopupTitle'),
+        popupText: document.getElementById('wisataPopupText'),
+        popupActions: document.getElementById('wisataPopupActions'),
+        popupPrimary: document.getElementById('wisataPopupPrimary')
     };
     const state = {
         page: 1,
         pageSize: pageSize,
         count: 0,
         total: 0,
-        deleteId: null,
-        deleteModal: window.bootstrap
-            ? new window.bootstrap.Modal(document.getElementById('deleteConfirmModal'))
-            : null
+        deleteId: null
     };
+
+    function closePopup() {
+        elements.popup.classList.remove('is-visible');
+        elements.popup.setAttribute('aria-hidden', 'true');
+    }
+
+    function showPopup(type, title, message, primaryLabel, onPrimary, confirmMode) {
+        elements.popupIcon.className = 'wisata-popup-icon' + (type === 'success' ? ' is-success' : (confirmMode ? ' is-confirm' : ''));
+        elements.popupIcon.innerHTML = type === 'success' ? '<i class="bi bi-check-lg"></i>' : (confirmMode ? '<i class="bi bi-trash-fill"></i>' : '×');
+        elements.popupTitle.className = 'wisata-popup-title' + (type === 'success' || confirmMode ? ' is-' + (confirmMode ? 'confirm' : 'success') : '');
+        elements.popupTitle.textContent = title;
+        elements.popupText.textContent = message;
+        elements.popupActions.innerHTML = '';
+        if (confirmMode) {
+            const yes = document.createElement('button');
+            yes.type = 'button'; yes.className = 'wisata-popup-button'; yes.textContent = 'Ya, Hapus';
+            yes.addEventListener('click', onPrimary);
+            const cancel = document.createElement('button');
+            cancel.type = 'button'; cancel.className = 'wisata-popup-button is-outline'; cancel.textContent = 'Batal';
+            cancel.addEventListener('click', closePopup);
+            elements.popupActions.append(yes, cancel);
+        } else {
+            const button = document.createElement('button');
+            button.type = 'button'; button.className = 'wisata-popup-button'; button.textContent = primaryLabel || 'Coba Lagi';
+            button.addEventListener('click', function () { closePopup(); if (onPrimary) onPrimary(); });
+            elements.popupActions.appendChild(button);
+        }
+        elements.popup.classList.add('is-visible');
+        elements.popup.setAttribute('aria-hidden', 'false');
+    }
+
+    elements.popup.addEventListener('click', function (event) { if (event.target === elements.popup) closePopup(); });
+    document.addEventListener('keydown', function (event) { if (event.key === 'Escape') closePopup(); });
 
     function getToken() {
         try {
@@ -300,30 +335,28 @@
         const button = event.target.closest('[data-delete-id]');
         if (!button) return;
         state.deleteId = button.getAttribute('data-delete-id');
-        if (state.deleteModal) {
-            state.deleteModal.show();
-        } else if (window.confirm('Hapus data wisata ini?')) {
-            deleteDestination();
-        }
+        const row = button.closest('tr');
+        const destinationName = row && row.children[2] ? row.children[2].textContent.trim() : 'destinasi wisata';
+        showPopup('confirm', 'Apakah Anda yakin ingin menghapus destinasi wisata ' + destinationName + '?', 'Tindakan ini tidak bisa dibatalkan', 'Ya, Hapus', deleteDestination, true);
     });
-    elements.deleteButton.addEventListener('click', deleteDestination);
 
     async function deleteDestination() {
         if (!state.deleteId) return;
-        elements.deleteButton.disabled = true;
+        const deleteActionButton = elements.popupActions.querySelector('.wisata-popup-button');
+        if (deleteActionButton) deleteActionButton.disabled = true;
         try {
             await request(config.apiDestinationsUrl + '?id=' + encodeURIComponent(state.deleteId), {
                 method: 'DELETE'
             });
-            if (state.deleteModal) state.deleteModal.hide();
+            closePopup();
             if (state.count === 1 && state.page > 1) state.page -= 1;
             await loadDestinations();
+            state.deleteId = null;
             showMessage('Destinasi wisata berhasil dihapus.', 'success');
         } catch (error) {
-            showMessage(error.message || 'Data wisata gagal dihapus.');
+            showPopup('error', 'Gagal di Hapus !', 'Wisata ' + (document.querySelector('[data-delete-id="' + CSS.escape(String(state.deleteId)) + '"]')?.closest('tr')?.children[2]?.textContent || '') + ' gagal di hapus dari data wisata', 'Coba Lagi', deleteDestination, false);
         } finally {
-            state.deleteId = null;
-            elements.deleteButton.disabled = false;
+            if (deleteActionButton) deleteActionButton.disabled = false;
         }
     }
 
@@ -354,6 +387,15 @@
     elements.backdrop.addEventListener('click', function () {
         document.body.classList.remove('mobile-sidebar-open');
     });
+
+    const resultStatus = new URLSearchParams(window.location.search).get('saved');
+    if (resultStatus === 'created') {
+        showPopup('success', 'Berhasil di simpan!', 'Wisata berhasil ditambahkan ke daftar data wisata', 'OK', function () {}, false);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (resultStatus === 'updated') {
+        showPopup('success', 'Perubahan Berhasil di simpan!', 'Data wisata berhasil diperbarui', 'OK', function () {}, false);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
 
     loadFilters()
         .then(loadDestinations)

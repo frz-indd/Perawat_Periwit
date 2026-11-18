@@ -1391,3 +1391,21 @@ body.admin-form-page {
     color: #ffffff !important;
     background-color: #176f60 !important;
 }
+
+/* Popup hasil aksi Data Wisata — mengikuti desain referensi */
+.wisata-popup-backdrop{position:fixed;inset:0;z-index:2050;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.58);opacity:0;visibility:hidden;transition:opacity .18s ease,visibility .18s ease}
+.wisata-popup-backdrop.is-visible{opacity:1;visibility:visible}
+.wisata-popup{width:min(100%,472px);min-height:480px;padding:43px 42px 38px;background:#fff;border-radius:19px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.12);font-family:'Poppins',sans-serif;transform:translateY(8px);transition:transform .18s ease}
+.wisata-popup-backdrop.is-visible .wisata-popup{transform:translateY(0)}
+.wisata-popup-icon{width:134px;height:134px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;background:#d9d9d9;color:#f10b13;font-size:91px;font-weight:400;line-height:1}
+.wisata-popup-icon.is-success,.wisata-popup-icon.is-confirm{background:#c9d6ce;color:#176f60}
+.wisata-popup-icon.is-confirm{font-size:64px}
+.wisata-popup-title{margin:0 0 7px;color:#ff1018;font-size:30px;line-height:1.35;font-weight:600}
+.wisata-popup-title.is-success,.wisata-popup-title.is-confirm{color:#176f60}
+.wisata-popup-description{margin:0 0 27px;color:#087565;font-size:19px;line-height:1.55;font-weight:400}
+.wisata-popup-actions{width:100%;margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.wisata-popup-button{width:100%;min-height:64px;border:1px solid #176f60;border-radius:11px;background:#176f60;color:#fff;font:500 23px 'Poppins',sans-serif;cursor:pointer;transition:background .15s ease}
+.wisata-popup-button:hover{background:#125c50;color:#fff}
+.wisata-popup-button.is-outline{background:#fff;color:#176f60}
+.wisata-popup-button.is-outline:hover{background:#f0f7f5}
+@media(max-width:520px){.wisata-popup{min-height:0;padding:32px 24px 26px;border-radius:16px}.wisata-popup-icon{width:112px;height:112px;font-size:76px}.wisata-popup-icon.is-confirm{font-size:54px}.wisata-popup-title{font-size:23px}.wisata-popup-description{font-size:16px}.wisata-popup-button{min-height:56px;font-size:19px}}

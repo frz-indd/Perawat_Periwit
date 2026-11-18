@@ -23,7 +23,12 @@
         imageFeedback: document.getElementById('imageFeedback'),
         message: document.getElementById('formMessage'),
         save: document.getElementById('saveDestinationButton'),
-        title: document.getElementById('formTitle')
+        title: document.getElementById('formTitle'),
+        popup: document.getElementById('wisataPopup'),
+        popupIcon: document.getElementById('wisataPopupIcon'),
+        popupTitle: document.getElementById('wisataPopupTitle'),
+        popupText: document.getElementById('wisataPopupText'),
+        popupPrimary: document.getElementById('wisataPopupPrimary')
     };
     let previewUrl = '';
     if (new URLSearchParams(window.location.search).has('id')) {
@@ -80,10 +85,27 @@
         return payload;
     }
 
-    function showMessage(message, type) {
-        elements.message.textContent = message;
-        elements.message.className = 'alert alert-' + (type || 'danger');
+    function closePopup() {
+        elements.popup.classList.remove('is-visible');
+        elements.popup.setAttribute('aria-hidden', 'true');
     }
+
+    function showMessage(message, type) {
+        elements.popupIcon.className = 'wisata-popup-icon';
+        elements.popupIcon.textContent = '×';
+        elements.popupTitle.className = 'wisata-popup-title';
+        elements.popupTitle.textContent = elements.id.value ? 'Gagal Memperbarui!' : 'Gagal di Simpan !';
+        elements.popupText.textContent = elements.id.value
+            ? 'Data wisata gagal diperbarui, Silahkan coba kembali'
+            : 'Wisata gagal ditambahkan kedaftar data wisata. Silahkan coba kembali';
+        elements.popupPrimary.textContent = 'Coba Lagi';
+        elements.popupPrimary.onclick = closePopup;
+        elements.popup.classList.add('is-visible');
+        elements.popup.setAttribute('aria-hidden', 'false');
+    }
+
+    elements.popup.addEventListener('click', function (event) { if (event.target === elements.popup) closePopup(); });
+    document.addEventListener('keydown', function (event) { if (event.key === 'Escape') closePopup(); });
 
     function addOptions(select, items, placeholder) {
         items.forEach(function (item) {
@@ -278,7 +300,7 @@
             } else {
                 await request(url, options);
             }
-            window.location.assign(config.listUrl + '?saved=1');
+            window.location.assign(config.listUrl + (destinationId ? '?saved=updated' : '?saved=created'));
         } catch (error) {
             showMessage(error.message || 'Data wisata gagal disimpan.');
         } finally {
