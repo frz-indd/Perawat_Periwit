@@ -108,13 +108,14 @@ function fetchTourismReviewProfiles(?mysqli $conn, string $tourismId): array {
         return [];
     }
 
+    // Semua ulasan diambil (tidak lagi dibatasi 3) supaya foto profil
+    // tetap muncul saat tombol "Tampilkan seluruh ulasan" ditekan.
     $statement = $conn->prepare(
         "SELECT ul.Id_user, u.`$photoColumn` AS foto
          FROM ulasan AS ul
          INNER JOIN `user` AS u ON u.Id_user = ul.Id_user
          WHERE ul.Id_wisata = ?
-         ORDER BY ul.tanggal_ulasan DESC, ul.Id_ulasan DESC
-         LIMIT 3"
+         ORDER BY ul.tanggal_ulasan DESC, ul.Id_ulasan DESC"
     );
     $statement->bind_param('s', $tourismId);
     $statement->execute();
@@ -295,8 +296,12 @@ foreach ([5, 4, 3, 2, 1] as $stars) {
     ];
 }
 
+// Jumlah ulasan yang tampil sebelum tombol "Tampilkan seluruh ulasan" ditekan.
+// Tombol hanya muncul kalau total ulasan lebih banyak dari angka ini.
+$ulasanAwal = 3;
+
 $reviews = [];
-foreach (array_slice($reviewRows, 0, 3) as $index => $review) {
+foreach ($reviewRows as $index => $review) {
     $profile = $reviewProfiles[$index] ?? [];
     $photo = fotoUlasanUrl((string) ($profile['foto'] ?? ''));
     if (
@@ -445,7 +450,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=nav-final-7">
-    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=final-24">
+    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=final-27">
     <link rel="stylesheet" href="../CSS/\1category-item-solid-1">
 </head>
 <body class="halaman-detail site-navbar-page">
@@ -776,9 +781,10 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                 <?php endif; ?>
             </div>
 
-            <div class="ulasan-grid">
-                <?php foreach ($destination['reviews'] as $ulasan): ?>
-                    <article class="ulasan">
+            <div class="ulasan-grid" id="ulasan-grid">
+                <?php foreach ($destination['reviews'] as $urutan => $ulasan): ?>
+                    <?php $tambahan = $urutan >= $ulasanAwal; ?>
+                    <article class="ulasan<?= $tambahan ? ' ulasan--tambahan' : '' ?>"<?= $tambahan ? ' hidden' : '' ?>>
                         <div class="ulasan__kepala">
                             <span class="ulasan__avatar-bingkai">
                                 <svg class="ulasan__avatar" viewBox="0 0 40 40" aria-hidden="true"><use href="#ikon-profil"/></svg>
@@ -799,6 +805,15 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                     </article>
                 <?php endforeach; ?>
             </div>
+
+            <?php if (count($destination['reviews']) > $ulasanAwal): ?>
+                <button class="tombol-semua-ulasan" type="button" id="tombol-semua-ulasan"
+                        aria-expanded="false" aria-controls="ulasan-grid"
+                        data-teks-lebih="Tampilkan seluruh ulasan"
+                        data-teks-kurang="Tampilkan lebih sedikit">
+                    <span>Tampilkan seluruh ulasan</span>
+                </button>
+            <?php endif; ?>
 
             <?php else: ?>
             <div class="ulasan-kosong"><p>Belum ada ulasan</p></div>
@@ -1149,6 +1164,37 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
         var dialogUlasan = buatDialog('dialog-ulasan');
 
         (function () {
+            var tombol = document.getElementById('tombol-semua-ulasan');
+            var grid = document.getElementById('ulasan-grid');
+            if (!tombol || !grid) return;
+
+            var label = tombol.querySelector('span');
+            var tambahan = grid.querySelectorAll('.ulasan--tambahan');
+            var judul = document.getElementById('judul-ulasan');
+
+            function atur(terbuka) {
+                tambahan.forEach(function (el) { el.hidden = !terbuka; });
+                tombol.classList.toggle('terbuka', terbuka);
+                tombol.setAttribute('aria-expanded', terbuka ? 'true' : 'false');
+                label.textContent = tombol.getAttribute(terbuka ? 'data-teks-kurang' : 'data-teks-lebih');
+            }
+
+            tombol.addEventListener('click', function () {
+                var terbuka = tombol.getAttribute('aria-expanded') !== 'true';
+                atur(terbuka);
+
+                if (!terbuka && judul) {
+                    var kurangGerak = window.matchMedia &&
+                        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    judul.scrollIntoView({
+                        behavior: kurangGerak ? 'auto' : 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        })();
+
+        (function () {
             var tombol = document.getElementById('tombol-ulasan');
             var batal = document.getElementById('batal-ulasan');
             if (!tombol || !dialogUlasan.el) return;
@@ -1256,6 +1302,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
                 galat.hidden = true;
                 sibuk = true;
+                var status = 0;
                 var kirim = form.querySelector('.btn-kirim');
                 if (kirim) kirim.disabled = true;
 
