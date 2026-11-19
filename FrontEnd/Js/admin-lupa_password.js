@@ -1,7 +1,13 @@
 (function () {
+  var PESAN_EMAIL = 'Email tidak valid/tidak terdaftar';
+  var PESAN_LIMIT = 'Terlalu banyak permintaan, coba beberapa saat lagi';
+  var POLA_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
   var $ = function (id) { return document.getElementById(id); };
   var form = $('form-lupa'), input = $('email'), err = $('error-email'), btn = $('btn-kirim');
-  var ok = $('modal-sukses'), fail = $('modal-gagal'), label = btn.textContent;
+  var ok = $('modal-sukses'), fail = $('modal-gagal');
+  var aksiLogin = $('aksi-login'), aksiCoba = $('aksi-coba');
+  var label = btn.textContent;
   var timer, siap = false, serverMsg = '', busy = false;
 
   function post(url, body) {
@@ -19,22 +25,33 @@
       .catch(function () { return null; });
   }
 
-  function cek(paksa) {
+  function formatSalah() {
     var v = input.value.trim();
-    if (!v) return paksa ? 'Email wajib diisi' : '';
-    return v.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? 'Format email tidak valid' : serverMsg;
+    return !v || v.length > 254 || !POLA_EMAIL.test(v);
+  }
+
+  function pesan(paksa) {
+    if (!input.value.trim()) return paksa ? PESAN_EMAIL : '';
+    return formatSalah() ? PESAN_EMAIL : serverMsg;
   }
 
   function render(paksa) {
-    var m = paksa || siap ? cek(paksa) : '';
+    var m = paksa || siap ? pesan(paksa) : '';
     err.textContent = m;
     err.hidden = !m;
     if (m) input.setAttribute('aria-invalid', 'true');
     else input.removeAttribute('aria-invalid');
   }
 
+  function buka(modal, fokus) {
+    form.setAttribute('inert', '');
+    modal.hidden = false;
+    fokus.focus();
+  }
+
   function tutupGagal() {
     fail.hidden = true;
+    form.removeAttribute('inert');
     input.focus();
   }
 
@@ -51,9 +68,16 @@
     if (input.value.trim()) { siap = true; render(false); }
   });
 
-  $('aksi-coba').addEventListener('click', tutupGagal);
+  aksiCoba.addEventListener('click', tutupGagal);
+
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !fail.hidden) tutupGagal();
+    var aktif = !fail.hidden ? fail : !ok.hidden ? ok : null;
+    if (!aktif) return;
+    if (e.key === 'Escape' && aktif === fail) { tutupGagal(); return; }
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      (aktif === fail ? aksiCoba : aksiLogin).focus();
+    }
   });
 
   form.addEventListener('submit', function (e) {
@@ -61,11 +85,11 @@
     if (busy) return;
     clearTimeout(timer);
     siap = true;
+    serverMsg = '';
 
-    if (cek(true)) {
+    if (pesan(true)) {
       render(true);
-      fail.hidden = false;
-      $('aksi-coba').focus();
+      buka(fail, aksiCoba);
       return;
     }
 
@@ -79,16 +103,16 @@
       btn.textContent = label;
 
       if (r && r.ok) {
-        ok.hidden = false;
-        $('aksi-login').focus();
+        render(false);
+        buka(ok, aksiLogin);
         return;
       }
-      if (r && [404, 422, 429].indexOf(r.status) > -1) {
-        serverMsg = (r.data.errors && r.data.errors.email) || r.data.message || '';
-      }
+
+      if (r && (r.status === 404 || r.status === 422)) serverMsg = PESAN_EMAIL;
+      else if (r && r.status === 429) serverMsg = (r.data.errors && r.data.errors.email) || r.data.message || PESAN_LIMIT;
+
       render(true);
-      fail.hidden = false;
-      $('aksi-coba').focus();
+      buka(fail, aksiCoba);
     });
   });
 
