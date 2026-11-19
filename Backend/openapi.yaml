@@ -1178,5 +1178,45 @@ components:
               example: { message: 'Kata sandi saat ini yang Anda masukkan salah.' }
         '403': { description: Token admin tidak valid atau akses ditolak. }
         '415': { description: Content-Type harus application/json. }
+  /api/admin/forgot-password:
+    post:
+      tags: [Admin]
+      summary: Lupa password akun admin berdasarkan validasi email dan role
+      description: >-
+        Memvalidasi format email serta memastikan akun memiliki role Admin (role = 1) di database,
+        melakukan hashing pada password baru admin menggunakan bcrypt, lalu memperbarui data di database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, new_password]
+              properties:
+                email: { type: string, format: email, example: 'admin@explormajaku.com' }
+                new_password: { type: string, format: password, minLength: 8, example: 'AdminBaru2026#' }
+                confirm_password: { type: string, format: password, minLength: 8, example: 'AdminBaru2026#' }
+      responses:
+        '200':
+          description: Password admin berhasil diperbarui.
+          content:
+            application/json:
+              example: { status: 'success', message: 'Password admin berhasil diperbarui. Silakan login kembali dengan password baru.' }
+        '403':
+          description: Akun tersebut bukan akun admin.
+          content:
+            application/json:
+              example: { status: 'forbidden', message: 'Akses ditolak: Akun tersebut bukan merupakan akun admin.' }
+        '404':
+          description: Akun admin tidak ditemukan.
+          content:
+            application/json:
+              example: { status: 'not_found', message: 'Akun admin dengan email tersebut tidak ditemukan.' }
+        '422':
+          description: Format email atau password baru tidak valid.
+          content:
+            application/json:
+              example: { status: 'validation_error', message: 'Format email tidak valid.' }
+        '500': { $ref: '#/components/responses/ServerError' }
         '422': { description: Format kata sandi baru tidak memenuhi kriteria keamanan. }
         '500': { $ref: '#/components/responses/ServerError' }
