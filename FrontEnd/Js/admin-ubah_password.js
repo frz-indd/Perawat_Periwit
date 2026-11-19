@@ -1,8 +1,19 @@
 (function () {
-  var $ = function (id) { return document.getElementById(id); };
   var KEY = 'admin_reset_token';
+  var MIN_KARAKTER = 8;
+  var MAKS_BYTE = 72;
+  var PESAN_BARU = 'Password baru wajib diisi dan memenuhi syarat';
+  var PESAN_MAKS = 'Password baru maksimal 72 byte';
+  var PESAN_KONF = 'Konfirmasi password tidak cocok';
+  var JUDUL_KEDALUWARSA = 'Tautan Reset Kadaluarsa';
+  var INFO_KEDALUWARSA = 'Maaf, tautan reset password sudah tidak berlaku atau telah melewati batas waktu penggunaan.';
+  var JUDUL_GAGAL_VERIFIKASI = 'Tautan Belum Dapat Diverifikasi';
+  var INFO_GAGAL_VERIFIKASI = 'Periksa koneksi internet lalu muat ulang halaman, atau minta tautan reset baru.';
+
+  var $ = function (id) { return document.getElementById(id); };
   var form = $('form-password'), stInvalid = $('state-tidak-valid'), btn = $('btn-simpan');
   var ok = $('modal-sukses'), fail = $('modal-gagal');
+  var aksiOk = $('aksi-ok'), aksiCoba = $('aksi-coba');
   var pw = $('password_baru'), cf = $('konfirmasi_password');
   var field = { baru: [pw, $('error-baru')], konf: [cf, $('error-konfirmasi')] };
   var siap = { baru: false, konf: false };
@@ -31,37 +42,30 @@
     return !!r && (r.data.status === 'invalid_token' || [401, 403, 404, 410].indexOf(r.status) > -1);
   }
 
-  function tidakValid(pesan) {
+  function tidakValid(judul, pesan) {
     if (!pesan) { token = ''; simpanToken(''); }
     form.hidden = true;
     fail.hidden = true;
-    if (pesan) $('info-tidak-valid').textContent = pesan;
+    ok.hidden = true;
+    $('judul-tidak-valid').textContent = judul || JUDUL_KEDALUWARSA;
+    $('info-tidak-valid').textContent = pesan || INFO_KEDALUWARSA;
     stInvalid.hidden = false;
+    $('aksi-minta-baru').focus();
   }
 
   function bytes(s) {
     return new TextEncoder().encode(s).length;
   }
 
-  function kurang(p) {
-    var k = [];
-    if (Array.from(p).length < 8) k.push('Minimal 8 karakter');
-    if (!/\p{Lu}/u.test(p)) k.push('1 huruf besar');
-    if (!/\p{Ll}/u.test(p)) k.push('1 huruf kecil');
-    if (!/[0-9]/.test(p)) k.push('1 angka');
-    if (!/[^\p{L}\p{N}\s]/u.test(p)) k.push('1 simbol');
-    return k;
-  }
-
   function galat(paksa) {
-    var g = {}, b = pw.value, k = cf.value, x;
-    if (!b) { if (paksa) g.baru = 'Password baru wajib diisi'; }
-    else if (bytes(b) > 72) g.baru = 'Password baru maksimal 72 byte';
-    else if ((x = kurang(b)).length) g.baru = x.join(', ');
+    var g = {}, b = pw.value, k = cf.value;
+
+    if (!b) { if (paksa) g.baru = PESAN_BARU; }
+    else if (Array.from(b).length < MIN_KARAKTER) g.baru = PESAN_BARU;
+    else if (bytes(b) > MAKS_BYTE) g.baru = PESAN_MAKS;
     else if (srv) g.baru = srv;
 
-    if (!k) { if (paksa) g.konf = 'Konfirmasi password wajib diisi'; }
-    else if (k !== b) g.konf = 'Konfirmasi password tidak sesuai';
+    if (k !== b && (k || paksa)) g.konf = PESAN_KONF;
     return g;
   }
 
@@ -80,6 +84,20 @@
     siap.baru = !!pw.value;
     siap.konf = !!cf.value;
     render(false);
+  }
+
+  function buka(modal, fokus) {
+    form.setAttribute('inert', '');
+    modal.hidden = false;
+    fokus.focus();
+  }
+
+  function tutupGagal() {
+    fail.hidden = true;
+    form.removeAttribute('inert');
+    if (!field.baru[1].hidden) pw.focus();
+    else if (!field.konf[1].hidden) cf.focus();
+    else pw.focus();
   }
 
   [pw, cf].forEach(function (el) {
@@ -107,26 +125,28 @@
     });
   });
 
-  function tutupGagal() {
-    fail.hidden = true;
-    (field.konf[1].hidden ? pw : cf).focus();
-  }
+  aksiCoba.addEventListener('click', tutupGagal);
 
-  $('aksi-coba').addEventListener('click', tutupGagal);
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !fail.hidden) tutupGagal();
+    var aktif = !fail.hidden ? fail : !ok.hidden ? ok : null;
+    if (!aktif) return;
+    if (e.key === 'Escape' && aktif === fail) { tutupGagal(); return; }
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      (aktif === fail ? aksiCoba : aksiOk).focus();
+    }
   });
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (busy) return;
     clearTimeout(timer);
+    srv = '';
     siap.baru = siap.konf = true;
 
     if (Object.keys(galat(true)).length) {
       render(true);
-      fail.hidden = false;
-      $('aksi-coba').focus();
+      buka(fail, aksiCoba);
       return;
     }
 
@@ -143,8 +163,7 @@
 
       if (r && r.ok) {
         simpanToken('');
-        ok.hidden = false;
-        $('aksi-ok').focus();
+        buka(ok, aksiOk);
         return;
       }
       if (ditolak(r)) { tidakValid(); return; }
@@ -152,8 +171,7 @@
         srv = (r.data.errors && r.data.errors.new_password) || r.data.message || '';
       }
       render(true);
-      fail.hidden = false;
-      $('aksi-coba').focus();
+      buka(fail, aksiCoba);
     });
   });
 
@@ -176,7 +194,7 @@
     } else if (ditolak(r)) {
       tidakValid();
     } else {
-      tidakValid('Tautan tidak dapat diverifikasi saat ini. Periksa koneksi internet lalu muat ulang halaman, atau minta tautan baru.');
+      tidakValid(JUDUL_GAGAL_VERIFIKASI, INFO_GAGAL_VERIFIKASI);
     }
   });
 })();
