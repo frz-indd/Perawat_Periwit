@@ -158,7 +158,7 @@ if (empty($_SESSION['csrf'])) { $_SESSION['csrf'] = bin2hex(random_bytes(32)); }
                             <label for="rememberMe">Ingat Saya</label>
                         </div>
 
-                        <a href="#" class="forgot-password">
+                        <a href="user-lupa_password.php" class="forgot-password">
                             Lupa Kata Sandi?
                         </a>
                     </div>
@@ -231,7 +231,7 @@ if (empty($_SESSION['csrf'])) { $_SESSION['csrf'] = bin2hex(random_bytes(32)); }
         </section>
     </div>
 
-    <script src="../Js/auth.js?v=auth-split-1"></script>
+    <script src="../Js/auth.js?v=<?= time() ?>"></script>
     <script src="../Js/login.js?v=auth-split-1"></script>
     <script>
     // Jika browser memulihkan halaman login dari BFCache setelah user login,

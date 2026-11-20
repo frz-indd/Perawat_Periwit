@@ -30,12 +30,12 @@ function facility_svg_icon(string $code): string {
 $config = ['apiDashboardUrl'=>$appBasePath.'/api/admin/dashboard','apiLogoutUrl'=>$appBasePath.'/api/admin/logout','apiUrl'=>$appBasePath.$section['api'],'loginUrl'=>$appBasePath.'/FrontEnd/auth/login-admin.php'];
 ?>
 <!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?=e($section['title'])?> | Explore Majaku Admin</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet"><link href="../CSS/admin-data-wisata.css?v=20261112-5" rel="stylesheet"><link href="../CSS/admin-dashboard.css?v=20261112-5" rel="stylesheet"><?php if ($key === 'profil'): ?><link href="../CSS/admin-profil.css?v=20261118-1" rel="stylesheet"><?php elseif ($key === 'kategori'): ?><link href="../CSS/admin-kategori.css?v=20261116-14" rel="stylesheet"><?php elseif ($key === 'fasilitas'): ?><link href="../CSS/admin-fasilitas.css?v=20261120-actions-exact-2" rel="stylesheet"><?php elseif ($key === 'ulasan'): ?><link href="../CSS/admin-ulasan.css?v=20261117-2" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet"><link href="../CSS/admin-data-wisata.css?v=20261112-5" rel="stylesheet"><link href="../CSS/admin-dashboard.css?v=20261120-compact" rel="stylesheet"><?php if ($key === 'profil'): ?><link href="../CSS/admin-profil.css?v=20261118-1" rel="stylesheet"><?php elseif ($key === 'kategori'): ?><link href="../CSS/admin-kategori.css?v=20261116-14" rel="stylesheet"><?php elseif ($key === 'fasilitas'): ?><link href="../CSS/admin-fasilitas.css?v=20261120-actions-exact-2" rel="stylesheet"><?php elseif ($key === 'ulasan'): ?><link href="../CSS/admin-ulasan.css?v=20261117-2" rel="stylesheet">
 <?php elseif ($key === 'pengguna'): ?><link href="../CSS/admin-pengguna.css?v=20261117-4" rel="stylesheet"><?php endif; ?></head>
 <body class="admin-wisata-page admin-resource-page <?= $key === 'fasilitas' ? 'admin-resource-facilities' : ($key === 'ulasan' ? 'admin-resource-reviews' : ($key === 'kategori' ? 'admin-resource-categories' : ($key === 'pengguna' ? 'admin-resource-users' : ($key === 'profil' ? 'admin-resource-profile' : '')))) ?>"><aside class="admin-sidebar"><a class="admin-brand" href="<?=e($appBasePath)?>/index.php">Explore Majaku</a><button class="sidebar-collapse" id="sidebarCollapse" type="button"><i class="bi bi-chevron-left"></i></button><nav class="admin-nav" aria-label="Navigasi admin">
 <a class="admin-nav__item" href="admin-dashboard.php"><i class="bi bi-house-door"></i><span>Dashboard</span></a><a class="admin-nav__item" href="data-wisata.php"><i class="bi bi-bar-chart-fill"></i><span>Data Wisata</span></a>
-<a class="admin-nav__item <?= $key==='kategori'?'is-active':'' ?>" href="admin-resource.php?section=kategori"><i class="bi bi-grid-fill"></i><span>Kategori</span></a><a class="admin-nav__item <?= $key==='fasilitas'?'is-active':'' ?>" href="admin-resource.php?section=fasilitas"><i class="bi bi-star-fill"></i><span>Fasilitas</span></a><a class="admin-nav__item <?= $key==='ulasan'?'is-active':'' ?>" href="admin-resource.php?section=ulasan"><i class="bi bi-chat-square-text"></i><span>Ulasan</span></a><a class="admin-nav__item <?= $key==='pengguna'?'is-active':'' ?>" href="admin-resource.php?section=pengguna"><i class="bi bi-people"></i><span>Pengguna</span></a></nav><div class="admin-sidebar__bottom"><a class="admin-nav__item <?= $key==='profil'?'is-active':'' ?>" href="admin-resource.php?section=profil"><i class="bi bi-person-circle"></i><span>Profil admin</span></a><button class="admin-nav__item admin-logout" id="logoutButton" type="button"><i class="bi bi-box-arrow-right"></i><span>Logout</span></button></div></aside>
-<header class="admin-mobile-bar"><button class="mobile-menu-button" id="mobileMenuButton"><i class="bi bi-list"></i></button><span class="admin-mobile-brand">Explore Majaku</span><button class="mobile-logout-button" id="mobileLogoutButton"><i class="bi bi-box-arrow-right"></i></button></header>
+<a class="admin-nav__item <?= $key==='kategori'?'is-active':'' ?>" href="admin-resource.php?section=kategori"><i class="bi bi-grid-fill"></i><span>Kategori</span></a><a class="admin-nav__item <?= $key==='fasilitas'?'is-active':'' ?>" href="admin-resource.php?section=fasilitas"><i class="bi bi-star-fill"></i><span>Fasilitas</span></a><a class="admin-nav__item <?= $key==='ulasan'?'is-active':'' ?>" href="admin-resource.php?section=ulasan"><i class="bi bi-chat-square-text"></i><span>Ulasan</span></a><a class="admin-nav__item <?= $key==='pengguna'?'is-active':'' ?>" href="admin-resource.php?section=pengguna"><i class="bi bi-people"></i><span>Pengguna</span></a></nav><div class="admin-sidebar__bottom"><a class="admin-nav__item <?= $key==='profil'?'is-active':'' ?>" href="admin-resource.php?section=profil"><i class="bi bi-person-circle"></i><span>Profil admin</span></a><button class="admin-nav__item admin-logout" id="logoutButton" type="button" data-api-url="<?= e($config['apiLogoutUrl']) ?>" data-api-method="POST"><i class="bi bi-box-arrow-right"></i><span>Logout</span></button></div></aside>
+<header class="admin-mobile-bar"><button class="mobile-menu-button" id="mobileMenuButton"><i class="bi bi-list"></i></button><span class="admin-mobile-brand">Explore Majaku</span><button class="mobile-logout-button" id="mobileLogoutButton" type="button" data-api-url="<?= e($config['apiLogoutUrl']) ?>" data-api-method="POST" aria-label="Logout"><i class="bi bi-box-arrow-right"></i></button></header>
 <main class="admin-main"><div class="admin-content">
 <?php if ($key === 'kategori'): ?>
 <div class="kategori-topbar"><div class="admin-user-indicator"><i class="bi bi-person-circle"></i><span>Admin 1</span></div></div>
@@ -134,7 +134,21 @@ $config = ['apiDashboardUrl'=>$appBasePath.'/api/admin/dashboard','apiLogoutUrl'
 <div class="admin-page-heading"><div><h1><?=e($section['title'])?></h1><p><?=e($section['description'])?></p></div><div class="admin-user-indicator"><i class="bi bi-person-circle"></i><span>Admin</span></div></div><section class="admin-resource-panel"><div id="resourceMessage" class="text-secondary">Memuat data...</div><div class="table-responsive"><table class="table admin-resource-table"><thead id="resourceHead"></thead><tbody id="resourceRows"></tbody></table></div></section>
 <?php endif; ?>
 </div></main><div class="admin-sidebar-backdrop" id="sidebarBackdrop"></div>
-<script>const cfg=<?=json_encode($config,JSON_UNESCAPED_SLASHES|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT)?>;const token=localStorage.getItem('admin_token')||sessionStorage.getItem('admin_token')||'';const clear=()=>{localStorage.removeItem('admin_token');sessionStorage.removeItem('admin_token');};const login=()=>location.replace(cfg.loginUrl);const esc=v=>String(v??'-').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+<div class="logout-modal" id="logoutModal" hidden>
+    <div class="logout-modal__backdrop" id="logoutModalBackdrop"></div>
+    <div class="logout-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle" aria-describedby="logoutModalText">
+        <div class="logout-modal__icon" aria-hidden="true">
+            <svg viewBox="0 0 34 34"><path fill="currentColor" fill-rule="evenodd" d="M12 0h10a1 1 0 0 1 1 1v5H11V1a1 1 0 0 1 1-1zM13.2 2.6h7.6v3.4h-7.6z"/><rect x="0" y="4.8" width="33.8" height="2.5" rx="1.25" fill="currentColor"/><path d="M3.8 6h26.2v25.6a1.7 1.7 0 0 1-1.7 1.7H5.5a1.7 1.7 0 0 1-1.7-1.7z" fill="currentColor"/><rect x="11.5" y="11.8" width="3" height="14.8" rx="1.5" fill="#c9d6ce"/><rect x="19" y="11.8" width="3" height="14.8" rx="1.5" fill="#c9d6ce"/></svg>
+        </div>
+        <h2 class="logout-modal__title" id="logoutModalTitle">Apakah Anda yakin ingin keluar dari admin panel Explore MajaKu?</h2>
+        <p class="logout-modal__text" id="logoutModalText">Sesi anda akan berakhir</p>
+        <div class="logout-modal__actions">
+            <button class="logout-modal__button logout-modal__button--confirm" id="logoutConfirmButton" type="button" data-api-url="<?= e($config['apiLogoutUrl']) ?>" data-api-method="POST">Ya, Keluar</button>
+            <button class="logout-modal__button logout-modal__button--cancel" id="logoutCancelButton" type="button">Batal</button>
+        </div>
+    </div>
+</div>
+<script>const cfg=<?=json_encode($config,JSON_UNESCAPED_SLASHES|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT)?>;const token=localStorage.getItem('admin_token')||sessionStorage.getItem('admin_token')||'';const clear=()=>{try{localStorage.removeItem('admin_token');}catch(_){}try{sessionStorage.removeItem('admin_token');}catch(_){}document.cookie='admin_token=; path=/; max-age=0; SameSite=Lax';};const login=()=>location.replace(cfg.loginUrl);const esc=v=>String(v??'-').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 async function start(){if(!token)return login();try{const guard=await fetch(cfg.apiDashboardUrl,{headers:{Authorization:'Bearer '+token,Accept:'application/json'}});if(!guard.ok){clear();return login();}const guardData=await guard.json();const section=<?=json_encode($key)?>;if(section==='profil'){setupAdminProfile();await loadAdminProfile();return;}if(section==='fasilitas'){setupFacilities();await loadFacilities();return;}if(section==='ulasan'){setupReviews();await loadReviews();return;}if(section==='pengguna'){setupUsers();await loadUsers();return;}const res=await fetch(cfg.apiUrl,{headers:{Authorization:'Bearer '+token,Accept:'application/json'}});const json=await res.json();if(!res.ok)throw new Error(json.message||'Gagal memuat data.');const rows=Array.isArray(json.data)?json.data:(json.data?[json.data]:[]);if(section==='kategori'){const categoryPhoto=name=>{const n=String(name||'').toLocaleLowerCase('id-ID');if(n.includes('alam')||n.includes('gunung'))return '../assets/images/telaga.png?v=20261112-exact';if(n.includes('air')||n.includes('curug')||n.includes('air terjun'))return '../assets/images/kategori-air-curug.jpeg?v=20261112-exact';if(n.includes('buatan')||n.includes('kuliner'))return '../assets/images/kategori-buatan-kuliner.jpeg?v=20261112-exact';if(n.includes('sejarah')||n.includes('budaya'))return '../assets/images/kategori-sejarah-budaya.jpeg?v=20261112-exact';return '../assets/images/img.png';};document.getElementById('resourceHead').innerHTML='<tr><th>No</th><th>Foto</th><th>Kategori</th><th>Jumlah Wisata</th></tr>';document.getElementById('resourceRows').innerHTML=rows.length?rows.map((r,i)=>'<tr><td class="kategori-number" data-label="No">'+(i+1)+'</td><td class="kategori-photo" data-label="Foto"><img src="'+categoryPhoto(r.name)+'" alt="Foto '+esc(r.name)+'" loading="lazy"></td><td class="kategori-name" data-label="Kategori">'+esc(r.name)+'</td><td class="kategori-total" data-label="Jumlah wisata">'+esc(r.total_destinations??0)+'</td></tr>').join(''):'<tr><td colspan="4" class="text-center py-4">Belum ada data kategori.</td></tr>';document.getElementById('resourceMessage').textContent='Data berhasil dimuat ('+rows.length+' kategori).';}else{let cols=section==='fasilitas'?['id','name','icon_code','description']:section==='pengguna'?['id','nama','email','no_telepon']:['id_ulasan','nama_pengguna','nama_wisata','rating','komentar','tanggal_ulasan'];document.getElementById('resourceHead').innerHTML='<tr>'+cols.map(c=>'<th>'+esc(c.replaceAll('_',' '))+'</th>').join('')+'</tr>';document.getElementById('resourceRows').innerHTML=rows.length?rows.map(r=>'<tr>'+cols.map(c=>'<td>'+esc(r[c])+'</td>').join('')+'</tr>').join(''):'<tr><td colspan="'+cols.length+'" class="text-center py-4">Belum ada data.</td></tr>';document.getElementById('resourceMessage').textContent='Data berhasil dimuat ('+rows.length+' data).';}}catch(e){document.getElementById('resourceMessage').textContent=e.message||'Terjadi kesalahan.';}}
 const facilityModal=document.getElementById('facilityModal');
 function facilityStatus(message,isError=false){const el=document.getElementById('resourceMessage');if(el){el.textContent=message;el.classList.toggle('is-error',isError);}}
@@ -266,4 +280,62 @@ function setupAdminProfile(){document.getElementById('editAdminProfile').addEven
 async function saveAdminProfile(event){event.preventDefault();const name=document.getElementById('editAdminName').value.trim();const username=document.getElementById('editAdminUsername').value.trim();const error=document.getElementById('editAdminNameError');error.textContent='';if(!name){error.textContent='Nama lengkap wajib diisi.';return;}if(name.length>255){error.textContent='Nama maksimal 255 karakter.';return;}if(!username){showProfileResult(false,'Gagal Memperbarui!','Username wajib diisi.');return;}if(username.length>100){showProfileResult(false,'Gagal Memperbarui!','Username maksimal 100 karakter.');return;}const button=document.getElementById('saveAdminProfile');button.disabled=true;button.innerHTML='<i class="bi bi-arrow-repeat"></i> Menyimpan...';try{let body;if(selectedAdminPhoto){body=new FormData();body.append('name',name);body.append('username',username);body.append('profile_photo',selectedAdminPhoto);}else{body=JSON.stringify({name,username});}const result=await adminProfileRequest(cfg.apiDashboardUrl.replace(/\/dashboard$/,'/profile'),{method:'PUT',body});adminProfileData={...adminProfileData,...(result.data||{}),name,username};document.getElementById('profileUsername').textContent=username;if(result.data&&result.data.image_url){adminProfileData.image_url=result.data.image_url;renderAdminProfilePhoto(result.data.image_url);}document.getElementById('profileDisplayName').textContent=name;document.getElementById('profileName').textContent=name;profileModal(false);showProfileResult(true,'Perubahan Berhasil di simpan!','Informasi profil anda berhasil diperbarui');}catch(err){profileModal(false);showProfileResult(false,'Gagal Memperbarui!','Informasi profil anda gagal diperbarui');}finally{button.disabled=false;button.innerHTML='<i class="bi bi-floppy"></i> Perbarui data';}}
 async function submitAdminPassword(event){event.preventDefault();const current=document.getElementById('currentAdminPassword').value;const next=document.getElementById('newAdminPassword').value;const confirm=document.getElementById('confirmAdminPassword').value;let valid=true;setPasswordError('currentPasswordError','');setPasswordError('newPasswordError','');setPasswordError('confirmPasswordError','');if(!current){setPasswordError('currentPasswordError','Password saat ini wajib di isi');valid=false;}if(!next){setPasswordError('newPasswordError','Password baru wajib di isi');valid=false;}else if(next.length<8){setPasswordError('newPasswordError','Password minimal 8 karakter');valid=false;}else if(next.length>72){setPasswordError('newPasswordError','Password maksimal 72 byte');valid=false;}else if(!/[a-z]/.test(next)||!/[A-Z]/.test(next)||!/[0-9]/.test(next)||!/[^A-Za-z0-9]/.test(next)){setPasswordError('newPasswordError','Gunakan huruf besar, huruf kecil, angka, dan karakter khusus.');valid=false;}else if(next===current){setPasswordError('newPasswordError','Password baru tidak boleh sama dengan password sebelumnya');valid=false;}if(!confirm){setPasswordError('confirmPasswordError','Konfirmasi password baru wajib di isi');valid=false;}else if(confirm!==next){setPasswordError('confirmPasswordError','Konfirmasi password tidak sesuai dengan password baru');valid=false;}if(!valid)return;const button=document.getElementById('adminPasswordSubmit');button.disabled=true;button.innerHTML='<i class="bi bi-arrow-repeat"></i> Memproses...';try{await adminProfileRequest(cfg.apiDashboardUrl.replace(/\/dashboard$/,'/change-password'),{method:'PUT',body:JSON.stringify({current_password:current,new_password:next})});document.getElementById('adminPasswordForm').reset();showProfileResult(true,'Perubahan Berhasil di simpan!','Password anda berhasil diperbarui','OK',()=>{clear();login();});}catch(error){showProfileResult(false,'Gagal Memperbarui!','Password anda gagal diperbarui');}finally{button.disabled=false;button.innerHTML='<i class="bi bi-lock"></i> Perbarui password';}}
 
-async function logout(){try{await fetch(cfg.apiLogoutUrl,{method:'POST',headers:{Authorization:'Bearer '+token}});}finally{clear();login();}}document.getElementById('logoutButton').onclick=logout;document.getElementById('mobileLogoutButton').onclick=logout;document.getElementById('sidebarCollapse').onclick=()=>document.body.classList.toggle('sidebar-collapsed');document.getElementById('mobileMenuButton').onclick=()=>document.body.classList.toggle('mobile-sidebar-open');document.getElementById('sidebarBackdrop').onclick=()=>document.body.classList.remove('mobile-sidebar-open');start();</script></body></html>
+const logoutModal = document.getElementById('logoutModal');
+const logoutConfirmButton = document.getElementById('logoutConfirmButton');
+const logoutCancelButton = document.getElementById('logoutCancelButton');
+
+function openLogoutModal() {
+    document.body.classList.remove('mobile-sidebar-open');
+    logoutModal.hidden = false;
+    document.body.classList.add('logout-modal-open');
+    setTimeout(function () {
+        logoutModal.classList.add('is-visible');
+        logoutCancelButton.focus();
+    }, 10);
+}
+
+function closeLogoutModal() {
+    logoutModal.classList.remove('is-visible');
+    document.body.classList.remove('logout-modal-open');
+    setTimeout(function () { logoutModal.hidden = true; }, 220);
+}
+
+async function logout() {
+    try {
+        if (token) {
+            await fetch(cfg.apiLogoutUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
+            });
+        }
+    } catch (e) {
+    } finally {
+        clear();
+        login();
+    }
+}
+
+document.getElementById('logoutButton').addEventListener('click', openLogoutModal);
+document.getElementById('mobileLogoutButton').addEventListener('click', openLogoutModal);
+logoutCancelButton.addEventListener('click', closeLogoutModal);
+document.getElementById('logoutModalBackdrop').addEventListener('click', closeLogoutModal);
+logoutConfirmButton.addEventListener('click', function () {
+    logoutConfirmButton.disabled = true;
+    logoutCancelButton.disabled = true;
+    logoutConfirmButton.textContent = 'Memproses...';
+    logout();
+});
+
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && !logoutModal.hidden && !logoutConfirmButton.disabled) {
+        closeLogoutModal();
+    }
+});
+
+document.getElementById('sidebarCollapse').onclick=()=>document.body.classList.toggle('sidebar-collapsed');
+document.getElementById('mobileMenuButton').onclick=()=>document.body.classList.toggle('mobile-sidebar-open');
+document.getElementById('sidebarBackdrop').onclick=()=>document.body.classList.remove('mobile-sidebar-open');
+start();</script>
+<script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
+</body></html>

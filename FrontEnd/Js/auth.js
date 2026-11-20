@@ -228,7 +228,11 @@ const forgotPassword = document.querySelector('.forgot-password');
 
 if (forgotPassword) {
     forgotPassword.addEventListener('click', function (event) {
+        const targetUrl = forgotPassword.getAttribute('href');
+        if (targetUrl && targetUrl !== '#' && !targetUrl.startsWith('javascript:')) {
+            return;
+        }
         event.preventDefault();
-        alert('Halaman lupa password belum dibuat.');
+        window.location.href = 'user-lupa_password.php';
     });
 }

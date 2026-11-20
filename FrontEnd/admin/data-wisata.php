@@ -37,6 +37,7 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet">
     <link href="../CSS/admin-data-wisata.css?v=20261118-popup1" rel="stylesheet">
+    <link href="../CSS/admin-dashboard.css?v=20261120-compact" rel="stylesheet">
 </head>
 <body class="admin-wisata-page">
     <aside class="admin-sidebar" id="adminSidebar">
@@ -157,6 +158,23 @@ function e(string $value): string
     </main>
 
     <div class="admin-sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Modal konfirmasi logout -->
+    <div class="logout-modal" id="logoutModal" hidden>
+        <div class="logout-modal__backdrop" id="logoutModalBackdrop"></div>
+        <div class="logout-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle" aria-describedby="logoutModalText">
+            <div class="logout-modal__icon" aria-hidden="true">
+                <svg viewBox="0 0 34 34"><path fill="currentColor" fill-rule="evenodd" d="M12 0h10a1 1 0 0 1 1 1v5H11V1a1 1 0 0 1 1-1zM13.2 2.6h7.6v3.4h-7.6z"/><rect x="0" y="4.8" width="33.8" height="2.5" rx="1.25" fill="currentColor"/><path d="M3.8 6h26.2v25.6a1.7 1.7 0 0 1-1.7 1.7H5.5a1.7 1.7 0 0 1-1.7-1.7z" fill="currentColor"/><rect x="11.5" y="11.8" width="3" height="14.8" rx="1.5" fill="#c9d6ce"/><rect x="19" y="11.8" width="3" height="14.8" rx="1.5" fill="#c9d6ce"/></svg>
+            </div>
+            <h2 class="logout-modal__title" id="logoutModalTitle">Apakah Anda yakin ingin keluar dari admin panel Explore MajaKu?</h2>
+            <p class="logout-modal__text" id="logoutModalText">Sesi anda akan berakhir</p>
+            <div class="logout-modal__actions">
+                <button class="logout-modal__button logout-modal__button--confirm" id="logoutConfirmButton" type="button" data-api-url="<?= e($pageConfig['apiLogoutUrl']) ?>" data-api-method="POST">Ya, Keluar</button>
+                <button class="logout-modal__button logout-modal__button--cancel" id="logoutCancelButton" type="button">Batal</button>
+            </div>
+        </div>
+    </div>
+
     <div class="wisata-popup-backdrop" id="wisataPopup" role="dialog" aria-modal="true" aria-labelledby="wisataPopupTitle" aria-hidden="true">
         <div class="wisata-popup">
             <div class="wisata-popup-icon" id="wisataPopupIcon" aria-hidden="true">×</div>
@@ -172,7 +190,7 @@ function e(string $value): string
         window.adminWisataConfig = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../Js/admin-data-wisata.js?v=20261118-popup1"></script>
+    <script src="../Js/admin-data-wisata.js?v=20261120-compact"></script>
 <script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

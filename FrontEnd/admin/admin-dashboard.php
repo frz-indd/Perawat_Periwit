@@ -16,7 +16,7 @@ $pageConfig = [
     'loginUrl' => $appBasePath . '/FrontEnd/auth/login-admin.php',
     'homeUrl' => $appBasePath . '/index.php',
     'appBasePath' => $appBasePath,
-    'refreshIntervalMs' => 60000,
+    'refreshIntervalMs' => 15000,
 ];
 
 function e(string $value): string
@@ -36,7 +36,7 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@500;600;700&family=Noto+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="../CSS/admin-data-wisata.css?v=20261112-50261112-5" rel="stylesheet">
-    <link href="../CSS/admin-dashboard.css?v=20261116-final" rel="stylesheet">
+    <link href="../CSS/admin-dashboard.css?v=20261120-compact" rel="stylesheet">
 </head>
 <body class="admin-wisata-page admin-route-pending">
     <aside class="admin-sidebar" id="adminSidebar">
@@ -151,16 +151,15 @@ function e(string $value): string
             <section class="dashboard-recent" aria-labelledby="recentTitle">
                 <div class="dashboard-recent__heading">
                     <h2 id="recentTitle">Wisata Terbaru</h2>
-                    <span class="dashboard-recent__updated" id="lastUpdated"></span>
                 </div>
                 <div class="dashboard-recent__table-wrap">
                     <table class="dashboard-recent__table">
                         <colgroup>
-                            <col style="width:19.5%">
-                            <col style="width:23.5%">
+                            <col style="width:20%">
+                            <col style="width:23%">
                             <col style="width:13%">
-                            <col style="width:24.5%">
-                            <col style="width:19.5%">
+                            <col style="width:24%">
+                            <col style="width:20%">
                         </colgroup>
                         <thead><tr><th>Foto</th><th>Nama wisata</th><th>Wilayah</th><th>Kategori</th><th>Ditambahkan<br>Pada Tanggal</th></tr></thead>
                         <tbody id="recentDestinationRows"><tr><td colspan="5" class="dashboard-recent__state">Memuat wisata terbaru...</td></tr></tbody>
@@ -187,7 +186,7 @@ function e(string $value): string
             <h2 class="logout-modal__title" id="logoutModalTitle">Apakah Anda yakin ingin keluar dari admin panel Explore MajaKu?</h2>
             <p class="logout-modal__text" id="logoutModalText">Sesi anda akan berakhir</p>
             <div class="logout-modal__actions">
-                <button class="logout-modal__button logout-modal__button--confirm" id="logoutConfirmButton" type="button">Ya, Keluar</button>
+                <button class="logout-modal__button logout-modal__button--confirm" id="logoutConfirmButton" type="button" data-api-url="<?= e($pageConfig['apiLogoutUrl']) ?>" data-api-method="POST">Ya, Keluar</button>
                 <button class="logout-modal__button logout-modal__button--cancel" id="logoutCancelButton" type="button">Batal</button>
             </div>
         </div>
@@ -287,12 +286,6 @@ function e(string $value): string
             return text;
         }
 
-        function setLastUpdated() {
-            const now = new Date();
-            document.getElementById('lastUpdated').textContent = 'Diperbarui ' + pad(now.getDate()) + '/' +
-                pad(now.getMonth() + 1) + '/' + now.getFullYear() + ' ' + pad(now.getHours()) + '.' + pad(now.getMinutes());
-        }
-
         function setSummaryMessage(message, isError) {
             const element = document.getElementById('summaryMessage');
             element.textContent = message;
@@ -344,7 +337,8 @@ function e(string $value): string
                 metrics.setAttribute('aria-busy', 'true');
             }
             try {
-                const response = await fetch(config.apiSummaryUrl, {
+                const summaryUrl = config.apiSummaryUrl + (config.apiSummaryUrl.indexOf('?') !== -1 ? '&' : '?') + '_t=' + Date.now();
+                const response = await fetch(summaryUrl, {
                     method: 'GET',
                     credentials: 'same-origin',
                     cache: 'no-store',
@@ -371,7 +365,6 @@ function e(string $value): string
                 });
                 renderRecentDestinations(Array.isArray(payload.data.wisata_terbaru) ? payload.data.wisata_terbaru : []);
                 setSummaryMessage('', false);
-                setLastUpdated();
             } catch (error) {
                 setSummaryMessage(error.message || 'Tidak dapat memuat ringkasan dashboard.', true);
                 if (!silent) {
@@ -522,8 +515,14 @@ function e(string $value): string
             return;
         }
 
-        // Saat tab kembali dibuka, langsung segarkan data.
+        // Saat tab kembali dibuka atau jendela difokuskan, langsung segarkan data.
         document.addEventListener('visibilitychange', function () {
+            if (!document.hidden && !document.body.classList.contains('admin-route-pending')) {
+                loadSummary(token, true);
+            }
+        });
+
+        window.addEventListener('focus', function () {
             if (!document.hidden && !document.body.classList.contains('admin-route-pending')) {
                 loadSummary(token, true);
             }
