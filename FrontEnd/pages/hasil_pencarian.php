@@ -71,6 +71,18 @@ try {
 }
 $regionOptions = array_values($regionOptions);
 
+// Samakan label kategori hasil pencarian dengan halaman kategori.php.
+$searchCategoryDisplayNames = [
+    1 => 'Wisata Alam & Pegunungan',
+    4 => 'Wisata Air & Curug',
+    3 => 'Wisata Buatan & Kuliner',
+    2 => 'Wisata Sejarah & Budaya'
+];
+$searchCategoryLabel = static function ($categoryId, $fallback = '') use ($searchCategoryDisplayNames): string {
+    $id = (int) $categoryId;
+    return $searchCategoryDisplayNames[$id] ?? (string) $fallback;
+};
+
 
 // FILTER DATA DESTINASI
 $hasil = array_filter($destinasi, function ($item) use (
@@ -126,6 +138,15 @@ function terpilih($daftar, $nilai)
 {
     return in_array($nilai, $daftar, true) ? 'checked' : '';
 }
+
+function formatJumlahUlasan($jumlah)
+{
+    $jumlah = max(0, (int) $jumlah);
+    if ($jumlah >= 1000) {
+        return number_format($jumlah / 1000, 1, ',', '.') . 'k';
+    }
+    return number_format($jumlah, 0, ',', '.');
+}
 ?>
 
 <!DOCTYPE html>
@@ -156,51 +177,45 @@ function terpilih($daftar, $nilai)
     >
 
     <link rel="stylesheet" href="../CSS/theme.css?v=nav-solid-green-8">
-    <link rel="stylesheet" href="../CSS/hasil_pencarian.css?v=font-map-3">
-    <link rel="stylesheet" href="../CSS/\1category-item-solid-1">
+    <link rel="stylesheet" href="../CSS/navbar-common.css?v=nav-category-selected-green-4">
+    <link rel="stylesheet" href="../CSS/hasil_pencarian.css?v=category-labels-match-category-page-1">
 </head>
 
 <body class="site-public-page site-navbar-page">
 
-<!-- NAVBAR -->
-<header class="navbar ep-navbar site-navbar">
-    <div class="navbar-container ep-navbar__inner">
-
-        <a href="../../index.php" class="navbar-logo ep-logo">
-            Explore Majaku
-        </a>
-
-        <nav class="navbar-menu ep-menu" aria-label="Menu utama">
+<!-- NAVBAR: disamakan dengan navbar halaman kategori -->
+<header class="ep-navbar site-navbar">
+    <div class="ep-navbar__inner">
+        <a class="ep-logo" href="../../index.php">Explore Majaku</a>
+        <nav class="ep-menu" aria-label="Menu utama">
             <a class="ep-menu__beranda" href="../../index.php">Beranda</a>
             <details name="site-category-menu" class="category-dropdown ep-menu__kategori">
-                <summary><span>Kategori</span><span class="ep-menu__panah" aria-hidden="true"></span></summary>
+                <summary>
+                    <span>Kategori</span>
+                    <span class="ep-menu__panah" aria-hidden="true"></span>
+                </summary>
                 <div class="category-menu">
-                    <a href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a>
-                    <a href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a>
-                    <a href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a>
-                    <a href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a>
+                    <?php
+                    $searchCategoryRoutes = [1 => 'alam', 4 => 'air-curug', 3 => 'buatan-kuliner', 2 => 'sejarah-budaya'];
+                    foreach ($filterCategories as $navigationCategory):
+                        $navigationId = (int) ($navigationCategory['Id_kategori'] ?? 0);
+                        if (!isset($searchCategoryRoutes[$navigationId])) continue;
+                    ?>
+                        <a href="kategori.php?kategori=<?= htmlspecialchars($searchCategoryRoutes[$navigationId], ENT_QUOTES, 'UTF-8') ?>">
+                            <?= htmlspecialchars($searchCategoryLabel($navigationId, $navigationCategory['nama_kategori'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
+                        </a>
+                    <?php endforeach; ?>
                 </div>
             </details>
             <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
         </nav>
-
-        <div class="navbar-icons ep-aksi">
-            <a href="hasil_pencarian.php" class="nav-icon ep-ikon ep-ikon--cari" aria-label="Pencarian">
-                <i class="bi bi-search"></i>
-            </a>
-
-            <a href="../auth/Login.php" class="nav-icon ep-ikon ep-ikon--cari" aria-label="Akun">
-                <svg class="profile-outline-icon" viewBox="0 0 40 40" aria-hidden="true">
-                    <circle cx="20" cy="20" r="17"></circle>
-                    <circle cx="20" cy="15" r="5"></circle>
-                    <path d="M9 31c1.7-5 5.5-7.5 11-7.5S29.3 26 31 31"></path>
-                </svg>
+        <div class="ep-aksi">
+            <a class="ep-ikon ep-ikon--profil" href="profil.php" aria-label="Profil">
+                <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="20" cy="20" r="18.2"/><circle cx="20" cy="16.2" r="5.8"/><path d="M9 33.5C9.7 29.2 12.2 26 15.2 25.2C17 26.6 23 26.6 24.8 25.2C27.8 26 30.3 29.2 31 33.5"/></svg>
             </a>
         </div>
-
     </div>
 </header>
-
 
 <!-- SEARCH BAR -->
 <section class="search-header<?= $isShortKeyword ? ' has-validation' : '' ?>">
@@ -289,7 +304,7 @@ function terpilih($daftar, $nilai)
                     <label class="filter-option">
                         <input type="checkbox" name="kategori[]" value="<?= $categoryValue ?>"
                             <?= terpilih($kategoriDipilih, $categoryValue) ?>>
-                        <span><?= htmlspecialchars($filterCategory['nama_kategori'], ENT_QUOTES, 'UTF-8') ?></span>
+                        <span><?= htmlspecialchars($searchCategoryLabel($filterCategory['Id_kategori'], $filterCategory['nama_kategori'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
                     </label>
                 <?php endforeach; ?>
             </div>
@@ -328,9 +343,6 @@ function terpilih($daftar, $nilai)
                 Terapkan Filter
             </button>
 
-            <a href="../../search" class="reset-filter">
-                Reset Filter
-            </a>
 
         </form>
 
@@ -375,10 +387,11 @@ function terpilih($daftar, $nilai)
 
                             <div class="rating">
                                 <?php if ($item['rating'] !== null && $item['review_count'] > 0): ?>
-                                    <span class="stars">★ <?= number_format($item['rating'], 1, ',', '.') ?>/5</span>
-                                    <span class="review-count">(<?= (int) $item['review_count'] ?> ulasan)</span>
+                                    <span class="stars" aria-label="Rating <?= number_format((float) $item['rating'], 1, ',', '.') ?> dari 5">★ ★ ★</span>
+                                    <span class="review-count">(<?= htmlspecialchars(formatJumlahUlasan($item['review_count']), ENT_QUOTES, 'UTF-8') ?> ulasan)</span>
                                 <?php else: ?>
-                                    <span class="review-count">Belum ada ulasan</span>
+                                    <span class="stars" aria-hidden="true">★ ★ ★</span>
+                                    <span class="review-count">(0 ulasan)</span>
                                 <?php endif; ?>
                             </div>
 
@@ -440,6 +453,78 @@ function terpilih($daftar, $nilai)
     const filterForm = document.getElementById('filterForm');
     const searchForm = document.querySelector('.search-box');
     const searchInput = searchForm.querySelector('input[name="q"]');
+
+    const categoryFilterGroup = Array.from(document.querySelectorAll('.filter-group'))
+        .find(group => group.querySelector('h3')?.textContent.trim() === 'Kategori');
+    const categoryMenu = document.querySelector('.category-dropdown > .category-menu');
+    const categoryRouteById = {
+        1: 'alam',
+        4: 'air-curug',
+        3: 'buatan-kuliner',
+        2: 'sejarah-budaya'
+    };
+    // Label harus identik dengan kategori.php, bukan nama mentah dari API.
+    const categoryDisplayNameById = {
+        1: 'Wisata Alam & Pegunungan',
+        4: 'Wisata Air & Curug',
+        3: 'Wisata Buatan & Kuliner',
+        2: 'Wisata Sejarah & Budaya'
+    };
+    const getCategoryDisplayName = category =>
+        categoryDisplayNameById[Number(category.id_kategori)] || category.nama || '';
+
+    // Kategori pada filter dan dropdown navbar disinkronkan dari API kategori aktif.
+    async function loadCategoryOptionsFromApi() {
+        try {
+            const response = await fetch('../../api/categories', {
+                headers: { Accept: 'application/json' },
+                credentials: 'same-origin'
+            });
+            const payload = await response.json();
+            if (!response.ok || payload.status !== 'success' || !Array.isArray(payload.data)) {
+                throw new Error(payload.message || 'Respons kategori tidak valid.');
+            }
+
+            const selected = new Set(Array.from(
+                categoryFilterGroup?.querySelectorAll('input[name="kategori[]"]:checked') || []
+            ).map(input => input.value));
+
+            if (categoryFilterGroup) {
+                const heading = categoryFilterGroup.querySelector('h3');
+                categoryFilterGroup.replaceChildren(heading);
+                payload.data.forEach(category => {
+                    const id = String(category.id_kategori);
+                    const label = document.createElement('label');
+                    label.className = 'filter-option';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = 'kategori[]';
+                    checkbox.value = id;
+                    checkbox.checked = selected.has(id);
+                    const text = document.createElement('span');
+                    text.textContent = getCategoryDisplayName(category);
+                    label.append(checkbox, text);
+                    categoryFilterGroup.append(label);
+                });
+            }
+
+            if (categoryMenu) {
+                categoryMenu.replaceChildren();
+                payload.data.forEach(category => {
+                    const slug = categoryRouteById[Number(category.id_kategori)];
+                    if (!slug) return;
+                    const link = document.createElement('a');
+                    link.href = `kategori.php?kategori=${slug}`;
+                    link.textContent = getCategoryDisplayName(category);
+                    categoryMenu.append(link);
+                });
+            }
+        } catch (error) {
+            // Server-rendered categories tetap menjadi fallback jika API tidak tersedia.
+            console.error('Gagal memuat kategori dari API:', error);
+        }
+    }
+
     const resultsGrid = document.querySelector('.destination-grid');
     const resultsCount = document.querySelector('.results-heading p');
     const searchHeader = document.querySelector('.search-header');
@@ -547,7 +632,7 @@ function terpilih($daftar, $nilai)
         }
     }
 
-    function showEmptyState(message, title = 'Wisata Tidak Di Temukan') {
+    function showEmptyState(message = 'Maaf, tidak ada destinasi wisata yang sesuai dengan kata kunci pencarianmu', title = 'Wisata Tidak Di Temukan') {
         const emptyState = document.createElement('div');
         emptyState.className = 'empty-results';
 
@@ -565,7 +650,9 @@ function terpilih($daftar, $nilai)
         heading.textContent = title;
 
         const description = document.createElement('p');
-        description.textContent = message;
+        description.textContent = title === 'Wisata Tidak Di Temukan'
+            ? 'Maaf, tidak ada destinasi wisata yang sesuai dengan kata kunci pencarianmu'
+            : message;
 
         const resetLink = document.createElement('a');
         resetLink.href = '../../search';
@@ -738,7 +825,7 @@ function terpilih($daftar, $nilai)
             const filteredResults = filterDestinations(payload.data);
             resultsCount.textContent = `${filteredResults.length} Destinasi Ditemukan`;
             if (filteredResults.length === 0) {
-                showEmptyState('Coba ubah kata kunci atau filter pencarianmu.');
+                showEmptyState('Maaf, tidak ada destinasi wisata yang sesuai dengan kata kunci pencarianmu');
                 return;
             }
 
@@ -754,6 +841,7 @@ function terpilih($daftar, $nilai)
     }
 
     updateSearchValidation();
+    loadCategoryOptionsFromApi();
     loadSearchResults();
 </script>
 

@@ -652,3 +652,15 @@ body.site-navbar-page .ep-menu .category-menu a[aria-current="page"] {
     border-color: #176f63 !important;
     opacity: 1 !important;
 }
+
+
+/* Kategori tetap hijau pada halaman kategori yang sedang dipilih,
+   termasuk ketika dropdown belum dibuka. */
+body.site-navbar-page .ep-menu > details.category-dropdown[aria-current="page"] > summary,
+body.site-navbar-page .ep-menu > details.category-dropdown[aria-current="page"] > summary span,
+body.site-navbar-page .ep-menu > details.category-dropdown[aria-current="page"] > summary .ep-menu__panah {
+    color: #166c5c !important;
+    -webkit-text-fill-color: #166c5c !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}

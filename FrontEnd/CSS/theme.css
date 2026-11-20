@@ -1655,21 +1655,18 @@ body.home-page {
     width: 70px;
     height: 66px;
     flex: 0 0 70px;
+    padding: 0;
+    border: 0;
     border-radius: 20px;
-    background: #d9d9d9;
-    color: #176f63;
+    background: transparent;
+    overflow: hidden;
 }
 .home-page .filter-lines-icon {
     display: block;
-    width: 39px;
-    height: 36px;
-    overflow: visible;
-}
-.home-page .filter-lines-icon path {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2.5;
-    stroke-linecap: butt;
+    width: 70px;
+    height: 66px;
+    flex: 0 0 70px;
+    overflow: hidden;
 }
 .home-page .home-filter-button:hover .filter-lines-icon {
     transform: none;
@@ -1695,7 +1692,7 @@ body.home-page {
     .home-page .home-filter-button {
         width: 48px; height: 52px; flex-basis: 48px; border-radius: 14px;
     }
-    .home-page .filter-lines-icon { width: 29px; height: 27px; }
+    .home-page .filter-lines-icon { width: 48px; height: 52px; }
 }
 
 /* =========================================================

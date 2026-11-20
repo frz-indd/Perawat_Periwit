@@ -20,7 +20,6 @@ RewriteRule ^api/destinations/([^/]+)/location/?$ Backend/api/destination_locati
 RewriteRule ^users/me/?$ Backend/api/users_me.php [QSA,L]
 RewriteRule ^api/user/change-password/?$ Backend/api/change_password.php [QSA,L]
 RewriteRule ^api/admin/login/?$ Backend/api/admin_login.php [QSA,L]
-RewriteRule ^api/admin/forgot-password/?$ Backend/api/admin_forgot_password.php [QSA,L]
 RewriteRule ^api/admin/logout/?$ Backend/api/admin_logout.php [QSA,L]
 RewriteRule ^api/admin/dashboard/?$ Backend/api/admin_dashboard.php [QSA,L]
 RewriteRule ^api/admin/dashboard/summary/?$ Backend/api/admin_dashboard_summary.php [QSA,L]
