@@ -360,8 +360,27 @@
         }
     }
 
-    document.getElementById('logoutButton').addEventListener('click', logout);
-    document.getElementById('mobileLogoutButton').addEventListener('click', logout);
+    // ── Logout dengan modal konfirmasi ──────────────────────────────────────
+    const logoutModal         = document.getElementById('logoutModal');
+    const logoutConfirmButton = document.getElementById('logoutConfirmButton');
+    const logoutCancelButton  = document.getElementById('logoutCancelButton');
+
+    function openLogoutModal() {
+        document.body.classList.remove('mobile-sidebar-open');
+        logoutModal.hidden = false;
+        document.body.classList.add('logout-modal-open');
+        setTimeout(function () {
+            logoutModal.classList.add('is-visible');
+            logoutCancelButton.focus();
+        }, 10);
+    }
+
+    function closeLogoutModal() {
+        logoutModal.classList.remove('is-visible');
+        document.body.classList.remove('logout-modal-open');
+        setTimeout(function () { logoutModal.hidden = true; }, 220);
+    }
+
     async function logout() {
         try {
             if (token) {
@@ -377,6 +396,24 @@
             window.location.replace(config.loginUrl);
         }
     }
+
+    document.getElementById('logoutButton').addEventListener('click', openLogoutModal);
+    document.getElementById('mobileLogoutButton').addEventListener('click', openLogoutModal);
+    logoutCancelButton.addEventListener('click', closeLogoutModal);
+    document.getElementById('logoutModalBackdrop').addEventListener('click', closeLogoutModal);
+    logoutConfirmButton.addEventListener('click', function () {
+        logoutConfirmButton.disabled = true;
+        logoutCancelButton.disabled = true;
+        logoutConfirmButton.textContent = 'Memproses...';
+        logout();
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && !logoutModal.hidden && !logoutConfirmButton.disabled) {
+            closeLogoutModal();
+        }
+    });
+    // ────────────────────────────────────────────────────────────────────────
 
     document.getElementById('sidebarCollapse').addEventListener('click', function () {
         document.body.classList.toggle('sidebar-collapsed');

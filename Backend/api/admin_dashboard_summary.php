@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 require_once __DIR__ . '/../middleware/auth.php';
 adminOnly();
 
@@ -54,14 +55,24 @@ function dashboardCount(mysqli $db, ?string $table, string $label): int
 {
     if ($table === null) throw new RuntimeException("Tabel {$label} tidak ditemukan di database.");
     $safe = dashboardQuote($table);
-    $where = "";
+    $cols = dashboardColumns($db, $table);
+    $whereParts = [];
+
     if (in_array($table, ['user', 'users', 'pengguna'], true)) {
-        $cols = dashboardColumns($db, $table);
         $roleCol = dashboardColumn($cols, ['role']);
         if ($roleCol !== null) {
-            $where = " WHERE " . dashboardQuote($roleCol) . " = 0 OR " . dashboardQuote($roleCol) . " = 'user' OR " . dashboardQuote($roleCol) . " = '0'";
+            $whereParts[] = "(" . dashboardQuote($roleCol) . " = 0 OR " . dashboardQuote($roleCol) . " = 'user' OR " . dashboardQuote($roleCol) . " = '0')";
         }
     }
+
+    if (in_array($table, ['wisata', 'kategori', 'categories'], true)) {
+        $aktifCol = dashboardColumn($cols, ['aktif', 'is_active', 'status']);
+        if ($aktifCol !== null) {
+            $whereParts[] = "(" . dashboardQuote($aktifCol) . " = 1 OR " . dashboardQuote($aktifCol) . " = '1')";
+        }
+    }
+
+    $where = $whereParts !== [] ? " WHERE " . implode(" AND ", $whereParts) : "";
     $result = $db->query("SELECT COUNT(*) AS total FROM {$safe}{$where}");
     return (int) ($result->fetch_assoc()['total'] ?? 0);
 }
@@ -87,6 +98,16 @@ try {
         $wRegion = dashboardColumn($wCols, ['domisili', 'wilayah', 'kabupaten', 'lokasi', 'alamat']);
         $wCategory = dashboardColumn($wCols, ['id_kategori', 'Id_kategori', 'category_id']);
         $wCreated = dashboardColumn($wCols, ['created_at', 'tanggal_ditambahkan', 'tanggal_input', 'createdAt']);
+        $wAktif = dashboardColumn($wCols, ['aktif', 'is_active', 'status']);
+
+        // Pastikan kolom created_at tersedia jika belum ada agar urutan data wisata selalu akurat
+        if ($wCreated === null) {
+            try {
+                $conn->query("ALTER TABLE `{$wisataTable}` ADD COLUMN `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP");
+                $wCols = dashboardColumns($conn, $wisataTable);
+                $wCreated = dashboardColumn($wCols, ['created_at', 'tanggal_ditambahkan', 'tanggal_input', 'createdAt']);
+            } catch (Throwable $ignored) {}
+        }
 
         if ($wId !== null && $wName !== null) {
             $select = [
@@ -121,20 +142,28 @@ try {
                 }
             }
 
+            $whereClause = $wAktif !== null ? ' WHERE (w.' . dashboardQuote($wAktif) . ' = 1 OR w.' . dashboardQuote($wAktif) . " = '1')" : '';
             $order = $wCreated !== null
-                ? 'w.' . dashboardQuote($wCreated) . ' DESC'
+                ? 'w.' . dashboardQuote($wCreated) . ' DESC, w.' . dashboardQuote($wId) . ' DESC'
                 : 'w.' . dashboardQuote($wId) . ' DESC';
-            $sql = 'SELECT ' . implode(', ', $select) . ' FROM ' . dashboardQuote($wisataTable) . ' w' . $joins . ' ORDER BY ' . $order . ' LIMIT 4';
+            $sql = 'SELECT ' . implode(', ', $select) . ' FROM ' . dashboardQuote($wisataTable) . ' w' . $joins . $whereClause . ' ORDER BY ' . $order . ' LIMIT 4';
             $result = $conn->query($sql);
             while ($row = $result->fetch_assoc()) {
                 $date = $row['tanggal_ditambahkan'] ?? null;
+                $formattedDate = '-';
+                if (!empty($date)) {
+                    $ts = strtotime((string)$date);
+                    if ($ts !== false && $ts > 0) {
+                        $formattedDate = date('d/m/Y', $ts);
+                    }
+                }
                 $recent[] = [
                     'id' => (string) ($row['id_wisata'] ?? ''),
                     'nama_wisata' => (string) ($row['nama_wisata'] ?? '-'),
                     'wilayah' => (string) ($row['wilayah'] ?? '-'),
                     'kategori' => (string) ($row['kategori'] ?? '-'),
                     'foto' => trim((string) ($row['foto'] ?? '')),
-                    'tanggal_ditambahkan' => $date ? date('d/m/Y', strtotime((string) $date)) : '-'
+                    'tanggal_ditambahkan' => $formattedDate
                 ];
             }
         }
