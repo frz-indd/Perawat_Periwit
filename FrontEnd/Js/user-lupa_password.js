@@ -1,12 +1,12 @@
 (function () {
-  var PESAN_EMAIL = 'Email tidak valid/tidak terdaftar sebagai pengguna';
+  var PESAN_EMAIL = 'Email tidak valid/tidak terdaftar';
   var PESAN_LIMIT = 'Terlalu banyak permintaan, coba beberapa saat lagi';
   var POLA_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
   var $ = function (id) { return document.getElementById(id); };
   var form = $('form-lupa'), input = $('email'), err = $('error-email'), btn = $('btn-kirim');
   var ok = $('modal-sukses'), fail = $('modal-gagal');
-  var aksiLogin = $('aksi-login'), aksiCoba = $('aksi-coba'), aksiBukaReset = $('aksi-buka-reset');
+  var aksiLogin = $('aksi-login'), aksiCoba = $('aksi-coba');
   var label = btn.textContent;
   var timer, siap = false, serverMsg = '', busy = false;
 
@@ -100,30 +100,21 @@
 
       if (r && r.ok) {
         render(false);
-        if (r.data && r.data.reset_url && aksiBukaReset) {
-          aksiBukaReset.href = r.data.reset_url;
-          aksiBukaReset.hidden = false;
-        } else if (r.data && r.data.token && aksiBukaReset) {
-          aksiBukaReset.href = 'user-ubah_password.php?token=' + encodeURIComponent(r.data.token);
-          aksiBukaReset.hidden = false;
-        }
-        buka(ok, aksiBukaReset || aksiLogin);
+        try {
+          if (r.data && r.data.token) {
+            sessionStorage.setItem('user_reset_token', r.data.token);
+          }
+        } catch (e) {}
+        buka(ok, aksiLogin);
         return;
       }
 
-      if (r && (r.status === 404 || r.status === 422)) {
-        serverMsg = (r.data && r.data.message) || PESAN_EMAIL;
-      } else if (r && r.status === 403) {
-        serverMsg = (r.data && r.data.message) || 'Akses ditolak: akun bukan user biasa.';
+      if (r && (r.status === 404 || r.status === 403 || r.status === 422)) {
+        serverMsg = PESAN_EMAIL;
       } else if (r && r.status === 429) {
         serverMsg = PESAN_LIMIT;
       } else {
-        serverMsg = (r && r.data && r.data.message) || 'Gagal mengirim tautan reset. Silakan coba lagi.';
-      }
-
-      var teksGagal = $('teks-gagal');
-      if (teksGagal) {
-        teksGagal.textContent = serverMsg;
+        serverMsg = PESAN_EMAIL;
       }
 
       render(true);
