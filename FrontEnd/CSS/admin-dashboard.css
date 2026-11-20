@@ -569,6 +569,7 @@ body.admin-wisata-page .dashboard-recent__heading h2 {
 
 body.admin-wisata-page .dashboard-recent__table-wrap {
     overflow-x: auto;
+    overflow-y: hidden;
     background: #fff;
     border: 1px solid #9a9a9a;
     border-radius: 20px;
@@ -576,27 +577,27 @@ body.admin-wisata-page .dashboard-recent__table-wrap {
 
 body.admin-wisata-page .dashboard-recent__table {
     width: 100%;
-    min-width: 600px;
+    min-width: 650px;
     margin: 0;
     table-layout: fixed;
     border-collapse: collapse;
     font-family: 'Poppins', Arial, sans-serif;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 body.admin-wisata-page .dashboard-recent__table thead th {
-    height: 46px;
-    padding: 6px 10px;
+    height: 56px;
+    padding: 8px 10px;
     color: #fff;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
-    line-height: 1.25;
+    line-height: 1.4;
     text-align: center;
     vertical-align: middle;
     background: #176f60;
     border: 0;
     border-right: 1px solid rgba(0, 0, 0, .35);
-    border-bottom: 1px solid #9a9a9a;
+    border-bottom: 1.5px solid #9a9a9a;
 }
 
 body.admin-wisata-page .dashboard-recent__table thead th:last-child {
@@ -604,11 +605,11 @@ body.admin-wisata-page .dashboard-recent__table thead th:last-child {
 }
 
 body.admin-wisata-page .dashboard-recent__table tbody td {
-    height: 62px;
-    padding: 4px 10px;
+    height: 88px;
+    padding: 6px 12px;
     color: #000;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: 13px;
+    line-height: 1.5;
     text-align: center;
     vertical-align: middle;
     background: #fff;
@@ -626,38 +627,41 @@ body.admin-wisata-page .dashboard-recent__table tbody tr:last-child td {
 }
 
 body.admin-wisata-page .dashboard-recent__table tbody td.dashboard-recent__photo {
-    padding: 4px 6px;
+    padding: 5px 8px;
     text-align: center;
 }
 
 body.admin-wisata-page .dashboard-recent__photo img {
     display: block;
     width: 100%;
-    max-width: 90px;
-    height: 52px;
+    max-width: 145px;
+    height: 76px;
     margin: 0 auto;
     object-fit: cover;
     border: 0;
-    border-radius: 8px;
+    border-radius: 12px;
 }
 
 body.admin-wisata-page .dashboard-recent__no-photo {
     display: grid;
     width: 100%;
-    max-width: 90px;
-    height: 52px;
+    max-width: 145px;
+    height: 76px;
     margin: 0 auto;
     place-items: center;
     color: #82928a;
-    font-size: 18px;
+    font-size: 22px;
     background: #eef3f0;
-    border-radius: 8px;
+    border-radius: 12px;
 }
 
 body.admin-wisata-page .dashboard-recent__table tbody td.dashboard-recent__state {
     height: auto;
-    padding: 16px;
+    padding: 24px;
     color: #71817b;
+    border-right: 0;
+    border-bottom: 0;
+}
     border-right: 0;
     border-bottom: 0;
 }
