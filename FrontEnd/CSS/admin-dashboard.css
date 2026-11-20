@@ -580,7 +580,8 @@ body.admin-wisata-page .dashboard-recent__table {
     min-width: 650px;
     margin: 0;
     table-layout: fixed;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-family: 'Poppins', Arial, sans-serif;
     font-size: 13px;
 }
@@ -600,8 +601,13 @@ body.admin-wisata-page .dashboard-recent__table thead th {
     border-bottom: 1.5px solid #9a9a9a;
 }
 
+body.admin-wisata-page .dashboard-recent__table thead th:first-child {
+    border-top-left-radius: 19px;
+}
+
 body.admin-wisata-page .dashboard-recent__table thead th:last-child {
     border-right: 0;
+    border-top-right-radius: 19px;
 }
 
 body.admin-wisata-page .dashboard-recent__table tbody td {
@@ -624,6 +630,14 @@ body.admin-wisata-page .dashboard-recent__table tbody td:last-child {
 
 body.admin-wisata-page .dashboard-recent__table tbody tr:last-child td {
     border-bottom: 0;
+}
+
+body.admin-wisata-page .dashboard-recent__table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 19px;
+}
+
+body.admin-wisata-page .dashboard-recent__table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 19px;
 }
 
 body.admin-wisata-page .dashboard-recent__table tbody td.dashboard-recent__photo {

@@ -104,6 +104,11 @@
 
       if (r && r.ok) {
         render(false);
+        try {
+          if (r.data && r.data.token) {
+            sessionStorage.setItem('admin_reset_token', r.data.token);
+          }
+        } catch (e) {}
         buka(ok, aksiLogin);
         return;
       }

@@ -1,10 +1,107 @@
 <?php
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-$p = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
-$i = strpos($p, '/FrontEnd/');
-$base = $i !== false ? substr($p, 0, $i) : rtrim(dirname(dirname($p)), '/.');
-$api = $base . '/api/admin/forgot-password';
-$login = $base . '/FrontEnd/auth/login-admin.php';
+header('Pragma: no-cache');
+
+if (isset($_GET['action']) && $_GET['action'] === 'forgot') {
+    header('Content-Type: application/json; charset=utf-8');
+    $raw = file_get_contents('php://input');
+    $body = json_decode((string)$raw, true) ?: $_POST;
+    $email = trim((string)($body['email'] ?? ''));
+
+    if ($email === '' || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+        http_response_code(422);
+        echo json_encode(['status' => 'validation_error', 'message' => 'Email tidak valid/tidak terdaftar']);
+        exit;
+    }
+
+    try {
+        require_once __DIR__ . '/../../Backend/database/koneksi.php';
+        if (isset($conn) && $conn instanceof mysqli) {
+            $conn->set_charset('utf8mb4');
+
+            // Cek di tabel user terlebih dahulu
+            $stmt = $conn->prepare('SELECT Id_user, Nama_user, Username, Email, Password, role FROM `user` WHERE LOWER(Email) = LOWER(?) LIMIT 1');
+            $stmt->bind_param('s', $email);
+            $stmt->execute();
+            $adminUser = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+
+            $adminFound = false;
+            $userId = 0;
+
+            if ($adminUser) {
+                $role = $adminUser['role'] ?? null;
+                $isAdmin = ($role === 1 || $role === '1' || strtolower((string)$role) === 'admin');
+                if ($isAdmin) {
+                    $adminFound = true;
+                    $userId = (int)$adminUser['Id_user'];
+                } else {
+                    http_response_code(403);
+                    echo json_encode(['status' => 'forbidden', 'message' => 'Email tidak valid/tidak terdaftar']);
+                    exit;
+                }
+            } else {
+                $colCheck = $conn->query("SHOW COLUMNS FROM `admin` LIKE 'Email'");
+                if ($colCheck && $colCheck->num_rows > 0) {
+                    $stmt2 = $conn->prepare('SELECT Id_admin, Username, Email FROM `admin` WHERE LOWER(Email) = LOWER(?) LIMIT 1');
+                    $stmt2->bind_param('s', $email);
+                    $stmt2->execute();
+                    $adminRow = $stmt2->get_result()->fetch_assoc();
+                    $stmt2->close();
+                    if ($adminRow) {
+                        $adminFound = true;
+                        $userId = (int)$adminRow['Id_admin'];
+                    }
+                }
+            }
+
+            if (!$adminFound) {
+                http_response_code(404);
+                echo json_encode(['status' => 'not_found', 'message' => 'Email tidak valid/tidak terdaftar']);
+                exit;
+            }
+
+            // Buat tabel admin_password_resets jika belum ada
+            $conn->query("CREATE TABLE IF NOT EXISTS `admin_password_resets` (
+                `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `admin_id` BIGINT UNSIGNED NOT NULL,
+                `email` VARCHAR(255) NOT NULL,
+                `token_hash` CHAR(64) NOT NULL,
+                `expires_at` DATETIME NOT NULL,
+                `used_at` DATETIME NULL DEFAULT NULL,
+                `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uq_admin_token_hash` (`token_hash`),
+                KEY `idx_admin_resets_email` (`email`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+            $token = bin2hex(random_bytes(32));
+            $tokenHash = hash('sha256', $token);
+            $expiresAt = date('Y-m-d H:i:s', time() + 3600);
+
+            $ins = $conn->prepare('INSERT INTO `admin_password_resets` (admin_id, email, token_hash, expires_at) VALUES (?, ?, ?, ?)');
+            $ins->bind_param('isss', $userId, $email, $tokenHash, $expiresAt);
+            $ins->execute();
+            $ins->close();
+
+            http_response_code(200);
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Tautan reset berhasil dikirim.',
+                'token' => $token,
+                'reset_url' => 'admin-ubah_password.php?token=' . $token
+            ]);
+            exit;
+        }
+    } catch (Throwable $e) {}
+
+    http_response_code(500);
+    echo json_encode(['status' => 'server_error', 'message' => 'Maaf, tautan reset password belum berhasil dikirim. Silakan periksa koneksi internet atau coba beberapa saat lagi.']);
+    exit;
+}
+
+$login = 'login-admin.php';
+$api = 'admin-lupa_password.php?action=forgot';
 $e = fn($s) => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
@@ -17,7 +114,7 @@ $e = fn($s) => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Noto+Serif:wght@400;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../CSS/admin-lupa_password.css?v=20261119">
+  <link rel="stylesheet" href="../CSS/admin-lupa_password.css?v=<?= time() ?>">
 </head>
 <body>
   <form id="form-lupa" method="post" novalidate data-api-url="<?= $e($api) ?>" data-api-method="POST">
@@ -72,7 +169,7 @@ $e = fn($s) => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
     </div>
   </div>
 
-  <script src="../Js/admin-lupa_password.js?v=20261119"></script>
+  <script src="../Js/admin-lupa_password.js?v=<?= time() ?>"></script>
   <script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>
