@@ -611,3 +611,155 @@ body.facility-modal-open { overflow: hidden; }
 .facility-result-card .facility-feedback-primary{min-height:64px;margin:0}
 body.facility-feedback-open{overflow:hidden}
 @media(max-width:650px){.facility-feedback-modal{padding:16px}.facility-feedback-card{padding:36px 25px 25px;border-radius:18px}.facility-feedback-card h2{font-size:20px}.facility-feedback-card p{font-size:16px}.facility-feedback-primary,.facility-feedback-secondary{min-height:54px;font-size:17px}.facility-result-icon{width:110px;height:110px;margin-bottom:28px;font-size:72px}.facility-result-card h2{font-size:25px}.facility-result-card p{font-size:16px;margin-bottom:28px}}
+
+/* Pertahankan posisi tombol Tambah Fasilitas seperti layout awal: kanan atas heading. */
+@media (min-width: 651px) {
+  body.admin-resource-facilities .admin-page-heading.facility-heading {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100%;
+  }
+  body.admin-resource-facilities .facility-heading > div:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  body.admin-resource-facilities .facility-heading > #addFacilityButton {
+    position: static !important;
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    align-self: center !important;
+    margin-left: auto !important;
+    order: 2;
+  }
+}
+
+
+/* Final layout guard: keep the add button at the upper-right on desktop. */
+@media (min-width: 681px) {
+  body.admin-resource-facilities .admin-content > .facility-heading {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    justify-content: stretch !important;
+    width: 100% !important;
+    gap: 22px !important;
+  }
+  body.admin-resource-facilities .admin-content > .facility-heading > div:first-child {
+    min-width: 0 !important;
+  }
+  body.admin-resource-facilities .admin-content > .facility-heading > #addFacilityButton {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+    align-self: center !important;
+    margin: 0 !important;
+    position: static !important;
+  }
+}
+
+/* Ikon fasilitas memakai artwork SVG asli dari file referensi pengguna. */
+.facility-option-icon img,
+.facility-icon-chip img { width: 100%; height: 100%; display: block; object-fit: contain; }
+.facility-option-icon img { padding: 2px; }
+.facility-icon-chip img { padding: 2px; }
+
+
+/* Penyelarasan tabel fasilitas dan ikon aksi berdasarkan SVG referensi pengguna */
+@media (min-width: 901px) {
+    .facility-panel {
+        width: calc(100% - 65px);
+        max-width: 962px;
+        margin-left: 30px;
+    }
+}
+.facility-table {
+    width: 100%;
+    min-width: 820px;
+    table-layout: fixed;
+}
+.facility-table th:nth-child(1) { width: 13%; }
+.facility-table th:nth-child(2) { width: 34%; }
+.facility-table th:nth-child(3) { width: 37%; }
+.facility-table th:nth-child(4) { width: 16%; }
+.facility-table tbody td { height: 122px; min-height: 122px; }
+.facility-icons-cell { padding: 8px 10px !important; text-align: left !important; }
+.facility-entries {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: center;
+    align-items: center;
+    gap: 4px 16px;
+    width: 100%;
+    padding: 0 18px;
+    text-align: left;
+}
+.facility-entry {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    min-height: 30px;
+    color: #111;
+    font-size: 14px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.facility-entry > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.facility-entry .facility-icon-chip {
+    display: inline-flex;
+    flex: 0 0 32px;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 30px;
+    padding: 1px;
+    border: 1px solid var(--facility-green);
+    border-radius: 8px;
+    background: #fff;
+}
+.facility-entry .facility-icon-chip img {
+    display: block;
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+}
+.facility-actions { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.facility-action-button {
+    display: inline-flex;
+    flex: 0 0 21px;
+    align-items: center;
+    justify-content: center;
+    width: 21px;
+    height: 21px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    cursor: pointer;
+}
+.facility-action-button img { display: block; width: 21px; height: 21px; object-fit: contain; }
+.facility-action-button:hover { filter: brightness(.94); }
+.facility-action-button:focus-visible { outline: 2px solid #176f60; outline-offset: 2px; }
+@media (max-width: 900px) {
+    .facility-panel { width: 100%; max-width: none; margin-left: 0; }
+    .facility-table tbody td { height: auto; min-height: 88px; }
+    .facility-entries { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 8px; gap: 5px 8px; }
+}
+@media (max-width: 640px) {
+    .facility-entry { white-space: normal; font-size: 12px; }
+    .facility-entry .facility-icon-chip { flex-basis: 30px; width: 30px; height: 30px; }
+    .facility-entry .facility-icon-chip img { width: 25px; height: 25px; }
+}
+
+
+/* Final correction: exact user-supplied SVG action icons and table alignment. */
+.facility-action-button { width:21px!important;height:21px!important;min-width:21px!important;min-height:21px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important; }
+.facility-action-button img { display:block!important;width:21px!important;height:21px!important;object-fit:contain!important; }
+.facility-action-button.is-edit,.facility-action-button.is-delete { background:transparent!important;color:inherit!important; }
+.facility-entry-actions { display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important; }
+@media (min-width:901px) {
+ body.admin-resource-facilities .facility-panel { width:calc(100% - 40px)!important;max-width:none!important;margin:0 0 0 30px!important;box-sizing:border-box!important; }
+}
