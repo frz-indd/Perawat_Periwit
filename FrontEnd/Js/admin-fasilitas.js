@@ -10,15 +10,32 @@
  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
  function toast(message, error=false) { const el=$('facilityToast'); el.textContent=message; el.classList.toggle('error',error); el.style.display='block'; clearTimeout(toast.timer); toast.timer=setTimeout(()=>el.style.display='none',3800); }
  function parseIcons(value) { if(!value) return []; return String(value).split(',').map(v=>v.trim()).filter(Boolean); }
- function iconMarkup(value) { const selected=parseIcons(value); return `<div class="facility-icon-list">${selected.map(code=>`<span class="facility-icon-chip" title="${esc(iconNames[code]||code)}"><i class="fa-solid ${esc(code)}"></i></span>`).join('') || '<span>—</span>'}</div>`; }
+ function iconMarkup(value) {
+  const selected=parseIcons(value);
+  const files={
+   'fa-square-parking':'facility-parking.svg',
+   'fa-mosque':'facility-mosque.svg',
+   'fa-restroom':'facility-toilet.svg',
+   'fa-camera':'facility-camera.svg',
+   'fa-wifi':'facility-wifi.svg'
+  };
+  const names={
+   'fa-square-parking':'Area Parkir',
+   'fa-mosque':'Mushola',
+   'fa-restroom':'Toilet',
+   'fa-camera':'Spot Foto',
+   'fa-wifi':'WiFi'
+  };
+  return `<div class="facility-entries">${selected.map(code=>files[code]?`<div class="facility-entry"><span class="facility-icon-chip"><img src="../assets/icons/${files[code]}" alt=""></span><span>${esc(names[code]||code)}</span></div>`:'').join('') || '<span>—</span>'}</div>`;
+ }
  function render() {
-  $('resourceHead').innerHTML='<tr><th>No</th><th>Nama Wisata</th><th>Ikon</th><th>Nama Fasilitas</th><th>Keterangan</th><th>Aksi</th></tr>';
+  $('resourceHead').innerHTML='<tr><th>No</th><th>Nama Wisata</th><th>Nama Fasilitas</th><th>Aksi</th></tr>';
   const start=(currentPage-1)*pageSize, visible=facilities.slice(start,start+pageSize);
-  $('resourceRows').innerHTML=visible.length?visible.map((r,i)=>`<tr><td>${start+i+1}</td><td>${esc(r.tourism_name || '—')}</td><td>${iconMarkup(r.icon_code)}</td><td>${esc(r.name)}</td><td>${esc(r.description || '—')}</td><td><div class="facility-actions"><button class="facility-action" data-edit="${r.id}" title="Edit"><i class="bi bi-pencil-square"></i></button><button class="facility-action delete" data-delete="${r.id}" title="Hapus"><i class="bi bi-trash-fill"></i></button></div></td></tr>`).join(''):'<tr><td colspan="6" class="text-center py-5">Belum ada data fasilitas.</td></tr>';
-  $('facilityCount').textContent=`Menampilkan ${facilities.length?start+1:0}-${Math.min(start+pageSize,facilities.length)} dari ${facilities.length} data fasilitas`;
-  const pages=Math.max(1,Math.ceil(facilities.length/pageSize)); let html=`<button class="facility-page arrow" data-page="${Math.max(1,currentPage-1)}" aria-label="Sebelumnya"><i class="bi bi-chevron-left"></i></button>`;
-  for(let p=1;p<=pages;p++) html+=`<button class="facility-page ${p===currentPage?'active':''}" data-page="${p}">${p}</button>`;
-  html+=`<button class="facility-page arrow" data-page="${Math.min(pages,currentPage+1)}" aria-label="Berikutnya"><i class="bi bi-chevron-right"></i></button>`; $('facilityPagination').innerHTML=html;
+  $('resourceRows').innerHTML=visible.length?visible.map((r,i)=>`<tr><td class="facility-number">${start+i+1}</td><td class="facility-destination">${esc(r.tourism_name || '—')}</td><td class="facility-icons-cell">${iconMarkup(r.icon_code)}</td><td><div class="facility-actions"><button type="button" class="facility-action-button is-edit" data-edit="${esc(r.id)}" title="Edit" aria-label="Edit fasilitas"><img src="../assets/icons/action-edit.svg" alt=""></button><button type="button" class="facility-action-button is-delete" data-delete="${esc(r.id)}" title="Hapus" aria-label="Hapus fasilitas"><img src="../assets/icons/action-delete.svg" alt=""></button></div></td></tr>`).join(''):'<tr><td colspan="4" class="facility-empty">Belum ada data fasilitas.</td></tr>';
+  $('facilityRange').textContent=`Menampilkan ${facilities.length?start+1:0}-${Math.min(start+pageSize,facilities.length)} dari ${facilities.length} data fasilitas`;
+  const pages=Math.max(1,Math.ceil(facilities.length/pageSize)); let html=`<button class="facility-page-button" data-page="${Math.max(1,currentPage-1)}" aria-label="Sebelumnya"><i class="bi bi-chevron-left"></i></button>`;
+  for(let p=1;p<=pages;p++) html+=`<button class="facility-page-button ${p===currentPage?'is-active':''}" data-page="${p}">${p}</button>`;
+  html+=`<button class="facility-page-button" data-page="${Math.min(pages,currentPage+1)}" aria-label="Berikutnya"><i class="bi bi-chevron-right"></i></button>`; $('facilityPagination').innerHTML=html;
  }
  async function request(url, options={}) { const res=await fetch(url,{...options,headers:{Authorization:'Bearer '+token,Accept:'application/json','Content-Type':'application/json',...(options.headers||{})}}); let data={}; try{data=await res.json()}catch{} if(!res.ok) throw new Error(data.message||'Permintaan gagal diproses.'); return data; }
  async function load() { if(!token){location.replace(facilityConfig.loginUrl);return;} $('resourceMessage').textContent='Memuat data fasilitas...'; try { const result=await request(facilityConfig.apiUrl); facilities=Array.isArray(result.data)?result.data:[]; currentPage=Math.min(currentPage,Math.max(1,Math.ceil(facilities.length/pageSize))); $('resourceMessage').textContent=''; render(); } catch(e) { $('resourceMessage').textContent=''; document.querySelector('.facility-heading').style.display='none'; document.querySelector('.facility-section').style.display='none'; let state=$('facilityServerError'); if(!state){state=document.createElement('section');state.id='facilityServerError';state.className='facility-server-error';document.querySelector('.admin-content').appendChild(state);} state.innerHTML='<h2>Terjadi kesalahan pada server</h2><p>Maaf, server sedang bermasalah. Silahkan<br class="desktop-break"> coba beberapa saat lagi.</p><button type="button" id="retryFacility">Coba lagi</button>'; $('retryFacility').onclick=()=>{state.remove();document.querySelector('.facility-heading').style.display='flex';document.querySelector('.facility-section').style.display='block';load();}; } }

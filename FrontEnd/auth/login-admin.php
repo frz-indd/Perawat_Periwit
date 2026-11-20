@@ -10,7 +10,7 @@ $appBasePath = $frontEndPosition !== false
 $apiLoginUrl = $appBasePath . '/api/admin/login';
 $loginUrl = $appBasePath . '/FrontEnd/auth/login-admin.php';
 $dashboardUrl = $appBasePath . '/FrontEnd/admin/admin-dashboard.php';
-$forgotPasswordUrl = $appBasePath . '/FrontEnd/auth/admin-lupa_password.php';
+$forgotPasswordUrl = '#';
 $homeUrl = $appBasePath . '/index.php';
 $isUnauthorized = ($_GET['status'] ?? '') === '401';
 $pageTitle = $isUnauthorized ? 'Akses Ditolak' : 'Login Admin';

@@ -18,18 +18,19 @@ $section = $sections[$key];
 function e(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8'); }
 function facility_svg_icon(string $code): string {
  $icons = [
-  'wifi' => '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3.5 11.5C10.6 4.8 21.4 4.8 28.5 11.5M8 16c4.7-4.4 11.3-4.4 16 0M12.5 20.5c2.1-2 4.9-2 7 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="25.5" r="1.8" fill="currentColor"/></svg>',
-  'camera' => '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 7.5 12 5h8l2 2.5h3.2A3.8 3.8 0 0 1 29 11.3v13A3.7 3.7 0 0 1 25.2 28H6.8A3.7 3.7 0 0 1 3 24.3v-13a3.8 3.8 0 0 1 3.8-3.8H10Z" fill="currentColor"/><circle cx="16" cy="17.5" r="7" fill="#fff"/><circle cx="16" cy="17.5" r="4.2" fill="currentColor"/><circle cx="24.5" cy="11.5" r="1.4" fill="#fff"/></svg>',
-  'mosque' => '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 27V15.5c0-1.1.9-2 2-2h20c1.1 0 2 .9 2 2V27h-3v-8.2c0-1.1-.9-2-2-2h-1v10.2h-2v-8.2a3 3 0 0 0-6 0V27h-2V16.8h-1c-1.1 0-2 .9-2 2V27H4Z" fill="currentColor"/><path d="M7 13.5c.3-4.2 3.9-7.5 9-9.5 5.1 2 8.7 5.3 9 9.5H7Z" fill="currentColor"/><path d="M16 4V1.8m0 0-1.4 1.4M16 1.8l1.4 1.4M3 27h26" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M13 27v-5a3 3 0 0 1 6 0v5" fill="#fff"/></svg>',
-  'toilet' => '<svg viewBox="0 0 32 32" aria-hidden="true"><g fill="currentColor"><circle cx="9" cy="5" r="2.6"/><path d="M6.2 9h5.6l1.1 10.5-1.8 1.2-.5 9h-2l-.6-8.5-.6 8.5h-2l-.4-9-1.8-1.2L4.3 10a1.9 1.9 0 0 1 1.9-1Z"/><circle cx="23" cy="5" r="2.6"/><path d="M20.5 9h5l2.8 10.2h-2.2l-2-6-.7 5.2 2 11h-2.2l-2.2-9-2.2 9h-2.2l2-11-.7-5.2-2 6h-2.2L18 10a2.5 2.5 0 0 1 2.5-1Z"/></g></svg>',
-  'parking' => '<svg viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 15.5 6.5 9h13l2.5 6.5v9H4v-9Z"/><path d="m7 9 1.5-3h9l2 3M4 16h18M7 19h3m6 0h3" stroke-linecap="round"/><path d="M7 24.5v2m12-2v2" stroke-width="2.5" stroke-linecap="round"/><rect x="23" y="3" width="7" height="11" rx="1.2"/><path d="M25.2 11V6h1.8a1.5 1.5 0 0 1 0 3h-1.8" stroke-width="1.2"/></g></svg>'
+  'parking' => 'facility-parking.svg',
+  'camera' => 'facility-camera.svg',
+  'toilet' => 'facility-toilet.svg',
+  'mosque' => 'facility-mosque.svg',
+  'wifi' => 'facility-wifi.svg'
  ];
- return $icons[$code] ?? '';
+ $file = $icons[$code] ?? null;
+ return $file ? '<img src="../assets/icons/' . $file . '" alt="" aria-hidden="true" loading="eager">' : '';
 }
 $config = ['apiDashboardUrl'=>$appBasePath.'/api/admin/dashboard','apiLogoutUrl'=>$appBasePath.'/api/admin/logout','apiUrl'=>$appBasePath.$section['api'],'loginUrl'=>$appBasePath.'/FrontEnd/auth/login-admin.php'];
 ?>
 <!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?=e($section['title'])?> | Explore Majaku Admin</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet"><link href="../CSS/admin-data-wisata.css?v=20261112-5" rel="stylesheet"><link href="../CSS/admin-dashboard.css?v=20261112-5" rel="stylesheet"><?php if ($key === 'profil'): ?><link href="../CSS/admin-profil.css?v=20261118-1" rel="stylesheet"><?php elseif ($key === 'kategori'): ?><link href="../CSS/admin-kategori.css?v=20261116-14" rel="stylesheet"><?php elseif ($key === 'fasilitas'): ?><link href="../CSS/admin-fasilitas.css?v=20261118-popup-2" rel="stylesheet"><?php elseif ($key === 'ulasan'): ?><link href="../CSS/admin-ulasan.css?v=20261117-2" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet"><link href="../CSS/admin-data-wisata.css?v=20261112-5" rel="stylesheet"><link href="../CSS/admin-dashboard.css?v=20261112-5" rel="stylesheet"><?php if ($key === 'profil'): ?><link href="../CSS/admin-profil.css?v=20261118-1" rel="stylesheet"><?php elseif ($key === 'kategori'): ?><link href="../CSS/admin-kategori.css?v=20261116-14" rel="stylesheet"><?php elseif ($key === 'fasilitas'): ?><link href="../CSS/admin-fasilitas.css?v=20261120-actions-exact-2" rel="stylesheet"><?php elseif ($key === 'ulasan'): ?><link href="../CSS/admin-ulasan.css?v=20261117-2" rel="stylesheet">
 <?php elseif ($key === 'pengguna'): ?><link href="../CSS/admin-pengguna.css?v=20261117-4" rel="stylesheet"><?php endif; ?></head>
 <body class="admin-wisata-page admin-resource-page <?= $key === 'fasilitas' ? 'admin-resource-facilities' : ($key === 'ulasan' ? 'admin-resource-reviews' : ($key === 'kategori' ? 'admin-resource-categories' : ($key === 'pengguna' ? 'admin-resource-users' : ($key === 'profil' ? 'admin-resource-profile' : '')))) ?>"><aside class="admin-sidebar"><a class="admin-brand" href="<?=e($appBasePath)?>/index.php">Explore Majaku</a><button class="sidebar-collapse" id="sidebarCollapse" type="button"><i class="bi bi-chevron-left"></i></button><nav class="admin-nav" aria-label="Navigasi admin">
 <a class="admin-nav__item" href="admin-dashboard.php"><i class="bi bi-house-door"></i><span>Dashboard</span></a><a class="admin-nav__item" href="data-wisata.php"><i class="bi bi-bar-chart-fill"></i><span>Data Wisata</span></a>
@@ -168,6 +169,7 @@ function facilityIconMarkup(code){
  const entry=map[String(code||'').trim().toLowerCase()];
  return entry?'<div class="facility-entry"><span class="facility-icon-chip">'+entry[1]+'</span><span>'+entry[0]+'</span></div>':'';
 }
+let facilitiesCache=[];let facilityPage=1;const facilityPageSize=5;
 function renderFacilityTable(){
  const total=facilitiesCache.length,pages=Math.max(1,Math.ceil(total/facilityPageSize));facilityPage=Math.min(facilityPage,pages);
  const start=(facilityPage-1)*facilityPageSize,shown=facilitiesCache.slice(start,start+facilityPageSize);
@@ -177,7 +179,7 @@ function renderFacilityTable(){
   const tourism=item.tourism_name||item.nama_wisata||item.destination_name||item.wisata||name;
   const selected=String(item.icon_code||'').split(/[;,|]/).map(v=>v.trim()).filter(Boolean);
   const facilityMarkup=selected.map(facilityIconMarkup).join('')||'<span>—</span>';
-  const actionMarkup='<span class="facility-entry-actions"><button type="button" class="facility-action-button is-edit" data-facility-action="edit" data-id="'+esc(item.id)+'" aria-label="Edit '+esc(name)+'"><i class="bi bi-pencil-square"></i></button><button type="button" class="facility-action-button is-delete" data-facility-action="delete" data-id="'+esc(item.id)+'" aria-label="Hapus '+esc(name)+'"><i class="bi bi-trash-fill"></i></button></span>';
+  const actionMarkup='<span class="facility-entry-actions"><button type="button" class="facility-action-button is-edit" data-facility-action="edit" data-id="'+esc(item.id)+'" aria-label="Edit '+esc(name)+'"><img src="../assets/icons/action-edit.svg" alt=""></button><button type="button" class="facility-action-button is-delete" data-facility-action="delete" data-id="'+esc(item.id)+'" aria-label="Hapus '+esc(name)+'"><img src="../assets/icons/action-delete.svg" alt=""></button></span>';
   return '<tr><td data-label="No" class="facility-number">'+(start+index+1)+'</td><td data-label="Nama Wisata" class="facility-destination">'+esc(tourism)+'</td><td data-label="Nama Fasilitas" class="facility-icons-cell"><div class="facility-entries">'+facilityMarkup+'</div></td><td data-label="Aksi"><div class="facility-actions">'+actionMarkup+'</div></td></tr>';
  }).join(''):'<tr><td colspan="4" class="facility-empty">Belum ada data fasilitas. Klik Tambah Fasilitas untuk membuat data pertama.</td></tr>';
  const rangeEl=document.getElementById('facilityRange');if(rangeEl)rangeEl.textContent=total?'Menampilkan '+(start+1)+'-'+Math.min(start+facilityPageSize,total)+' dari '+total+' data fasilitas':'Menampilkan 0-0 dari 0 data fasilitas';
