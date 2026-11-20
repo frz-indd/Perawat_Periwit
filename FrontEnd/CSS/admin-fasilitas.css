@@ -763,3 +763,9 @@ body.facility-feedback-open{overflow:hidden}
 @media (min-width:901px) {
  body.admin-resource-facilities .facility-panel { width:calc(100% - 40px)!important;max-width:none!important;margin:0 0 0 30px!important;box-sizing:border-box!important; }
 }
+
+
+/* Samakan outline kotak ikon Spot Foto (kamera) dan Mushola dengan ikon fasilitas lainnya. */
+.facility-modal__body .facility-option-icon--plain {
+    border: 1px solid #176f60 !important;
+}

@@ -112,10 +112,9 @@ $destinasiLain = array_slice($wisata, 4, 4);
 
             </form>
             <button type="button" class="home-filter-button" id="homeFilterButton" aria-label="Buka filter pencarian" title="Filter pencarian">
-                <svg class="filter-lines-icon" viewBox="0 0 40 36" aria-hidden="true" focusable="false">
-                    <path d="M3 7H37" />
-                    <path d="M9 17H31" />
-                    <path d="M15 27H25" />
+                <svg class="filter-lines-icon" width="70" height="66" viewBox="0 0 70 66" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <rect width="70" height="66" rx="20" fill="#D9D9D9"/>
+                    <path d="M21.2692 28.0476H49.7308V30.9047H21.2692V28.0476ZM27.6731 37.0953H43.3269V39.9524H27.6731V37.0953ZM31.9423 46.1429H39.0577V49H31.9423V46.1429ZM17 19H54V21.8571H17V19Z" fill="#166C5C"/>
                 </svg>
             </button>
             </div>

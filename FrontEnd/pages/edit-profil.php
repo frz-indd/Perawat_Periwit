@@ -369,12 +369,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a class="ep-menu__tentang" href="tentang.php">Tentang</a>
       </nav>
       <div class="ep-aksi">
-        <a href="hasil_pencarian.php" aria-label="Cari">
-          <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
-            <circle cx="13.5" cy="13.5" r="11.7"/>
-            <line x1="22.3" y1="22.3" x2="33.2" y2="33.2"/>
-          </svg>
-        </a>
         <a class="ep-ikon ep-ikon--profil<?= fotoNavbarClass($srcTampil) ?>" href="profil.php" aria-label="Profil">
           <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="20" cy="20" r="18.2"/>
