@@ -19,17 +19,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.2"
-          extensions: mysqli, curl, openssl
-          tools: composer:v2
-
-      - name: Install backend dependencies
-        working-directory: Backend
-        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-
       - name: Deploy files with FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
@@ -50,7 +39,7 @@ jobs:
             postman/**
             swagger/**
             **/node_modules/**
-            **/vendor/**/.git*
+            **/vendor/**
             **/tests/**
             **/api/postman/**
             **/*.md
