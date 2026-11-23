@@ -27,7 +27,12 @@ function facility_svg_icon(string $code): string {
  $file = $icons[$code] ?? null;
  return $file ? '<img src="../assets/icons/' . $file . '" alt="" aria-hidden="true" loading="eager">' : '';
 }
-$config = ['apiDashboardUrl'=>$appBasePath.'/api/admin/dashboard','apiLogoutUrl'=>$appBasePath.'/api/admin/logout','apiUrl'=>$appBasePath.$section['api'],'loginUrl'=>$appBasePath.'/FrontEnd/auth/login-admin.php'];
+$config = ['apiDashboardUrl'=>$appBasePath.'/api/admin/dashboad',
+           'apiLogoutUrl'=>$appBasePath.'/api/admin/logout',
+           'apiUrl'=>$appBasePath.$section['api'],
+           'apiDestinationsSearchUrl'=>$appBasePath.'/api/destinations/search',
+           'apiWisataSearchUrl' => $appBasePath . '/api/admin/wisata-search',
+           'loginUrl'=>$appBasePath.'/FrontEnd/auth/login-admin.php'];
 ?>
 <!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?=e($section['title'])?> | Explore Majaku Admin</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet"><link href="../CSS/admin-data-wisata.css?v=20261123-restore-add-button" rel="stylesheet"><link href="../CSS/admin-dashboard.css?v=20261123-profile-active-label" rel="stylesheet"><?php if ($key === 'profil'): ?><link href="../CSS/admin-profil.css?v=20261123-1" rel="stylesheet"><?php elseif ($key === 'kategori'): ?><link href="../CSS/admin-kategori.css?v=20261123-1" rel="stylesheet"><?php elseif ($key === 'fasilitas'): ?><link href="../CSS/admin-fasilitas.css?v=20261123-1" rel="stylesheet"><?php elseif ($key === 'ulasan'): ?><link href="../CSS/admin-ulasan.css?v=20261123-1" rel="stylesheet">
@@ -55,9 +60,29 @@ $config = ['apiDashboardUrl'=>$appBasePath.'/api/admin/dashboard','apiLogoutUrl'
    <div class="facility-modal__body">
     <h2 id="facilityModalTitle">Tambah Fasilitas</h2>
     <p class="facility-modal__subtitle">Lengkapi informasi destinasi wisata dengan detail dan benar.</p>
-    <label for="facilityName">Nama wisata</label>
-    <input id="facilityName" name="name" type="text" maxlength="150" placeholder="Masukkan nama destinasi wisata" autocomplete="off">
-    <p class="facility-field-error" id="facilityNameError" role="alert"></p>
+
+<label for="facilityName">Nama wisata</label>
+
+<div class="wisata-autocomplete">
+    <input
+        id="facilityName"
+        name="name"
+        type="text"
+        maxlength="150"
+        placeholder="Masukkan nama destinasi wisata"
+        autocomplete="off"
+    >
+
+    <div id="wisataSuggestions"
+         class="wisata-suggestions"
+         hidden>
+    </div>
+</div>
+
+<p class="facility-field-error"
+   id="facilityNameError"
+   role="alert"></p>
+
     <div class="facility-options-heading">
      <h3>Pilih Fasilitas</h3>
      <p class="facility-field-error" id="facilityIconError" role="alert"></p>
@@ -170,16 +195,217 @@ function facilityModalOpen(item=null){
  form.querySelectorAll('input[name="facility_types"]').forEach(input=>{input.checked=selected.includes(input.value);});
  if(facilityModal){facilityModal.classList.add('is-open');facilityModal.setAttribute('aria-hidden','false');document.body.classList.add('facility-modal-open');document.getElementById('facilityName').focus();}
 }
-function facilityModalClose(){if(facilityModal){facilityModal.classList.remove('is-open');facilityModal.setAttribute('aria-hidden','true');document.body.classList.remove('facility-modal-open');}}
+function facilityModalClose(){
+ if(facilityModal){
+  facilityModal.classList.remove('is-open');
+  facilityModal.setAttribute('aria-hidden','true');
+  document.body.classList.remove('facility-modal-open');
+ }
+ const sug=document.getElementById('facilitySuggestions');
+ if(sug){sug.innerHTML='';sug.hidden=true;}
+}
 let pendingFacilityDelete=null;
 function setupFacilities(){
  const addBtn=document.getElementById('addFacilityButton');if(addBtn)addBtn.addEventListener('click',()=>facilityModalOpen());
+
+ // AUTOCOMPLETE NAMA WISATA
+ const wisataInput = document.getElementById('facilityName');
+ const wisataSuggestions = document.getElementById('wisataSuggestions');
+
+ let wisataTimer = null;
+ let wisataRequestId = 0;
+
+ wisataInput.addEventListener('input', function () {
+
+     clearTimeout(wisataTimer);
+
+     const keyword = this.value.trim();
+
+     wisataSuggestions.innerHTML = '';
+     wisataSuggestions.hidden = true;
+
+     if (keyword.length < 2) {
+         return;
+     }
+
+     wisataTimer = setTimeout(async function () {
+
+         const requestId = ++wisataRequestId;
+
+         try {
+             const result = await facilityRequest(
+                 cfg.apiWisataSearchUrl +
+                 '?q=' + encodeURIComponent(keyword)
+             );
+
+             // Abaikan hasil pencarian lama
+             if (requestId !== wisataRequestId) return;
+
+             const wisataList = result.data || [];
+
+             wisataSuggestions.innerHTML = '';
+
+             if (!wisataList.length) {
+                 const empty = document.createElement('div');
+                 empty.className = 'wisata-suggestion-empty';
+                 empty.textContent = 'Wisata tidak ditemukan';
+                 wisataSuggestions.appendChild(empty);
+             } else {
+
+                 wisataList.forEach(function (wisata) {
+
+                     const button = document.createElement('button');
+
+                     button.type = 'button';
+                     button.className = 'wisata-suggestion-item';
+                     button.textContent = wisata.nama_wisata;
+
+                     button.addEventListener('click', function () {
+
+                         wisataInput.value = wisata.nama_wisata;
+
+                         wisataSuggestions.innerHTML = '';
+                         wisataSuggestions.hidden = true;
+
+                     });
+
+                     wisataSuggestions.appendChild(button);
+
+                 });
+             }
+
+             wisataSuggestions.hidden = false;
+
+         } catch (error) {
+
+             if (requestId !== wisataRequestId) return;
+
+             console.error('Pencarian wisata:', error);
+
+             wisataSuggestions.innerHTML = '';
+
+             const errorItem = document.createElement('div');
+             errorItem.className = 'wisata-suggestion-empty';
+             errorItem.textContent = 'Gagal mengambil saran wisata';
+
+             wisataSuggestions.appendChild(errorItem);
+             wisataSuggestions.hidden = false;
+         }
+
+     }, 300);
+
+ });
+
+ // Tutup saran jika klik di luar
+ document.addEventListener('click', function (event) {
+
+     if (!wisataInput.contains(event.target) &&
+         !wisataSuggestions.contains(event.target)) {
+
+         wisataSuggestions.hidden = true;
+     }
+
+ });
+
  if(facilityModal){facilityModal.querySelectorAll('[data-close-facility-modal]').forEach(el=>el.addEventListener('click',facilityModalClose));document.addEventListener('keydown',event=>{if(event.key==='Escape'){facilityModalClose();facilityHideModal('facilityConfirmModal');facilityHideModal('facilityResultModal');}});}
  document.querySelectorAll('[data-facility-confirm-close]').forEach(el=>el.addEventListener('click',()=>{facilityHideModal('facilityConfirmModal');pendingFacilityDelete=null;}));
  document.getElementById('facilityResultModal').querySelector('.facility-feedback-backdrop').addEventListener('click',()=>facilityHideModal('facilityResultModal'));
  const rows=document.getElementById('resourceRows');if(rows)rows.addEventListener('click',async event=>{const button=event.target.closest('[data-facility-action]');if(!button)return;const id=button.dataset.id;try{if(button.dataset.facilityAction==='edit'){const result=await facilityRequest(cfg.apiUrl+'/'+encodeURIComponent(id));facilityModalOpen(result.data||{});}else if(button.dataset.facilityAction==='delete'){const row=facilitiesCache.find(item=>String(item.id)===String(id));if(!row)return;pendingFacilityDelete={id,button};facilityShowModal('facilityConfirmModal');}}catch(error){facilityShowResult(false,'Gagal di Hapus !','Fasilitas gagal di hapus dari data detail wisata');}});
  document.getElementById('facilityConfirmDelete').addEventListener('click',async()=>{if(!pendingFacilityDelete)return;const {id,button}=pendingFacilityDelete,confirmButton=document.getElementById('facilityConfirmDelete');confirmButton.disabled=true;confirmButton.textContent='Menghapus...';try{await facilityRequest(cfg.apiUrl+'/'+encodeURIComponent(id),{method:'DELETE'});facilityHideModal('facilityConfirmModal');pendingFacilityDelete=null;await loadFacilities(false);facilityShowResult(true,'Berhasil di Hapus!','Fasilitas berhasil dihapus dari data detail wisata');}catch(error){facilityHideModal('facilityConfirmModal');facilityShowResult(false,'Gagal di Hapus !','Fasilitas gagal di hapus dari data detail wisata',()=>{if(button)button.disabled=false;facilityShowModal('facilityConfirmModal');});}finally{confirmButton.disabled=false;confirmButton.textContent='Ya, Hapus Fasilitas';}});
  const form=document.getElementById('facilityForm');if(form)form.addEventListener('submit',saveFacility);
+ setupFacilityTourismAutocomplete();
+}
+function setupFacilityTourismAutocomplete(){
+ const input=document.getElementById('facilityName');
+ const box=document.getElementById('facilitySuggestions');
+ if(!input||!box)return;
+ let debounceTimer=null;
+ let activeIndex=-1;
+
+ function closeSuggestions(){
+  box.innerHTML='';
+  box.hidden=true;
+  activeIndex=-1;
+ }
+
+ function selectItem(name){
+  input.value=name;
+  closeSuggestions();
+  input.focus();
+  const errorName=document.getElementById('facilityNameError');
+  if(errorName)errorName.textContent='';
+ }
+
+ input.addEventListener('input',()=>{
+  const val=input.value.trim();
+  clearTimeout(debounceTimer);
+  if(val.length<2){
+   closeSuggestions();
+   return;
+  }
+  debounceTimer=setTimeout(async()=>{
+   try{
+    const searchUrl=cfg.apiDestinationsSearchUrl?cfg.apiDestinationsSearchUrl+'?q='+encodeURIComponent(val):'';
+    if(!searchUrl)return;
+    const res=await fetch(searchUrl,{headers:{Accept:'application/json'}});
+    const json=await res.json();
+    const list=Array.isArray(json.data)?json.data:[];
+    if(!list.length){
+     box.innerHTML='<div class="facility-suggestion-empty">Tidak ada nama wisata ditemukan</div>';
+     box.hidden=false;
+     return;
+    }
+    box.innerHTML=list.slice(0,8).map((item,idx)=>{
+     const name=item.name||item.nama_wisata||'';
+     const cat=item.category||item.nama_kategori||'';
+     const region=item.kabupaten||item.region||item.domisili||'';
+     const sub=cat||region?[cat,region].filter(Boolean).join(' • '):'';
+     return '<div class="facility-suggestion-item" data-index="'+idx+'" data-name="'+esc(name)+'"><div class="facility-suggestion-title">'+esc(name)+'</div>'+(sub?'<div class="facility-suggestion-sub">'+esc(sub)+'</div>':'')+'</div>';
+    }).join('');
+    box.hidden=false;
+    activeIndex=-1;
+   }catch(_){
+    closeSuggestions();
+   }
+  },250);
+ });
+
+ box.addEventListener('click',e=>{
+  const item=e.target.closest('.facility-suggestion-item');
+  if(item && item.dataset.name){
+   selectItem(item.dataset.name);
+  }
+ });
+
+ input.addEventListener('keydown',e=>{
+  if(box.hidden)return;
+  const items=box.querySelectorAll('.facility-suggestion-item');
+  if(!items.length)return;
+  if(e.key==='ArrowDown'){
+   e.preventDefault();
+   activeIndex=(activeIndex+1)%items.length;
+   items.forEach((el,i)=>el.classList.toggle('is-active',i===activeIndex));
+   items[activeIndex]?.scrollIntoView({block:'nearest'});
+  }else if(e.key==='ArrowUp'){
+   e.preventDefault();
+   activeIndex=(activeIndex-1+items.length)%items.length;
+   items.forEach((el,i)=>el.classList.toggle('is-active',i===activeIndex));
+   items[activeIndex]?.scrollIntoView({block:'nearest'});
+  }else if(e.key==='Enter'){
+   if(activeIndex>=0 && items[activeIndex]){
+    e.preventDefault();
+    selectItem(items[activeIndex].dataset.name);
+   }
+  }else if(e.key==='Escape'){
+   closeSuggestions();
+  }
+ });
+
+ document.addEventListener('click',e=>{
+  if(!input.contains(e.target)&&!box.contains(e.target)){
+   closeSuggestions();
+  }
+ });
 }
 function facilityIconMarkup(code){
  const map={parking:['Area Parkir',`<?=facility_svg_icon('parking')?>`],toilet:['Toilet',`<?=facility_svg_icon('toilet')?>`],wifi:['WiFi',`<?=facility_svg_icon('wifi')?>`],camera:['Spot Foto',`<?=facility_svg_icon('camera')?>`],mosque:['Mushola',`<?=facility_svg_icon('mosque')?>`]};
@@ -318,6 +544,7 @@ async function logout() {
         login();
     }
 }
+
 
 document.getElementById('logoutButton').addEventListener('click', openLogoutModal);
 document.getElementById('mobileLogoutButton').addEventListener('click', openLogoutModal);
