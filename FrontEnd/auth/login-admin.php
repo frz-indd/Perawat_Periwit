@@ -10,7 +10,7 @@ $appBasePath = $frontEndPosition !== false
 $apiLoginUrl = $appBasePath . '/api/admin/login';
 $loginUrl = $appBasePath . '/FrontEnd/auth/login-admin.php';
 $dashboardUrl = $appBasePath . '/FrontEnd/admin/admin-dashboard.php';
-$forgotPasswordUrl = $appBasePath . '/FrontEnd/auth/admin-lupa_password.php';
+$forgotPasswordUrl = $appBasePath . '/FrontEnd/auth/admin-ubah_password.php';
 $homeUrl = $appBasePath . '/index.php';
 $isUnauthorized = ($_GET['status'] ?? '') === '401';
 $pageTitle = $isUnauthorized ? 'Akses Ditolak' : 'Login Admin';
@@ -572,6 +572,18 @@ function e(string $value): string
         });
 
         elements.toggle.addEventListener('click', handlePasswordToggle);
+
+        const forgotLink = document.querySelector('.forgot-password');
+        if (forgotLink) {
+            forgotLink.addEventListener('click', function (event) {
+                const u = elements.username ? elements.username.value.trim() : '';
+                if (u) {
+                    try { sessionStorage.setItem('admin_reset_email', u); } catch (e) {}
+                    forgotLink.href = '<?= e($forgotPasswordUrl) ?>' + (('<?= e($forgotPasswordUrl) ?>'.indexOf('?') > -1 ? '&' : '?') + 'email=' + encodeURIComponent(u));
+                }
+            });
+        }
+
         form.addEventListener('submit', handleSubmit);
 
         render();

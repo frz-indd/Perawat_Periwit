@@ -19,84 +19,35 @@ if (isset($_GET['action']) && $_GET['action'] === 'forgot') {
         if (isset($conn) && $conn instanceof mysqli) {
             $conn->set_charset('utf8mb4');
 
-            // Cek di tabel user terlebih dahulu
-            $stmt = $conn->prepare('SELECT Id_user, Nama_user, Username, Email, Password, role FROM `user` WHERE LOWER(Email) = LOWER(?) LIMIT 1');
-            $stmt->bind_param('s', $email);
-            $stmt->execute();
-            $adminUser = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
-
-            $adminFound = false;
-            $userId = 0;
-
-            if ($adminUser) {
-                $role = $adminUser['role'] ?? null;
-                $isAdmin = ($role === 1 || $role === '1' || strtolower((string)$role) === 'admin');
-                if ($isAdmin) {
-                    $adminFound = true;
-                    $userId = (int)$adminUser['Id_user'];
-                } else {
-                    http_response_code(403);
-                    echo json_encode(['status' => 'forbidden', 'message' => 'Email tidak valid/tidak terdaftar']);
-                    exit;
-                }
-            } else {
-                $colCheck = $conn->query("SHOW COLUMNS FROM `admin` LIKE 'Email'");
-                if ($colCheck && $colCheck->num_rows > 0) {
-                    $stmt2 = $conn->prepare('SELECT Id_admin, Username, Email FROM `admin` WHERE LOWER(Email) = LOWER(?) LIMIT 1');
-                    $stmt2->bind_param('s', $email);
-                    $stmt2->execute();
-                    $adminRow = $stmt2->get_result()->fetch_assoc();
-                    $stmt2->close();
-                    if ($adminRow) {
-                        $adminFound = true;
-                        $userId = (int)$adminRow['Id_admin'];
-                    }
-                }
+            $stmt = $conn->prepare('SELECT Id_admin, Username, Email FROM `admin` WHERE LOWER(Username) = LOWER(?) OR (Email IS NOT NULL AND LOWER(Email) = LOWER(?)) LIMIT 1');
+            $adminRow = null;
+            if ($stmt) {
+                $stmt->bind_param('ss', $email, $email);
+                $stmt->execute();
+                $adminRow = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
             }
 
-            if (!$adminFound) {
+            if (!$adminRow) {
                 http_response_code(404);
-                echo json_encode(['status' => 'not_found', 'message' => 'Email tidak valid/tidak terdaftar']);
+                echo json_encode(['status' => 'not_found', 'message' => 'Email atau username tidak terdaftar']);
                 exit;
             }
 
-            // Buat tabel admin_password_resets jika belum ada
-            $conn->query("CREATE TABLE IF NOT EXISTS `admin_password_resets` (
-                `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                `admin_id` BIGINT UNSIGNED NOT NULL,
-                `email` VARCHAR(255) NOT NULL,
-                `token_hash` CHAR(64) NOT NULL,
-                `expires_at` DATETIME NOT NULL,
-                `used_at` DATETIME NULL DEFAULT NULL,
-                `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY (`id`),
-                UNIQUE KEY `uq_admin_token_hash` (`token_hash`),
-                KEY `idx_admin_resets_email` (`email`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-
-            $token = bin2hex(random_bytes(32));
-            $tokenHash = hash('sha256', $token);
-            $expiresAt = date('Y-m-d H:i:s', time() + 3600);
-
-            $ins = $conn->prepare('INSERT INTO `admin_password_resets` (admin_id, email, token_hash, expires_at) VALUES (?, ?, ?, ?)');
-            $ins->bind_param('isss', $userId, $email, $tokenHash, $expiresAt);
-            $ins->execute();
-            $ins->close();
-
+            $adminIdentifier = !empty($adminRow['Email']) ? $adminRow['Email'] : $adminRow['Username'];
             http_response_code(200);
             echo json_encode([
                 'status' => 'success',
-                'message' => 'Tautan reset berhasil dikirim.',
-                'token' => $token,
-                'reset_url' => 'admin-ubah_password.php?token=' . $token
+                'message' => 'Akun admin terverifikasi.',
+                'email' => $adminIdentifier,
+                'redirect_url' => 'admin-ubah_password.php?email=' . urlencode($adminIdentifier)
             ]);
             exit;
         }
     } catch (Throwable $e) {}
 
     http_response_code(500);
-    echo json_encode(['status' => 'server_error', 'message' => 'Maaf, tautan reset password belum berhasil dikirim. Silakan periksa koneksi internet atau coba beberapa saat lagi.']);
+    echo json_encode(['status' => 'server_error', 'message' => 'Terjadi kesalahan pada server. Silakan coba lagi.']);
     exit;
 }
 

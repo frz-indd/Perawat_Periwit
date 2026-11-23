@@ -228,11 +228,13 @@ const forgotPassword = document.querySelector('.forgot-password');
 
 if (forgotPassword) {
     forgotPassword.addEventListener('click', function (event) {
-        const targetUrl = forgotPassword.getAttribute('href');
-        if (targetUrl && targetUrl !== '#' && !targetUrl.startsWith('javascript:')) {
-            return;
-        }
         event.preventDefault();
-        window.location.href = 'user-lupa_password.php';
+        const loginIdentity = document.getElementById('loginIdentity');
+        const val = loginIdentity ? loginIdentity.value.trim() : '';
+        if (val) {
+            try { sessionStorage.setItem('user_reset_email', val); } catch (e) {}
+        }
+        const qs = val ? '?email=' + encodeURIComponent(val) : '';
+        window.location.href = 'user-ubah_password.php' + qs;
     });
 }

@@ -20,11 +20,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'forgot') {
             $conn->set_charset('utf8mb4');
 
             // Cek apakah email terdaftar di tabel user
-            $stmt = $conn->prepare('SELECT Id_user, Email, role FROM `user` WHERE LOWER(Email) = LOWER(?) LIMIT 1');
-            $stmt->bind_param('s', $email);
-            $stmt->execute();
-            $user = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
+            $stmt = $conn->prepare('SELECT Id_user, Email FROM `user` WHERE LOWER(Email) = LOWER(?) OR LOWER(Nama_user) = LOWER(?) LIMIT 1');
+            $user = null;
+            if ($stmt) {
+                $stmt->bind_param('ss', $email, $email);
+                $stmt->execute();
+                $user = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
+            }
 
             if (!$user) {
                 http_response_code(404);
@@ -32,51 +35,19 @@ if (isset($_GET['action']) && $_GET['action'] === 'forgot') {
                 exit;
             }
 
-            // Pastikan akun user biasa (bukan akun admin)
-            $role = $user['role'] ?? null;
-            if ($role === 1 || $role === '1' || strtolower((string)$role) === 'admin') {
-                http_response_code(403);
-                echo json_encode(['status' => 'forbidden', 'message' => 'Email tidak valid/tidak terdaftar']);
-                exit;
-            }
-
-            // Siapkan tabel user_password_resets jika belum ada
-            $conn->query("CREATE TABLE IF NOT EXISTS `user_password_resets` (
-                `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                `user_id` BIGINT UNSIGNED NOT NULL,
-                `email` VARCHAR(255) NOT NULL,
-                `token_hash` CHAR(64) NOT NULL,
-                `expires_at` DATETIME NOT NULL,
-                `used_at` DATETIME NULL DEFAULT NULL,
-                `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY (`id`),
-                UNIQUE KEY `uq_user_token_hash` (`token_hash`),
-                KEY `idx_user_resets_email` (`email`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-
-            $token = bin2hex(random_bytes(32));
-            $tokenHash = hash('sha256', $token);
-            $expiresAt = date('Y-m-d H:i:s', time() + 3600);
-            $userId = (int)$user['Id_user'];
-
-            $ins = $conn->prepare('INSERT INTO `user_password_resets` (user_id, email, token_hash, expires_at) VALUES (?, ?, ?, ?)');
-            $ins->bind_param('isss', $userId, $email, $tokenHash, $expiresAt);
-            $ins->execute();
-            $ins->close();
-
             http_response_code(200);
             echo json_encode([
                 'status' => 'success',
-                'message' => 'Tautan reset berhasil dikirim.',
-                'token' => $token,
-                'reset_url' => 'user-ubah_password.php?token=' . $token
+                'message' => 'Email terverifikasi.',
+                'email' => $user['Email'],
+                'redirect_url' => 'user-ubah_password.php?email=' . urlencode($user['Email'])
             ]);
             exit;
         }
     } catch (Throwable $e) {}
 
     http_response_code(500);
-    echo json_encode(['status' => 'server_error', 'message' => 'Maaf, tautan reset password belum berhasil dikirim. Silakan periksa koneksi internet atau coba beberapa saat lagi.']);
+    echo json_encode(['status' => 'server_error', 'message' => 'Terjadi kesalahan pada server. Silakan coba lagi.']);
     exit;
 }
 

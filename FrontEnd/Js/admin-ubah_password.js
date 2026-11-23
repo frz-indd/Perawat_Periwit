@@ -154,7 +154,7 @@
     btn.disabled = true;
 
     post(form.getAttribute('data-api-url'), {
-      token: token,
+      email: email,
       new_password: pw.value,
       confirm_password: cf.value
     }).then(function (r) {
@@ -162,11 +162,10 @@
       btn.disabled = false;
 
       if (r && r.ok) {
-        simpanToken('');
+        try { sessionStorage.removeItem('admin_reset_email'); } catch (e) {}
         buka(ok, aksiOk);
         return;
       }
-      if (ditolak(r)) { tidakValid(); return; }
       if (r && r.status === 422) {
         srv = (r.data.errors && r.data.errors.new_password) || r.data.message || '';
       }
@@ -179,22 +178,10 @@
     if (e.persisted) location.reload();
   });
 
-  var t = new URLSearchParams(location.search).get('token');
-  if (t !== null) history.replaceState(null, '', location.pathname + location.hash);
-  else try { t = sessionStorage.getItem(KEY); } catch (e) {}
-  token = /^[a-f0-9]{64}$/.test(t || '') ? t : '';
-  simpanToken(token);
-
-  if (!token) { tidakValid(); return; }
-
-  post(document.body.getAttribute('data-api-verify'), { token: token }).then(function (r) {
-    if (r && r.ok) {
-      form.hidden = false;
-      pw.focus();
-    } else if (ditolak(r)) {
-      tidakValid();
-    } else {
-      tidakValid(JUDUL_GAGAL_VERIFIKASI, INFO_GAGAL_VERIFIKASI);
-    }
-  });
+  var email = new URLSearchParams(location.search).get('email') || '';
+  if (!email) {
+    try { email = sessionStorage.getItem('admin_reset_email') || ''; } catch (e) {}
+  }
+  form.hidden = false;
+  pw.focus();
 })();
