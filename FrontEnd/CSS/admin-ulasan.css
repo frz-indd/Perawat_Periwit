@@ -72,3 +72,10 @@ body.admin-resource-reviews .admin-content{width:100%;max-width:none!important}
 @media(max-width:1000px){body.admin-resource-reviews .admin-main{padding:0 22px 30px!important}.review-topbar{margin:0 -22px 32px;padding:0 30px}.review-toolbar{grid-template-columns:minmax(0,1fr) minmax(170px,.7fr) 110px}.review-table thead th{font-size:16px}.review-table tbody td{font-size:16px}.review-footer{font-size:15px}}
 @media(max-width:650px){body.admin-resource-reviews .admin-main{padding:0 14px 28px!important}.review-topbar{height:65px;margin:0 -14px 25px;padding:0 18px}.review-topbar .admin-user-indicator{font-size:18px}.review-topbar .admin-user-indicator i{font-size:30px}.review-heading{margin-left:4px}.review-heading h1{font-size:31px}.review-heading p{font-size:16px}.review-toolbar{grid-template-columns:1fr 105px;gap:9px}.review-search{grid-column:1/-1;height:44px}.review-search input{font-size:15px}.review-search i{font-size:25px}.review-toolbar select{height:44px;min-width:0;padding:0 8px;font-size:13px}.review-search-button{height:44px;font-size:15px}.review-notice{font-size:12px}.review-panel{border-radius:17px}.review-table thead th{height:62px;font-size:14px}.review-empty{min-height:330px}.review-empty h2{font-size:25px}.review-empty p{font-size:16px}.review-footer{align-items:flex-start;flex-direction:column;margin:25px 5px 0;font-size:14px}.review-modal__card{padding:36px 25px 25px}.review-modal__card h2{font-size:20px}.review-modal__card p{font-size:16px}.review-modal__primary,.review-modal__secondary{min-height:54px;font-size:17px}.review-result-icon{width:110px;height:110px;font-size:72px}.review-result-card h2{font-size:25px}}
 @media (min-width:651px){.review-notice:empty{min-height:36px;padding:0}}
+
+
+/* Penyesuaian visual Figma - 23 Nov 2026 */
+
+.review-empty-icon svg{display:block;width:67px;height:67px}
+.review-empty-icon.is-search svg{width:67px;height:67px}
+

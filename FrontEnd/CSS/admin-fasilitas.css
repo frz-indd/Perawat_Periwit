@@ -769,3 +769,9 @@ body.facility-feedback-open{overflow:hidden}
 .facility-modal__body .facility-option-icon--plain {
     border: 1px solid #176f60 !important;
 }
+
+
+/* Penyesuaian visual Figma - 23 Nov 2026 */
+
+.facility-message{display:none!important}
+

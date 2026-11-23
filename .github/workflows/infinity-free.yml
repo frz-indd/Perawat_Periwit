@@ -1,0 +1,62 @@
+name: Deploy to InfinityFree
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: infinityfree-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy website
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mysqli, curl, openssl
+          tools: composer:v2
+
+      - name: Install backend dependencies
+        working-directory: Backend
+        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+      - name: Deploy files with FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          server-dir: /htdocs/
+          local-dir: ./
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/.postman/**
+            **/.vscode/**
+            postman/**
+            swagger/**
+            **/node_modules/**
+            **/vendor/**/.git*
+            **/tests/**
+            **/api/postman/**
+            **/*.md
+            **/*.sql
+            **/*.sql.bak
+            **/*.log
+            Backend/jwt.local.php
+            Backend/google_oauth.local.php
+            Backend/database/database.local.php

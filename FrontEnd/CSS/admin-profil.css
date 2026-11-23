@@ -83,3 +83,44 @@ body.admin-resource-profile{font-family:'Poppins',Arial,sans-serif;color:#176f60
 body.sidebar-collapsed.admin-resource-profile .profil-topbar{left:78px}
 @media(max-width:1000px){.admin-profile-info{grid-template-columns:32% 68%;padding-right:4%}.admin-profile-row{grid-template-columns:25px minmax(110px,1fr) minmax(130px,1fr);font-size:14px}.admin-password-grid{gap:4%}.admin-password-card form{padding-left:4%;padding-right:4%}}
 @media(max-width:767px){.admin-resource-profile .admin-main{padding-top:60px}.admin-resource-profile .admin-content{padding:0 16px 30px}.admin-resource-profile .profil-topbar{position:relative;left:auto;right:auto;height:60px;margin:0 -16px;padding:0 18px;box-shadow:0 2px 5px #0002}.admin-resource-profile .admin-user-indicator{font-size:18px}.admin-resource-profile .admin-user-indicator i{font-size:30px}.admin-profile-heading{margin:25px 0 16px}.admin-profile-heading h1{font-size:30px}.admin-profile-heading p{font-size:14px}.admin-profile-card{border-radius:18px}.admin-profile-card__title{height:45px;padding:0 22px;font-size:21px}.admin-profile-info{grid-template-columns:1fr;padding:18px 20px 22px;gap:18px}.admin-profile-avatar>i{font-size:100px}.admin-profile-avatar strong{font-size:17px}.admin-profile-details{max-width:none}.admin-profile-row{grid-template-columns:25px minmax(105px,1fr) minmax(100px,1fr);font-size:12px;gap:4px}.admin-profile-row i{font-size:17px}.admin-profile-edit{margin-top:17px;font-size:16px}.admin-password-card form{padding:22px 20px}.admin-password-grid{grid-template-columns:1fr;gap:0}.admin-field label{font-size:16px}.admin-password-input{height:52px}.admin-password-input input{font-size:15px}.admin-password-criteria{margin:0 0 20px;font-size:14px}.admin-password-criteria strong{font-size:16px}.admin-password-right .admin-field{margin-bottom:16px}.admin-password-submit{min-height:52px;font-size:16px}.admin-profile-modal__dialog{padding:22px}}
+
+
+/* Penyesuaian visual Figma - 23 Nov 2026 */
+
+/* Navbar profil mengikuti alur halaman dan ikut tergulir */
+.admin-resource-profile .admin-main{padding-top:0!important}
+.admin-resource-profile .profil-topbar{position:relative;top:auto;right:auto;left:auto;margin:0 -5.7% 0;height:82px;box-shadow:0 3px 5px #0003;transition:none}
+.admin-resource-profile.sidebar-collapsed .profil-topbar{left:auto}
+.admin-profile-avatar-svg{display:block;width:138px;height:138px;flex:none}
+.admin-profile-row{grid-template-columns:52px minmax(145px,1fr) minmax(160px,1fr)}
+.profile-field-icon{display:flex;align-items:center;justify-content:center;width:50px;height:42px}
+.profile-field-icon svg{display:block;max-width:50px;max-height:50px}
+.profile-field-icon--username svg{width:47px;height:37px}
+.profile-field-icon--email svg{width:44px;height:32px}
+.admin-profile-edit svg{width:27px;height:29px;margin-right:8px;vertical-align:-7px}
+.admin-password-submit svg{width:24px;height:24px;margin-right:7px;vertical-align:-6px}
+@media(max-width:900px){.admin-resource-profile .profil-topbar{margin-left:-16px;margin-right:-16px}}
+
+
+/* Revisi proporsi ikon profil dan ikon informasi */
+.admin-profile-avatar-svg{width:70px;height:68px}
+.admin-profile-avatar strong{margin-top:8px}
+.admin-profile-row{grid-template-columns:42px minmax(145px,1fr) minmax(160px,1fr);min-height:46px;gap:8px}
+.profile-field-icon{width:40px;height:38px}
+.profile-field-icon--name svg{width:36px;height:36px}
+.profile-field-icon--username svg{width:36px;height:auto}
+.profile-field-icon--email svg{width:36px;height:auto}
+.admin-topbar-profile-svg{display:block;width:38px;height:38px;flex:none}
+.admin-resource-profile .admin-user-indicator{gap:10px}
+@media(max-width:1000px){.admin-profile-row{grid-template-columns:40px minmax(110px,1fr) minmax(130px,1fr)}}
+@media(max-width:767px){.admin-profile-avatar-svg{width:64px;height:62px}.admin-profile-row{grid-template-columns:38px minmax(105px,1fr) minmax(100px,1fr);min-height:42px}.profile-field-icon{width:36px;height:34px}.profile-field-icon--name svg,.profile-field-icon--username svg,.profile-field-icon--email svg{width:32px;height:auto}.admin-topbar-profile-svg{width:30px;height:30px}}
+
+
+/* Shared profile symbol supplied for all admin profile locations. */
+.admin-topbar-profile-svg{display:block;width:40px;height:40px;flex:none}
+.admin-sidebar-profile-svg{display:block;width:28px;height:28px;flex:none}
+.admin-profile-avatar-svg{display:block;width:138px;height:138px;flex:none}
+.admin-resource-profile .admin-user-indicator .admin-topbar-profile-svg{width:40px;height:40px}
+.admin-profile-photo__preview .admin-topbar-profile-svg{width:90px;height:90px}
+
+.admin-sidebar__bottom .admin-topbar-profile-svg{width:28px;height:28px}

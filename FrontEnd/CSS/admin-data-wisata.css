@@ -1409,3 +1409,7 @@ body.admin-form-page {
 .wisata-popup-button.is-outline{background:#fff;color:#176f60}
 .wisata-popup-button.is-outline:hover{background:#f0f7f5}
 @media(max-width:520px){.wisata-popup{min-height:0;padding:32px 24px 26px;border-radius:16px}.wisata-popup-icon{width:112px;height:112px;font-size:76px}.wisata-popup-icon.is-confirm{font-size:54px}.wisata-popup-title{font-size:23px}.wisata-popup-description{font-size:16px}.wisata-popup-button{min-height:56px;font-size:19px}}
+
+
+/* Empty-state illustration sizing. */
+.destination-empty-search{display:block;width:118px;height:118px;margin:0 auto 12px}
