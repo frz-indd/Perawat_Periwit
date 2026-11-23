@@ -1,2293 +1,2463 @@
 {
-  "info": {
-    "_postman_id": "7a0e2d9a-5e7a-4f8b-a1c4-000000000002",
-    "name": "Perawat_Periwit — API ADMIN",
-    "description": "Koleksi endpoint Admin; jalankan login admin lebih dulu. Sesuaikan token/session dan ID data lokal.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "item": [
-    {
-      "name": "POST login admin JWT (untuk CRUD fasilitas)",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/login"
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\"username\":\"{{adminUsername}}\",\"password\":\"{{adminPassword}}\"}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Admin JWT login succeeds', function () { pm.response.to.have.status(200); const body=pm.response.json(); pm.expect(body.token).to.be.a('string').and.not.empty; pm.collectionVariables.set('adminJwtToken', body.token); });"
-            ]
-          }
-        }
-      ]
+    "info": {
+        "_postman_id": "7a0e2d9a-5e7a-4f8b-a1c4-000000000002",
+        "name": "Perawat_Periwit — API ADMIN",
+        "description": "Koleksi endpoint Admin; jalankan login admin lebih dulu. Sesuaikan token/session dan ID data lokal.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
-    {
-      "name": "POST login admin (kredensial opsional)",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/fungsi_login.php"
-        },
-        "body": {
-          "mode": "urlencoded",
-          "urlencoded": [
-            {
-              "key": "role",
-              "value": "admin",
-              "type": "text"
+    "item": [
+        {
+            "name": "POST login admin JWT (untuk CRUD fasilitas)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/login"
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"username\":\"{{adminUsername}}\",\"password\":\"{{adminPassword}}\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
             },
-            {
-              "key": "username",
-              "value": "{{adminUsername}}",
-              "type": "text"
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Admin JWT login succeeds', function () { pm.response.to.have.status(200); const body=pm.response.json(); pm.expect(body.token).to.be.a('string').and.not.empty; pm.collectionVariables.set('adminJwtToken', body.token); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "POST login admin (kredensial opsional)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/fungsi_login.php"
+                },
+                "body": {
+                    "mode": "urlencoded",
+                    "urlencoded": [
+                        {
+                            "key": "role",
+                            "value": "admin",
+                            "type": "text"
+                        },
+                        {
+                            "key": "username",
+                            "value": "{{adminUsername}}",
+                            "type": "text"
+                        },
+                        {
+                            "key": "password",
+                            "value": "{{adminPassword}}",
+                            "type": "text"
+                        }
+                    ]
+                }
             },
-            {
-              "key": "password",
-              "value": "{{adminPassword}}",
-              "type": "text"
-            }
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "prerequest",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.collectionVariables.unset('adminCsrf');"
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.collectionVariables.unset('adminCsrf');"
+                        ]
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "const ok=pm.response.code===200; pm.test('Admin login succeeds or validates missing credentials',function(){pm.response.to.have.status(ok?200:422);if(ok){const d=pm.response.json().data;pm.expect(d.role).to.eql('admin');pm.expect(d.csrf).to.be.a('string').and.not.empty;pm.collectionVariables.set('adminCsrf',d.csrf);}else{pm.expect(pm.response.json().status).to.eql('validation_error');}});"
+                        ]
+                    }
+                }
             ]
-          }
         },
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "const ok=pm.response.code===200; pm.test('Admin login succeeds or validates missing credentials',function(){pm.response.to.have.status(ok?200:422);if(ok){const d=pm.response.json().data;pm.expect(d.role).to.eql('admin');pm.expect(d.csrf).to.be.a('string').and.not.empty;pm.collectionVariables.set('adminCsrf',d.csrf);}else{pm.expect(pm.response.json().status).to.eql('validation_error');}});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "PUT lokasi memvalidasi session admin dan koordinat",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "X-CSRF-Token",
-            "value": "{{adminCsrf}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/destinations/{{destinationId}}/location"
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\"alamat\":\"Alamat uji\",\"latitude\":-6.9,\"longitude\":null}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "const has=Boolean(pm.collectionVariables.get('adminCsrf')); pm.test('Location update validates session and coordinate pair',function(){pm.response.to.have.status(has?422:401);pm.expect(pm.response.json().status).to.eql(has?'incomplete_coordinates':'unauthenticated');});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "POST /api/admin/login JWT (kredensial opsional)",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/login"
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"username\": \"{{adminUsername}}\",\n    \"password\": \"{{adminPassword}}\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "prerequest",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.collectionVariables.unset('adminJwtToken');"
-            ]
-          }
-        },
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "const ok = pm.response.code === 200;",
-              "pm.test('Admin login JWT succeeds or validates missing credentials', function () {",
-              "  pm.response.to.have.status(ok ? 200 : 422);",
-              "  if (ok) {",
-              "    const res = pm.response.json();",
-              "    pm.expect(res.status).to.eql('success');",
-              "    pm.expect(res.message).to.eql('Login berhasil.');",
-              "    pm.expect(res.token).to.be.a('string').and.not.empty;",
-              "    pm.expect(res.user).to.be.an('object');",
-              "    pm.expect(res.user.role).to.eql('admin');",
-              "    pm.collectionVariables.set('adminJwtToken', res.token);",
-              "  } else {",
-              "    pm.expect(pm.response.json().status).to.eql('validation_error');",
-              "  }",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /api/admin/dashboard RBAC (proteksi middleware adminOnly)",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/dashboard"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "const hasToken = Boolean(pm.collectionVariables.get('adminJwtToken'));",
-              "pm.test('Admin dashboard endpoint validates JWT token', function () {",
-              "  pm.response.to.have.status(hasToken ? 200 : 403);",
-              "  if (hasToken) {",
-              "    const res = pm.response.json();",
-              "    pm.expect(res.status).to.eql('success');",
-              "    pm.expect(res.auth.role).to.eql('admin');",
-              "  } else {",
-              "    pm.expect(pm.response.json().message).to.eql('Akses ditolak: Anda tidak memiliki wewenang admin.');",
-              "  }",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET master fasilitas",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/facilities"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('List fasilitas returns 200', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data).to.be.an('array'); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET detail fasilitas",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/facilities/{{facilityId}}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Detail fasilitas returns 200 or 404', function () { pm.expect([200,404]).to.include(pm.response.code); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "POST tambah fasilitas",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/facilities"
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\"name\": \"Toilet\", \"icon_code\": \"fa-restroom\", \"description\": \"Fasilitas toilet umum\"}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Create facility returns 201 or duplicate 422', function () { pm.expect([201,422]).to.include(pm.response.code); });",
-              "if (pm.response.code === 201) { pm.collectionVariables.set('facilityId', pm.response.json().data.id); }"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "POST duplikasi nama fasilitas (harus 422)",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/facilities"
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\"name\": \"Toilet\", \"icon_code\": \"fa-restroom\", \"description\": \"Uji duplikasi\"}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Duplicate facility name returns HTTP 422', function () { pm.response.to.have.status(422); pm.expect(pm.response.json().message).to.eql('Nama fasilitas sudah ada di sistem.'); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "PUT ubah fasilitas",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/facilities/{{facilityId}}"
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\"name\": \"Toilet Umum\", \"icon_code\": \"fa-restroom\", \"description\": \"Fasilitas toilet umum\"}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Update facility returns 200 or 422', function () { pm.expect([200,422]).to.include(pm.response.code); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "DELETE hapus fasilitas",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/facilities/{{facilityId}}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Delete facility returns 200 or 404', function () { pm.expect([200,404]).to.include(pm.response.code); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET dashboard summary",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/dashboard/summary"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Dashboard summary returns 200', function () { pm.response.to.have.status(200); const d=pm.response.json().data; ['total_wisata','total_kategori','total_pengguna','total_ulasan'].forEach(k => pm.expect(d[k]).to.be.a('number')); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET all admin reviews",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/reviews"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Reviews list returns array', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data).to.be.an('array'); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET one admin review",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/reviews/{{reviewId}}"
-        }
-      }
-    },
-    {
-      "name": "DELETE admin review",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/reviews/{{reviewId}}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Review deleted', function () { pm.response.to.have.status(200); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /api/admin/users - search & pagination",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/users?search={{userSearch}}&page={{userPage}}&limit={{userLimit}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "admin",
-            "users"
-          ],
-          "query": [
-            {
-              "key": "search",
-              "value": "{{userSearch}}",
-              "description": "Pencarian nama atau email"
+            "name": "PUT lokasi memvalidasi session admin dan koordinat",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "X-CSRF-Token",
+                        "value": "{{adminCsrf}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/destinations/{{destinationId}}/location"
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"alamat\":\"Alamat uji\",\"latitude\":-6.9,\"longitude\":null}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
             },
-            {
-              "key": "page",
-              "value": "{{userPage}}"
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "const has=Boolean(pm.collectionVariables.get('adminCsrf')); pm.test('Location update validates session and coordinate pair',function(){pm.response.to.have.status(has?422:401);pm.expect(pm.response.json().status).to.eql(has?'incomplete_coordinates':'unauthenticated');});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "POST /api/admin/login JWT (kredensial opsional)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/login"
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"username\": \"{{adminUsername}}\",\n    \"password\": \"{{adminPassword}}\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
             },
-            {
-              "key": "limit",
-              "value": "{{userLimit}}"
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.collectionVariables.unset('adminJwtToken');"
+                        ]
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "const ok = pm.response.code === 200;",
+                            "pm.test('Admin login JWT succeeds or validates missing credentials', function () {",
+                            "  pm.response.to.have.status(ok ? 200 : 422);",
+                            "  if (ok) {",
+                            "    const res = pm.response.json();",
+                            "    pm.expect(res.status).to.eql('success');",
+                            "    pm.expect(res.message).to.eql('Login berhasil.');",
+                            "    pm.expect(res.token).to.be.a('string').and.not.empty;",
+                            "    pm.expect(res.user).to.be.an('object');",
+                            "    pm.expect(res.user.role).to.eql('admin');",
+                            "    pm.collectionVariables.set('adminJwtToken', res.token);",
+                            "  } else {",
+                            "    pm.expect(pm.response.json().status).to.eql('validation_error');",
+                            "  }",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /api/admin/dashboard RBAC (proteksi middleware adminOnly)",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/dashboard"
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "const hasToken = Boolean(pm.collectionVariables.get('adminJwtToken'));",
+                            "pm.test('Admin dashboard endpoint validates JWT token', function () {",
+                            "  pm.response.to.have.status(hasToken ? 200 : 403);",
+                            "  if (hasToken) {",
+                            "    const res = pm.response.json();",
+                            "    pm.expect(res.status).to.eql('success');",
+                            "    pm.expect(res.auth.role).to.eql('admin');",
+                            "  } else {",
+                            "    pm.expect(pm.response.json().message).to.eql('Akses ditolak: Anda tidak memiliki wewenang admin.');",
+                            "  }",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET master fasilitas",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/facilities"
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('List fasilitas returns 200', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data).to.be.an('array'); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET detail fasilitas",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/facilities/{{facilityId}}"
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Detail fasilitas returns 200 or 404', function () { pm.expect([200,404]).to.include(pm.response.code); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "POST tambah fasilitas",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/facilities"
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"name\": \"Toilet\", \"icon_code\": \"fa-restroom\", \"description\": \"Fasilitas toilet umum\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Create facility returns 201 or duplicate 422', function () { pm.expect([201,422]).to.include(pm.response.code); });",
+                            "if (pm.response.code === 201) { pm.collectionVariables.set('facilityId', pm.response.json().data.id); }"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "POST duplikasi nama fasilitas (harus 422)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/facilities"
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"name\": \"Toilet\", \"icon_code\": \"fa-restroom\", \"description\": \"Uji duplikasi\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Duplicate facility name returns HTTP 422', function () { pm.response.to.have.status(422); pm.expect(pm.response.json().message).to.eql('Nama fasilitas sudah ada di sistem.'); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "PUT ubah fasilitas",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/facilities/{{facilityId}}"
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"name\": \"Toilet Umum\", \"icon_code\": \"fa-restroom\", \"description\": \"Fasilitas toilet umum\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Update facility returns 200 or 422', function () { pm.expect([200,422]).to.include(pm.response.code); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "DELETE hapus fasilitas",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/facilities/{{facilityId}}"
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Delete facility returns 200 or 404', function () { pm.expect([200,404]).to.include(pm.response.code); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET dashboard summary",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/dashboard/summary"
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Dashboard summary returns 200', function () { pm.response.to.have.status(200); const d=pm.response.json().data; ['total_wisata','total_kategori','total_pengguna','total_ulasan'].forEach(k => pm.expect(d[k]).to.be.a('number')); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET all admin reviews",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/reviews"
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Reviews list returns array', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data).to.be.an('array'); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET one admin review",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/reviews/{{reviewId}}"
+                }
             }
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Admin users returns paginated data', function () {",
-              "  pm.response.to.have.status(200);",
-              "  const body = pm.response.json();",
-              "  pm.expect(body.status).to.eql('success');",
-              "  pm.expect(body.data).to.be.an('array');",
-              "  pm.expect(body.pagination).to.have.property('current_page');",
-              "  pm.expect(body.pagination).to.have.property('total_data');",
-              "  body.data.forEach(function (user) {",
-              "    pm.expect(user).to.have.property('id');",
-              "    pm.expect(user).to.have.property('nama');",
-              "    pm.expect(user).to.have.property('email');",
-              "    pm.expect(user).not.to.have.property('password');",
-              "  });",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET admin profile",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/profile"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Profile returns 200', function(){pm.response.to.have.status(200);});",
-              "const d=pm.response.json().data; pm.test('Profile has safe fields',function(){pm.expect(d.id).to.be.a('number');pm.expect(d.name).to.be.a('string');pm.expect(d.username).to.be.a('string');pm.expect(d).not.to.have.property('password');pm.expect(d).not.to.have.property('password_hash');});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "PUT update admin profile",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/profile"
         },
-        "body": {
-          "mode": "raw",
-          "raw": "{\"name\": \"{{adminProfileName}}\", \"image_url\": \"{{adminProfileImageUrl}}\"}",
-          "options": {
-            "raw": {
-              "language": "json"
+        {
+            "name": "DELETE admin review",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/reviews/{{reviewId}}"
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Review deleted', function () { pm.response.to.have.status(200); });"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /api/admin/users - search & pagination",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/users?search={{userSearch}}&page={{userPage}}&limit={{userLimit}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "users"
+                    ],
+                    "query": [
+                        {
+                            "key": "search",
+                            "value": "{{userSearch}}",
+                            "description": "Pencarian nama atau email"
+                        },
+                        {
+                            "key": "page",
+                            "value": "{{userPage}}"
+                        },
+                        {
+                            "key": "limit",
+                            "value": "{{userLimit}}"
+                        }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Admin users returns paginated data', function () {",
+                            "  pm.response.to.have.status(200);",
+                            "  const body = pm.response.json();",
+                            "  pm.expect(body.status).to.eql('success');",
+                            "  pm.expect(body.data).to.be.an('array');",
+                            "  pm.expect(body.pagination).to.have.property('current_page');",
+                            "  pm.expect(body.pagination).to.have.property('total_data');",
+                            "  body.data.forEach(function (user) {",
+                            "    pm.expect(user).to.have.property('id');",
+                            "    pm.expect(user).to.have.property('nama');",
+                            "    pm.expect(user).to.have.property('email');",
+                            "    pm.expect(user).not.to.have.property('password');",
+                            "  });",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET admin profile",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/profile"
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Profile returns 200', function(){pm.response.to.have.status(200);});",
+                            "const d=pm.response.json().data; pm.test('Profile has safe fields',function(){pm.expect(d.id).to.be.a('number');pm.expect(d.name).to.be.a('string');pm.expect(d.username).to.be.a('string');pm.expect(d).not.to.have.property('password');pm.expect(d).not.to.have.property('password_hash');});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "PUT update admin profile",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/profile"
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"name\": \"{{adminProfileName}}\", \"image_url\": \"{{adminProfileImageUrl}}\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Profile update returns 200',function(){pm.response.to.have.status(200);pm.expect(pm.response.json().data.name).to.eql(pm.collectionVariables.get('adminProfileName'));});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "PUT change admin password",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/change-password"
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"current_password\": \"{{adminCurrentPassword}}\", \"new_password\": \"{{adminNewPassword}}\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Password updated',function(){pm.response.to.have.status(200);pm.expect(pm.response.json().message).to.eql('Kata sandi berhasil diperbarui. Silakan login kembali.');});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "PUT reject wrong current password",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/change-password"
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"current_password\": \"PasswordSalah1!\", \"new_password\": \"PasswordBaru2@\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Wrong current password returns exact 400 contract',function(){pm.response.to.have.status(400);pm.expect(pm.response.json().message).to.eql('Kata sandi saat ini yang Anda masukkan salah.');});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "PUT reject weak new password",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminJwtToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/change-password"
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"current_password\": \"{{adminCurrentPassword}}\", \"new_password\": \"weak\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Weak password is rejected',function(){pm.response.to.have.status(422);pm.expect(pm.response.json().status).to.eql('validation_error');});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET admin profile without token",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/profile"
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Admin profile requires a token',function(){pm.response.to.have.status(403);});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /api/admin/dashboard/summary — Ringkasan statistik dashboard admin",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/dashboard/summary",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "dashboard",
+                        "summary"
+                    ]
+                },
+                "description": "Menghitung total wisata, kategori, pengguna, dan ulasan melalui agregasi database."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /api/admin/users — Daftar pengguna dengan pencarian dan pagination",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/users",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "users"
+                    ]
+                },
+                "description": "Hanya dapat diakses admin menggunakan Bearer JWT. Pencarian dilakukan pada nama dan email. Data sensitif seperti password tidak pernah dikirim. Tabel `user` pada skema lama diperlakukan sebagai akun pengguna; pada skema `users`, hanya baris dengan role `user` yang dikembalikan."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /api/admin/reviews — Daftar seluruh ulasan untuk admin",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/reviews",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "reviews"
+                    ]
+                },
+                "description": "Daftar seluruh ulasan untuk admin"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /api/admin/reviews/{id} — Detail ulasan",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/reviews/{id}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "reviews",
+                        "{{id}}"
+                    ]
+                },
+                "description": "Detail ulasan"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "DELETE /api/admin/reviews/{id} — Hapus ulasan",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/reviews/{id}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "reviews",
+                        "{{id}}"
+                    ]
+                },
+                "description": "Hapus ulasan"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /api/admin/facilities — Daftar master fasilitas",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/facilities",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "facilities"
+                    ]
+                },
+                "description": "Daftar master fasilitas"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "POST /api/admin/facilities — Tambah master fasilitas",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/facilities",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "facilities"
+                    ]
+                },
+                "description": "Tambah master fasilitas",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /api/admin/facilities/{id} — Detail master fasilitas",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/facilities/{id}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "facilities",
+                        "{{id}}"
+                    ]
+                },
+                "description": "Detail master fasilitas"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "PUT /api/admin/facilities/{id} — Perbarui master fasilitas",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/facilities/{id}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "facilities",
+                        "{{id}}"
+                    ]
+                },
+                "description": "Perbarui master fasilitas",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "DELETE /api/admin/facilities/{id} — Hapus master fasilitas",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/facilities/{id}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "facilities",
+                        "{{id}}"
+                    ]
+                },
+                "description": "Hapus master fasilitas"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "POST /Backend/api/admin_login.php — direct PHP endpoint",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_login.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_login.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "POST /Backend/api/admin_logout.php — direct PHP endpoint",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_logout.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_logout.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /Backend/api/admin_dashboard.php — direct PHP endpoint",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_dashboard.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_dashboard.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /Backend/api/admin_dashboard_summary.php — direct PHP endpoint",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_dashboard_summary.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_dashboard_summary.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /Backend/api/admin_users.php — direct PHP endpoint",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_users.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_users.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /Backend/api/admin_reviews.php — direct PHP endpoint",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_reviews.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_reviews.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /Backend/api/admin_profile.php — direct PHP endpoint",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_profile.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_profile.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "PUT /Backend/api/admin_profile.php — direct PHP endpoint",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_profile.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_profile.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "PUT /Backend/api/admin_change_password.php — direct PHP endpoint",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_change_password.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_change_password.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /Backend/api/admin_categories.php — direct PHP endpoint",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_categories.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_categories.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "POST /Backend/api/admin_categories.php — direct PHP endpoint",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_categories.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_categories.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "PUT /Backend/api/admin_categories.php — direct PHP endpoint",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_categories.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_categories.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "DELETE /Backend/api/admin_categories.php — direct PHP endpoint",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_categories.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_categories.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /Backend/api/admin_regions.php — direct PHP endpoint",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_regions.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_regions.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /Backend/api/admin_regions_lookup.php — direct PHP endpoint",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_regions_lookup.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_regions_lookup.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /Backend/api/admin_destinations.php — direct PHP endpoint",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_destinations.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_destinations.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "POST /Backend/api/admin_destinations.php — direct PHP endpoint",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_destinations.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_destinations.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "PUT /Backend/api/admin_destinations.php — direct PHP endpoint",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_destinations.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_destinations.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "DELETE /Backend/api/admin_destinations.php — direct PHP endpoint",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_destinations.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_destinations.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "GET /Backend/api/admin_facilities.php — direct PHP endpoint",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_facilities.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_facilities.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "POST /Backend/api/admin_facilities.php — direct PHP endpoint",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_facilities.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_facilities.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "PUT /Backend/api/admin_facilities.php — direct PHP endpoint",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_facilities.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_facilities.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "DELETE /Backend/api/admin_facilities.php — direct PHP endpoint",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/Backend/api/admin_facilities.php",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "Backend",
+                        "api",
+                        "admin_facilities.php"
+                    ]
+                },
+                "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Server returned a response (not 5xx)', function () {",
+                            "  pm.expect(pm.response.code).to.be.below(500);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "POST /api/admin/forgot-password — Verifikasi username admin",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"username\": \"{{adminUsername}}\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/forgot-password",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "forgot-password"
+                    ]
+                },
+                "description": "Memvalidasi bahwa username adalah akun admin terdaftar."
             }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Profile update returns 200',function(){pm.response.to.have.status(200);pm.expect(pm.response.json().data.name).to.eql(pm.collectionVariables.get('adminProfileName'));});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "PUT change admin password",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/change-password"
         },
-        "body": {
-          "mode": "raw",
-          "raw": "{\"current_password\": \"{{adminCurrentPassword}}\", \"new_password\": \"{{adminNewPassword}}\"}",
-          "options": {
-            "raw": {
-              "language": "json"
+        {
+            "name": "POST /api/admin/forgot-password — Reset password admin",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"username\": \"{{adminUsername}}\",\n    \"new_password\": \"{{adminPassword}}\",\n    \"confirm_password\": \"{{adminPassword}}\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/forgot-password",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "forgot-password"
+                    ]
+                },
+                "description": "Mereset password admin dengan password baru yang di-hash bcrypt."
             }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Password updated',function(){pm.response.to.have.status(200);pm.expect(pm.response.json().message).to.eql('Kata sandi berhasil diperbarui. Silakan login kembali.');});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "PUT reject wrong current password",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/change-password"
         },
-        "body": {
-          "mode": "raw",
-          "raw": "{\"current_password\": \"PasswordSalah1!\", \"new_password\": \"PasswordBaru2@\"}",
-          "options": {
-            "raw": {
-              "language": "json"
+        {
+            "name": "POST /api/admin/forgot-password — Validasi username kosong (422)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"username\": \"\",\n    \"new_password\": \"NewPassword123#\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/forgot-password",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "forgot-password"
+                    ]
+                },
+                "description": "Memastikan API mengembalikan HTTP 422 bila username kosong."
             }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Wrong current password returns exact 400 contract',function(){pm.response.to.have.status(400);pm.expect(pm.response.json().message).to.eql('Kata sandi saat ini yang Anda masukkan salah.');});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "PUT reject weak new password",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminJwtToken}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/change-password"
         },
-        "body": {
-          "mode": "raw",
-          "raw": "{\"current_password\": \"{{adminCurrentPassword}}\", \"new_password\": \"weak\"}",
-          "options": {
-            "raw": {
-              "language": "json"
+        {
+            "name": "POST /api/admin/forgot-password — Username tidak terdaftar (404)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"username\": \"admin.tidak.ditemukan.999\",\n    \"new_password\": \"NewPassword123#\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/forgot-password",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "forgot-password"
+                    ]
+                },
+                "description": "Memastikan API mengembalikan HTTP 404 jika username tidak ditemukan."
             }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Weak password is rejected',function(){pm.response.to.have.status(422);pm.expect(pm.response.json().status).to.eql('validation_error');});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET admin profile without token",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/profile"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Admin profile requires a token',function(){pm.response.to.have.status(403);});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /api/admin/dashboard/summary — Ringkasan statistik dashboard admin",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/dashboard/summary",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "admin",
-            "dashboard",
-            "summary"
-          ]
         },
-        "description": "Menghitung total wisata, kategori, pengguna, dan ulasan melalui agregasi database."
-      },
-      "event": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /api/admin/users — Daftar pengguna dengan pencarian dan pagination",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/users",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "admin",
-            "users"
-          ]
-        },
-        "description": "Hanya dapat diakses admin menggunakan Bearer JWT. Pencarian dilakukan pada nama dan email. Data sensitif seperti password tidak pernah dikirim. Tabel `user` pada skema lama diperlakukan sebagai akun pengguna; pada skema `users`, hanya baris dengan role `user` yang dikembalikan."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /api/admin/reviews — Daftar seluruh ulasan untuk admin",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/reviews",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "admin",
-            "reviews"
-          ]
-        },
-        "description": "Daftar seluruh ulasan untuk admin"
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /api/admin/reviews/{id} — Detail ulasan",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/reviews/{id}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "admin",
-            "reviews",
-            "{{id}}"
-          ]
-        },
-        "description": "Detail ulasan"
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "DELETE /api/admin/reviews/{id} — Hapus ulasan",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/reviews/{id}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "admin",
-            "reviews",
-            "{{id}}"
-          ]
-        },
-        "description": "Hapus ulasan"
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /api/admin/facilities — Daftar master fasilitas",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/facilities",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "admin",
-            "facilities"
-          ]
-        },
-        "description": "Daftar master fasilitas"
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "POST /api/admin/facilities — Tambah master fasilitas",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/facilities",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "admin",
-            "facilities"
-          ]
-        },
-        "description": "Tambah master fasilitas",
-        "body": {
-          "mode": "raw",
-          "raw": "{}",
-          "options": {
-            "raw": {
-              "language": "json"
+            "name": "POST /api/admin/forgot-password — Konfirmasi password beda (422)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    },
+                    {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"username\": \"{{adminUsername}}\",\n    \"new_password\": \"NewPassword123#\",\n    \"confirm_password\": \"PasswordBeda123#\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/admin/forgot-password",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "admin",
+                        "forgot-password"
+                    ]
+                },
+                "description": "Memastikan API mengembalikan HTTP 422 jika konfirmasi password tidak cocok."
             }
-          }
         }
-      },
-      "event": [
+    ],
+    "variable": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /api/admin/facilities/{id} — Detail master fasilitas",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/facilities/{id}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "admin",
-            "facilities",
-            "{{id}}"
-          ]
+            "key": "baseUrl",
+            "value": "http://localhost/Perawat_Periwit",
+            "type": "string"
         },
-        "description": "Detail master fasilitas"
-      },
-      "event": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "PUT /api/admin/facilities/{id} — Perbarui master fasilitas",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/facilities/{id}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "admin",
-            "facilities",
-            "{{id}}"
-          ]
+            "key": "adminToken",
+            "value": "",
+            "type": "string"
         },
-        "description": "Perbarui master fasilitas",
-        "body": {
-          "mode": "raw",
-          "raw": "{}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "DELETE /api/admin/facilities/{id} — Hapus master fasilitas",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/admin/facilities/{id}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "admin",
-            "facilities",
-            "{{id}}"
-          ]
+            "key": "userToken",
+            "value": "",
+            "type": "string"
         },
-        "description": "Hapus master fasilitas"
-      },
-      "event": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "POST /Backend/api/admin_login.php — direct PHP endpoint",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_login.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_login.php"
-          ]
+            "key": "categoryId",
+            "value": "1",
+            "type": "string"
         },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
-        "body": {
-          "mode": "raw",
-          "raw": "{}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "POST /Backend/api/admin_logout.php — direct PHP endpoint",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_logout.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_logout.php"
-          ]
+            "key": "destinationId",
+            "value": "1",
+            "type": "string"
         },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
-        "body": {
-          "mode": "raw",
-          "raw": "{}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /Backend/api/admin_dashboard.php — direct PHP endpoint",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_dashboard.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_dashboard.php"
-          ]
+            "key": "facilityId",
+            "value": "1",
+            "type": "string"
         },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
-      },
-      "event": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
+            "key": "userId",
+            "value": "1",
+            "type": "string"
         }
-      ]
-    },
-    {
-      "name": "GET /Backend/api/admin_dashboard_summary.php — direct PHP endpoint",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_dashboard_summary.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_dashboard_summary.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /Backend/api/admin_users.php — direct PHP endpoint",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_users.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_users.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /Backend/api/admin_reviews.php — direct PHP endpoint",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_reviews.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_reviews.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /Backend/api/admin_profile.php — direct PHP endpoint",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_profile.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_profile.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "PUT /Backend/api/admin_profile.php — direct PHP endpoint",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_profile.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_profile.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
-        "body": {
-          "mode": "raw",
-          "raw": "{}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "PUT /Backend/api/admin_change_password.php — direct PHP endpoint",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_change_password.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_change_password.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
-        "body": {
-          "mode": "raw",
-          "raw": "{}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /Backend/api/admin_categories.php — direct PHP endpoint",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_categories.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_categories.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "POST /Backend/api/admin_categories.php — direct PHP endpoint",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_categories.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_categories.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
-        "body": {
-          "mode": "raw",
-          "raw": "{}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "PUT /Backend/api/admin_categories.php — direct PHP endpoint",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_categories.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_categories.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
-        "body": {
-          "mode": "raw",
-          "raw": "{}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "DELETE /Backend/api/admin_categories.php — direct PHP endpoint",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_categories.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_categories.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /Backend/api/admin_regions.php — direct PHP endpoint",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_regions.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_regions.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /Backend/api/admin_regions_lookup.php — direct PHP endpoint",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_regions_lookup.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_regions_lookup.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /Backend/api/admin_destinations.php — direct PHP endpoint",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_destinations.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_destinations.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "POST /Backend/api/admin_destinations.php — direct PHP endpoint",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_destinations.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_destinations.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
-        "body": {
-          "mode": "raw",
-          "raw": "{}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "PUT /Backend/api/admin_destinations.php — direct PHP endpoint",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_destinations.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_destinations.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
-        "body": {
-          "mode": "raw",
-          "raw": "{}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "DELETE /Backend/api/admin_destinations.php — direct PHP endpoint",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_destinations.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_destinations.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "GET /Backend/api/admin_facilities.php — direct PHP endpoint",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_facilities.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_facilities.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "POST /Backend/api/admin_facilities.php — direct PHP endpoint",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_facilities.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_facilities.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
-        "body": {
-          "mode": "raw",
-          "raw": "{}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "PUT /Backend/api/admin_facilities.php — direct PHP endpoint",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_facilities.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_facilities.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware.",
-        "body": {
-          "mode": "raw",
-          "raw": "{}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "DELETE /Backend/api/admin_facilities.php — direct PHP endpoint",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          {
-            "key": "Accept",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/Backend/api/admin_facilities.php",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "Backend",
-            "api",
-            "admin_facilities.php"
-          ]
-        },
-        "description": "Endpoint PHP langsung. Pastikan session/token admin sesuai middleware."
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Server returned a response (not 5xx)', function () {",
-              "  pm.expect(pm.response.code).to.be.below(500);",
-              "});"
-            ]
-          }
-        }
-      ]
-    }
-  ],
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost/Perawat_Periwit",
-      "type": "string"
-    },
-    {
-      "key": "adminToken",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "userToken",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "categoryId",
-      "value": "1",
-      "type": "string"
-    },
-    {
-      "key": "destinationId",
-      "value": "1",
-      "type": "string"
-    },
-    {
-      "key": "facilityId",
-      "value": "1",
-      "type": "string"
-    },
-    {
-      "key": "userId",
-      "value": "1",
-      "type": "string"
-    }
-  ]
+    ]
 }

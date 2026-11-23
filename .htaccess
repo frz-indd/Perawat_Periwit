@@ -37,3 +37,4 @@ RewriteRule ^api/admin/destinations/?$ Backend/api/admin_destinations.php [QSA,L
 RewriteRule ^api/admin/destinations/([^/]+)/?$ Backend/api/admin_destinations.php?id=$1 [B,QSA,L]
 RewriteRule ^api/admin/profile/?$ Backend/api/admin_profile.php [QSA,L]
 RewriteRule ^api/admin/change-password/?$ Backend/api/admin_change_password.php [QSA,L]
+RewriteRule ^api/admin/forgot-password/?$ Backend/api/admin_forgot_password.php [QSA,L]

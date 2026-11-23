@@ -882,6 +882,117 @@ paths:
         '405':
           $ref: '#/components/responses/MethodNotAllowed'
 
+  /api/admin/profile:
+    get:
+      tags: [Admin]
+      summary: Mengambil profil admin yang sedang login
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          description: Profil admin berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  message: { type: string, example: Profil admin berhasil diambil. }
+                  data:
+                    type: object
+                    properties:
+                      id: { type: integer, example: 1 }
+                      name: { type: string, example: Administrator }
+                      username: { type: string, example: admin }
+                      image_url: { type: string, nullable: true, example: 'https://example.com/admin.jpg' }
+        '403': { description: Token admin tidak valid atau akses ditolak. }
+        '404': { description: Data admin tidak ditemukan. }
+        '500': { $ref: '#/components/responses/ServerError' }
+    put:
+      tags: [Admin]
+      summary: Memperbarui nama dan URL foto profil admin
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, minLength: 1, maxLength: 255, example: Administrator Baru }
+                image_url: { type: string, nullable: true, maxLength: 2048, example: 'https://example.com/admin-baru.jpg' }
+      responses:
+        '200': { description: Profil admin berhasil diperbarui. }
+        '403': { description: Token admin tidak valid atau akses ditolak. }
+        '409': { description: Migration kolom foto profil belum diterapkan. }
+        '415': { description: Content-Type harus application/json. }
+        '422': { description: Data profil tidak valid. }
+        '500': { $ref: '#/components/responses/ServerError' }
+  /api/admin/change-password:
+    put:
+      tags: [Admin]
+      summary: Mengganti kata sandi admin dengan verifikasi bcrypt
+      description: >-
+        Memverifikasi current_password dengan password_verify terhadap hash tersimpan,
+        kemudian menyimpan new_password menggunakan bcrypt cost 10. Kata sandi baru
+        minimal 8 karakter, mengandung huruf besar, huruf kecil, angka, dan karakter khusus.
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [current_password, new_password]
+              properties:
+                current_password: { type: string, format: password, example: 'PasswordLama1!' }
+                new_password: { type: string, format: password, minLength: 8, example: 'PasswordBaru2@' }
+      responses:
+        '200':
+          description: Kata sandi berhasil diperbarui.
+          content:
+            application/json:
+              example: { message: 'Kata sandi berhasil diperbarui. Silakan login kembali.' }
+        '400':
+          description: Kata sandi saat ini salah.
+          content:
+            application/json:
+              example: { message: 'Kata sandi saat ini yang Anda masukkan salah.' }
+        '403': { description: Token admin tidak valid atau akses ditolak. }
+        '415': { description: Content-Type harus application/json. }
+        '422': { description: Format kata sandi baru tidak memenuhi kriteria keamanan. }
+        '500': { $ref: '#/components/responses/ServerError' }
+
+  /api/admin/forgot-password:
+    post:
+      tags: [Admin]
+      summary: Lupa password akun admin berdasarkan username
+      description: >-
+        Memverifikasi username akun admin (role = 1) di database dan memperbarui
+        kata sandi admin menggunakan hashing bcrypt cost 10.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username]
+              properties:
+                username: { type: string, example: wowok }
+                new_password: { type: string, format: password, minLength: 8, maxLength: 72, example: 'AdminBaru123#' }
+                confirm_password: { type: string, format: password, example: 'AdminBaru123#' }
+      responses:
+        '200':
+          description: Username terverifikasi atau password berhasil diperbarui.
+          content:
+            application/json:
+              example: { status: 'success', message: 'Password admin berhasil diperbarui. Silakan login kembali dengan password baru.' }
+        '403': { description: Akun bukan merupakan akun admin (role bukan 1). }
+        '404': { description: Akun admin dengan username tersebut tidak ditemukan. }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
+        '422': { description: Validasi username atau konfirmasi password gagal. }
+        '500': { $ref: '#/components/responses/ServerError' }
+
 components:
   securitySchemes:
     BearerAuth:
@@ -1100,83 +1211,3 @@ components:
         text: { type: string }
         average_rating: { type: number, nullable: true, format: double }
         review_count: { type: integer }
-  /api/admin/profile:
-    get:
-      tags: [Admin]
-      summary: Mengambil profil admin yang sedang login
-      security: [{ BearerAuth: [] }]
-      responses:
-        '200':
-          description: Profil admin berhasil diambil.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status: { type: string, example: success }
-                  message: { type: string, example: Profil admin berhasil diambil. }
-                  data:
-                    type: object
-                    properties:
-                      id: { type: integer, example: 1 }
-                      name: { type: string, example: Administrator }
-                      username: { type: string, example: admin }
-                      image_url: { type: string, nullable: true, example: 'https://example.com/admin.jpg' }
-        '403': { description: Token admin tidak valid atau akses ditolak. }
-        '404': { description: Data admin tidak ditemukan. }
-        '500': { $ref: '#/components/responses/ServerError' }
-    put:
-      tags: [Admin]
-      summary: Memperbarui nama dan URL foto profil admin
-      security: [{ BearerAuth: [] }]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [name]
-              properties:
-                name: { type: string, minLength: 1, maxLength: 255, example: Administrator Baru }
-                image_url: { type: string, nullable: true, maxLength: 2048, example: 'https://example.com/admin-baru.jpg' }
-      responses:
-        '200': { description: Profil admin berhasil diperbarui. }
-        '403': { description: Token admin tidak valid atau akses ditolak. }
-        '409': { description: Migration kolom foto profil belum diterapkan. }
-        '415': { description: Content-Type harus application/json. }
-        '422': { description: Data profil tidak valid. }
-        '500': { $ref: '#/components/responses/ServerError' }
-  /api/admin/change-password:
-    put:
-      tags: [Admin]
-      summary: Mengganti kata sandi admin dengan verifikasi bcrypt
-      description: >-
-        Memverifikasi current_password dengan password_verify terhadap hash tersimpan,
-        kemudian menyimpan new_password menggunakan bcrypt cost 10. Kata sandi baru
-        minimal 8 karakter, mengandung huruf besar, huruf kecil, angka, dan karakter khusus.
-      security: [{ BearerAuth: [] }]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [current_password, new_password]
-              properties:
-                current_password: { type: string, format: password, example: 'PasswordLama1!' }
-                new_password: { type: string, format: password, minLength: 8, example: 'PasswordBaru2@' }
-      responses:
-        '200':
-          description: Kata sandi berhasil diperbarui.
-          content:
-            application/json:
-              example: { message: 'Kata sandi berhasil diperbarui. Silakan login kembali.' }
-        '400':
-          description: Kata sandi saat ini salah.
-          content:
-            application/json:
-              example: { message: 'Kata sandi saat ini yang Anda masukkan salah.' }
-        '403': { description: Token admin tidak valid atau akses ditolak. }
-        '415': { description: Content-Type harus application/json. }
-        '422': { description: Format kata sandi baru tidak memenuhi kriteria keamanan. }
-        '500': { $ref: '#/components/responses/ServerError' }

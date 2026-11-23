@@ -34,23 +34,15 @@ if (empty($input) && !empty($_POST)) {
     $input = $_POST;
 }
 
-$emailRaw = $input['email'] ?? null;
+$username = trim((string)($input['username'] ?? $input['identity'] ?? $input['email'] ?? ''));
 $newPassword = $input['new_password'] ?? $input['password'] ?? $input['newPassword'] ?? null;
 $confirmPassword = $input['confirm_password'] ?? $input['confirmPassword'] ?? null;
 
-// 3. Validasi Format Email
-if (!is_string($emailRaw) || trim($emailRaw) === '') {
+// 3. Validasi Username Admin
+if ($username === '') {
     $respond(422, [
         'status' => 'validation_error',
-        'message' => 'Email wajib diisi.'
-    ]);
-}
-
-$email = trim($emailRaw);
-if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-    $respond(422, [
-        'status' => 'validation_error',
-        'message' => 'Format email tidak valid.'
+        'message' => 'Username admin wajib diisi.'
     ]);
 }
 
@@ -99,9 +91,9 @@ try {
     $adminAccount = null;
     $sourceTable = '';
 
-    // Cek di tabel user terlebih dahulu
-    $checkUser = $conn->prepare('SELECT Id_user, Nama_user, Username, Email, Password, role FROM `user` WHERE LOWER(Email) = LOWER(?) LIMIT 1');
-    $checkUser->bind_param('s', $email);
+    // Cari akun di tabel user berdasarkan Username atau Email
+    $checkUser = $conn->prepare('SELECT Id_user, Nama_user, Username, Email, Password, role FROM `user` WHERE Username = ? OR (Email <> "" AND LOWER(Email) = LOWER(?)) LIMIT 1');
+    $checkUser->bind_param('ss', $username, $username);
     $checkUser->execute();
     $userRow = $checkUser->get_result()->fetch_assoc();
     $checkUser->close();
@@ -110,11 +102,10 @@ try {
         $adminAccount = $userRow;
         $sourceTable = 'user';
     } else {
-        // Fallback: periksa tabel admin jika tabel admin memiliki kolom Email
-        $colCheck = $conn->query("SHOW COLUMNS FROM `admin` LIKE 'Email'");
-        if ($colCheck && $colCheck->num_rows > 0) {
-            $checkAdmin = $conn->prepare('SELECT Id_admin, Nama_admin, Username, Email, Password, 1 AS role FROM `admin` WHERE LOWER(Email) = LOWER(?) LIMIT 1');
-            $checkAdmin->bind_param('s', $email);
+        // Fallback: periksa tabel admin jika tabel admin ada
+        $checkAdmin = $conn->prepare('SELECT Id_admin, Nama_admin, Username, "" AS Email, Password, 1 AS role FROM `admin` WHERE Username = ? LIMIT 1');
+        if ($checkAdmin !== false) {
+            $checkAdmin->bind_param('s', $username);
             $checkAdmin->execute();
             $adminRow = $checkAdmin->get_result()->fetch_assoc();
             $checkAdmin->close();
@@ -128,7 +119,7 @@ try {
     if (!$adminAccount) {
         $respond(404, [
             'status' => 'not_found',
-            'message' => 'Akun admin dengan email tersebut tidak ditemukan.'
+            'message' => 'Akun admin dengan username tersebut tidak ditemukan.'
         ]);
     }
 
@@ -143,13 +134,13 @@ try {
         ]);
     }
 
-    // Jika hanya memvalidasi email (new_password tidak dikirim)
+    // Jika hanya memvalidasi identitas akun (new_password tidak dikirim)
     if ($newPassword === null) {
         $respond(200, [
             'status' => 'success',
-            'message' => 'Email admin terverifikasi. Silakan masukkan password baru.',
+            'message' => 'Akun admin terverifikasi. Silakan masukkan password baru.',
             'data' => [
-                'email' => $email,
+                'username' => $adminAccount['Username'] ?: $username,
                 'can_reset' => true
             ]
         ]);
@@ -170,11 +161,11 @@ try {
         $update->close();
 
         // Jika username cocok dengan akun di tabel admin, sinkronkan juga
-        $username = $adminAccount['Username'] ?? null;
-        if (!empty($username)) {
+        $accountUser = $adminAccount['Username'] ?? null;
+        if (!empty($accountUser)) {
             $syncAdmin = $conn->prepare('UPDATE `admin` SET Password = ? WHERE Username = ?');
             if ($syncAdmin !== false) {
-                $syncAdmin->bind_param('ss', $newHash, $username);
+                $syncAdmin->bind_param('ss', $newHash, $accountUser);
                 $syncAdmin->execute();
                 $syncAdmin->close();
             }
@@ -199,6 +190,16 @@ try {
         $update->bind_param('si', $newHash, $adminId);
         $update->execute();
         $update->close();
+
+        $accountUser = $adminAccount['Username'] ?? null;
+        if (!empty($accountUser)) {
+            $syncUser = $conn->prepare('UPDATE `user` SET Password = ? WHERE Username = ? AND role = 1');
+            if ($syncUser !== false) {
+                $syncUser->bind_param('ss', $newHash, $accountUser);
+                $syncUser->execute();
+                $syncUser->close();
+            }
+        }
 
         $revoke = $conn->prepare('UPDATE admin_sessions SET revoked_at = NOW() WHERE admin_id = ? AND revoked_at IS NULL');
         if ($revoke !== false) {

@@ -53,11 +53,14 @@ function report(string $name, bool $ok, string $detail = '') {
     }
 }
 
+$adminUser = !empty($vars['adminUsername']) ? $vars['adminUsername'] : 'wowok';
+$adminPass = !empty($vars['adminPassword']) ? $vars['adminPassword'] : 'admin123';
+
 // 1. Uji Login Admin & Dapatkan JWT
 echo "1. Pengujian Autentikasi Admin...\n";
 $login = sendReq('POST', "$baseUrl/api/admin/login", ['Content-Type' => 'application/json', 'Accept' => 'application/json'], [
-    'username' => $vars['adminUsername'] ?? 'wowok',
-    'password' => $vars['adminPassword'] ?? 'admin123'
+    'username' => $adminUser,
+    'password' => $adminPass
 ]);
 $token = $login['body']['token'] ?? '';
 report("POST /api/admin/login (HTTP 200)", $login['code'] === 200 && !empty($token), "HTTP {$login['code']}");
@@ -115,24 +118,36 @@ report("GET /api/admin/users (HTTP 200)", $usersList['code'] === 200, "HTTP {$us
 
 // 6. Uji Lupa Password Admin (Forgot Password)
 echo "\n6. Pengujian Forgot Password Admin...\n";
-$fpInvalidEmail = sendReq('POST', "$baseUrl/api/admin/forgot-password", ['Content-Type' => 'application/json'], [
-    'email' => 'format-salah',
+$fpEmptyUser = sendReq('POST', "$baseUrl/api/admin/forgot-password", ['Content-Type' => 'application/json'], [
+    'username' => '',
     'new_password' => 'PasswordBaru123#'
 ]);
-report("POST /api/admin/forgot-password Format Email Salah (HTTP 422)", $fpInvalidEmail['code'] === 422, "HTTP {$fpInvalidEmail['code']}");
+report("POST /api/admin/forgot-password Username Kosong (HTTP 422)", $fpEmptyUser['code'] === 422, "HTTP {$fpEmptyUser['code']}");
 
 $fpNotFound = sendReq('POST', "$baseUrl/api/admin/forgot-password", ['Content-Type' => 'application/json'], [
-    'email' => 'tidak.ditemukan.999@example.com',
+    'username' => 'admin.tidak.ditemukan.999',
     'new_password' => 'PasswordBaru123#'
 ]);
-report("POST /api/admin/forgot-password Email Tidak Terdaftar (HTTP 404)", $fpNotFound['code'] === 404, "HTTP {$fpNotFound['code']}");
+report("POST /api/admin/forgot-password Username Tidak Terdaftar (HTTP 404)", $fpNotFound['code'] === 404, "HTTP {$fpNotFound['code']}");
 
 $fpMismatch = sendReq('POST', "$baseUrl/api/admin/forgot-password", ['Content-Type' => 'application/json'], [
-    'email' => 'farisrachman@gmail.com',
+    'username' => $adminUser,
     'new_password' => 'PasswordBaru123#',
     'confirm_password' => 'PasswordBeda123#'
 ]);
 report("POST /api/admin/forgot-password Konfirmasi Beda (HTTP 422)", $fpMismatch['code'] === 422, "HTTP {$fpMismatch['code']}");
+
+$fpVerify = sendReq('POST', "$baseUrl/api/admin/forgot-password", ['Content-Type' => 'application/json'], [
+    'username' => $adminUser
+]);
+report("POST /api/admin/forgot-password Verifikasi Username Admin (HTTP 200)", $fpVerify['code'] === 200, "HTTP {$fpVerify['code']}");
+
+$fpSuccess = sendReq('POST', "$baseUrl/api/admin/forgot-password", ['Content-Type' => 'application/json'], [
+    'username' => $adminUser,
+    'new_password' => $adminPass,
+    'confirm_password' => $adminPass
+]);
+report("POST /api/admin/forgot-password Reset Password Admin Berhasil (HTTP 200)", $fpSuccess['code'] === 200, "HTTP {$fpSuccess['code']}");
 
 // 7. Uji Logout Admin
 echo "\n7. Pengujian Logout Admin...\n";
