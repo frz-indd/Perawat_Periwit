@@ -114,3 +114,12 @@ body.admin-resource-users .user-topbar{
  .user-footer__summary{gap:3px}
  .user-footer__summary strong{font-size:13px}
 }
+
+
+/* Penyesuaian visual Figma - 23 Nov 2026 */
+
+.user-table{width:100%;table-layout:fixed}
+.user-table th:first-child{width:12%}
+.user-table th:nth-child(2){width:43%}
+.user-table th:nth-child(3){width:45%}
+

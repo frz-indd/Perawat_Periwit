@@ -938,3 +938,91 @@ body.logout-modal-open {
         transition: none;
     }
 }
+.admin-sidebar-profile-svg{display:block;width:28px;height:28px;flex:none}
+
+
+/* FIX 23-11-2026: Data Wisata heading and action must remain on one row.
+   This stylesheet loads after admin-data-wisata.css, so these rules override
+   the older display:block / mobile column declarations above. */
+body.admin-wisata-page .admin-page-heading {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    width: 100%;
+}
+body.admin-wisata-page .admin-page-heading > div {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+body.admin-wisata-page .admin-page-heading > .admin-add-button {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    align-self: center !important;
+    margin: 0 0 0 auto !important;
+    white-space: nowrap !important;
+}
+@media (max-width: 600px) {
+    body.admin-wisata-page .admin-page-heading {
+        flex-direction: row !important;
+        align-items: center !important;
+        flex-wrap: nowrap !important;
+        gap: 8px !important;
+    }
+    body.admin-wisata-page .admin-page-heading h1 { font-size: clamp(20px, 5vw, 28px) !important; }
+    body.admin-wisata-page .admin-page-heading p { font-size: clamp(11px, 2.8vw, 14px) !important; }
+    body.admin-wisata-page .admin-page-heading > .admin-add-button {
+        min-height: 34px !important;
+        padding: 4px 7px !important;
+        font-size: 11px !important;
+    }
+}
+
+
+/* Sidebar Profil Admin: outline icon on all non-profile pages. */
+.admin-sidebar__bottom .admin-sidebar-profile-svg{display:block;width:30px;height:30px;flex:0 0 30px}
+.admin-sidebar__bottom .admin-nav__item{align-items:center;gap:13px}
+
+
+/* Profil Admin pada halaman nonaktif memakai SVG asli berukuran sama
+   dengan ikon navigasi lain; label tetap berupa teks putih sidebar. */
+.admin-sidebar__bottom > a:not(.is-active) .admin-sidebar-profile-svg {
+    display: block;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+}
+.admin-sidebar__bottom > a:not(.is-active) {
+    min-height: 50px;
+    padding: 5px 15px;
+    gap: 13px;
+    color: #fff;
+}
+.admin-sidebar__bottom > a:not(.is-active) > span {
+    color: #fff;
+}
+
+
+/* Profil Admin: active state keeps the green icon and label on a light-green pill. */
+.admin-sidebar__bottom > a.is-active {
+    min-height: 50px;
+    padding: 5px 15px;
+    gap: 13px;
+    color: var(--admin-green);
+    background: #ccece6;
+}
+.admin-sidebar__bottom > a.is-active:hover {
+    color: var(--admin-green);
+    background: #ccece6;
+}
+.admin-sidebar__bottom > a.is-active .admin-topbar-profile-svg {
+    display: block;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+}
+.admin-sidebar__bottom > a.is-active > span {
+    color: var(--admin-green);
+}

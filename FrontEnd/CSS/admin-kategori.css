@@ -344,3 +344,13 @@ body.admin-wisata-page.admin-resource-page .admin-content {
     .kategori-topbar .admin-user-indicator { font-size: 18px; }
     .kategori-topbar .admin-user-indicator i { font-size: 30px; }
 }
+
+
+/* Penyesuaian visual Figma - 23 Nov 2026 */
+
+/* Status pemuatan tidak menjadi teks permanen di atas tabel */
+.kategori-message{display:none!important}
+.kategori-table tbody tr{height:126px}
+.kategori-photo{height:126px!important;max-height:126px!important;overflow:hidden}
+.kategori-photo img{width:100%;height:112px!important;max-height:112px;aspect-ratio:auto;object-fit:cover;border-radius:8px}
+
