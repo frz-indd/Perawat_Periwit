@@ -101,11 +101,9 @@
       if (r && r.ok) {
         render(false);
         try {
-          if (r.data && r.data.token) {
-            sessionStorage.setItem('user_reset_token', r.data.token);
-          }
+          sessionStorage.setItem('user_reset_email', input.value.trim());
         } catch (e) {}
-        buka(ok, aksiLogin);
+        window.location.href = (r.data && r.data.redirect_url) || ('user-ubah_password.php?email=' + encodeURIComponent(input.value.trim()));
         return;
       }
 

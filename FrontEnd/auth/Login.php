@@ -158,7 +158,7 @@ if (empty($_SESSION['csrf'])) { $_SESSION['csrf'] = bin2hex(random_bytes(32)); }
                             <label for="rememberMe">Ingat Saya</label>
                         </div>
 
-                        <a href="user-lupa_password.php" class="forgot-password">
+                        <a href="user-ubah_password.php" class="forgot-password">
                             Lupa Kata Sandi?
                         </a>
                     </div>

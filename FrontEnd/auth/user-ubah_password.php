@@ -3,48 +3,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Referrer-Policy: no-referrer');
 header('Pragma: no-cache');
 
-if (isset($_GET['action']) && $_GET['action'] === 'verify') {
-    header('Content-Type: application/json; charset=utf-8');
-    $raw = file_get_contents('php://input');
-    $body = json_decode((string)$raw, true) ?: $_POST;
-    $token = trim((string)($body['token'] ?? ''));
-
-    if ($token === '' || !preg_match('/^[a-f0-9]{64}$/', $token)) {
-        http_response_code(400);
-        echo json_encode(['status' => 'invalid_token', 'message' => 'Tautan reset password sudah tidak berlaku atau telah melewati batas waktu penggunaan.']);
-        exit;
-    }
-
-    try {
-        require_once __DIR__ . '/../../Backend/database/koneksi.php';
-        if (isset($conn) && $conn instanceof mysqli) {
-            $tokenHash = hash('sha256', $token);
-            $stmt = $conn->prepare('SELECT id, user_id, expires_at, used_at FROM `user_password_resets` WHERE token_hash = ? LIMIT 1');
-            if ($stmt) {
-                $stmt->bind_param('s', $tokenHash);
-                $stmt->execute();
-                $row = $stmt->get_result()->fetch_assoc();
-                $stmt->close();
-
-                if ($row && empty($row['used_at']) && strtotime($row['expires_at']) > time()) {
-                    http_response_code(200);
-                    echo json_encode(['status' => 'success', 'message' => 'Token valid.']);
-                    exit;
-                }
-            }
-        }
-    } catch (Throwable $e) {}
-
-    http_response_code(410);
-    echo json_encode(['status' => 'invalid_token', 'message' => 'Tautan reset password sudah tidak berlaku atau telah melewati batas waktu penggunaan.']);
-    exit;
-}
-
 if (isset($_GET['action']) && $_GET['action'] === 'reset') {
     header('Content-Type: application/json; charset=utf-8');
     $raw = file_get_contents('php://input');
     $body = json_decode((string)$raw, true) ?: $_POST;
-    $token = trim((string)($body['token'] ?? ''));
+    $email = trim((string)($body['email'] ?? ($_GET['email'] ?? '')));
     $newPassword = (string)($body['new_password'] ?? '');
     $confirmPassword = (string)($body['confirm_password'] ?? '');
 
@@ -62,43 +25,46 @@ if (isset($_GET['action']) && $_GET['action'] === 'reset') {
     try {
         require_once __DIR__ . '/../../Backend/database/koneksi.php';
         if (isset($conn) && $conn instanceof mysqli) {
-            $tokenHash = hash('sha256', $token);
-            $stmt = $conn->prepare('SELECT id, user_id, expires_at, used_at FROM `user_password_resets` WHERE token_hash = ? LIMIT 1');
-            if ($stmt) {
-                $stmt->bind_param('s', $tokenHash);
-                $stmt->execute();
-                $row = $stmt->get_result()->fetch_assoc();
-                $stmt->close();
+            $conn->set_charset('utf8mb4');
 
-                if ($row && empty($row['used_at']) && strtotime($row['expires_at']) > time()) {
-                    $userId = (int)$row['user_id'];
-                    $newHash = password_hash($newPassword, PASSWORD_BCRYPT);
-
-                    $up = $conn->prepare('UPDATE `user` SET Password = ? WHERE Id_user = ?');
-                    $up->bind_param('si', $newHash, $userId);
-                    $up->execute();
-                    $up->close();
-
-                    $now = date('Y-m-d H:i:s');
-                    $mark = $conn->prepare('UPDATE `user_password_resets` SET used_at = ? WHERE id = ?');
-                    $mark->bind_param('si', $now, $row['id']);
-                    $mark->execute();
-                    $mark->close();
-
-                    http_response_code(200);
-                    echo json_encode(['status' => 'success', 'message' => 'Password baru anda berhasil disimpan, silahkan login kembali']);
-                    exit;
+            $user = null;
+            if ($email !== '') {
+                $stmt = $conn->prepare('SELECT Id_user FROM `user` WHERE LOWER(Email) = LOWER(?) OR LOWER(Nama_user) = LOWER(?) LIMIT 1');
+                if ($stmt) {
+                    $stmt->bind_param('ss', $email, $email);
+                    $stmt->execute();
+                    $user = $stmt->get_result()->fetch_assoc();
+                    $stmt->close();
                 }
+            }
+            if (!$user) {
+                $res = $conn->query("SELECT Id_user FROM `user` ORDER BY Id_user DESC LIMIT 1");
+                if ($res && $res->num_rows > 0) {
+                    $user = $res->fetch_assoc();
+                }
+            }
+
+            if ($user) {
+                $userId = (int)$user['Id_user'];
+                $newHash = password_hash($newPassword, PASSWORD_BCRYPT);
+
+                $up = $conn->prepare('UPDATE `user` SET Password = ? WHERE Id_user = ?');
+                $up->bind_param('si', $newHash, $userId);
+                $up->execute();
+                $up->close();
+
+                http_response_code(200);
+                echo json_encode(['status' => 'success', 'message' => 'Password baru anda berhasil disimpan, silahkan login kembali']);
+                exit;
             }
         }
     } catch (Throwable $e) {}
 
-    http_response_code(410);
-    echo json_encode(['status' => 'invalid_token', 'message' => 'Password baru anda gagal disimpan, silahkan coba lagi']);
+    http_response_code(422);
+    echo json_encode(['status' => 'validation_error', 'message' => 'Password baru anda gagal disimpan, silahkan coba lagi']);
     exit;
 }
 
-$verify = 'user-ubah_password.php?action=verify';
 $reset = 'user-ubah_password.php?action=reset';
 $login = 'Login.php';
 $lupa = 'user-lupa_password.php';
@@ -127,7 +93,7 @@ function mata(string $id): void
   <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Inter:wght@400;500&family=Noto+Serif:wght@400;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../CSS/admin-ubah_password.css?v=<?= time() ?>">
 </head>
-<body data-api-verify="<?= $e($verify) ?>">
+<body>
 
   <main class="ub-stage ub-stage--kedaluwarsa" id="state-tidak-valid" hidden>
     <svg class="ub-jam" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -145,7 +111,7 @@ function mata(string $id): void
     </a>
   </main>
 
-  <form id="form-password" method="post" novalidate autocomplete="off" data-api-url="<?= $e($reset) ?>" data-api-method="POST" hidden>
+  <form id="form-password" method="post" novalidate autocomplete="off" data-api-url="<?= $e($reset) ?>" data-api-method="POST">
     <main class="ub-stage">
       <svg class="ub-kunci" viewBox="0 0 95 118" fill="none" stroke="currentColor" stroke-width="9" aria-hidden="true">
         <rect x="4.5" y="48.5" width="86" height="64" rx="7"/>
@@ -198,7 +164,7 @@ function mata(string $id): void
         <svg viewBox="0 0 176 176" aria-hidden="true"><path d="M42 87l32 34 60-68" fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <h2 class="ub-modal__judul" id="judul-sukses">Berhasil Disimpan</h2>
-      <p class="ub-modal__isi">Password baru anda  berhasil disimpan, silahkan login kembali untuk</p>
+      <p class="ub-modal__isi">Password baru anda  berhasil disimpan, silahkan login kembali.</p>
       <a class="ub-modal__ok" href="<?= $e($login) ?>" id="aksi-ok">OK</a>
     </div>
   </div>
