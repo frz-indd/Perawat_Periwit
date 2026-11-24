@@ -86,13 +86,18 @@ try {
     }
     $destination->close();
 
-    $existingReview = $conn->prepare(
-        "SELECT Id_ulasan FROM ulasan
-         WHERE Id_user = ? AND Id_wisata = ?
-         ORDER BY Id_ulasan DESC
-         LIMIT 1
-         FOR UPDATE"
-    );
+  $saveReview = $conn->prepare(
+    "INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar, tanggal_ulasan)
+     VALUES (?, ?, ?, ?, CURDATE())"
+);
+
+$saveReview->bind_param("isis", $userId, $destinationId, $rating, $reviewText);
+$saveReview->execute();
+
+$reviewId = (int) $conn->insert_id;
+$saveReview->close();
+
+$responseCode = 201;
     $existingReview->bind_param("is", $userId, $destinationId);
     $existingReview->execute();
     $existingReview->bind_result($existingReviewId);
