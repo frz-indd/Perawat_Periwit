@@ -1,0 +1,11 @@
+# Use this workspace to collaborate
+workspace:
+  id: 178a5cc9-ee3c-4822-8fc2-37f517217a4f
+
+localResources:
+  collections:
+    - ../Backend/api/postman/Explore MajaKu - Backend API
+
+cloudResources:
+  collections:
+    ../postman/collections/Admin Reviews Collection: bae7a669-7079-48fe-bc0c-a10ddc5307f8

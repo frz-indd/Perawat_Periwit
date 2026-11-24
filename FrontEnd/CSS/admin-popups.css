@@ -1,0 +1,240 @@
+/* Validasi Tambah/Edit Wisata — pesan merah tanpa outline merah. */
+.admin-destination-form .admin-field .invalid-feedback.is-visible,
+.admin-destination-form .upload-feedback.is-visible {
+    display: block !important;
+    margin-top: 3px;
+    color: #ff1018 !important;
+    font-family: 'Poppins', Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.35;
+}
+.admin-destination-form.was-validated .form-control:invalid,
+.admin-destination-form.was-validated .form-select:invalid,
+.admin-destination-form .form-control[aria-invalid="true"],
+.admin-destination-form .form-select[aria-invalid="true"] {
+    border-color: #6fa99c !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+.admin-destination-form .required-mark {
+    color: inherit;
+    margin-left: 3px;
+}
+
+/* Pop-up hasil aksi: ukuran, posisi, warna, dan tipografi mengikuti gambar acuan. */
+.wisata-popup,
+.facility-result-card,
+.review-result-card,
+.admin-profile-result__dialog {
+    box-sizing: border-box !important;
+    width: min(470px, calc(100vw - 32px)) !important;
+    min-height: 471px !important;
+    padding: 52px 58px 37px !important;
+    border: 0 !important;
+    border-radius: 18px !important;
+    background: #fff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    text-align: center !important;
+    box-shadow: 0 10px 32px rgba(0,0,0,.12) !important;
+    font-family: 'Poppins', Arial, sans-serif !important;
+}
+.wisata-popup-icon,
+.facility-result-icon,
+.review-result-icon,
+.admin-profile-result__icon {
+    box-sizing: border-box !important;
+    flex: 0 0 142px !important;
+    width: 142px !important;
+    height: 142px !important;
+    margin: 0 auto 31px !important;
+    border-radius: 50% !important;
+    display: grid !important;
+    place-items: center !important;
+    background: #d0dbd3 !important;
+    color: #176f60 !important;
+    font-size: 88px !important;
+    line-height: 1 !important;
+}
+.wisata-popup-icon:not(.is-success):not(.is-confirm),
+.facility-result-icon.is-error,
+.review-result-icon.is-error,
+.admin-profile-result__icon:not(.is-success) {
+    background: #d9d9d9 !important;
+    color: #ff1018 !important;
+}
+.wisata-popup-title,
+.facility-result-card h2,
+.review-result-card h2,
+.admin-profile-result__dialog h2 {
+    margin: 0 0 7px !important;
+    color: #176f60 !important;
+    font-family: 'Poppins', Arial, sans-serif !important;
+    font-size: 32px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+}
+.wisata-popup-title:not(.is-success):not(.is-confirm),
+.facility-result-card h2.is-error,
+.review-result-card h2.is-error,
+.admin-profile-result__icon:not(.is-success) ~ h2 {
+    color: #ff1018 !important;
+}
+.wisata-popup-description,
+.facility-result-card p,
+.review-result-card p,
+.admin-profile-result__dialog p {
+    margin: 0 0 30px !important;
+    color: #087765 !important;
+    font-family: 'Poppins', Arial, sans-serif !important;
+    font-size: 20px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+}
+.wisata-popup-actions {
+    width: 100% !important;
+    margin-top: auto !important;
+}
+.wisata-popup-button,
+.facility-result-card .facility-feedback-primary,
+.review-result-card .review-modal__primary,
+.admin-profile-result__dialog button {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 64px !important;
+    margin: auto 0 0 !important;
+    padding: 8px 12px !important;
+    border: 1px solid #176f60 !important;
+    border-radius: 10px !important;
+    background: #176f60 !important;
+    color: #fff !important;
+    font-family: 'Poppins', Arial, sans-serif !important;
+    font-size: 22px !important;
+    font-weight: 500 !important;
+    line-height: 1.25 !important;
+}
+.wisata-popup-button.is-outline {
+    background: #fff !important;
+    color: #176f60 !important;
+}
+
+/* Pop-up konfirmasi hapus: ukuran 570 x 570 sesuai gambar acuan. */
+#wisataPopup .wisata-popup:has(.wisata-popup-icon.is-confirm),
+.facility-confirm-card,
+#reviewConfirmModal .review-modal__card {
+    box-sizing: border-box !important;
+    width: min(570px, calc(100vw - 32px)) !important;
+    min-height: 570px !important;
+    padding: 48px 85px 48px !important;
+    border-radius: 18px !important;
+    background: #fff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    text-align: center !important;
+    font-family: 'Poppins', Arial, sans-serif !important;
+}
+#wisataPopup .wisata-popup:has(.wisata-popup-icon.is-confirm) .wisata-popup-icon,
+.facility-confirm-card .facility-feedback-icon,
+#reviewConfirmModal .review-modal__icon {
+    flex: 0 0 120px !important;
+    width: 120px !important;
+    height: 120px !important;
+    margin: 0 auto 18px !important;
+    background: #cbd8d0 !important;
+    color: #176f60 !important;
+    font-size: 64px !important;
+}
+.facility-confirm-card h2,
+#reviewConfirmModal .review-modal__card h2,
+#wisataPopup .wisata-popup:has(.wisata-popup-icon.is-confirm) .wisata-popup-title {
+    margin: 0 0 14px !important;
+    color: #176f60 !important;
+    font-family: 'Poppins', Arial, sans-serif !important;
+    font-size: 26px !important;
+    font-weight: 600 !important;
+    line-height: 1.45 !important;
+}
+.facility-confirm-card p,
+#reviewConfirmModal .review-modal__card p,
+#wisataPopup .wisata-popup:has(.wisata-popup-icon.is-confirm) .wisata-popup-description {
+    margin: 0 0 26px !important;
+    color: #087765 !important;
+    font-family: 'Poppins', Arial, sans-serif !important;
+    font-size: 20px !important;
+    line-height: 1.5 !important;
+}
+.facility-confirm-card .facility-feedback-primary,
+.facility-confirm-card .facility-feedback-secondary,
+#reviewConfirmModal .review-modal__card .review-modal__primary,
+#reviewConfirmModal .review-modal__card .review-modal__secondary,
+#wisataPopup .wisata-popup:has(.wisata-popup-icon.is-confirm) .wisata-popup-button {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 64px !important;
+    margin: 0 0 10px !important;
+    border: 1px solid #176f60 !important;
+    border-radius: 10px !important;
+    font-family: 'Poppins', Arial, sans-serif !important;
+    font-size: 22px !important;
+    font-weight: 500 !important;
+}
+.facility-confirm-card .facility-feedback-primary,
+#reviewConfirmModal .review-modal__card .review-modal__primary,
+#wisataPopup .wisata-popup:has(.wisata-popup-icon.is-confirm) .wisata-popup-button:not(.is-outline) {
+    background: #176f60 !important;
+    color: #fff !important;
+}
+.facility-confirm-card .facility-feedback-secondary,
+#reviewConfirmModal .review-modal__card .review-modal__secondary,
+#wisataPopup .wisata-popup:has(.wisata-popup-icon.is-confirm) .wisata-popup-button.is-outline {
+    margin-bottom: 0 !important;
+    background: #fff !important;
+    color: #176f60 !important;
+}
+
+/* Semua lapisan latar pop-up menggunakan tingkat gelap yang konsisten. */
+.facility-feedback-backdrop,
+.review-modal__backdrop,
+.admin-profile-result__backdrop {
+    background: rgba(0,0,0,.58) !important;
+}
+@media (max-width: 600px) {
+    .wisata-popup,
+    .facility-result-card,
+    .review-result-card,
+    .admin-profile-result__dialog {
+        width: min(470px, calc(100vw - 28px)) !important;
+        min-height: 0 !important;
+        padding: 34px 24px 28px !important;
+    }
+    #wisataPopup .wisata-popup:has(.wisata-popup-icon.is-confirm),
+    .facility-confirm-card,
+    #reviewConfirmModal .review-modal__card {
+        width: min(570px, calc(100vw - 28px)) !important;
+        min-height: 0 !important;
+        padding: 34px 24px 28px !important;
+    }
+    .wisata-popup-icon,
+    .facility-result-icon,
+    .review-result-icon,
+    .admin-profile-result__icon {
+        flex-basis: 112px !important;
+        width: 112px !important;
+        height: 112px !important;
+        margin-bottom: 24px !important;
+        font-size: 72px !important;
+    }
+    .wisata-popup-title,
+    .facility-result-card h2,
+    .review-result-card h2,
+    .admin-profile-result__dialog h2 { font-size: 25px !important; }
+    .wisata-popup-description,
+    .facility-result-card p,
+    .review-result-card p,
+    .admin-profile-result__dialog p { font-size: 16px !important; }
+}

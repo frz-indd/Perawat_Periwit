@@ -381,8 +381,7 @@ body.facility-modal-open { overflow: hidden; }
     font-weight: 700;
     line-height: 1.2;
 }
-.facility-modal__body > input#facilityName,
-.facility-modal__body .facility-autocomplete-wrapper > input#facilityName {
+.facility-modal__body > input#facilityName {
     display: block;
     width: min(538px, 100%);
     height: 60px;
@@ -396,102 +395,10 @@ body.facility-modal-open { overflow: hidden; }
     font-family: 'Poppins', Arial, sans-serif;
     font-size: 20px;
 }
-.facility-modal__body > input#facilityName::placeholder,
-.facility-modal__body .facility-autocomplete-wrapper > input#facilityName::placeholder { color: #999; opacity: 1; }
-.facility-modal__body > input#facilityName:focus,
-.facility-modal__body .facility-autocomplete-wrapper > input#facilityName:focus {
+.facility-modal__body > input#facilityName::placeholder { color: #999; opacity: 1; }
+.facility-modal__body > input#facilityName:focus {
     border-color: #176f60;
     box-shadow: 0 0 0 2px rgba(23,111,96,.12);
-}
-
-/* Autocomplete saran nama wisata */
-.facility-autocomplete-wrapper {
-    position: relative;
-    width: min(538px, 100%);
-}
-.facility-autocomplete-wrapper > input#facilityName {
-    width: 100%;
-    padding-right: 48px;
-}
-.facility-dropdown-arrow {
-    position: absolute;
-    right: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #176f60;
-    font-size: 18px;
-    pointer-events: none;
-    transition: transform 0.2s ease;
-}
-.facility-autocomplete-wrapper.is-open .facility-dropdown-arrow {
-    transform: translateY(-50%) rotate(180deg);
-}
-.facility-suggestions {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
-    z-index: 9999;
-    background: #ffffff;
-    border: 1.5px solid #176f60;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
-    max-height: 250px;
-    overflow-y: auto;
-}
-.facility-suggestion-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 18px;
-    cursor: pointer;
-    border-bottom: 1px solid #edf2ef;
-    background: #fff;
-    transition: all 0.15s ease;
-}
-.facility-suggestion-item:last-child {
-    border-bottom: none;
-}
-.facility-suggestion-item:hover,
-.facility-suggestion-item.is-active {
-    background: #e6f4f1;
-}
-.facility-suggestion-info {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-.facility-suggestion-title {
-    font-family: 'Poppins', Arial, sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    color: #176f60;
-    line-height: 1.25;
-}
-.facility-suggestion-sub {
-    font-family: 'Poppins', Arial, sans-serif;
-    font-size: 12px;
-    color: #5a6d67;
-}
-.facility-suggestion-badge {
-    font-family: 'Poppins', Arial, sans-serif;
-    font-size: 11px;
-    color: #176f60;
-    background: rgba(23, 111, 96, 0.12);
-    padding: 3px 8px;
-    border-radius: 6px;
-    white-space: nowrap;
-    margin-left: 10px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-.facility-suggestion-empty {
-    padding: 16px;
-    font-family: 'Poppins', Arial, sans-serif;
-    font-size: 14px;
-    color: #71827d;
-    text-align: center;
 }
 .facility-field-error {
     min-height: 0;

@@ -12,8 +12,6 @@
 </FilesMatch>
 
 RewriteEngine On
-RewriteCond %{HTTP:Authorization} ^(.*)
-RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 RewriteRule ^search/?$ FrontEnd/pages/hasil_pencarian.php [QSA,L]
 RewriteRule ^api/destinations/search/?$ Backend/api/destinations_search.php [QSA,L]
 RewriteRule ^api/favorites/?$ Backend/api/favorites.php [QSA,L]

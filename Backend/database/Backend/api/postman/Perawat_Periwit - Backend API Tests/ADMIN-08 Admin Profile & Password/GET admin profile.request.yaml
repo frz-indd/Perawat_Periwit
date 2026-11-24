@@ -1,0 +1,13 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/api/admin/profile'
+order: 1000
+headers:
+  Accept: application/json
+  Authorization: 'Bearer {{adminJwtToken}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Profile returns 200', function(){pm.response.to.have.status(200);});
+      const d=pm.response.json().data; pm.test('Profile has safe fields',function(){pm.expect(d.id).to.be.a('number');pm.expect(d.name).to.be.a('string');pm.expect(d.username).to.be.a('string');pm.expect(d).not.to.have.property('password');pm.expect(d).not.to.have.property('password_hash');});

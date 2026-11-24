@@ -1,0 +1,12 @@
+$kind: http-request
+name: 'GET /wisata menyertakan foto'
+method: GET
+url: '{{baseUrl}}/Backend/api/wisata.php'
+order: 7000
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Tourism rows include IDs and photos', function () { pm.response.to.have.status(200); const rows=pm.response.json().data; pm.expect(rows).to.be.an('array').that.is.not.empty; rows.forEach(x => {pm.expect(x.id_wisata).to.match(/^[KM][0-9]{5,}$/); pm.expect(x.gambar).to.be.a('string').and.not.empty;}); });

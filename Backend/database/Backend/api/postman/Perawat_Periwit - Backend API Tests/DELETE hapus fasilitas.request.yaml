@@ -1,0 +1,12 @@
+$kind: http-request
+method: DELETE
+url: '{{baseUrl}}/api/admin/facilities/{{facilityId}}'
+order: 23000
+headers:
+  Accept: application/json
+  Authorization: 'Bearer {{adminJwtToken}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Delete facility returns 200 or 404', function () { pm.expect([200,404]).to.include(pm.response.code); });

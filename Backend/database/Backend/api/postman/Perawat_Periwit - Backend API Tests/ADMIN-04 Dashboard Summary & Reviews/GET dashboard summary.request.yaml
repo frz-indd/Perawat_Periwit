@@ -1,0 +1,12 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/api/admin/dashboard/summary'
+order: 1000
+headers:
+  Accept: application/json
+  Authorization: 'Bearer {{adminJwtToken}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Dashboard summary returns 200', function () { pm.response.to.have.status(200); const d=pm.response.json().data; ['total_wisata','total_kategori','total_pengguna','total_ulasan'].forEach(k => pm.expect(d[k]).to.be.a('number')); });

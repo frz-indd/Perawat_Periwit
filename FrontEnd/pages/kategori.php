@@ -10,16 +10,16 @@ $categoryRoutes = [
     "sejarah-budaya" => 2
 ];
 $categoryDisplayNames = [
-    1 => "Wisata Alam & Pegunungan",
+    1 => "Wisata Alam & pegunungan",
     4 => "Wisata Air & Curug",
     3 => "Wisata Buatan & Kuliner",
     2 => "Wisata Sejarah & Budaya"
 ];
 $categoryHeroNames = [
-    1 => "Wisata Alam dan Pegunungan",
-    4 => "Wisata Air dan Curug",
-    3 => "Wisata Buatan dan Kuliner",
-    2 => "Wisata Sejarah dan Budaya"
+    1 => "Wisata Alam & pegunungan",
+    4 => "Wisata Air & Curug",
+    3 => "Wisata Buatan & Kuliner",
+    2 => "Wisata Sejarah & Budaya"
 ];
 $categoryHeroDescriptions = [
     1 => "Nikmati keindahan alam Majalengka dan Kuningan dari perbukitan, hingga panorama menakjubkan",

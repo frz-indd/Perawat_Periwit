@@ -1,0 +1,34 @@
+$kind: http-request
+name: 'GET /api/admin/users - search & pagination'
+method: GET
+url: '{{baseUrl}}/api/admin/users?search={{userSearch}}&page={{userPage}}&limit={{userLimit}}'
+order: 24000
+headers:
+  Accept: application/json
+  Authorization: 'Bearer {{adminJwtToken}}'
+queryParams:
+  - key: search
+    value: '{{userSearch}}'
+    description: 'Pencarian nama atau email'
+  - key: page
+    value: '{{userPage}}'
+  - key: limit
+    value: '{{userLimit}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Admin users returns paginated data', function () {
+        pm.response.to.have.status(200);
+        const body = pm.response.json();
+        pm.expect(body.status).to.eql('success');
+        pm.expect(body.data).to.be.an('array');
+        pm.expect(body.pagination).to.have.property('current_page');
+        pm.expect(body.pagination).to.have.property('total_data');
+        body.data.forEach(function (user) {
+          pm.expect(user).to.have.property('id');
+          pm.expect(user).to.have.property('nama');
+          pm.expect(user).to.have.property('email');
+          pm.expect(user).not.to.have.property('password');
+        });
+      });

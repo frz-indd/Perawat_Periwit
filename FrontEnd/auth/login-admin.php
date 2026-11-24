@@ -54,21 +54,7 @@ function e(string $value): string
     >
 
     <link rel="stylesheet" href="../CSS/theme.css?v=admin-design-1">
-    <link rel="stylesheet" href="../CSS/login-admin.css?v=<?= time() ?>">
-    <style>
-        input[type="password"]::-ms-reveal,
-        input[type="password"]::-ms-clear,
-        .field__input--password::-ms-reveal,
-        .field__input--password::-ms-clear,
-        #password::-ms-reveal,
-        #password::-ms-clear {
-            display: none !important;
-            width: 0 !important;
-            height: 0 !important;
-            visibility: hidden !important;
-            pointer-events: none !important;
-        }
-    </style>
+    <link rel="stylesheet" href="../CSS/login-admin.css?v=admin-design-8">
 </head>
 
 <body class="admin-auth-page <?= $isUnauthorized ? 'page-unauthorized' : 'page-login' ?>">

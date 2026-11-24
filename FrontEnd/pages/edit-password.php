@@ -210,7 +210,7 @@ header('Cache-Control: no-store');
             <span class="ep-menu__panah" aria-hidden="true"></span>
           </summary>
           <div class="category-menu">
-            <a href="kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a>
+            <a href="kategori.php?kategori=alam">Wisata Alam &amp; pegunungan</a>
             <a href="kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a>
             <a href="kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a>
             <a href="kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a>
