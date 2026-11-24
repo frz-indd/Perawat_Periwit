@@ -160,15 +160,21 @@ body.admin-auth-page {
     padding-right: 6rem;
 }
 
-.field__input--password::-ms-reveal,
-.field__input--password::-ms-clear,
-.field__input::-ms-reveal,
-.field__input::-ms-clear,
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+.field__input--password::-ms-reveal,
+.field__input--password::-ms-clear {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    visibility: hidden !important;
     pointer-events: none !important;
 }
 
