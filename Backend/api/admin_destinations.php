@@ -40,13 +40,13 @@ try {
     if($id!==''){ $where[]='w.id_wisata=?'; $params[]=$id; $types.='s'; }
     $whereSql='WHERE '.implode(' AND ',$where);
     $count=$conn->prepare("SELECT COUNT(*) total FROM wisata w $whereSql"); if($types) $count->bind_param($types,...$params); $count->execute(); $total=(int)$count->get_result()->fetch_assoc()['total'];
-    $sql="SELECT w.id_wisata,w.nama_wisata,w.deskripsi,w.domisili,w.harga_tiket,w.alamat,w.Maps_Wisata,w.jam_buka,w.jam_tutup,w.latitude,w.longitude,w.id_kategori,k.nama_kategori,(SELECT AVG(u.rating) FROM ulasan u WHERE u.Id_wisata=w.id_wisata) rating,(SELECT f.link_foto FROM foto_wisata f WHERE f.id_wisata=w.id_wisata ORDER BY f.Id_foto DESC LIMIT 1) image FROM wisata w LEFT JOIN kategori k ON k.Id_kategori=w.id_kategori $whereSql ORDER BY w.nama_wisata LIMIT ? OFFSET ?";
+    $sql="SELECT w.id_wisata,w.nama_wisata,w.deskripsi,w.domisili,w.harga_tiket,w.alamat,w.Maps_Wisata,w.jam_buka,w.jam_tutup,w.hari_operasional,w.jam_operasional,w.latitude,w.longitude,w.id_kategori,k.nama_kategori,(SELECT AVG(u.rating) FROM ulasan u WHERE u.Id_wisata=w.id_wisata) rating,(SELECT f.link_foto FROM foto_wisata f WHERE f.id_wisata=w.id_wisata ORDER BY f.Id_foto DESC LIMIT 1) image FROM wisata w LEFT JOIN kategori k ON k.Id_kategori=w.id_kategori $whereSql ORDER BY w.nama_wisata LIMIT ? OFFSET ?";
     $stmt=$conn->prepare($sql); $bt=$types.'ii'; $bv=array_merge($params,[$limit,$offset]); $stmt->bind_param($bt,...$bv); $stmt->execute(); $rs=$stmt->get_result(); $data=[];
-    while($r=$rs->fetch_assoc()) $data[]=['id'=>$r['id_wisata'],'name'=>$r['nama_wisata'],'region'=>$r['domisili'],'kabupaten'=>$r['domisili'],'category'=>$r['nama_kategori']??'-','category_detail'=>['id'=>(int)$r['id_kategori'],'name'=>$r['nama_kategori']??''],'price'=>(float)$r['harga_tiket'],'rating'=>$r['rating']!==null?round((float)$r['rating'],1):null,'maps_url'=>$r['Maps_Wisata'],'image'=>$r['image'],'image_url'=>$r['image'],'description'=>$r['deskripsi'],'address'=>$r['alamat'],'open_time'=>$r['jam_buka'],'close_time'=>$r['jam_tutup'],'latitude'=>$r['latitude'],'longitude'=>$r['longitude']];
+    while($r=$rs->fetch_assoc()) $data[]=['id'=>$r['id_wisata'],'name'=>$r['nama_wisata'],'region'=>$r['domisili'],'kabupaten'=>$r['domisili'],'category'=>$r['nama_kategori']??'-','category_detail'=>['id'=>(int)$r['id_kategori'],'name'=>$r['nama_kategori']??''],'price'=>(float)$r['harga_tiket'],'rating'=>$r['rating']!==null?round((float)$r['rating'],1):null,'maps_url'=>$r['Maps_Wisata'],'image'=>$r['image'],'image_url'=>$r['image'],'description'=>$r['deskripsi'],'address'=>$r['alamat'],'open_time'=>$r['jam_buka'],'close_time'=>$r['jam_tutup'],'operating_days'=>$r['hari_operasional'],'operating_hours'=>$r['jam_operasional'],'latitude'=>$r['latitude'],'longitude'=>$r['longitude']];
     respond(['status'=>'success','total'=>$total,'total_data'=>$total,'total_page'=>(int)ceil($total/$limit),'current_page'=>$page,'per_page'=>$limit,'data'=>$data]);
  }
  if($method==='POST') {
-    $name=trim((string)($_POST['name']??'')); $region=trim((string)($_POST['domisili']??$_POST['kabupaten_id']??'')); $cat=(int)($_POST['category_id']??0); $price=(float)($_POST['price']??0); $maps=trim((string)($_POST['maps_url']??'')); $description=trim((string)($_POST['description']??'')); $openTime=trim((string)($_POST['open_time']??'')); $closeTime=trim((string)($_POST['close_time']??''));
+    $name=trim((string)($_POST['name']??'')); $region=trim((string)($_POST['domisili']??$_POST['kabupaten_id']??'')); $cat=(int)($_POST['category_id']??0); $price=(float)($_POST['price']??0); $maps=trim((string)($_POST['maps_url']??'')); $description=trim((string)($_POST['description']??'')); $days=trim((string)($_POST['operating_days']??'')); $hours=trim((string)($_POST['operating_hours']??'')); $openTime=trim((string)($_POST['open_time']??'')); $closeTime=trim((string)($_POST['close_time']??''));
     $latitudeRaw=trim((string)($_POST['latitude']??'')); $longitudeRaw=trim((string)($_POST['longitude']??''));
     if($name===''||$region===''||$cat<1) respond(['status'=>'error','message'=>'Nama wisata, wilayah, dan kategori wajib diisi.'],400);
     if(($latitudeRaw==='')!==($longitudeRaw==='')) respond(['status'=>'error','message'=>'Latitude dan longitude harus diisi bersama.'],400);
@@ -55,23 +55,23 @@ try {
     $check=$conn->prepare('SELECT Id_kategori FROM kategori WHERE Id_kategori=? AND aktif=1'); $check->bind_param('i',$cat); $check->execute(); if(!$check->get_result()->fetch_assoc()) respond(['status'=>'error','message'=>'Kategori tidak ditemukan.'],400);
     $id=destinationId($conn,$region); $photo=uploadPhoto($conn,$id);
     $openTime = $openTime !== '' ? $openTime : null; $closeTime = $closeTime !== '' ? $closeTime : null;
-    $stmt=$conn->prepare('INSERT INTO wisata (id_wisata,id_kategori,nama_wisata,deskripsi,harga_tiket,domisili,jam_buka,jam_tutup,Maps_Wisata,latitude,longitude,aktif) VALUES (?,?,?,?,?,?,?,?,?,?,?,1)');
-    $stmt->bind_param('sissdssssdd',$id,$cat,$name,$description,$price,$region,$openTime,$closeTime,$maps,$latitude,$longitude);
+    $stmt=$conn->prepare('INSERT INTO wisata (id_wisata,id_kategori,nama_wisata,deskripsi,hari_operasional,jam_operasional,harga_tiket,domisili,jam_buka,jam_tutup,Maps_Wisata,latitude,longitude,aktif) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,1)');
+    $stmt->bind_param('sissssdssssdd',$id,$cat,$name,$description,$days,$hours,$price,$region,$openTime,$closeTime,$maps,$latitude,$longitude);
     $stmt->execute();
     if($photo){ $p=$conn->prepare('INSERT INTO foto_wisata (id_wisata,Nama_Foto,link_foto) VALUES (?,?,?)'); $base=basename($photo); $p->bind_param('sss',$id,$base,$photo); $p->execute(); }
     respond(['status'=>'success','message'=>'Data wisata berhasil ditambahkan.','data'=>['id'=>$id]],201);
  }
  if($method==='PUT') {
     $id=trim((string)($_GET['id']??'')); if($id==='') respond(['status'=>'error','message'=>'ID wisata tidak valid.'],400);
-    $name=trim((string)($_POST['name']??'')); $region=trim((string)($_POST['domisili']??$_POST['kabupaten_id']??'')); $cat=(int)($_POST['category_id']??0); $price=(float)($_POST['price']??0); $maps=trim((string)($_POST['maps_url']??'')); $description=trim((string)($_POST['description']??'')); $openTime=trim((string)($_POST['open_time']??'')); $closeTime=trim((string)($_POST['close_time']??''));
+    $name=trim((string)($_POST['name']??'')); $region=trim((string)($_POST['domisili']??$_POST['kabupaten_id']??'')); $cat=(int)($_POST['category_id']??0); $price=(float)($_POST['price']??0); $maps=trim((string)($_POST['maps_url']??'')); $description=trim((string)($_POST['description']??'')); $days=trim((string)($_POST['operating_days']??'')); $hours=trim((string)($_POST['operating_hours']??'')); $openTime=trim((string)($_POST['open_time']??'')); $closeTime=trim((string)($_POST['close_time']??''));
     $latitudeRaw=trim((string)($_POST['latitude']??'')); $longitudeRaw=trim((string)($_POST['longitude']??''));
     if($name===''||$region===''||$cat<1) respond(['status'=>'error','message'=>'Nama wisata, wilayah, dan kategori wajib diisi.'],400);
     if(($latitudeRaw==='')!==($longitudeRaw==='')) respond(['status'=>'error','message'=>'Latitude dan longitude harus diisi bersama.'],400);
     if($latitudeRaw!=='' && (!is_numeric($latitudeRaw)||!is_numeric($longitudeRaw)||(float)$latitudeRaw < -90||(float)$latitudeRaw > 90||(float)$longitudeRaw < -180||(float)$longitudeRaw > 180)) respond(['status'=>'error','message'=>'Koordinat latitude atau longitude tidak valid.'],400);
     $latitude=$latitudeRaw===''?null:(float)$latitudeRaw; $longitude=$longitudeRaw===''?null:(float)$longitudeRaw;
     $openTime = $openTime !== '' ? $openTime : null; $closeTime = $closeTime !== '' ? $closeTime : null;
-    $stmt=$conn->prepare('UPDATE wisata SET nama_wisata=?,deskripsi=?,domisili=?,id_kategori=?,harga_tiket=?,jam_buka=?,jam_tutup=?,Maps_Wisata=?,latitude=?,longitude=? WHERE id_wisata=?');
-    $stmt->bind_param('sssidsssdds',$name,$description,$region,$cat,$price,$openTime,$closeTime,$maps,$latitude,$longitude,$id); $stmt->execute();
+    $stmt=$conn->prepare('UPDATE wisata SET nama_wisata=?,deskripsi=?,hari_operasional=?,jam_operasional=?,domisili=?,id_kategori=?,harga_tiket=?,jam_buka=?,jam_tutup=?,Maps_Wisata=?,latitude=?,longitude=? WHERE id_wisata=?');
+    $stmt->bind_param('sssssidsssdds',$name,$description,$days,$hours,$region,$cat,$price,$openTime,$closeTime,$maps,$latitude,$longitude,$id); $stmt->execute();
     $photo=uploadPhoto($conn,$id); if($photo){ $p=$conn->prepare('INSERT INTO foto_wisata (id_wisata,Nama_Foto,link_foto) VALUES (?,?,?)'); $base=basename($photo); $p->bind_param('sss',$id,$base,$photo); $p->execute(); }
     respond(['status'=>'success','message'=>'Data wisata berhasil diperbarui.']);
  }

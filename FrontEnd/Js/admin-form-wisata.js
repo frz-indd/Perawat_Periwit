@@ -11,6 +11,7 @@
         name: document.getElementById('destinationName'),
         region: document.getElementById('destinationRegion'),
         category: document.getElementById('destinationCategory'),
+        days: document.getElementById('destinationDays'),
         price: document.getElementById('destinationPrice'),
         maps: document.getElementById('destinationMaps'),
         longitude: document.getElementById('destinationLongitude'),
@@ -220,11 +221,12 @@
         elements.name.value = item.name || '';
         const description = document.getElementById('destinationDescription');
         if (description) description.value = item.description || '';
+        if (elements.days) elements.days.value = item.operating_days || item.hari_operasional || '';
         const hours = document.getElementById('destinationHours');
         if (hours) {
             const open = item.open_time || item.jam_buka || '';
             const close = item.close_time || item.jam_tutup || '';
-            hours.value = open && close ? String(open).slice(0, 5) + ' - ' + String(close).slice(0, 5) : '';
+            hours.value = open && close ? String(open).slice(0, 5) + ' - ' + String(close).slice(0, 5) : (item.operating_hours || item.jam_operasional || '');
         }
 
         // API dapat mengirim wilayah/kategori sebagai ID, objek, atau nama teks.
@@ -319,8 +321,10 @@
         formData.append('name', elements.name.value.trim());
         const description = document.getElementById('destinationDescription');
         if (description) formData.append('description', description.value.trim());
+        if (elements.days) formData.append('operating_days', elements.days.value.trim());
         const hours = document.getElementById('destinationHours');
         if (hours && hours.value.trim()) {
+            formData.append('operating_hours', hours.value.trim());
             const timeParts = hours.value.split(/\s*(?:-|–|—|sampai)\s*/i);
             if (timeParts.length === 2) {
                 formData.append('open_time', timeParts[0].trim());
