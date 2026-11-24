@@ -12,16 +12,32 @@ function extractBearerToken(): ?string
 {
     $authHeader = '';
 
-    if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
-        $authHeader = (string) $_SERVER['HTTP_AUTHORIZATION'];
-    } elseif (!empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
-        $authHeader = (string) $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
-    } elseif (function_exists('apache_request_headers')) {
+    // Hosting Apache/FastCGI tertentu tidak meneruskan Authorization secara otomatis.
+    foreach (['HTTP_AUTHORIZATION', 'REDIRECT_HTTP_AUTHORIZATION'] as $serverKey) {
+        if (!empty($_SERVER[$serverKey])) {
+            $authHeader = trim((string) $_SERVER[$serverKey]);
+            break;
+        }
+    }
+
+    // Fallback header untuk variasi konfigurasi Apache/proxy.
+    if ($authHeader === '' && function_exists('getallheaders')) {
+        $headers = getallheaders();
+        if (is_array($headers)) {
+            foreach ($headers as $key => $value) {
+                if (strcasecmp((string) $key, 'Authorization') === 0) {
+                    $authHeader = trim((string) $value);
+                    break;
+                }
+            }
+        }
+    }
+    if ($authHeader === '' && function_exists('apache_request_headers')) {
         $headers = apache_request_headers();
         if (is_array($headers)) {
             foreach ($headers as $key => $value) {
-                if (strcasecmp($key, 'Authorization') === 0) {
-                    $authHeader = (string) $value;
+                if (strcasecmp((string) $key, 'Authorization') === 0) {
+                    $authHeader = trim((string) $value);
                     break;
                 }
             }
@@ -30,6 +46,12 @@ function extractBearerToken(): ?string
 
     if (preg_match('/^\s*Bearer\s+(.+)$/i', $authHeader, $matches)) {
         return trim($matches[1]);
+    }
+
+    // Fallback cookie same-origin jika hosting menghapus Authorization.
+    $cookieToken = $_COOKIE['admin_token'] ?? '';
+    if (is_string($cookieToken) && trim($cookieToken) !== '') {
+        return trim($cookieToken);
     }
 
     return null;
