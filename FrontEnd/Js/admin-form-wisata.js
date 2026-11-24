@@ -108,24 +108,48 @@
     document.addEventListener('keydown', function (event) { if (event.key === 'Escape') closePopup(); });
 
     function addOptions(select, items, placeholder) {
-        items.forEach(function (item) {
-            const option = document.createElement('option');
-            option.value = String(item.id);
-            option.textContent = item.name;
+        // Kosongkan opsi lama agar pemanggilan ulang API tidak menumpuk pilihan.
+        select.replaceChildren();
+
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = placeholder || 'Pilih';
+        select.appendChild(placeholderOption);
+
+        const seenLabels = new Set();
+        const seenValues = new Set();
+
+        (Array.isArray(items) ? items : []).forEach(function (item) {
+            if (!item || item.id === undefined || item.id === null) return;
+
+            let label = String(item.name || '').trim();
+            if (!label) return;
+
             if (select === elements.category) {
-                const raw = String(item.name || '').toLocaleLowerCase('id-ID');
-                if (raw.includes('alam') || raw.includes('gunung')) option.textContent = 'Wisata Alam & pegunungan';
-                else if (raw.includes('air') || raw.includes('curug')) option.textContent = 'Wisata Air & Curug';
-                else if (raw.includes('buatan') || raw.includes('kuliner')) option.textContent = 'Wisata Buatan & Kuliner';
-                else if (raw.includes('sejarah') || raw.includes('budaya')) option.textContent = 'Wisata Sejarah & Budaya';
+                const raw = label.toLocaleLowerCase('id-ID');
+                if (raw.includes('alam') || raw.includes('gunung')) label = 'Wisata Alam & pegunungan';
+                else if (raw.includes('air') || raw.includes('curug')) label = 'Wisata Air & Curug';
+                else if (raw.includes('buatan') || raw.includes('kuliner')) label = 'Wisata Buatan & Kuliner';
+                else if (raw.includes('sejarah') || raw.includes('budaya')) label = 'Wisata Sejarah & Budaya';
             } else if (select === elements.region) {
-                const raw = String(item.name || '').toLocaleLowerCase('id-ID');
-                if (raw.includes('majalengka')) option.textContent = 'Majalengka';
-                else if (raw.includes('kuningan')) option.textContent = 'Kuningan';
+                const raw = label.toLocaleLowerCase('id-ID');
+                if (raw.includes('majalengka')) label = 'Majalengka';
+                else if (raw.includes('kuningan')) label = 'Kuningan';
             }
+
+            // Bandingkan label secara case-insensitive dan abaikan spasi ganda.
+            const labelKey = label.normalize('NFKC').replace(/\s+/g, ' ').trim().toLocaleLowerCase('id-ID');
+            const value = String(item.id).trim();
+            if (!value || seenLabels.has(labelKey) || seenValues.has(value)) return;
+
+            seenLabels.add(labelKey);
+            seenValues.add(value);
+
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = label;
             select.appendChild(option);
         });
-        if (placeholder) select.options[0].textContent = placeholder;
     }
 
     async function loadSelectOptions() {

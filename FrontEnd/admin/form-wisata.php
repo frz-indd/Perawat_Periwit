@@ -145,11 +145,7 @@ $destinationId = isset($_GET['id'])
     <script>
         window.adminWisataConfig = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
-<<<<<<< HEAD
-    <script src="../Js/admin-form-wisata.js?v=20261124-edit-region-fix-v1"></script>
-=======
-    <script src="../Js/admin-form-wisata.js?v=20261124-edit-populate-fix-v2"></script>
->>>>>>> 379dd8c84f51634b493ca4de08e0b598c568a6db
+    <script src="../Js/admin-form-wisata.js?v=20261125-dropdown-dedupe-v1"></script>
 <script src="../Js/admin-custom-dropdowns.js?v=20261124-same-dropdown-arrow-v4"></script>
 <script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
