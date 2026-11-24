@@ -82,8 +82,32 @@ $destinationId = isset($_GET['id'])
                     <input class="form-control" id="destinationDays" name="operating_days" type="text" maxlength="120" placeholder="Contoh : Senin - Jum’at">
                 </div>
                 <div class="admin-field">
-                    <label for="destinationHours">Jam Operasional</label>
-                    <input class="form-control" id="destinationHours" name="operating_hours" type="text" maxlength="120" placeholder="Contoh : 08:00 - 17:00">
+                    <label>Jam Operasional</label>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <select class="form-control" id="destinationOpenTime" name="open_time">
+                            <option value="">-- Jam Buka --</option>
+                            <?php
+                            for ($h = 0; $h < 24; $h++) {
+                                foreach (['00','30'] as $m) {
+                                    $val = sprintf('%02d:%s', $h, $m);
+                                    echo "<option value=\"$val\">$val</option>\n";
+                                }
+                            }
+                            ?>
+                        </select>
+                        <span style="white-space:nowrap;">s/d</span>
+                        <select class="form-control" id="destinationCloseTime" name="close_time">
+                            <option value="">-- Jam Tutup --</option>
+                            <?php
+                            for ($h = 0; $h < 24; $h++) {
+                                foreach (['00','30'] as $m) {
+                                    $val = sprintf('%02d:%s', $h, $m);
+                                    echo "<option value=\"$val\">$val</option>\n";
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
                 </div>
                 <div class="admin-field">
                     <label for="destinationPrice">Harga Tiket masuk (Rp)</label>

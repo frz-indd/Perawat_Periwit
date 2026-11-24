@@ -196,11 +196,26 @@
         elements.name.value = item.name || '';
         const description = document.getElementById('destinationDescription');
         if (description) description.value = item.description || '';
-        const hours = document.getElementById('destinationHours');
-        if (hours) {
-            const open = item.open_time || item.jam_buka || '';
-            const close = item.close_time || item.jam_tutup || '';
-            hours.value = open && close ? String(open).slice(0, 5) + ' - ' + String(close).slice(0, 5) : '';
+        // Jam buka & tutup – gunakan dropdown select
+        const openSelect = document.getElementById('destinationOpenTime');
+        const closeSelect = document.getElementById('destinationCloseTime');
+        if (openSelect && closeSelect) {
+            const open = String(item.open_time || item.jam_buka || '').slice(0, 5);
+            const close = String(item.close_time || item.jam_tutup || '').slice(0, 5);
+            // Pilih opsi yang cocok; kalau tidak ada, buat opsi baru
+            function selectOrAdd(sel, val) {
+                if (!val) return;
+                const hh = val.length === 5 ? val : '';
+                const existing = Array.from(sel.options).find(o => o.value === hh);
+                if (existing) {
+                    sel.value = hh;
+                } else if (hh) {
+                    const opt = new Option(hh, hh, true, true);
+                    sel.add(opt);
+                }
+            }
+            selectOrAdd(openSelect, open);
+            selectOrAdd(closeSelect, close);
         }
 
         // API dapat mengirim wilayah/kategori sebagai ID, objek, atau nama teks.
@@ -295,13 +310,14 @@
         formData.append('name', elements.name.value.trim());
         const description = document.getElementById('destinationDescription');
         if (description) formData.append('description', description.value.trim());
-        const hours = document.getElementById('destinationHours');
-        if (hours && hours.value.trim()) {
-            const timeParts = hours.value.split(/\s*(?:-|–|—|sampai)\s*/i);
-            if (timeParts.length === 2) {
-                formData.append('open_time', timeParts[0].trim());
-                formData.append('close_time', timeParts[1].trim());
-            }
+        // Jam buka & tutup dari dropdown select
+        const openSelect = document.getElementById('destinationOpenTime');
+        const closeSelect = document.getElementById('destinationCloseTime');
+        if (openSelect && openSelect.value.trim()) {
+            formData.append('open_time', openSelect.value.trim());
+        }
+        if (closeSelect && closeSelect.value.trim()) {
+            formData.append('close_time', closeSelect.value.trim());
         }
         formData.append('domisili', elements.region.value);
         formData.append('category_id', elements.category.value);
