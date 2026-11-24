@@ -775,3 +775,23 @@ body.facility-feedback-open{overflow:hidden}
 
 .facility-message{display:none!important}
 
+
+
+/* Autocomplete nama wisata pada modal Tambah Fasilitas */
+.facility-destination-autocomplete { position:relative; width:100%; }
+.facility-destination-autocomplete #facilityName { width:100%; }
+.facility-destination-suggestions {
+    position:absolute; z-index:1200; top:calc(100% + 4px); left:0; right:0;
+    max-height:230px; overflow-y:auto; padding:5px;
+    border:1px solid #9ac9bf; border-radius:10px; background:#fff;
+    box-shadow:0 8px 22px rgba(0,0,0,.13);
+}
+.facility-destination-suggestions[hidden] { display:none!important; }
+.facility-destination-suggestion {
+    display:block; width:100%; padding:10px 12px; border:0; border-radius:7px;
+    background:#fff; color:#174f45; text-align:left; font:inherit; cursor:pointer;
+}
+.facility-destination-suggestion:hover,
+.facility-destination-suggestion:focus { background:#e8f5f1; outline:none; }
+.facility-destination-suggestion small { display:block; margin-top:2px; color:#6b817b; font-size:12px; }
+.facility-destination-empty { padding:10px 12px; color:#687a75; font-size:13px; }
