@@ -27,7 +27,7 @@ function facility_svg_icon(string $code): string {
  $file = $icons[$code] ?? null;
  return $file ? '<img src="../assets/icons/' . $file . '" alt="" aria-hidden="true" loading="eager">' : '';
 }
-$config = ['apiDashboardUrl'=>$appBasePath.'/api/admin/dashboad',
+$config = ['apiDashboardUrl'=>$appBasePath.'/api/admin/dashboard',
            'apiLogoutUrl'=>$appBasePath.'/api/admin/logout',
            'apiUrl'=>$appBasePath.$section['api'],
            'apiDestinationsSearchUrl'=>$appBasePath.'/api/destinations/search',

@@ -7,6 +7,12 @@ require_once __DIR__ . '/../middleware/auth.php'; // adminOnly() defined here
 require_once __DIR__ . '/../database/koneksi.php';
 
 $method = $_SERVER['REQUEST_METHOD'] ?? '';
+if ($method === 'POST') {
+    $override = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? ($_POST['_method'] ?? '');
+    if (in_array(strtoupper($override), ['PUT', 'DELETE'], true)) {
+        $method = strtoupper($override);
+    }
+}
 $adminPayload = adminOnly(); // ensures admin role, exits on failure
 
 switch ($method) {
