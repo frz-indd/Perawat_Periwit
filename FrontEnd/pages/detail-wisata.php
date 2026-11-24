@@ -448,7 +448,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
 
     <link rel="stylesheet" href="../CSS/edit-profil.css?v=20261031">
     <link rel="stylesheet" href="../CSS/theme.css?v=nav-final-7">
-    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=final-24">
+    <link rel="stylesheet" href="../CSS/detail-wisata.css?v=scroll-fix-20261125">
     <link rel="stylesheet" href="../CSS/\1category-item-solid-1">
 </head>
 <body class="halaman-detail site-navbar-page">

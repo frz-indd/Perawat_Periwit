@@ -2419,3 +2419,35 @@ body.halaman-detail.site-navbar-page .detail {
         height: 100%;
     }
 }
+
+/* FIX: hero/detail wisata ikut menggulir bersama halaman; hanya navbar yang menetap. */
+body.halaman-detail.site-navbar-page .hero-wisata {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    z-index: 1 !important;
+    width: 100%;
+    height: calc(var(--hero-h) + var(--tutup)) !important;
+    margin: var(--nav-h) 0 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+body.halaman-detail.site-navbar-page .detail {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    z-index: 2 !important;
+    margin-top: -24px !important;
+}
+
+@media (max-width: 900px) {
+    body.halaman-detail.site-navbar-page .hero-wisata {
+        margin-top: 90px !important;
+        height: calc(var(--hero-h) + var(--tutup)) !important;
+    }
+}
