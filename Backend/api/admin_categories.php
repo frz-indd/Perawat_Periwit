@@ -32,42 +32,4 @@ switch ($method) {
         ], JSON_UNESCAPED_UNICODE);
         break;
 
-    case 'POST':
-        $payload = json_decode(file_get_contents('php://input'), true);
-        $name = trim($payload['name'] ?? '');
-        $sortOrder = isset($payload['sort_order']) ? (int) $payload['sort_order'] : 0;
-
-        if ($name === '') {
-            http_response_code(400);
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Semua field wajib diisi dengan benar.'
-            ], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-        // Check duplicate name
-        $dup = $conn->prepare('SELECT 1 FROM kategori WHERE nama_kategori = ?');
-        $dup->bind_param('s', $name);
-        $dup->execute();
-        if ($dup->get_result()->fetch_row()) {
-            http_response_code(409);
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Nama kategori sudah ada.'
-            ], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-        $stmt = $conn->prepare('INSERT INTO kategori (nama_kategori, sort_order, aktif) VALUES (?, ?, 1)');
-        $stmt->bind_param('si', $name, $sortOrder);
-        $stmt->execute();
-        $newId = $stmt->insert_id;
-        http_response_code(201);
-        echo json_encode([
-            'status' => 'success',
-            'message' => 'Kategori berhasil dibuat.',
-            'data' => ['id' => $newId]
-        ], JSON_UNESCAPED_UNICODE);
-        break;
-}
-?>
-
+   
