@@ -61,27 +61,12 @@ $config = ['apiDashboardUrl'=>$appBasePath.'/api/admin/dashboard',
     <h2 id="facilityModalTitle">Tambah Fasilitas</h2>
     <p class="facility-modal__subtitle">Lengkapi informasi destinasi wisata dengan detail dan benar.</p>
 
-<label for="facilityName">Nama wisata</label>
-
-<div class="wisata-autocomplete">
-    <input
-        id="facilityName"
-        name="name"
-        type="text"
-        maxlength="150"
-        placeholder="Masukkan nama destinasi wisata"
-        autocomplete="off"
-    >
-
-    <div id="wisataSuggestions"
-         class="wisata-suggestions"
-         hidden>
+    <label for="facilityName">Nama wisata</label>
+    <div class="facility-autocomplete-wrapper">
+     <input id="facilityName" name="name" type="text" maxlength="150" placeholder="Masukkan nama destinasi wisata" autocomplete="off">
+     <div id="facilitySuggestions" class="facility-suggestions" hidden></div>
     </div>
-</div>
-
-<p class="facility-field-error"
-   id="facilityNameError"
-   role="alert"></p>
+    <p class="facility-field-error" id="facilityNameError" role="alert"></p>
 
     <div class="facility-options-heading">
      <h3>Pilih Fasilitas</h3>
