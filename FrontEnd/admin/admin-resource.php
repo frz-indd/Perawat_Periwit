@@ -63,7 +63,8 @@ $config = ['apiDashboardUrl'=>$appBasePath.'/api/admin/dashboard',
 
     <label for="facilityName">Nama wisata</label>
     <div class="facility-autocomplete-wrapper">
-     <input id="facilityName" name="name" type="text" maxlength="150" placeholder="Masukkan nama destinasi wisata" autocomplete="off">
+     <input id="facilityName" name="name" type="text" maxlength="150" placeholder="Ketik minimal 2 huruf untuk cari wisata..." autocomplete="off">
+     <span class="facility-dropdown-arrow" aria-hidden="true"><i class="bi bi-chevron-down"></i></span>
      <div id="facilitySuggestions" class="facility-suggestions" hidden></div>
     </div>
     <p class="facility-field-error" id="facilityNameError" role="alert"></p>
@@ -303,6 +304,7 @@ function setupFacilities(){
 function setupFacilityTourismAutocomplete(){
  const input=document.getElementById('facilityName');
  const box=document.getElementById('facilitySuggestions');
+ const wrapper=input?.closest('.facility-autocomplete-wrapper');
  if(!input||!box)return;
  let debounceTimer=null;
  let activeIndex=-1;
@@ -310,6 +312,7 @@ function setupFacilityTourismAutocomplete(){
  function closeSuggestions(){
   box.innerHTML='';
   box.hidden=true;
+  if(wrapper)wrapper.classList.remove('is-open');
   activeIndex=-1;
  }
 
@@ -336,8 +339,9 @@ function setupFacilityTourismAutocomplete(){
     const json=await res.json();
     const list=Array.isArray(json.data)?json.data:[];
     if(!list.length){
-     box.innerHTML='<div class="facility-suggestion-empty">Tidak ada nama wisata ditemukan</div>';
+     box.innerHTML='<div class="facility-suggestion-empty"><i class="bi bi-info-circle"></i> Tidak ada wisata yang cocok</div>';
      box.hidden=false;
+     if(wrapper)wrapper.classList.add('is-open');
      return;
     }
     box.innerHTML=list.slice(0,8).map((item,idx)=>{
@@ -345,14 +349,21 @@ function setupFacilityTourismAutocomplete(){
      const cat=item.category||item.nama_kategori||'';
      const region=item.kabupaten||item.region||item.domisili||'';
      const sub=cat||region?[cat,region].filter(Boolean).join(' • '):'';
-     return '<div class="facility-suggestion-item" data-index="'+idx+'" data-name="'+esc(name)+'"><div class="facility-suggestion-title">'+esc(name)+'</div>'+(sub?'<div class="facility-suggestion-sub">'+esc(sub)+'</div>':'')+'</div>';
+     return '<div class="facility-suggestion-item" data-index="'+idx+'" data-name="'+esc(name)+'" role="option">' +
+            '<div class="facility-suggestion-info">' +
+            '  <span class="facility-suggestion-title">'+esc(name)+'</span>' +
+            (sub ? '  <span class="facility-suggestion-sub">'+esc(sub)+'</span>' : '') +
+            '</div>' +
+            '<span class="facility-suggestion-badge"><i class="bi bi-check2"></i> Pilih</span>' +
+            '</div>';
     }).join('');
     box.hidden=false;
+    if(wrapper)wrapper.classList.add('is-open');
     activeIndex=-1;
    }catch(_){
     closeSuggestions();
    }
-  },250);
+  },200);
  });
 
  box.addEventListener('click',e=>{
