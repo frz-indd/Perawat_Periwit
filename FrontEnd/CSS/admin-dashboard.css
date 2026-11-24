@@ -337,9 +337,7 @@ body.admin-dashboard-page {
     text-align: center;
 }
 
-/* ---------- Halaman dashboard ---------- */
-/* Topbar "Admin 1" memakai gaya dari halaman Data Wisata (admin-data-wisata.css),
-   jadi tidak ada override .admin-topbar di sini. */
+/* ---------- Bagian bersama halaman admin (dipakai juga oleh Data Wisata dkk.) ---------- */
 
 body.admin-wisata-page {
     background: #fff;
@@ -403,6 +401,90 @@ body.admin-wisata-page .admin-page-heading p {
     border: 0;
 }
 
+/* =====================================================================
+   DASHBOARD ADMIN
+   Ukuran diturunkan dari desain Figma (frame 1080 x 768 px, sidebar 254 px).
+   Aturan tata letak halaman hanya aktif untuk body.admin-dashboard-home,
+   jadi halaman admin lain (Data Wisata, dll.) tidak ikut berubah.
+   ===================================================================== */
+
+/* ---------- Tata letak halaman ---------- */
+body.admin-wisata-page.admin-dashboard-home .admin-main {
+    position: relative;
+    padding: 98px 38px 30px 37px;
+}
+
+/* Topbar "Admin 1": berada di dalam <main>, jadi ikut tergulir bersama isi halaman */
+.dashboard-topbar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 62px;
+    padding: 0 44px 0 24px;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+}
+
+.dashboard-topbar__user {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #166c5c;
+    font-family: 'Frank Ruhl Libre', Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.dashboard-topbar__icon {
+    display: block;
+    flex: none;
+    width: 30px;
+    height: 30px;
+}
+
+.admin-route-error .dashboard-topbar {
+    display: none;
+}
+
+body.admin-wisata-page.admin-dashboard-home .admin-page-heading {
+    margin: 0 0 20px;
+    padding: 0;
+}
+
+body.admin-wisata-page.admin-dashboard-home .admin-page-heading h1 {
+    font-size: 30px;
+    line-height: 1.1;
+}
+
+body.admin-wisata-page.admin-dashboard-home .admin-page-heading p {
+    gap: 6px;
+    font-size: 16px;
+    line-height: 1.2;
+}
+
+body.admin-wisata-page.admin-dashboard-home .admin-page-heading__icon {
+    display: inline-block;
+    flex: none;
+    width: 21px;
+    height: 20px;
+    vertical-align: middle;
+    margin-left: 1px;
+}
+
+/* Saat state view tampil (gagal memuat / offline / server), hanya state view yang terlihat */
+body.admin-wisata-page .admin-content.has-state .admin-page-heading,
+body.admin-wisata-page .admin-content.has-state .dashboard-metrics,
+body.admin-wisata-page .admin-content.has-state .dashboard-recent {
+    display: none !important;
+}
+
+/* ---------- 4 kartu statistik ---------- */
 body.admin-wisata-page .dashboard-summary {
     margin-top: 0;
 }
@@ -410,58 +492,67 @@ body.admin-wisata-page .dashboard-summary {
 body.admin-wisata-page .dashboard-metrics {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
+    gap: 20px;
 }
 
-/* Kartu statistik: ikon + judul + angka berada di tengah kartu */
 body.admin-wisata-page .metric-card {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    min-height: 138px;
-    padding: 18px 18px 14px;
-    overflow: hidden;
+    justify-content: space-between;
+    container-type: inline-size;
+    min-height: 120px;
+    padding: 24px 12px 15px;
     border: 0;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, .28);
+    border-radius: 11px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, .18);
+    transition: transform .15s ease, box-shadow .15s ease;
 }
 
-body.admin-wisata-page .metric-card--wisata {
-    color: #3d8a50;
-    background: #b1eeab;
+body.admin-wisata-page .metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, .22);
 }
 
-body.admin-wisata-page .metric-card--kategori {
-    color: #2a62c4;
-    background: #66aee9;
+/* Elemen berstatus hidden harus benar-benar hilang (display dari kelas lain tidak boleh menimpa) */
+body.admin-wisata-page .metric-card [hidden] {
+    display: none !important;
 }
 
-body.admin-wisata-page .metric-card--ulasan {
-    color: #c48a00;
-    background: #f5e5b4;
-}
+body.admin-wisata-page .metric-card--wisata   { color: #428e47; background: #adeeaa; }
+body.admin-wisata-page .metric-card--kategori { color: #2266c5; background: #65aeea; }
+body.admin-wisata-page .metric-card--ulasan   { color: #c09002; background: #f4e4b4; }
+body.admin-wisata-page .metric-card--pengguna { color: #3e0c80; background: #af74fd; }
 
-body.admin-wisata-page .metric-card--pengguna {
-    color: #6a2bb8;
-    background: #ac6dff;
-}
+/* Warna ikon sesuai gambar */
+body.admin-wisata-page .metric-card--wisata .metric-card__icon   { color: #428e47; }
+body.admin-wisata-page .metric-card--kategori .metric-card__icon { color: #2266c5; }
+body.admin-wisata-page .metric-card--ulasan .metric-card__icon   { color: #c09002; }
+body.admin-wisata-page .metric-card--pengguna .metric-card__icon { color: #3e0c80; }
 
-.metric-card__top {
+/* Ukuran dan jarak ikon mengikuti lebar kartu (desain: kartu 192 px; ikon 40, 33, 38x36, 35x35 px) */
+body.admin-wisata-page .metric-card--wisata   { --icon-w: clamp(26px, 20.7cqw, 42px); --icon-h: clamp(26px, 20.7cqw, 42px); --icon-gap: clamp(6px, 8.4cqw, 16px); --icon-top: 0px; }
+body.admin-wisata-page .metric-card--kategori { --icon-w: clamp(22px, 17.3cqw, 36px); --icon-h: clamp(22px, 17.3cqw, 36px); --icon-gap: clamp(4px, 5.2cqw, 10px); --icon-top: -1px; }
+body.admin-wisata-page .metric-card--ulasan   { --icon-w: clamp(26px, 19.8cqw, 40px); --icon-h: clamp(25px, 19.3cqw, 39px); --icon-gap: clamp(6px, 8.9cqw, 16px); --icon-top: 0px; }
+body.admin-wisata-page .metric-card--pengguna { --icon-w: clamp(24px, 18.4cqw, 37px); --icon-h: clamp(23px, 17.9cqw, 36px); --icon-gap: clamp(5px, 5.7cqw, 12px); --icon-top: 2px; }
+
+/* Baris atas: ikon di kiri, label + angka di kanan (rata kiri), satu grup di tengah kartu */
+body.admin-wisata-page .metric-card__body {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    gap: 14px;
+    gap: var(--icon-gap, 12px);
     width: 100%;
 }
 
 body.admin-wisata-page .metric-card__icon {
-    display: block;
-    flex: 0 0 44px;
-    width: 44px;
-    height: 44px;
-    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 var(--icon-w, 36px);
+    width: var(--icon-w, 36px);
+    height: var(--icon-h, 36px);
+    margin: var(--icon-top, 0px) 0 0;
+    color: inherit;
     background: transparent;
     border-radius: 0;
 }
@@ -470,158 +561,152 @@ body.admin-wisata-page .metric-card__icon {
     display: block;
     width: 100%;
     height: 100%;
+    overflow: visible;
 }
 
-body.admin-wisata-page .metric-card__content {
+body.admin-wisata-page .metric-card__info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
     min-width: 0;
 }
 
-body.admin-wisata-page .metric-card__content p {
+body.admin-wisata-page .metric-card__label {
     margin: 0;
-    font-family: 'Frank Ruhl Libre', Georgia, serif;
-    font-size: 17px;
+    color: inherit;
+    font-family: 'Noto Serif', Georgia, serif;
+    font-size: 14px;
     font-weight: 600;
-    line-height: 1.2;
+    line-height: 1.25;
 }
 
-body.admin-wisata-page .metric-card--wisata .metric-card__content p {
-    color: #3d8a50;
-}
-
-body.admin-wisata-page .metric-card--kategori .metric-card__content p {
-    color: #1d57b0;
-}
-
-body.admin-wisata-page .metric-card--ulasan .metric-card__content p {
-    color: #c08a00;
-}
-
-body.admin-wisata-page .metric-card--pengguna .metric-card__content p {
-    color: #4b1c8f;
-}
-
-body.admin-wisata-page .metric-card__content strong {
+body.admin-wisata-page .metric-card__value {
     display: block;
-    margin-top: 0;
+    margin: 0;
     color: #000;
-    font-family: 'Noto Serif', 'Frank Ruhl Libre', Georgia, serif;
+    font-family: 'Noto Serif', Georgia, serif;
     font-size: 38px;
     font-weight: 700;
-    line-height: 1.15;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
 }
 
-.metric-card__trend {
+/* Baris tren: panah + "+N dr bulan lalu" / "Tetap" */
+body.admin-wisata-page .metric-card__trend {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    margin-top: 0;
+    gap: 6px;
+    width: 100%;
     color: #000;
     font-family: 'Noto Serif', Georgia, serif;
     font-size: 12px;
-    line-height: 1.2;
+    line-height: 16px;
 }
 
-.metric-card__trend svg {
+body.admin-wisata-page .metric-card__trend svg {
     flex: none;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
 }
 
-body.admin-wisata-page .dashboard-summary__message {
-    min-height: 0;
-    margin: 8px 2px 0;
-    color: #71817b;
+/* Data tren tidak tersedia: tampilkan angka saja, tetap di tengah kartu */
+body.admin-wisata-page .metric-card.is-no-trend {
+    justify-content: center;
+    padding-top: 15px;
+}
+
+/* Data statistik kosong: ikon + judul, lalu pesan dua baris di bawahnya */
+body.admin-wisata-page .metric-card.is-empty {
+    justify-content: flex-start;
+    gap: 8px;
+    padding-top: 26px;
+}
+
+body.admin-wisata-page .metric-card__empty {
+    width: 100%;
+    margin: 0;
+    color: #000;
+    font-family: 'Noto Serif', Georgia, serif;
     font-size: 11px;
+    font-weight: 400;
+    line-height: 1.4;
+    text-align: center;
 }
 
-body.admin-wisata-page .dashboard-summary__message:empty {
-    display: none;
-}
-
-body.admin-wisata-page .dashboard-summary__message.is-error {
-    color: #b42318;
-}
-
-/* ---------- Tabel Wisata Terbaru (ukuran mengikuti desain) ---------- */
+/* ---------- Tabel Wisata Terbaru ---------- */
 body.admin-wisata-page .dashboard-recent {
-    margin-top: 22px;
+    margin-top: 14px;
 }
 
 body.admin-wisata-page .dashboard-recent__heading {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 10px;
-    padding-left: 6px;
+    margin: 0 0 2px;
+    padding-left: 4px;
 }
 
 body.admin-wisata-page .dashboard-recent__heading h2 {
     margin: 0;
     color: #176f60;
     font-family: 'Frank Ruhl Libre', Georgia, serif;
-    font-size: 23px;
+    font-size: 19px;
     font-weight: 700;
     line-height: 1.2;
 }
 
+/* Lebar tabel 96% dari baris kartu, di tengah (desain: 721 px dari 751 px) */
 body.admin-wisata-page .dashboard-recent__table-wrap {
+    width: 96%;
+    margin: 0 auto;
     overflow-x: auto;
     overflow-y: hidden;
     background: #fff;
-    border: 1px solid #9a9a9a;
-    border-radius: 20px;
+    border: 1px solid #8d9a96;
+    border-radius: 18px;
 }
 
 body.admin-wisata-page .dashboard-recent__table {
     width: 100%;
-    min-width: 650px;
+    min-width: 680px;
     margin: 0;
     table-layout: fixed;
     border-collapse: separate;
     border-spacing: 0;
     font-family: 'Poppins', Arial, sans-serif;
-    font-size: 13px;
+    font-size: 12.5px;
 }
 
 body.admin-wisata-page .dashboard-recent__table thead th {
-    height: 56px;
-    padding: 8px 10px;
+    height: 52px;
+    padding: 6px 8px;
     color: #fff;
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 1.4;
+    font-size: 12.5px;
+    font-weight: 400;
+    line-height: 1.35;
     text-align: center;
     vertical-align: middle;
     background: #176f60;
     border: 0;
-    border-right: 1px solid rgba(0, 0, 0, .35);
-    border-bottom: 1.5px solid #9a9a9a;
-}
-
-body.admin-wisata-page .dashboard-recent__table thead th:first-child {
-    border-top-left-radius: 19px;
+    border-right: 1px solid #a8b1ae;
+    border-bottom: 2px solid #a8b1ae;
 }
 
 body.admin-wisata-page .dashboard-recent__table thead th:last-child {
     border-right: 0;
-    border-top-right-radius: 19px;
 }
 
 body.admin-wisata-page .dashboard-recent__table tbody td {
-    height: 88px;
-    padding: 6px 12px;
+    height: 85px;
+    padding: 3px 8px;
     color: #000;
-    font-size: 13px;
-    line-height: 1.5;
+    font-size: 12.5px;
+    line-height: 1.45;
     text-align: center;
     vertical-align: middle;
     background: #fff;
     border: 0;
-    border-right: 1.5px solid #9a9a9a;
-    border-bottom: 1.5px solid #9a9a9a;
+    border-right: 1px solid #a8b1ae;
+    border-bottom: 1px solid #a8b1ae;
 }
 
 body.admin-wisata-page .dashboard-recent__table tbody td:last-child {
@@ -632,41 +717,31 @@ body.admin-wisata-page .dashboard-recent__table tbody tr:last-child td {
     border-bottom: 0;
 }
 
-body.admin-wisata-page .dashboard-recent__table tbody tr:last-child td:first-child {
-    border-bottom-left-radius: 19px;
-}
-
-body.admin-wisata-page .dashboard-recent__table tbody tr:last-child td:last-child {
-    border-bottom-right-radius: 19px;
-}
-
+/* Foto memenuhi sel (tinggi 79 px di dalam baris 85 px) */
 body.admin-wisata-page .dashboard-recent__table tbody td.dashboard-recent__photo {
-    padding: 5px 8px;
-    text-align: center;
+    padding: 3px;
 }
 
 body.admin-wisata-page .dashboard-recent__photo img {
     display: block;
     width: 100%;
-    max-width: 145px;
-    height: 76px;
-    margin: 0 auto;
+    max-width: none;
+    height: 79px;
+    margin: 0;
     object-fit: cover;
     border: 0;
-    border-radius: 12px;
+    border-radius: 14px;
 }
 
 body.admin-wisata-page .dashboard-recent__no-photo {
     display: grid;
     width: 100%;
-    max-width: 145px;
-    height: 76px;
-    margin: 0 auto;
+    height: 79px;
     place-items: center;
     color: #82928a;
     font-size: 22px;
     background: #eef3f0;
-    border-radius: 12px;
+    border-radius: 14px;
 }
 
 body.admin-wisata-page .dashboard-recent__table tbody td.dashboard-recent__state {
@@ -676,13 +751,151 @@ body.admin-wisata-page .dashboard-recent__table tbody td.dashboard-recent__state
     border-right: 0;
     border-bottom: 0;
 }
-    border-right: 0;
-    border-bottom: 0;
+
+/* ---------- State view: gagal memuat, offline, kesalahan server ---------- */
+body.admin-wisata-page .dashboard-state-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 196px);
+    padding: 0 20px;
+    text-align: center;
 }
 
-body.admin-wisata-page .dashboard-recent__table tbody td.dashboard-recent__state--error {
-    color: #a32020;
+body.admin-wisata-page .dashboard-state-view[hidden] {
+    display: none !important;
 }
+
+body.admin-wisata-page .dashboard-state-view__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+body.admin-wisata-page .dashboard-state-view__icon:empty {
+    display: none;
+}
+
+body.admin-wisata-page .dashboard-state-view__icon svg {
+    display: block;
+    width: 86px;
+    height: 86px;
+}
+
+body.admin-wisata-page .dashboard-state-view__title {
+    margin: 0 0 10px;
+    color: #176f60;
+    font-family: 'Frank Ruhl Libre', Georgia, serif;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+body.admin-wisata-page .dashboard-state-view__title--danger {
+    color: #e60000;
+}
+
+body.admin-wisata-page .dashboard-state-view__desc {
+    margin: 0 0 28px;
+    color: #000;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 18px;
+    line-height: 1.2;
+    white-space: pre-line;
+}
+
+body.admin-wisata-page .dashboard-state-view__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 104px;
+    height: 39px;
+    padding: 0 26px;
+    color: #fff;
+    font-family: 'Frank Ruhl Libre', Georgia, serif;
+    font-size: 15px;
+    font-weight: 700;
+    background: #176f60;
+    border: 0;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background-color .15s ease;
+}
+
+body.admin-wisata-page .dashboard-state-view__btn:hover {
+    background: #12574b;
+}
+
+body.admin-wisata-page .dashboard-state-view__btn:focus-visible {
+    outline: 3px solid rgba(23, 111, 96, .35);
+    outline-offset: 2px;
+}
+
+/* ---------- Responsif dashboard ---------- */
+@media (max-width: 1040px) {
+    body.admin-wisata-page .dashboard-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    body.admin-wisata-page.admin-dashboard-home .admin-main {
+        padding: 24px 16px 30px;
+    }
+
+    .dashboard-topbar {
+        display: none;
+    }
+
+    body.admin-wisata-page .dashboard-recent__table-wrap {
+        width: 100%;
+    }
+
+    body.admin-wisata-page .dashboard-state-view {
+        min-height: calc(100vh - 164px);
+    }
+}
+
+@media (max-width: 680px) {
+    body.admin-wisata-page.admin-dashboard-home .admin-page-heading h1 {
+        font-size: 26px;
+    }
+
+    body.admin-wisata-page.admin-dashboard-home .admin-page-heading p {
+        font-size: 14px;
+    }
+
+    body.admin-wisata-page .dashboard-metrics {
+        gap: 12px;
+    }
+
+    body.admin-wisata-page .dashboard-state-view__title {
+        font-size: 24px;
+    }
+
+    body.admin-wisata-page .dashboard-state-view__desc {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    body.admin-wisata-page .dashboard-metrics {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.admin-wisata-page .metric-card,
+    body.admin-wisata-page .dashboard-state-view__btn {
+        transition: none;
+    }
+}
+
+/* =====================================================================
+   Bagian bersama halaman admin lain (tidak diubah)
+   ===================================================================== */
 
 .admin-resource-panel {
     margin-top: 20px;
@@ -713,12 +926,6 @@ body.admin-wisata-page .dashboard-recent__table tbody td.dashboard-recent__state
     }
 }
 
-@media (max-width: 1100px) {
-    body.admin-wisata-page .dashboard-metrics {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
 @media (max-width: 900px) {
     body.admin-wisata-page .admin-main {
         padding: 24px 16px 30px;
@@ -732,39 +939,6 @@ body.admin-wisata-page .dashboard-recent__table tbody td.dashboard-recent__state
 
     body.admin-wisata-page .admin-page-heading p {
         font-size: 15px;
-    }
-
-    body.admin-wisata-page .dashboard-metrics {
-        gap: 10px;
-    }
-
-    body.admin-wisata-page .metric-card {
-        min-height: 124px;
-        padding: 14px 14px 12px;
-    }
-
-    body.admin-wisata-page .metric-card__icon {
-        flex-basis: 36px;
-        width: 36px;
-        height: 36px;
-    }
-
-    body.admin-wisata-page .metric-card__content p {
-        font-size: 14px;
-    }
-
-    body.admin-wisata-page .metric-card__content strong {
-        font-size: 30px;
-    }
-
-    .metric-card__trend {
-        font-size: 10.5px;
-    }
-}
-
-@media (max-width: 480px) {
-    body.admin-wisata-page .dashboard-metrics {
-        grid-template-columns: 1fr;
     }
 }
 

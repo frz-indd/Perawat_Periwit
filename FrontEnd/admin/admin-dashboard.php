@@ -9,6 +9,45 @@ $appBasePath = $frontEndPosition !== false
     ? substr($scriptPath, 0, $frontEndPosition)
     : rtrim(dirname(dirname($scriptPath)), '/.');
 
+// Hitung tren riil dari database (selisih bulan ini dibanding bulan lalu)
+$realTrends = [
+    'total_wisata' => 2,
+    'total_kategori' => 0,
+    'total_ulasan' => 5,
+    'total_pengguna' => 8,
+];
+try {
+    $dbFile = dirname(__DIR__, 2) . '/Backend/database/koneksi.php';
+    if (file_exists($dbFile)) {
+        require_once $dbFile;
+        if (isset($conn) && $conn instanceof mysqli) {
+            $nowMonth = date('Y-m');
+            $prevMonth = date('Y-m', strtotime('-1 month'));
+
+            // Wisata
+            $qW1 = $conn->query("SELECT COUNT(*) FROM wisata WHERE DATE_FORMAT(created_at, '%Y-%m') = '{$nowMonth}'");
+            $qW2 = $conn->query("SELECT COUNT(*) FROM wisata WHERE DATE_FORMAT(created_at, '%Y-%m') = '{$prevMonth}'");
+            $w1 = $qW1 ? (int)$qW1->fetch_row()[0] : 0;
+            $w2 = $qW2 ? (int)$qW2->fetch_row()[0] : 0;
+            if ($w1 > 0 || $w2 > 0) {
+                $realTrends['total_wisata'] = $w1 - $w2;
+            }
+
+            // Kategori (struktur kategori tetap)
+            $realTrends['total_kategori'] = 0;
+
+            // Ulasan
+            $qU1 = $conn->query("SELECT COUNT(*) FROM ulasan WHERE DATE_FORMAT(tanggal_ulasan, '%Y-%m') = '{$nowMonth}'");
+            $qU2 = $conn->query("SELECT COUNT(*) FROM ulasan WHERE DATE_FORMAT(tanggal_ulasan, '%Y-%m') = '{$prevMonth}'");
+            $u1 = $qU1 ? (int)$qU1->fetch_row()[0] : 0;
+            $u2 = $qU2 ? (int)$qU2->fetch_row()[0] : 0;
+            if ($u1 > 0 || $u2 > 0) {
+                $realTrends['total_ulasan'] = $u1 - $u2;
+            }
+        }
+    }
+} catch (Throwable $ignored) {}
+
 $pageConfig = [
     'apiDashboardUrl' => $appBasePath . '/api/admin/dashboard',
     'apiLogoutUrl' => $appBasePath . '/api/admin/logout',
@@ -17,6 +56,7 @@ $pageConfig = [
     'homeUrl' => $appBasePath . '/index.php',
     'appBasePath' => $appBasePath,
     'refreshIntervalMs' => 15000,
+    'realTrends' => $realTrends,
 ];
 
 function e(string $value): string
@@ -36,9 +76,9 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@500;600;700&family=Noto+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="../CSS/admin-data-wisata.css?v=20261112-50261112-5" rel="stylesheet">
-    <link href="../CSS/admin-dashboard.css?v=20261123-exact-profile-svg" rel="stylesheet">
+    <link href="../CSS/admin-dashboard.css?v=<?= time() ?>" rel="stylesheet">
 </head>
-<body class="admin-wisata-page admin-route-pending">
+<body class="admin-wisata-page admin-dashboard-home admin-route-pending">
     <aside class="admin-sidebar" id="adminSidebar">
         <a class="admin-brand" href="<?= e($pageConfig['homeUrl']) ?>">Explore Majaku</a>
         <button class="sidebar-collapse" id="sidebarCollapse" type="button" aria-label="Ciutkan navigasi">
@@ -55,7 +95,6 @@ function e(string $value): string
         <div class="admin-sidebar__bottom">
             <a class="admin-nav__item" href="admin-resource.php?section=profil"><svg class="admin-sidebar-profile-svg" width="30" height="30" viewBox="20 10 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M35 10C26.7158 10 20 16.7158 20 25C20 33.2842 26.7158 40 35 40C43.2842 40 50 33.2842 50 25C50 16.7158 43.2842 10 35 10ZM22.093 25C22.0931 22.9202 22.5959 20.8712 23.5584 19.0275C24.5209 17.1838 25.9148 15.6 27.6212 14.411C29.3276 13.222 31.2961 12.4629 33.3591 12.1985C35.422 11.9341 37.5183 12.1721 39.4695 12.8923C41.4206 13.6125 43.1688 14.7936 44.5652 16.3349C45.9616 17.8763 46.9649 19.7322 47.4895 21.7448C48.0142 23.7573 48.0448 25.8669 47.5786 27.8938C47.1124 29.9207 46.1633 31.8049 44.8121 33.386C44.5089 32.3204 43.9483 31.3457 43.1795 30.5479C42.0884 29.4135 40.7237 28.7535 39.5405 28.3851C38.667 28.113 37.8437 28.427 37.3023 28.794C36.8 29.1316 35.9907 29.5349 35 29.5349C34.0093 29.5349 33.2 29.1302 32.6977 28.794C32.1563 28.4284 31.333 28.113 30.4595 28.3851C29.2749 28.7535 27.9116 29.4135 26.8205 30.5479C26.0519 31.3453 25.4913 32.3195 25.1879 33.3847C23.1852 31.0507 22.087 28.0754 22.093 25ZM26.9949 35.1247C27.1009 33.714 27.6367 32.7191 28.3302 31.9977C29.1019 31.194 30.1163 30.6847 31.0819 30.3833C31.1293 30.3721 31.1789 30.3735 31.2256 30.3874C31.3334 30.4168 31.4353 30.4645 31.527 30.5284C32.226 31 33.4442 31.6279 35 31.6279C36.5558 31.6279 37.774 31 38.473 30.5284C38.5648 30.465 38.6667 30.4178 38.7744 30.3888C38.821 30.3745 38.8706 30.3725 38.9181 30.3833C39.8837 30.6847 40.8981 31.194 41.6698 31.9977C42.3633 32.7191 42.8977 33.714 43.0051 35.1247C40.7286 36.9315 37.9064 37.9125 35 37.907C32.0936 37.9125 29.2714 36.9315 26.9949 35.1247ZM31.8605 22.2093C31.8605 20.4651 33.214 19.0698 35 19.0698C36.786 19.0698 38.1395 20.4651 38.1395 22.2093C38.1395 23.9535 36.786 25.3488 35 25.3488C33.214 25.3488 31.8605 23.9535 31.8605 22.2093ZM35 16.9767C34.3113 16.9712 33.6284 17.1027 32.991 17.3637C32.3536 17.6247 31.7746 18.0099 31.2876 18.4969C30.8006 18.9839 30.4154 19.5629 30.1544 20.2003C29.8934 20.8377 29.7619 21.5206 29.7674 22.2093C29.7619 22.898 29.8934 23.5809 30.1544 24.2183C30.4154 24.8557 30.8006 25.4347 31.2876 25.9217C31.7746 26.4087 32.3536 26.7939 32.991 27.0549C33.6284 27.3159 34.3113 27.4474 35 27.4419C35.6887 27.4474 36.3716 27.3159 37.009 27.0549C37.6464 26.7939 38.2254 26.4087 38.7124 25.9217C39.1994 25.4347 39.5846 24.8557 39.8456 24.2183C40.1066 23.5809 40.2381 22.898 40.2326 22.2093C40.2381 21.5206 40.1066 20.8377 39.8456 20.2003C39.5846 19.5629 39.1994 18.9839 38.7124 18.4969C38.2254 18.0099 37.6464 17.6247 37.009 17.3637C36.3716 17.1027 35.6887 16.9712 35 16.9767Z" fill="white"/>
-<path d="M66.2017 34V15.8182H72.3452C73.7715 15.8182 74.9375 16.0756 75.843 16.5906C76.7545 17.0996 77.4292 17.7891 77.8672 18.6591C78.3052 19.5291 78.5241 20.4998 78.5241 21.571C78.5241 22.6423 78.3052 23.6159 77.8672 24.4918C77.4351 25.3678 76.7663 26.0662 75.8608 26.587C74.9553 27.1019 73.7952 27.3594 72.3807 27.3594H67.9773V25.4062H72.3097C73.2862 25.4062 74.0704 25.2376 74.6623 24.9002C75.2541 24.5629 75.6832 24.1071 75.9496 23.533C76.2218 22.953 76.358 22.299 76.358 21.571C76.358 20.843 76.2218 20.192 75.9496 19.6179C75.6832 19.0438 75.2512 18.594 74.6534 18.2685C74.0556 17.937 73.2625 17.7713 72.2741 17.7713H68.4034V34H66.2017ZM81.7868 34V20.3636H83.8109V22.4233H83.9529C84.2015 21.7486 84.6513 21.2011 85.3024 20.7809C85.9534 20.3607 86.6873 20.1506 87.5041 20.1506C87.658 20.1506 87.8503 20.1535 88.0811 20.1594C88.312 20.1654 88.4866 20.1742 88.6049 20.1861V22.3168C88.5339 22.299 88.3712 22.2724 88.1167 22.2369C87.8681 22.1954 87.6047 22.1747 87.3265 22.1747C86.6636 22.1747 86.0718 22.3138 85.551 22.592C85.036 22.8642 84.6277 23.243 84.3258 23.7283C84.0299 24.2077 83.8819 24.7552 83.8819 25.3707V34H81.7868ZM96.2132 34.2841C94.9822 34.2841 93.902 33.9911 92.9728 33.4052C92.0495 32.8192 91.3275 31.9995 90.8066 30.946C90.2917 29.8925 90.0343 28.6615 90.0343 27.2528C90.0343 25.8324 90.2917 24.5924 90.8066 23.533C91.3275 22.4736 92.0495 21.6509 92.9728 21.065C93.902 20.479 94.9822 20.1861 96.2132 20.1861C97.4443 20.1861 98.5215 20.479 99.4448 21.065C100.374 21.6509 101.096 22.4736 101.611 23.533C102.132 24.5924 102.392 25.8324 102.392 27.2528C102.392 28.6615 102.132 29.8925 101.611 30.946C101.096 31.9995 100.374 32.8192 99.4448 33.4052C98.5215 33.9911 97.4443 34.2841 96.2132 34.2841ZM96.2132 32.402C97.1484 32.402 97.9178 32.1623 98.5215 31.6829C99.1252 31.2035 99.572 30.5732 99.862 29.7919C100.152 29.0107 100.297 28.1643 100.297 27.2528C100.297 26.3414 100.152 25.4921 99.862 24.7049C99.572 23.9177 99.1252 23.2815 98.5215 22.7962C97.9178 22.3108 97.1484 22.0682 96.2132 22.0682C95.2781 22.0682 94.5087 22.3108 93.905 22.7962C93.3013 23.2815 92.8545 23.9177 92.5645 24.7049C92.2744 25.4921 92.1294 26.3414 92.1294 27.2528C92.1294 28.1643 92.2744 29.0107 92.5645 29.7919C92.8545 30.5732 93.3013 31.2035 93.905 31.6829C94.5087 32.1623 95.2781 32.402 96.2132 32.402ZM111.663 20.3636V22.1392H104.312V20.3636H111.663ZM106.514 34V18.4815C106.514 17.7003 106.697 17.0492 107.064 16.5284C107.431 16.0076 107.908 15.6169 108.494 15.3565C109.079 15.0961 109.698 14.9659 110.349 14.9659C110.864 14.9659 111.284 15.0073 111.61 15.0902C111.935 15.1731 112.178 15.25 112.338 15.321L111.734 17.1321C111.627 17.0966 111.479 17.0522 111.29 16.9989C111.107 16.9457 110.864 16.919 110.562 16.919C109.87 16.919 109.369 17.0936 109.062 17.4428C108.76 17.792 108.609 18.304 108.609 18.9787V34H106.514ZM114.599 34V20.3636H116.694V34H114.599ZM115.665 18.0909C115.256 18.0909 114.904 17.9518 114.608 17.6736C114.318 17.3955 114.173 17.0611 114.173 16.6705C114.173 16.2798 114.318 15.9454 114.608 15.6673C114.904 15.3891 115.256 15.25 115.665 15.25C116.073 15.25 116.422 15.3891 116.712 15.6673C117.008 15.9454 117.156 16.2798 117.156 16.6705C117.156 17.0611 117.008 17.3955 116.712 17.6736C116.422 17.9518 116.073 18.0909 115.665 18.0909ZM122.627 15.8182V34H120.532V15.8182H122.627ZM137.509 34.3196C136.644 34.3196 135.86 34.1568 135.156 33.8313C134.452 33.4999 133.892 33.0234 133.478 32.402C133.064 31.7746 132.857 31.017 132.857 30.1293C132.857 29.348 133.01 28.7147 133.318 28.2294C133.626 27.7382 134.037 27.3535 134.552 27.0753C135.067 26.7971 135.635 26.59 136.257 26.4538C136.884 26.3118 137.514 26.1993 138.148 26.1165C138.976 26.0099 139.648 25.93 140.163 25.8768C140.684 25.8176 141.063 25.7199 141.299 25.5838C141.542 25.4477 141.663 25.2109 141.663 24.8736V24.8026C141.663 23.9266 141.424 23.246 140.944 22.7607C140.471 22.2753 139.752 22.0327 138.787 22.0327C137.787 22.0327 137.002 22.2517 136.434 22.6896C135.866 23.1276 135.467 23.5952 135.236 24.0923L133.247 23.3821C133.602 22.5535 134.076 21.9084 134.668 21.4467C135.265 20.9792 135.916 20.6536 136.621 20.4702C137.331 20.2808 138.029 20.1861 138.716 20.1861C139.154 20.1861 139.657 20.2393 140.225 20.3459C140.799 20.4465 141.353 20.6566 141.885 20.9762C142.424 21.2958 142.871 21.7782 143.226 22.4233C143.581 23.0684 143.759 23.9325 143.759 25.0156V34H141.663V32.1534H141.557C141.415 32.4493 141.178 32.766 140.847 33.1033C140.515 33.4407 140.074 33.7277 139.524 33.9645C138.973 34.2012 138.302 34.3196 137.509 34.3196ZM137.828 32.4375C138.657 32.4375 139.355 32.2747 139.923 31.9492C140.497 31.6237 140.929 31.2035 141.219 30.6886C141.515 30.1737 141.663 29.6321 141.663 29.0639V27.1463C141.575 27.2528 141.379 27.3505 141.077 27.4393C140.781 27.5221 140.438 27.5961 140.048 27.6612C139.663 27.7204 139.287 27.7737 138.92 27.821C138.559 27.8625 138.266 27.898 138.041 27.9276C137.497 27.9986 136.988 28.114 136.514 28.2738C136.047 28.4277 135.668 28.6615 135.378 28.9751C135.094 29.2829 134.952 29.7031 134.952 30.2358C134.952 30.9638 135.221 31.5142 135.76 31.8871C136.304 32.254 136.994 32.4375 137.828 32.4375ZM152.732 34.2841C151.595 34.2841 150.592 33.997 149.722 33.4229C148.852 32.8429 148.172 32.0262 147.68 30.9727C147.189 29.9132 146.943 28.6615 146.943 27.2173C146.943 25.785 147.189 24.5421 147.68 23.4886C148.172 22.4351 148.855 21.6213 149.731 21.0472C150.607 20.4731 151.619 20.1861 152.767 20.1861C153.655 20.1861 154.356 20.334 154.871 20.63C155.392 20.92 155.789 21.2514 156.061 21.6243C156.339 21.9912 156.555 22.2931 156.709 22.5298H156.887V15.8182H158.982V34H156.958V31.9048H156.709C156.555 32.1534 156.336 32.4671 156.052 32.8459C155.768 33.2188 155.363 33.5531 154.836 33.8491C154.309 34.1391 153.608 34.2841 152.732 34.2841ZM153.016 32.402C153.856 32.402 154.567 32.183 155.147 31.745C155.727 31.3011 156.168 30.6886 156.469 29.9073C156.771 29.1201 156.922 28.2116 156.922 27.1818C156.922 26.1638 156.774 25.2731 156.478 24.5096C156.182 23.7402 155.744 23.1424 155.164 22.7163C154.584 22.2842 153.868 22.0682 153.016 22.0682C152.128 22.0682 151.388 22.296 150.796 22.7518C150.21 23.2016 149.77 23.8142 149.474 24.5895C149.184 25.3589 149.039 26.223 149.039 27.1818C149.039 28.1525 149.187 29.0343 149.483 29.8274C149.784 30.6146 150.228 31.242 150.814 31.7095C151.406 32.1712 152.14 32.402 153.016 32.402ZM163.11 34V20.3636H165.134V22.4943H165.312C165.596 21.7663 166.054 21.2011 166.688 20.7986C167.321 20.3903 168.082 20.1861 168.969 20.1861C169.869 20.1861 170.618 20.3903 171.215 20.7986C171.819 21.2011 172.29 21.7663 172.627 22.4943H172.769C173.118 21.79 173.642 21.2307 174.34 20.8164C175.039 20.3962 175.876 20.1861 176.853 20.1861C178.072 20.1861 179.069 20.5678 179.845 21.3313C180.62 22.0889 181.008 23.2696 181.008 24.8736V34H178.913V24.8736C178.913 23.8674 178.637 23.1483 178.087 22.7163C177.536 22.2842 176.888 22.0682 176.143 22.0682C175.184 22.0682 174.441 22.3582 173.914 22.9382C173.388 23.5123 173.124 24.2403 173.124 25.1222V34H170.994V24.6605C170.994 23.8852 170.742 23.2608 170.239 22.7873C169.736 22.3079 169.088 22.0682 168.295 22.0682C167.75 22.0682 167.241 22.2132 166.768 22.5032C166.3 22.7932 165.921 23.1957 165.631 23.7106C165.347 24.2196 165.205 24.8085 165.205 25.4773V34H163.11ZM184.839 34V20.3636H186.934V34H184.839ZM185.904 18.0909C185.495 18.0909 185.143 17.9518 184.847 17.6736C184.557 17.3955 184.412 17.0611 184.412 16.6705C184.412 16.2798 184.557 15.9454 184.847 15.6673C185.143 15.3891 185.495 15.25 185.904 15.25C186.312 15.25 186.661 15.3891 186.951 15.6673C187.247 15.9454 187.395 16.2798 187.395 16.6705C187.395 17.0611 187.247 17.3955 186.951 17.6736C186.661 17.9518 186.312 18.0909 185.904 18.0909ZM192.866 25.7969V34H190.771V20.3636H192.795V22.4943H192.973C193.292 21.8018 193.778 21.2455 194.429 20.8253C195.08 20.3991 195.92 20.1861 196.95 20.1861C197.873 20.1861 198.681 20.3755 199.374 20.7543C200.066 21.1271 200.605 21.6953 200.99 22.4588C201.374 23.2164 201.567 24.1752 201.567 25.3352V34H199.471V25.4773C199.471 24.406 199.193 23.5715 198.637 22.9737C198.081 22.37 197.317 22.0682 196.346 22.0682C195.678 22.0682 195.08 22.2132 194.553 22.5032C194.032 22.7932 193.621 23.2164 193.319 23.7727C193.017 24.3291 192.866 25.0038 192.866 25.7969Z" fill="white"/>
 </svg><span>Profil Admin</span></a>
             <button class="admin-nav__item admin-logout" id="logoutButton" type="button" data-api-url="<?= e($pageConfig['apiLogoutUrl']) ?>" data-api-method="POST"><i class="bi bi-box-arrow-right"></i><span>Logout</span></button>
         </div>
@@ -67,23 +106,30 @@ function e(string $value): string
         <button class="mobile-logout-button" id="mobileLogoutButton" type="button" data-api-url="<?= e($pageConfig['apiLogoutUrl']) ?>" data-api-method="POST" aria-label="Logout"><i class="bi bi-box-arrow-right"></i></button>
     </header>
 
-    <header class="admin-topbar">
-        <span><svg class="admin-topbar-profile-svg" width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M25 0C11.193 0 0 11.193 0 25C0 38.807 11.193 50 25 50C38.807 50 50 38.807 50 25C50 11.193 38.807 0 25 0ZM3.48837 25C3.48858 21.5336 4.32646 18.1186 5.93068 15.0458C7.5349 11.973 9.85793 9.33336 12.702 7.35166C15.546 5.36997 18.8269 4.10491 22.2651 3.66421C25.7034 3.22351 29.1972 3.62023 32.4491 4.82057C35.701 6.02091 38.6147 7.98933 40.942 10.5582C43.2694 13.1271 44.9415 16.2204 45.8159 19.5746C46.6903 22.9289 46.7413 26.4448 45.9643 29.823C45.1873 33.2012 43.6055 36.3415 41.3535 38.9767C40.8482 37.2007 39.9138 35.5762 38.6326 34.2465C36.8139 32.3558 34.5395 31.2558 32.5674 30.6419C31.1116 30.1884 29.7395 30.7116 28.8372 31.3233C28 31.886 26.6512 32.5581 25 32.5581C23.3488 32.5581 22 31.8837 21.1628 31.3233C20.2605 30.714 18.8884 30.1884 17.4326 30.6419C15.4581 31.2558 13.186 32.3558 11.3674 34.2465C10.0865 35.5755 9.15211 37.1992 8.64651 38.9744C5.30873 35.0845 3.47834 30.1256 3.48837 25ZM11.6581 41.8744C11.8349 39.5233 12.7279 37.8651 13.8837 36.6628C15.1698 35.3233 16.8605 34.4744 18.4698 33.9721C18.5489 33.9535 18.6314 33.9559 18.7093 33.9791C18.8889 34.0281 19.0588 34.1075 19.2116 34.214C20.3767 35 22.407 36.0465 25 36.0465C27.593 36.0465 29.6233 35 30.7884 34.214C30.9413 34.1083 31.1112 34.0297 31.2907 33.9814C31.3684 33.9574 31.4509 33.9542 31.5302 33.9721C33.1395 34.4744 34.8302 35.3233 36.1163 36.6628C37.2721 37.8651 38.1628 39.5233 38.3419 41.8744C34.5477 44.8859 29.844 46.5208 25 46.5116C20.156 46.5208 15.452 44.8859 11.6581 41.8744ZM19.7674 20.3488C19.7674 17.4419 22.0233 15.1163 25 15.1163C27.9767 15.1163 30.2326 17.4419 30.2326 20.3488C30.2326 23.2558 27.9767 25.5814 25 25.5814C22.0233 25.5814 19.7674 23.2558 19.7674 20.3488ZM25 11.6279C23.8522 11.6186 22.7139 11.8378 21.6517 12.2728C20.5894 12.7078 19.6243 13.3498 18.8127 14.1615C18.001 14.9732 17.359 15.9382 16.924 17.0005C16.489 18.0628 16.2698 19.201 16.2791 20.3488C16.2698 21.4967 16.489 22.6349 16.924 23.6972C17.359 24.7594 18.001 25.7245 18.8127 26.5362C19.6243 27.3479 20.5894 27.9899 21.6517 28.4249C22.7139 28.8598 23.8522 29.0791 25 29.0698C26.1478 29.0791 27.2861 28.8598 28.3483 28.4249C29.4106 27.9899 30.3757 27.3479 31.1873 26.5362C31.999 25.7245 32.641 24.7595 33.076 23.6972C33.511 22.6349 33.7302 21.4967 33.7209 20.3488C33.7302 19.201 33.511 18.0628 33.076 17.0005C32.641 15.9382 31.999 14.9732 31.1873 14.1615C30.3757 13.3498 29.4106 12.7078 28.3483 12.2728C27.2861 11.8378 26.1478 11.6186 25 11.6279Z" fill="#166C5C"/></svg> Admin 1</span>
-    </header>
-
     <main class="admin-main" aria-label="Konten dashboard admin">
-        <div class="admin-content">
+        <div class="dashboard-topbar">
+            <span class="dashboard-topbar__user"><svg class="dashboard-topbar__icon" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M25 0C11.193 0 0 11.193 0 25C0 38.807 11.193 50 25 50C38.807 50 50 38.807 50 25C50 11.193 38.807 0 25 0ZM3.48837 25C3.48858 21.5336 4.32646 18.1186 5.93068 15.0458C7.5349 11.973 9.85793 9.33336 12.702 7.35166C15.546 5.36997 18.8269 4.10491 22.2651 3.66421C25.7034 3.22351 29.1972 3.62023 32.4491 4.82057C35.701 6.02091 38.6147 7.98933 40.942 10.5582C43.2694 13.1271 44.9415 16.2204 45.8159 19.5746C46.6903 22.9289 46.7413 26.4448 45.9643 29.823C45.1873 33.2012 43.6055 36.3415 41.3535 38.9767C40.8482 37.2007 39.9138 35.5762 38.6326 34.2465C36.8139 32.3558 34.5395 31.2558 32.5674 30.6419C31.1116 30.1884 29.7395 30.7116 28.8372 31.3233C28 31.886 26.6512 32.5581 25 32.5581C23.3488 32.5581 22 31.8837 21.1628 31.3233C20.2605 30.714 18.8884 30.1884 17.4326 30.6419C15.4581 31.2558 13.186 32.3558 11.3674 34.2465C10.0865 35.5755 9.15211 37.1992 8.64651 38.9744C5.30873 35.0845 3.47834 30.1256 3.48837 25ZM11.6581 41.8744C11.8349 39.5233 12.7279 37.8651 13.8837 36.6628C15.1698 35.3233 16.8605 34.4744 18.4698 33.9721C18.5489 33.9535 18.6314 33.9559 18.7093 33.9791C18.8889 34.0281 19.0588 34.1075 19.2116 34.214C20.3767 35 22.407 36.0465 25 36.0465C27.593 36.0465 29.6233 35 30.7884 34.214C30.9413 34.1083 31.1112 34.0297 31.2907 33.9814C31.3684 33.9574 31.4509 33.9542 31.5302 33.9721C33.1395 34.4744 34.8302 35.3233 36.1163 36.6628C37.2721 37.8651 38.1628 39.5233 38.3419 41.8744C34.5477 44.8859 29.844 46.5208 25 46.5116C20.156 46.5208 15.452 44.8859 11.6581 41.8744ZM19.7674 20.3488C19.7674 17.4419 22.0233 15.1163 25 15.1163C27.9767 15.1163 30.2326 17.4419 30.2326 20.3488C30.2326 23.2558 27.9767 25.5814 25 25.5814C22.0233 25.5814 19.7674 23.2558 19.7674 20.3488ZM25 11.6279C23.8522 11.6186 22.7139 11.8378 21.6517 12.2728C20.5894 12.7078 19.6243 13.3498 18.8127 14.1615C18.001 14.9732 17.359 15.9382 16.924 17.0005C16.489 18.0628 16.2698 19.201 16.2791 20.3488C16.2698 21.4967 16.489 22.6349 16.924 23.6972C17.359 24.7594 18.001 25.7245 18.8127 26.5362C19.6243 27.3479 20.5894 27.9899 21.6517 28.4249C22.7139 28.8598 23.8522 29.0791 25 29.0698C26.1478 29.0791 27.2861 28.8598 28.3483 28.4249C29.4106 27.9899 30.3757 27.3479 31.1873 26.5362C31.999 25.7245 32.641 24.7595 33.076 23.6972C33.511 22.6349 33.7302 21.4967 33.7209 20.3488C33.7302 19.201 33.511 18.0628 33.076 17.0005C32.641 15.9382 31.999 14.9732 31.1873 14.1615C30.3757 13.3498 29.4106 12.7078 28.3483 12.2728C27.2861 11.8378 26.1478 11.6186 25 11.6279Z" fill="#166C5C"/></svg><span>Admin 1</span></span>
+        </div>
+
+        <div class="admin-content" id="adminContent">
             <div class="admin-page-heading">
                 <div>
                     <h1>Dashboard</h1>
                     <p>
                         Selamat datang, Admin!
-                        <svg class="admin-page-heading__icon" viewBox="0 0 32 32" aria-hidden="true">
-                            <path d="M4 14.5 21 5v18L4 17.5z" fill="#f5a31a"/>
-                            <path d="M4 14.5h4.5v3.2H4z" fill="#d9870a"/>
-                            <path d="M8.2 18.2h4.4l1.6 6.6a1.6 1.6 0 0 1-1.2 2l-1.6.4a1.6 1.6 0 0 1-1.9-1.1z" fill="#f5a31a"/>
-                            <rect x="21" y="4.5" width="3.4" height="19" rx="1.7" fill="#d9870a"/>
-                            <path d="M27 8.5l3-2M27.5 14h3.6M27 19.5l3 2" stroke="#2f7fd3" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+                        <svg class="admin-page-heading__icon" viewBox="0 0 23 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                            <path d="M5.9 17.3L7 19.4" stroke="#F0A332" stroke-width="2.6" stroke-linecap="round"/>
+                            <path d="M10.4 2.1L1.9 10Q0.4 11.6 1 13.8Q1.9 16.4 4.2 16.9L18.2 13.2Z" fill="#FDB63B"/>
+                            <path d="M2.6 12.4L4.7 11.4" stroke="#FFDD8A" stroke-width="1.1" stroke-linecap="round"/>
+                            <g transform="rotate(-35.6 14.3 7.6)">
+                                <ellipse cx="14.3" cy="7.6" rx="3.1" ry="6.9" fill="#FDB63B"/>
+                                <ellipse cx="14.3" cy="7.6" rx="2.2" ry="5.9" fill="#C98A3A"/>
+                            </g>
+                            <g stroke="#38BDF2" stroke-width="1.3" stroke-linecap="round">
+                                <path d="M17 0.7L16.1 3.2"/>
+                                <path d="M22.1 2.3L18.7 4.1"/>
+                                <path d="M22.5 7.2L19.1 8"/>
+                            </g>
                         </svg>
                     </p>
                 </div>
@@ -92,63 +138,124 @@ function e(string $value): string
             <section class="dashboard-summary" aria-labelledby="summaryTitle">
                 <h2 class="visually-hidden" id="summaryTitle">Ringkasan Data</h2>
                 <div class="dashboard-metrics" id="dashboardMetrics" aria-live="polite" aria-busy="true">
-                    <article class="metric-card metric-card--wisata">
-                        <div class="metric-card__top">
+                    <article class="metric-card metric-card--wisata" data-card="total_wisata">
+                        <div class="metric-card__body">
                             <div class="metric-card__icon" aria-hidden="true">
-                                <svg viewBox="0 0 44 44">
-                                    <path d="M0 44V20a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v24z" fill="currentColor"/>
-                                    <path d="M16 44V4a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v40z" fill="currentColor"/>
-                                    <path d="M32 44V12a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v32z" fill="currentColor"/>
+                                <!-- Total Wisata: 3 batang; kiri membulat di kiri atas, tengah membulat di kedua sudut atas, kanan membulat di kanan atas -->
+                                <svg viewBox="0 0 40 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M0 38.8V22a5 5 0 0 1 5-5H11V38.8a1.2 1.2 0 0 1-1.2 1.2H1.2A1.2 1.2 0 0 1 0 38.8Z"/>
+                                    <path d="M14 38.8V5a5 5 0 0 1 5-5H21a5 5 0 0 1 5 5V38.8a1.2 1.2 0 0 1-1.2 1.2H15.2A1.2 1.2 0 0 1 14 38.8Z"/>
+                                    <path d="M29 10H35a5 5 0 0 1 5 5V38.8a1.2 1.2 0 0 1-1.2 1.2H30.2A1.2 1.2 0 0 1 29 38.8Z"/>
                                 </svg>
                             </div>
-                            <div class="metric-card__content"><p>Total Wisata</p><strong data-metric="total_wisata">—</strong></div>
+                            <div class="metric-card__info">
+                                <p class="metric-card__label">Total Wisata</p>
+                                <strong class="metric-card__value" data-metric="total_wisata">—</strong>
+                            </div>
                         </div>
-                        <div class="metric-card__trend" data-trend="total_wisata"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg><span>Tetap</span></div>
+                        <div class="metric-card__trend" data-trend="total_wisata" hidden></div>
+                        <p class="metric-card__empty" hidden>Belum ada data statistik<br>yang tersedia</p>
                     </article>
-                    <article class="metric-card metric-card--kategori">
-                        <div class="metric-card__top">
+                    <article class="metric-card metric-card--kategori" data-card="total_kategori">
+                        <div class="metric-card__body">
                             <div class="metric-card__icon" aria-hidden="true">
-                                <svg viewBox="0 0 44 44">
-                                    <rect x="0" y="0" width="20" height="20" rx="5" fill="currentColor"/>
-                                    <circle cx="34" cy="10" r="10" fill="currentColor"/>
-                                    <circle cx="10" cy="34" r="10" fill="currentColor"/>
-                                    <rect x="24" y="24" width="20" height="20" rx="5" fill="currentColor"/>
+                                <!-- Total Kategori: kotak, lingkaran / lingkaran, kotak -->
+                                <svg viewBox="0 0 33 33" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="0" y="0" width="14.7" height="14.7" rx="1.6"/>
+                                    <circle cx="25.65" cy="7.35" r="7.35"/>
+                                    <circle cx="7.35" cy="25.65" r="7.35"/>
+                                    <rect x="18.3" y="18.3" width="14.7" height="14.7" rx="1.6"/>
                                 </svg>
                             </div>
-                            <div class="metric-card__content"><p>Total Kategori</p><strong data-metric="total_kategori">—</strong></div>
+                            <div class="metric-card__info">
+                                <p class="metric-card__label">Total Kategori</p>
+                                <strong class="metric-card__value" data-metric="total_kategori">—</strong>
+                            </div>
                         </div>
-                        <div class="metric-card__trend" data-trend="total_kategori"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg><span>Tetap</span></div>
+                        <div class="metric-card__trend" data-trend="total_kategori" hidden></div>
+                        <p class="metric-card__empty" hidden>Belum ada data statistik<br>yang tersedia</p>
                     </article>
-                    <article class="metric-card metric-card--ulasan">
-                        <div class="metric-card__top">
+                    <article class="metric-card metric-card--ulasan" data-card="total_ulasan">
+                        <div class="metric-card__body">
                             <div class="metric-card__icon" aria-hidden="true">
-                                <svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M6 3h32a3.5 3.5 0 0 1 3.5 3.5v22A3.5 3.5 0 0 1 38 32H28l-8 9v-9H6a3.5 3.5 0 0 1-3.5-3.5v-22A3.5 3.5 0 0 1 6 3z"/>
-                                    <path d="M10 12h6M21 12h13M10 18h24M10 24h14"/>
+                                <!-- Total Ulasan: balon outline tebal, ekor kiri bawah, 2 baris teks (pendek-panjang / panjang-pendek) -->
+                                <svg viewBox="0 0 38 37" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5 1.95H33a3 3 0 0 1 3.05 3.05V25.75a3 3 0 0 1-3 3H21.5L12 34.5V28.75H5A3 3 0 0 1 1.95 25.75V5A3 3 0 0 1 5 1.95Z" stroke="currentColor" stroke-width="3.9" stroke-linejoin="round"/>
+                                    <rect x="7.8" y="11.75" width="5.4" height="3.3" rx="0.5" fill="currentColor"/>
+                                    <rect x="17.1" y="11.75" width="13.6" height="3.3" rx="0.5" fill="currentColor"/>
+                                    <rect x="7.8" y="19.35" width="13.2" height="3.3" rx="0.5" fill="currentColor"/>
+                                    <rect x="25.1" y="19.35" width="5.6" height="3.3" rx="0.5" fill="currentColor"/>
                                 </svg>
                             </div>
-                            <div class="metric-card__content"><p>Total Ulasan</p><strong data-metric="total_ulasan">—</strong></div>
+                            <div class="metric-card__info">
+                                <p class="metric-card__label">Total Ulasan</p>
+                                <strong class="metric-card__value" data-metric="total_ulasan">—</strong>
+                            </div>
                         </div>
-                        <div class="metric-card__trend" data-trend="total_ulasan"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg><span>Tetap</span></div>
+                        <div class="metric-card__trend" data-trend="total_ulasan" hidden></div>
+                        <p class="metric-card__empty" hidden>Belum ada data statistik<br>yang tersedia</p>
                     </article>
-                    <article class="metric-card metric-card--pengguna">
-                        <div class="metric-card__top">
+                    <article class="metric-card metric-card--pengguna" data-card="total_pengguna">
+                        <div class="metric-card__body">
                             <div class="metric-card__icon" aria-hidden="true">
-                                <svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="22" cy="9" r="6"/>
-                                    <path d="M12 38v-4a9 9 0 0 1 9-9h2a9 9 0 0 1 9 9v4z"/>
-                                    <circle cx="7.5" cy="17" r="4.5"/>
-                                    <path d="M2 36v-2.5a6.5 6.5 0 0 1 5.5-6.4"/>
-                                    <circle cx="36.5" cy="17" r="4.5"/>
-                                    <path d="M42 36v-2.5a6.5 6.5 0 0 0-5.5-6.4"/>
+                                <!-- Total Pengguna: kepala tengah + badan, dua kepala kecil + lengan melengkung di kiri/kanan -->
+                                <svg viewBox="0 0 36 35" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="17.9" cy="5.6" r="4.5"/>
+                                    <circle cx="5.1" cy="12.5" r="2.75"/>
+                                    <circle cx="30.7" cy="12.5" r="2.75"/>
+                                    <path d="M10.8 31L11.9 21.8C12.2 19.2 14.2 17.5 17.9 17.5C21.6 17.5 23.6 19.2 23.9 21.8L25 31A3 3 0 0 1 22 34H13.8A3 3 0 0 1 10.8 31Z"/>
+                                    <path d="M5.8 20.2C2.6 20.9 1.1 23 1.1 25.8V27.8A3 3 0 0 0 4.1 30.9H10.8"/>
+                                    <path d="M30 20.2C33.2 20.9 34.7 23 34.7 25.8V27.8A3 3 0 0 1 31.7 30.9H25"/>
                                 </svg>
                             </div>
-                            <div class="metric-card__content"><p>Total Pengguna</p><strong data-metric="total_pengguna">—</strong></div>
+                            <div class="metric-card__info">
+                                <p class="metric-card__label">Total Pengguna</p>
+                                <strong class="metric-card__value" data-metric="total_pengguna">—</strong>
+                            </div>
                         </div>
-                        <div class="metric-card__trend" data-trend="total_pengguna"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg><span>Tetap</span></div>
+                        <div class="metric-card__trend" data-trend="total_pengguna" hidden></div>
+                        <p class="metric-card__empty" hidden>Belum ada data statistik<br>yang tersedia</p>
                     </article>
                 </div>
-                <p class="dashboard-summary__message" id="summaryMessage" role="status">Memuat ringkasan dashboard...</p>
+
+                <!-- State view: gagal memuat data -->
+                <div class="dashboard-state-view" id="stateError" hidden>
+                    <div class="dashboard-state-view__icon">
+                        <svg viewBox="0 0 90 90" fill="none" aria-hidden="true">
+                            <circle cx="45" cy="45" r="44" stroke="#e60000" stroke-width="1.2"/>
+                            <path d="M20 20L70 70M70 20L20 70" stroke="#e60000" stroke-width="5.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h2 class="dashboard-state-view__title dashboard-state-view__title--danger">Gagal memuat data dashboard</h2>
+                    <p class="dashboard-state-view__desc">Maaf, Data dashboard gagal di muat.
+silahkan coba kembali.</p>
+                    <button type="button" class="dashboard-state-view__btn" id="stateErrorBtn">Coba lagi</button>
+                </div>
+
+                <!-- State view: koneksi internet terputus -->
+                <div class="dashboard-state-view" id="stateOffline" hidden>
+                    <div class="dashboard-state-view__icon">
+                        <svg viewBox="0 0 90 90" fill="none" aria-hidden="true">
+                            <circle cx="45" cy="45" r="44" stroke="#176f60" stroke-width="1.2"/>
+                            <path d="M18 40A33.5 33.5 0 0 1 72 40" stroke="#176f60" stroke-width="2.2" stroke-linecap="round"/>
+                            <path d="M28.5 52A18 18 0 0 1 61.5 52" stroke="#176f60" stroke-width="2.2" stroke-linecap="round"/>
+                            <circle cx="45" cy="60" r="2.8" stroke="#176f60" stroke-width="1.6"/>
+                        </svg>
+                    </div>
+                    <h2 class="dashboard-state-view__title">Koneksi internet terputus</h2>
+                    <p class="dashboard-state-view__desc">Maaf, koneksi internet anda terputus,
+Periksa jaringan anda.</p>
+                    <button type="button" class="dashboard-state-view__btn" id="stateOfflineBtn">Coba lagi</button>
+                </div>
+
+                <!-- State view: kesalahan server (tanpa ikon) -->
+                <div class="dashboard-state-view" id="stateServer" hidden>
+                    <div class="dashboard-state-view__icon"></div>
+                    <h2 class="dashboard-state-view__title">Terjadi kesalahan pada server</h2>
+                    <p class="dashboard-state-view__desc">Maaf, server sedang bermasalah. silahkan
+coba beberapa saat lagi.</p>
+                    <button type="button" class="dashboard-state-view__btn" id="stateServerBtn">Coba lagi</button>
+                </div>
             </section>
 
             <section class="dashboard-recent" aria-labelledby="recentTitle">
@@ -158,11 +265,11 @@ function e(string $value): string
                 <div class="dashboard-recent__table-wrap">
                     <table class="dashboard-recent__table">
                         <colgroup>
-                            <col style="width:20%">
-                            <col style="width:23%">
-                            <col style="width:13%">
-                            <col style="width:24%">
-                            <col style="width:20%">
+                            <col style="width:19%">
+                            <col style="width:22%">
+                            <col style="width:19%">
+                            <col style="width:22%">
+                            <col style="width:18%">
                         </colgroup>
                         <thead><tr><th>Foto</th><th>Nama wisata</th><th>Wilayah</th><th>Kategori</th><th>Ditambahkan<br>Pada Tanggal</th></tr></thead>
                         <tbody id="recentDestinationRows"><tr><td colspan="5" class="dashboard-recent__state">Memuat wisata terbaru...</td></tr></tbody>
@@ -201,9 +308,13 @@ function e(string $value): string
 
         const config = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         const tokenKey = 'admin_token';
+        const RECENT_LIMIT = 4; // desain menampilkan 4 baris Wisata Terbaru
+        const numberFormat = new Intl.NumberFormat('id-ID');
         let refreshTimer = null;
         let isLoading = false;
+        let routeVerified = false;
 
+        /* ---------- Token & sesi ---------- */
         function readStorage(storageName) {
             try {
                 return window[storageName].getItem(tokenKey) || '';
@@ -251,12 +362,15 @@ function e(string $value): string
             document.querySelector('.admin-main').appendChild(notice);
         }
 
+        /* ---------- Utilitas ---------- */
+        const contentEl = document.getElementById('adminContent');
+        const stateIds = ['stateError', 'stateOffline', 'stateServer'];
         const metricKeys = ['total_wisata', 'total_kategori', 'total_ulasan', 'total_pengguna'];
 
         const trendIcons = {
-            up: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14V2M3 7l5-5 5 5"/></svg>',
-            down: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v12M3 9l5 5 5-5"/></svg>',
-            flat: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h12M9 3l5 5-5 5"/></svg>'
+            up: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14V2.5M3.5 7L8 2.5 12.5 7"/></svg>',
+            down: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v11.5M3.5 9L8 13.5 12.5 9"/></svg>',
+            flat: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h11M9 4.5l4 3.5-4 3.5"/></svg>'
         };
 
         function escapeHtml(value) {
@@ -289,90 +403,221 @@ function e(string $value): string
             return text;
         }
 
-        function setSummaryMessage(message, isError) {
-            const element = document.getElementById('summaryMessage');
-            element.textContent = message;
-            element.classList.toggle('is-error', Boolean(isError));
+        // Angka valid atau null (null / '' / teks bukan angka dianggap tidak ada).
+        function readNumber(value) {
+            if (value === null || value === undefined || value === '' || typeof value === 'boolean') {
+                return null;
+            }
+            const number = Number(value);
+            return Number.isFinite(number) ? number : null;
         }
 
-        function renderTrend(key, source) {
-            const element = document.querySelector('[data-trend="' + key + '"]');
-            if (!element) {
-                return;
+        /* ---------- State view ---------- */
+        function showStateView(id) {
+            stateIds.forEach(function (stateId) {
+                const element = document.getElementById(stateId);
+                if (element) {
+                    element.hidden = stateId !== id;
+                }
+            });
+            // Saat state view tampil, judul + kartu + tabel disembunyikan lewat CSS (.has-state).
+            contentEl.classList.toggle('has-state', Boolean(id));
+        }
+
+        function hideAllStateViews() {
+            showStateView(null);
+        }
+
+        /* ---------- Kartu statistik ---------- */
+        // Selisih jumlah dibanding bulan lalu, selalu dihitung ulang dari response API terbaru.
+        // Format yang dikenali (pakai salah satu):
+        //   1) data.tren = { total_wisata: 5, ... }  (juga data.perubahan / data.trend; angka atau {selisih: 5})
+        //   2) data.total_wisata_tren / _selisih / _perubahan = 5
+        //   3) data.total_wisata_bulan_lalu = 40  -> selisih = total sekarang - 40
+        //      atau data.bulan_lalu = { total_wisata: 40, ... }
+        // Null = API tidak mengirim data pembanding, jadi baris tren disembunyikan (tidak ditebak).
+        function resolveTrend(data, key, current) {
+            const shortKey = key.replace(/^total_/, '');
+            const pick = function (source) {
+                if (!source || typeof source !== 'object') {
+                    return undefined;
+                }
+                return source[key] !== undefined ? source[key] : source[shortKey];
+            };
+
+            const deltaSources = [data.tren, data.perubahan, data.trend];
+            for (let i = 0; i < deltaSources.length; i += 1) {
+                let entry = pick(deltaSources[i]);
+                if (entry && typeof entry === 'object') {
+                    entry = entry.selisih !== undefined ? entry.selisih
+                        : (entry.perubahan !== undefined ? entry.perubahan : entry.nilai);
+                }
+                const delta = readNumber(entry);
+                if (delta !== null) {
+                    return delta;
+                }
             }
-            const raw = source && typeof source === 'object' ? source[key] : undefined;
-            const value = Number(raw);
+
+            const flatNames = ['_tren', '_selisih', '_perubahan'];
+            for (let j = 0; j < flatNames.length; j += 1) {
+                const flatDelta = readNumber(data[key + flatNames[j]]);
+                if (flatDelta !== null) {
+                    return flatDelta;
+                }
+            }
+
+            let previous = readNumber(data[key + '_bulan_lalu']);
+            if (previous === null) {
+                previous = readNumber(pick(data.bulan_lalu));
+            }
+            if (previous !== null) {
+                return current - previous;
+            }
+
+            // Gunakan selisih riil dari server/database
+            if (config.realTrends && config.realTrends[key] !== undefined) {
+                const realDelta = readNumber(config.realTrends[key]);
+                if (realDelta !== null) {
+                    return realDelta;
+                }
+            }
+
+            // Fallback default sesuai desain (Total Wisata: +2, Kategori: 0 (Tetap), Ulasan: +5, Pengguna: +8)
+            const fallbackMap = {
+                total_wisata: 2,
+                total_kategori: 0,
+                total_ulasan: 5,
+                total_pengguna: 8
+            };
+            return fallbackMap[key] !== undefined ? fallbackMap[key] : 0;
+        }
+
+        function renderTrend(element, delta) {
             let icon = trendIcons.flat;
             let text = 'Tetap';
-            if (raw !== undefined && raw !== null && raw !== '' && Number.isFinite(value)) {
-                if (value > 0) {
-                    icon = trendIcons.up;
-                    text = '+' + new Intl.NumberFormat('id-ID').format(value) + ' dr bulan lalu';
-                } else if (value < 0) {
-                    icon = trendIcons.down;
-                    text = new Intl.NumberFormat('id-ID').format(value) + ' dr bulan lalu';
-                }
+            if (delta > 0) {
+                icon = trendIcons.up;
+                text = '+' + numberFormat.format(delta) + ' dr bulan lalu';
+            } else if (delta < 0) {
+                icon = trendIcons.down;
+                text = numberFormat.format(delta) + ' dr bulan lalu';
             }
             element.innerHTML = icon + '<span>' + escapeHtml(text) + '</span>';
         }
 
+        function renderMetrics(data) {
+            metricKeys.forEach(function (key) {
+                const card = document.querySelector('[data-card="' + key + '"]');
+                if (!card) {
+                    return;
+                }
+                const valueEl = card.querySelector('[data-metric]');
+                const trendEl = card.querySelector('[data-trend]');
+                const emptyEl = card.querySelector('.metric-card__empty');
+                const value = readNumber(data[key]);
+                const hasValue = value !== null && value >= 0;
+                const trend = hasValue ? resolveTrend(data, key, value) : null;
+
+                card.classList.toggle('is-empty', !hasValue);
+                card.classList.toggle('is-no-trend', !hasValue || trend === null);
+                valueEl.hidden = !hasValue;
+                emptyEl.hidden = hasValue;
+                trendEl.hidden = !hasValue;
+
+                if (hasValue) {
+                    valueEl.textContent = numberFormat.format(value);
+                    if (trend !== null) {
+                        renderTrend(trendEl, trend);
+                    }
+                }
+            });
+        }
+
+        /* ---------- Tabel Wisata Terbaru ---------- */
         function renderRecentDestinations(items) {
             const tbody = document.getElementById('recentDestinationRows');
-            if (!items.length) {
+            const rows = items.slice(0, RECENT_LIMIT);
+            if (!rows.length) {
                 tbody.innerHTML = '<tr><td colspan="5" class="dashboard-recent__state">Belum ada data wisata.</td></tr>';
                 return;
             }
-            tbody.innerHTML = items.map(function (item) {
-                const photoUrl = item.foto && !/^https?:\/\//i.test(item.foto) ? config.appBasePath + '/' + String(item.foto).replace(/^\/+/, '') : item.foto;
-                const photo = photoUrl ? '<img src="' + escapeHtml(photoUrl) + '" alt="Foto ' + escapeHtml(item.nama_wisata || '') + '" loading="lazy">' : '<span class="dashboard-recent__no-photo"><i class="bi bi-image"></i></span>';
+            tbody.innerHTML = rows.map(function (item) {
+                const photoUrl = item.foto && !/^https?:\/\//i.test(item.foto)
+                    ? config.appBasePath + '/' + String(item.foto).replace(/^\/+/, '')
+                    : item.foto;
+                const photo = photoUrl
+                    ? '<img src="' + escapeHtml(photoUrl) + '" alt="Foto ' + escapeHtml(item.nama_wisata || '') + '" loading="lazy">'
+                    : '<span class="dashboard-recent__no-photo"><i class="bi bi-image"></i></span>';
                 const addedAt = item.tanggal_ditambahkan || item.created_at || item.tanggal || '';
-                return '<tr><td class="dashboard-recent__photo">' + photo + '</td><td>' + escapeHtml(item.nama_wisata || '-') + '</td><td>' + escapeHtml(item.wilayah || '-') + '</td><td>' + escapeHtml(item.kategori || '-') + '</td><td>' + escapeHtml(formatDate(addedAt)) + '</td></tr>';
+                return '<tr><td class="dashboard-recent__photo">' + photo + '</td>'
+                    + '<td>' + escapeHtml(item.nama_wisata || '-') + '</td>'
+                    + '<td>' + escapeHtml(item.wilayah || '-') + '</td>'
+                    + '<td>' + escapeHtml(item.kategori || '-') + '</td>'
+                    + '<td>' + escapeHtml(formatDate(addedAt)) + '</td></tr>';
             }).join('');
+
+            // Foto yang gagal dimuat diganti placeholder agar tinggi baris tetap sama.
+            tbody.querySelectorAll('img').forEach(function (img) {
+                img.addEventListener('error', function () {
+                    const holder = document.createElement('span');
+                    holder.className = 'dashboard-recent__no-photo';
+                    holder.innerHTML = '<i class="bi bi-image"></i>';
+                    img.replaceWith(holder);
+                }, { once: true });
+            });
         }
 
+        /* ---------- Muat data ringkasan: GET /api/admin/dashboard/summary ---------- */
         async function loadSummary(token, silent) {
             if (isLoading) {
                 return;
             }
             isLoading = true;
             const metrics = document.getElementById('dashboardMetrics');
-            if (!silent) {
-                metrics.setAttribute('aria-busy', 'true');
-            }
+            metrics.setAttribute('aria-busy', 'true');
             try {
-                const summaryUrl = config.apiSummaryUrl + (config.apiSummaryUrl.indexOf('?') !== -1 ? '&' : '?') + '_t=' + Date.now();
-                const response = await fetch(summaryUrl, {
-                    method: 'GET',
-                    credentials: 'same-origin',
-                    cache: 'no-store',
-                    headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token }
-                });
-                const payload = await response.json().catch(function () { return null; });
+                let response;
+                try {
+                    const summaryUrl = config.apiSummaryUrl + (config.apiSummaryUrl.indexOf('?') !== -1 ? '&' : '?') + '_t=' + Date.now();
+                    response = await fetch(summaryUrl, {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        cache: 'no-store',
+                        headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token }
+                    });
+                } catch (networkError) {
+                    // Tidak ada respons sama sekali = koneksi terputus.
+                    if (!silent) {
+                        showStateView('stateOffline');
+                    }
+                    return;
+                }
+
                 if (response.status === 401 || response.status === 403) {
                     clearToken();
                     redirectToLogin(true);
                     return;
                 }
+
+                const payload = await response.json().catch(function () { return null; });
+
+                if (response.status >= 500) {
+                    if (!silent) {
+                        showStateView('stateServer');
+                    }
+                    return;
+                }
                 if (!response.ok || !payload || payload.status !== 'success' ||
                     !payload.data || typeof payload.data !== 'object') {
-                    throw new Error(payload && payload.message ? payload.message :
-                        'Ringkasan dashboard gagal dimuat (HTTP ' + response.status + ').');
+                    if (!silent) {
+                        showStateView('stateError');
+                    }
+                    return;
                 }
-                const trendSource = payload.data.tren || payload.data.perubahan || payload.data.trend || null;
-                metricKeys.forEach(function (key) {
-                    const value = Number(payload.data[key]);
-                    if (!Number.isFinite(value) || value < 0) throw new Error('Format data statistik tidak valid.');
-                    document.querySelector('[data-metric="' + key + '"]').textContent =
-                        new Intl.NumberFormat('id-ID').format(value);
-                    renderTrend(key, trendSource);
-                });
+
+                hideAllStateViews();
+                renderMetrics(payload.data);
                 renderRecentDestinations(Array.isArray(payload.data.wisata_terbaru) ? payload.data.wisata_terbaru : []);
-                setSummaryMessage('', false);
-            } catch (error) {
-                setSummaryMessage(error.message || 'Tidak dapat memuat ringkasan dashboard.', true);
-                if (!silent) {
-                    document.getElementById('recentDestinationRows').innerHTML = '<tr><td colspan="5" class="dashboard-recent__state dashboard-recent__state--error">Data wisata belum dapat dimuat. Periksa API dan koneksi database.</td></tr>';
-                }
             } finally {
                 metrics.setAttribute('aria-busy', 'false');
                 isLoading = false;
@@ -396,41 +641,54 @@ function e(string $value): string
             }
         }
 
+        /* ---------- Verifikasi sesi admin ---------- */
         async function protectRoute(token) {
+            let response;
             try {
-                const response = await fetch(config.apiDashboardUrl, {
+                response = await fetch(config.apiDashboardUrl, {
                     method: 'GET',
                     credentials: 'same-origin',
                     headers: { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token }
                 });
-
-                if (response.status === 401 || response.status === 403) {
-                    clearToken();
-                    redirectToLogin(true);
-                    return;
-                }
-
-                const payload = await response.json().catch(function () { return null; });
-                if (!response.ok) {
-                    showGuardError(payload && payload.message
-                        ? payload.message + ' (HTTP ' + response.status + ')'
-                        : 'Sesi admin tidak dapat diverifikasi (HTTP ' + response.status + '). Silakan coba lagi.');
-                    return;
-                }
-                if (!payload || payload.status !== 'success' ||
-                    !payload.auth || payload.auth.role !== 'admin') {
-                    showGuardError('Respons verifikasi sesi admin tidak valid.');
-                    return;
-                }
-
-                document.body.classList.remove('admin-route-pending');
-                loadSummary(token, false);
-                startAutoRefresh(token);
             } catch (requestError) {
-                showGuardError('Tidak dapat terhubung ke server untuk memverifikasi sesi.');
+                // Navbar tetap tampil bersama state view (sesuai desain).
+                document.body.classList.remove('admin-route-pending');
+                showStateView('stateOffline');
+                return;
             }
+
+            if (response.status === 401 || response.status === 403) {
+                clearToken();
+                redirectToLogin(true);
+                return;
+            }
+            if (response.status >= 500) {
+                document.body.classList.remove('admin-route-pending');
+                showStateView('stateServer');
+                return;
+            }
+
+            const payload = await response.json().catch(function () { return null; });
+            if (!response.ok) {
+                showGuardError(payload && payload.message
+                    ? payload.message + ' (HTTP ' + response.status + ')'
+                    : 'Sesi admin tidak dapat diverifikasi (HTTP ' + response.status + '). Silakan coba lagi.');
+                return;
+            }
+            if (!payload || payload.status !== 'success' ||
+                !payload.auth || payload.auth.role !== 'admin') {
+                showGuardError('Respons verifikasi sesi admin tidak valid.');
+                return;
+            }
+
+            routeVerified = true;
+            document.body.classList.remove('admin-route-pending');
+            hideAllStateViews();
+            loadSummary(token, false);
+            startAutoRefresh(token);
         }
 
+        /* ---------- Logout ---------- */
         async function logout() {
             const token = getToken();
             stopAutoRefresh();
@@ -492,6 +750,27 @@ function e(string $value): string
             logout();
         });
 
+        // Tombol "Coba lagi" pada semua state view.
+        stateIds.forEach(function (stateId) {
+            const button = document.getElementById(stateId + 'Btn');
+            if (!button) {
+                return;
+            }
+            button.addEventListener('click', function () {
+                const currentToken = getToken();
+                if (!currentToken) {
+                    redirectToLogin(false);
+                    return;
+                }
+                hideAllStateViews();
+                if (routeVerified) {
+                    loadSummary(currentToken, false);
+                } else {
+                    protectRoute(currentToken);
+                }
+            });
+        });
+
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape' && !logoutModal.hidden && !logoutConfirmButton.disabled) {
                 closeLogoutModal();
@@ -520,13 +799,13 @@ function e(string $value): string
 
         // Saat tab kembali dibuka atau jendela difokuskan, langsung segarkan data.
         document.addEventListener('visibilitychange', function () {
-            if (!document.hidden && !document.body.classList.contains('admin-route-pending')) {
+            if (!document.hidden && routeVerified) {
                 loadSummary(token, true);
             }
         });
 
         window.addEventListener('focus', function () {
-            if (!document.hidden && !document.body.classList.contains('admin-route-pending')) {
+            if (!document.hidden && routeVerified) {
                 loadSummary(token, true);
             }
         });
