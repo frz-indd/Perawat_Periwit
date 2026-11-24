@@ -27,10 +27,10 @@ function facility_svg_icon(string $code): string {
  $file = $icons[$code] ?? null;
  return $file ? '<img src="../assets/icons/' . $file . '" alt="" aria-hidden="true" loading="eager">' : '';
 }
-$config = ['apiDashboardUrl'=>$appBasePath.'/api/admin/dashboard','apiLogoutUrl'=>$appBasePath.'/api/admin/logout','apiUrl'=>$appBasePath.$section['api'],'loginUrl'=>$appBasePath.'/FrontEnd/auth/login-admin.php'];
+$config = ['apiDashboardUrl'=>$appBasePath.'/api/admin/dashboard','apiLogoutUrl'=>$appBasePath.'/api/admin/logout','apiUrl'=>$appBasePath.$section['api'],'apiDestinationsUrl'=>$appBasePath.'/api/admin/destinations','loginUrl'=>$appBasePath.'/FrontEnd/auth/login-admin.php'];
 ?>
 <!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><?=e($section['title'])?> | Explore Majaku Admin</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet"><link href="../CSS/admin-data-wisata.css?v=20261124-native-active-green" rel="stylesheet"><link href="../CSS/admin-dashboard.css?v=20261123-profile-active-label" rel="stylesheet"><?php if ($key === 'profil'): ?><link href="../CSS/admin-profil.css?v=20261123-1" rel="stylesheet"><?php elseif ($key === 'kategori'): ?><link href="../CSS/admin-kategori.css?v=20261123-1" rel="stylesheet"><?php elseif ($key === 'fasilitas'): ?><link href="../CSS/admin-fasilitas.css?v=20261123-1" rel="stylesheet"><?php elseif ($key === 'ulasan'): ?><link href="../CSS/admin-ulasan.css?v=20261124-native-active-green" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet"><link href="../CSS/admin-data-wisata.css?v=20261124-native-active-green" rel="stylesheet"><link href="../CSS/admin-dashboard.css?v=20261123-profile-active-label" rel="stylesheet"><?php if ($key === 'profil'): ?><link href="../CSS/admin-profil.css?v=20261123-1" rel="stylesheet"><?php elseif ($key === 'kategori'): ?><link href="../CSS/admin-kategori.css?v=20261123-1" rel="stylesheet"><?php elseif ($key === 'fasilitas'): ?><link href="../CSS/admin-fasilitas.css?v=20261124-autocomplete-v1" rel="stylesheet"><?php elseif ($key === 'ulasan'): ?><link href="../CSS/admin-ulasan.css?v=20261124-native-active-green" rel="stylesheet">
 <?php elseif ($key === 'pengguna'): ?><link href="../CSS/admin-pengguna.css?v=20261123-1" rel="stylesheet"><?php endif; ?><link href="../CSS/admin-controls.css?v=20261124-real-arrow-fix-v3" rel="stylesheet"></head>
 <body class="admin-wisata-page admin-resource-page <?= $key === 'fasilitas' ? 'admin-resource-facilities' : ($key === 'ulasan' ? 'admin-resource-reviews' : ($key === 'kategori' ? 'admin-resource-categories' : ($key === 'pengguna' ? 'admin-resource-users' : ($key === 'profil' ? 'admin-resource-profile' : '')))) ?>"><aside class="admin-sidebar"><a class="admin-brand" href="<?=e($appBasePath)?>/index.php">Explore Majaku</a><button class="sidebar-collapse" id="sidebarCollapse" type="button"><i class="bi bi-chevron-left"></i></button><nav class="admin-nav" aria-label="Navigasi admin">
 <a class="admin-nav__item" href="admin-dashboard.php"><i class="bi bi-house-door"></i><span>Dashboard</span></a><a class="admin-nav__item" href="data-wisata.php"><i class="bi bi-bar-chart-fill"></i><span>Data Wisata</span></a>
@@ -56,7 +56,10 @@ $config = ['apiDashboardUrl'=>$appBasePath.'/api/admin/dashboard','apiLogoutUrl'
     <h2 id="facilityModalTitle">Tambah Fasilitas</h2>
     <p class="facility-modal__subtitle">Lengkapi informasi destinasi wisata dengan detail dan benar.</p>
     <label for="facilityName">Nama wisata</label>
-    <input id="facilityName" name="name" type="text" maxlength="150" placeholder="Masukkan nama destinasi wisata" autocomplete="off">
+    <div class="facility-destination-autocomplete">
+     <input id="facilityName" name="name" type="text" maxlength="150" placeholder="Masukkan nama destinasi wisata" autocomplete="off" aria-autocomplete="list" aria-controls="facilityDestinationSuggestions" aria-expanded="false">
+     <div class="facility-destination-suggestions" id="facilityDestinationSuggestions" role="listbox" aria-label="Saran nama destinasi wisata" hidden></div>
+    </div>
     <p class="facility-field-error" id="facilityNameError" role="alert"></p>
     <div class="facility-options-heading">
      <h3>Pilih Fasilitas</h3>
@@ -172,7 +175,60 @@ function facilityModalOpen(item=null){
 }
 function facilityModalClose(){if(facilityModal){facilityModal.classList.remove('is-open');facilityModal.setAttribute('aria-hidden','true');document.body.classList.remove('facility-modal-open');}}
 let pendingFacilityDelete=null;
+let destinationSuggestTimer=null;let destinationSuggestSequence=0;
+function hideDestinationSuggestions(){
+ const box=document.getElementById('facilityDestinationSuggestions'),input=document.getElementById('facilityName');
+ if(box){box.hidden=true;box.innerHTML='';}
+ if(input)input.setAttribute('aria-expanded','false');
+}
+async function searchDestinationSuggestions(query){
+ const box=document.getElementById('facilityDestinationSuggestions'),input=document.getElementById('facilityName');
+ if(!box||!input)return;
+ const sequence=++destinationSuggestSequence;
+ try{
+  const url=cfg.apiDestinationsUrl+'?'+new URLSearchParams({search:query,page:'1',per_page:'8'}).toString();
+  const response=await fetch(url,{headers:{Authorization:'Bearer '+token,Accept:'application/json'}});
+  const payload=await response.json();
+  if(sequence!==destinationSuggestSequence||input.value.trim().length<2)return;
+  if(!response.ok)throw new Error(payload.message||'Saran nama wisata gagal dimuat.');
+  const rows=Array.isArray(payload.data)?payload.data:[];
+  const normalized=query.toLocaleLowerCase('id-ID');
+  const matches=rows.filter(row=>String(row.name||'').toLocaleLowerCase('id-ID').includes(normalized));
+  if(!matches.length){
+   box.innerHTML='<div class="facility-destination-empty">Tidak ada nama wisata yang cocok.</div>';
+  }else{
+   box.innerHTML=matches.map(row=>'<button type="button" class="facility-destination-suggestion" role="option" data-destination-name="'+esc(row.name)+'">'+esc(row.name)+(row.region?'<small>'+esc(row.region)+'</small>':'')+'</button>').join('');
+  }
+  box.hidden=false;input.setAttribute('aria-expanded','true');
+ }catch(error){hideDestinationSuggestions();}
+}
+function setupDestinationAutocomplete(){
+ const input=document.getElementById('facilityName'),box=document.getElementById('facilityDestinationSuggestions');
+ if(!input||!box)return;
+ input.addEventListener('input',()=>{
+  const query=input.value.trim();
+  clearTimeout(destinationSuggestTimer);
+  if(query.length<2){hideDestinationSuggestions();return;}
+  destinationSuggestTimer=setTimeout(()=>searchDestinationSuggestions(query),250);
+ });
+ box.addEventListener('mousedown',event=>{
+  const option=event.target.closest('[data-destination-name]');
+  if(!option)return;
+  event.preventDefault();
+  input.value=option.dataset.destinationName||'';
+  hideDestinationSuggestions();
+  input.dispatchEvent(new Event('change',{bubbles:true}));
+ });
+ input.addEventListener('keydown',event=>{
+  if(event.key==='Escape'){hideDestinationSuggestions();return;}
+  if(event.key==='ArrowDown'&&!box.hidden){event.preventDefault();box.querySelector('button')?.focus();}
+ });
+ document.addEventListener('click',event=>{
+  if(!event.target.closest('.facility-destination-autocomplete'))hideDestinationSuggestions();
+ });
+}
 function setupFacilities(){
+ setupDestinationAutocomplete();
  const addBtn=document.getElementById('addFacilityButton');if(addBtn)addBtn.addEventListener('click',()=>facilityModalOpen());
  if(facilityModal){facilityModal.querySelectorAll('[data-close-facility-modal]').forEach(el=>el.addEventListener('click',facilityModalClose));document.addEventListener('keydown',event=>{if(event.key==='Escape'){facilityModalClose();facilityHideModal('facilityConfirmModal');facilityHideModal('facilityResultModal');}});}
  document.querySelectorAll('[data-facility-confirm-close]').forEach(el=>el.addEventListener('click',()=>{facilityHideModal('facilityConfirmModal');pendingFacilityDelete=null;}));

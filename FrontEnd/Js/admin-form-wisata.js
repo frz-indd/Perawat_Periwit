@@ -127,8 +127,8 @@
                 else if (raw.includes('sejarah') || raw.includes('budaya')) option.textContent = 'Wisata Sejarah & Budaya';
             } else if (select === elements.region) {
                 const raw = String(item.name || '').toLocaleLowerCase('id-ID');
-                if (raw.includes('majalengka')) { option.textContent = 'Majalengka'; option.value = 'Majalengka'; }
-                else if (raw.includes('kuningan')) { option.textContent = 'Kuningan'; option.value = 'Kuningan'; }
+                if (raw.includes('majalengka')) option.textContent = 'Majalengka';
+                else if (raw.includes('kuningan')) option.textContent = 'Kuningan';
             }
             select.appendChild(option);
         });
@@ -386,7 +386,12 @@
                 if (exactValue) return exactValue.value;
                 const normalized = String(value).trim().toLocaleLowerCase('id');
                 const matchingLabel = Array.from(select.options).find(function (option) {
-                    return option.value !== '' && option.textContent.trim().toLocaleLowerCase('id') === normalized;
+                    if (option.value === '') return false;
+                    const label = option.textContent.trim().toLocaleLowerCase('id');
+                    const optionValue = String(option.value).trim().toLocaleLowerCase('id');
+                    return label === normalized || optionValue === normalized
+                        || normalized.includes(label) || label.includes(normalized)
+                        || normalized.includes(optionValue) || optionValue.includes(normalized);
                 });
                 if (matchingLabel) return matchingLabel.value;
             }
