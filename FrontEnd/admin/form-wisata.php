@@ -82,6 +82,8 @@ $destinationId = isset($_GET['id'])
                     <input class="form-control" id="destinationDays" name="operating_days" type="text" maxlength="120" placeholder="Contoh : Senin - Jum’at">
                 </div>
                 <div class="admin-field">
+                    <label for="destinationHours">Jam Operasional</label>
+                    <input class="form-control" id="destinationHours" name="operating_hours" type="text" maxlength="120" placeholder="Contoh : 08:00 - 17:00">
                     <label>Jam Operasional</label>
                     <div style="display:flex;gap:8px;align-items:center;">
                         <select class="form-control" id="destinationOpenTime" name="open_time">
