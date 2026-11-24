@@ -1,5 +1,6 @@
 <?php
 header("Content-Type: application/json; charset=utf-8");
+require_once __DIR__ . "/../middleware/moderasi-komentar.php";
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
@@ -60,6 +61,11 @@ $reviewText = trim($reviewText);
 $textLength = function_exists("mb_strlen") ? mb_strlen($reviewText, "UTF-8") : strlen($reviewText);
 if ($reviewText === "" || $textLength > 500) {
     $respond(422, ["status" => "validation_error", "message" => "Teks ulasan wajib diisi dan maksimal 500 karakter."]);
+}
+
+$pesanModerasi = moderasiKomentar($reviewText);
+if ($pesanModerasi !== null) {
+    $respond(422, ["status" => "blocked_word", "message" => $pesanModerasi]);
 }
 
 $destinationId = $_GET["id"] ?? "";

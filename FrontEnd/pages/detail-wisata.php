@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../Backend/middleware/moderasi-komentar.php';
 session_start();
 require_once __DIR__ . '/navbar-profile-session.php';
 date_default_timezone_set('Asia/Jakarta');
@@ -259,6 +260,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'ulasan'
         $galatSimpan = 'Pilih rating terlebih dahulu.';
     } elseif ($panjang < 1 || $panjang > 500) {
         $galatSimpan = 'Ulasan harus berisi 1 sampai 500 karakter.';
+    } elseif (($pesanModerasi = moderasiKomentar($komentarPost)) !== null) {
+        $galatSimpan = $pesanModerasi;
     } else {
         try {
             simpanUlasan($conn, (int) $userId, $tourismId, $ratingPost, $komentarPost);
@@ -842,6 +845,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <label class="dialog__label" for="komentar">Ulasan</label>
             <textarea id="komentar" name="komentar" rows="5" maxlength="500"
                       placeholder="Ceritakan Pengalamanmu di sini..."><?= e($komentarSaya) ?></textarea>
+            <p class="dialog__catatan" id="catatan-sensor" aria-live="polite">Komentar akan diperiksa otomatis agar tetap sopan dan nyaman dibaca.</p>
             <p class="dialog__catatan">Jika kamu sudah pernah mengulas, ulasan yang kamu kirim akan menggantikan ulasan sebelumnya.</p>
 
             <p class="dialog__error" id="error-ulasan" role="alert"<?= $galatSimpan === '' ? ' hidden' : '' ?>><?= e($galatSimpan) ?></p>
