@@ -82,16 +82,32 @@ $destinationId = isset($_GET['id'])
                     <input class="form-control" id="destinationDays" name="operating_days" type="text" maxlength="120" placeholder="Contoh : Senin - Jum’at">
                 </div>
                 <div class="admin-field">
-                    <label for="destinationOpenTime">Jam Buka</label>
-                    <select class="form-select" id="destinationOpenTime" name="open_time" required>
-                        <option value="">Pilih jam buka</option>
-<?php for ($h = 0; $h < 24; $h++) { $hour = str_pad((string)$h, 2, '0', STR_PAD_LEFT); echo "                <option value=\"$hour:00\">$hour:00</option>\n"; echo "                <option value=\"$hour:30\">$hour:30</option>\n"; } ?>
-                    </select>
-                    <label for="destinationCloseTime" class="mt-2">Jam Tutup</label>
-                    <select class="form-select" id="destinationCloseTime" name="close_time" required>
-                        <option value="">Pilih jam tutup</option>
-<?php for ($h = 0; $h < 24; $h++) { $hour = str_pad((string)$h, 2, '0', STR_PAD_LEFT); echo "                <option value=\"$hour:00\">$hour:00</option>\n"; echo "                <option value=\"$hour:30\">$hour:30</option>\n"; } ?>
-                    </select>
+                    <label>Jam Operasional</label>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <select class="form-control" id="destinationOpenTime" name="open_time">
+                            <option value="">-- Jam Buka --</option>
+                            <?php
+                            for ($h = 0; $h < 24; $h++) {
+                                foreach (['00','30'] as $m) {
+                                    $val = sprintf('%02d:%s', $h, $m);
+                                    echo "<option value=\"$val\">$val</option>\n";
+                                }
+                            }
+                            ?>
+                        </select>
+                        <span style="white-space:nowrap;">s/d</span>
+                        <select class="form-control" id="destinationCloseTime" name="close_time">
+                            <option value="">-- Jam Tutup --</option>
+                            <?php
+                            for ($h = 0; $h < 24; $h++) {
+                                foreach (['00','30'] as $m) {
+                                    $val = sprintf('%02d:%s', $h, $m);
+                                    echo "<option value=\"$val\">$val</option>\n";
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
                 </div>
                 <div class="admin-field">
                     <label for="destinationPrice">Harga Tiket masuk (Rp)</label>
