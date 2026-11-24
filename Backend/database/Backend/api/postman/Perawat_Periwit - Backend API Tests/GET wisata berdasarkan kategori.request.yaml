@@ -1,0 +1,16 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/categories/{{categoryId}}/wisata'
+order: 4000
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Tourism is returned for selected category', function () {
+        pm.response.to.have.status(200);
+        const d = pm.response.json().data;
+        pm.expect(d.kategori.id_kategori).to.eql(Number(pm.collectionVariables.get('categoryId')));
+        pm.expect(d.wisata).to.be.an('array');
+      });

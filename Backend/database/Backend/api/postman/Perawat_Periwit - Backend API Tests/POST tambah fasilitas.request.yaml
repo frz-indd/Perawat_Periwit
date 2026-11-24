@@ -1,0 +1,18 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/api/admin/facilities'
+order: 20000
+headers:
+  Accept: application/json
+  Authorization: 'Bearer {{adminJwtToken}}'
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {"name": "Toilet", "icon_code": "fa-restroom", "description": "Fasilitas toilet umum"}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Create facility returns 201 or duplicate 422', function () { pm.expect([201,422]).to.include(pm.response.code); });
+      if (pm.response.code === 201) { pm.collectionVariables.set('facilityId', pm.response.json().data.id); }

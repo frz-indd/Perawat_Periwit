@@ -36,8 +36,9 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Poppins:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@600;700&display=swap" rel="stylesheet">
-    <link href="../CSS/admin-data-wisata.css?v=20261123-restore-add-button" rel="stylesheet">
+    <link href="../CSS/admin-data-wisata.css?v=20261124-wisata-fields" rel="stylesheet">
     <link href="../CSS/admin-dashboard.css?v=20261123-exact-profile-svg" rel="stylesheet">
+    <link href="../CSS/admin-controls.css?v=20261124-data-wisata-arrows-only" rel="stylesheet">
 </head>
 <body class="admin-wisata-page">
     <aside class="admin-sidebar" id="adminSidebar">
@@ -109,14 +110,17 @@ function e(string $value): string
                             <th scope="col">Nama wisata</th>
                             <th scope="col">wilayah</th>
                             <th scope="col">Kategori</th>
+                            <th scope="col">Deskripsi</th>
                             <th scope="col">Harga Tiket<br>masuk</th>
+                            <th scope="col">Hari</th>
+                            <th scope="col">Jam Operasional</th>
                             <th scope="col">Rating</th>
                             <th scope="col">Lokasi</th>
                             <th scope="col">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="destinationRows">
-                        <tr><td class="table-state" colspan="9"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Memuat data wisata...</td></tr>
+                        <tr><td class="table-state" colspan="12"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Memuat data wisata...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -193,7 +197,8 @@ function e(string $value): string
         window.adminWisataConfig = <?= json_encode($pageConfig, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../Js/admin-data-wisata.js?v=20261120-compact"></script>
+    <script src="../Js/admin-data-wisata.js?v=20261124-category-region-labels"></script>
+<script src="../Js/admin-custom-dropdowns.js?v=admin-data-wisata-arrows-only"></script>
 <script src="../Js/api-endpoint-labels.js?v=api-tooltip-3"></script>
 </body>
 </html>

@@ -1,0 +1,17 @@
+$kind: http-request
+method: PUT
+url: '{{baseUrl}}/api/destinations/{{destinationId}}/location'
+order: 10000
+headers:
+  Content-Type: application/json
+  Accept: application/json
+  X-CSRF-Token: '{{adminCsrf}}'
+body:
+  type: json
+  content: |-
+    {"alamat":"Alamat uji","latitude":-6.9,"longitude":null}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const has=Boolean(pm.collectionVariables.get('adminCsrf')); pm.test('Location update validates session and coordinate pair',function(){pm.response.to.have.status(has?422:401);pm.expect(pm.response.json().status).to.eql(has?'incomplete_coordinates':'unauthenticated');});

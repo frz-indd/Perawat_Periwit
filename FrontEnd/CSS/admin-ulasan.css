@@ -79,3 +79,81 @@ body.admin-resource-reviews .admin-content{width:100%;max-width:none!important}
 .review-empty-icon svg{display:block;width:67px;height:67px}
 .review-empty-icon.is-search svg{width:67px;height:67px}
 
+
+/* Dropdown rating: status aktif hijau sesuai referensi SVG. */
+.review-toolbar select:focus,
+.review-toolbar select:active {
+    color: #fff;
+    background-color: #166c5c;
+    border-color: #166c5c;
+    outline: 0;
+    box-shadow: 0 0 0 2px rgba(57, 139, 124, .18);
+}
+.review-toolbar select option {
+    color: #171b19;
+    background: #fff;
+}
+.review-toolbar select option:checked {
+    color: #fff;
+    background: #166c5c;
+}
+
+
+/* Hanya panel ketika dropdown dibuka yang memakai desain referensi.
+   Kontrol tertutup mengikuti ukuran, posisi, dan tampilan select asli. */
+.admin-custom-select{position:relative;display:block;min-width:0;width:100%;}
+.admin-custom-select>select{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;opacity:0!important;pointer-events:none!important;z-index:-1!important;}
+.admin-custom-select__trigger{box-sizing:border-box;cursor:pointer;}
+.admin-custom-select__panel{position:absolute;z-index:1200;top:calc(100% + 3px);left:0;width:100%;max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;padding:5px;background:#398f80;border:1px solid #267b6d;border-radius:7px;box-shadow:0 3px 7px rgba(0,0,0,.16);}
+.admin-custom-select__panel[hidden]{display:none!important;}
+.admin-custom-select__option{display:block;width:100%;min-height:38px;padding:7px 9px;border:1px solid #176f60;border-radius:5px;background:#fff;color:#111;font-family:inherit;font-size:inherit;font-weight:400;line-height:1.25;text-align:center;white-space:normal;cursor:pointer;}
+.admin-custom-select__option:hover,.admin-custom-select__option[aria-selected="true"]{background:#f4faf8;color:#111;border-color:#176f60;}
+.admin-custom-select__option:focus-visible{outline:2px solid #176f60;outline-offset:2px;}
+@media(max-width:650px){.admin-custom-select__option{min-height:36px;font-size:14px}}
+
+/* Panah dropdown tetap terlihat pada pilihan rating */
+.review-toolbar select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 42px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m3 6 5 5 5-5' stroke='%23999' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+}
+
+
+/* Semua dropdown admin memakai panah bawah yang konsisten, termasuk rating ulasan. */
+.admin-custom-select { position: relative; min-width: 0; width: 100%; }
+.admin-custom-select__trigger {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding-right: 44px !important;
+    text-align: left !important;
+    background-image: none !important;
+}
+.admin-custom-select__trigger::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 17px;
+    width: 10px;
+    height: 10px;
+    margin-top: -6px;
+    border-right: 2px solid #999;
+    border-bottom: 2px solid #999;
+    transform: rotate(45deg);
+    transition: transform .15s ease;
+    pointer-events: none;
+}
+.admin-custom-select.is-open .admin-custom-select__trigger::after {
+    margin-top: 0;
+    transform: translateY(-50%) rotate(225deg);
+}
+@media(max-width:650px) {
+    .admin-custom-select__trigger { padding-right: 38px !important; }
+    .admin-custom-select__trigger::after { right: 13px; }
+}

@@ -1,0 +1,12 @@
+$kind: http-request
+method: DELETE
+url: '{{baseUrl}}/api/admin/reviews/{{reviewId}}'
+order: 4000
+headers:
+  Accept: application/json
+  Authorization: 'Bearer {{adminJwtToken}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Review deleted', function () { pm.response.to.have.status(200); });

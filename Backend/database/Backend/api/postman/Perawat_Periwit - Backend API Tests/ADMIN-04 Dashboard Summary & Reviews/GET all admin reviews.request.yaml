@@ -1,0 +1,12 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/api/admin/reviews'
+order: 2000
+headers:
+  Accept: application/json
+  Authorization: 'Bearer {{adminJwtToken}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Reviews list returns array', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data).to.be.an('array'); });

@@ -1,0 +1,15 @@
+$kind: http-request
+name: 'GET /users/me tanpa login'
+method: GET
+url: '{{baseUrl}}/users/me'
+order: 2000
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Anonymous GET returns 401', function () {
+        pm.response.to.have.status(401);
+        pm.expect(pm.response.json().status).to.eql('unauthenticated');
+      });

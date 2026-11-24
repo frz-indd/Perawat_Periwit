@@ -1,0 +1,16 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/api/admin/login'
+order: 1000
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {"username":"{{adminUsername}}","password":"{{adminPassword}}"}
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Admin JWT login succeeds', function () { pm.response.to.have.status(200); const body=pm.response.json(); pm.expect(body.token).to.be.a('string').and.not.empty; pm.collectionVariables.set('adminJwtToken', body.token); });

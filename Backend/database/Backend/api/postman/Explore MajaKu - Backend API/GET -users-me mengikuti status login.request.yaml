@@ -1,0 +1,25 @@
+$kind: http-request
+name: GET /users/me mengikuti status login
+url: "{{baseUrl}}/users/me"
+method: GET
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      const userAuthenticated = pm.collectionVariables.get('userAuthenticated') === 'true';
+      pm.test('Profile access matches login state', function () {
+          pm.response.to.have.status(userAuthenticated ? 200 : 401);
+          if (userAuthenticated) {
+              const data = pm.response.json().data;
+              pm.expect(data.id_user).to.be.a('number');
+              pm.expect(data.nama).to.be.a('string').and.not.empty;
+              pm.expect(data.email).to.be.a('string').and.not.empty;
+              pm.collectionVariables.set('profileName', data.nama);
+              pm.collectionVariables.set('profileEmail', data.email);
+          } else {
+              pm.expect(pm.response.json().status).to.eql('unauthenticated');
+          }
+      });
+    language: text/javascript
+order: 12000

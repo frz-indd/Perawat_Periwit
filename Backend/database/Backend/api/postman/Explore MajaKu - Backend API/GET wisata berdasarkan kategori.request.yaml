@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/categories/{{categoryId}}/wisata"
+method: GET
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Tourism is returned for the selected category', function () {
+          pm.response.to.have.status(200);
+          const data = pm.response.json().data;
+          pm.expect(data.kategori.id_kategori).to.eql(Number(pm.collectionVariables.get('categoryId')));
+          pm.expect(data.kategori).to.have.property('gambar');
+          pm.expect(data.wisata).to.be.an('array');
+          data.wisata.forEach(function (tourism) {
+              pm.expect(tourism.id_kategori).to.eql(data.kategori.id_kategori);
+              pm.expect(tourism.gambar).to.be.a('string').and.not.empty;
+          });
+      });
+    language: text/javascript
+order: 3000

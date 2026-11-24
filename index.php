@@ -1,8 +1,6 @@
 <?php
 session_start();
 
-require_once __DIR__ . '/FrontEnd/pages/navbar-profile-session.php';
-
 $isLoggedIn = isset($_SESSION["id_user"]);
 
 require_once __DIR__ . "/Backend/database/koneksi.php";
@@ -50,7 +48,7 @@ $destinasiLain = array_slice($wisata, 4, 4);
                 <details name="site-category-menu" class="category-dropdown ep-menu__kategori">
                     <summary><span>Kategori</span><span class="ep-menu__panah" aria-hidden="true"></span></summary>
                     <div class="category-menu">
-                        <a href="FrontEnd/pages/kategori.php?kategori=alam">Wisata Alam &amp; Pegunungan</a>
+                        <a href="FrontEnd/pages/kategori.php?kategori=alam">Wisata Alam &amp; pegunungan</a>
                         <a href="FrontEnd/pages/kategori.php?kategori=air-curug">Wisata Air &amp; Curug</a>
                         <a href="FrontEnd/pages/kategori.php?kategori=buatan-kuliner">Wisata Buatan &amp; Kuliner</a>
                         <a href="FrontEnd/pages/kategori.php?kategori=sejarah-budaya">Wisata Sejarah &amp; Budaya</a>
@@ -62,16 +60,13 @@ $destinasiLain = array_slice($wisata, 4, 4);
             <div class="navbar-icons ep-aksi">
 
                 <a href="<?= $isLoggedIn ? 'FrontEnd/pages/profil.php' : 'FrontEnd/auth/Login.php' ?>"
-                   class="profile-icon ep-ikon ep-ikon--profil<?= $isLoggedIn ? fotoNavbarClass() : '' ?>"
+                   class="profile-icon ep-ikon ep-ikon--profil"
                    aria-label="<?= $isLoggedIn ? 'Profil' : 'Login' ?>">
                     <svg class="profile-outline-icon" viewBox="0 0 40 40" aria-hidden="true">
                         <circle cx="20" cy="20" r="17"></circle>
                         <circle cx="20" cy="15" r="5"></circle>
                         <path d="M9 31c1.7-5 5.5-7.5 11-7.5S29.3 26 31 31"></path>
                     </svg>
-                    <?php if ($isLoggedIn): ?>
-                        <?= fotoNavbarMarkup() ?>
-                    <?php endif; ?>
                 </a>
 
                 <?php if (!$isLoggedIn): ?>

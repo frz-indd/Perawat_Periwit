@@ -1,0 +1,11 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/categories/not-a-number/wisata'
+order: 5000
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Malformed category ID returns 400', function () { pm.response.to.have.status(400); pm.expect(pm.response.json().status).to.eql('invalid_category_id'); });

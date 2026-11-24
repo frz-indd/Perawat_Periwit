@@ -675,7 +675,7 @@ body.admin-form-page {
     display: flex;
     justify-content: flex-end;
     gap: 14px;
-    margin-top: 0;
+    margin-top: -16px;
 }
 
 .admin-form-actions .btn {
@@ -1413,3 +1413,243 @@ body.admin-form-page {
 
 /* Empty-state illustration sizing. */
 .destination-empty-search{display:block;width:118px;height:118px;margin:0 auto 12px}
+
+/* Dropdown filter dan form: keadaan aktif mengikuti referensi SVG hijau. */
+.admin-filters .form-select:focus,
+.admin-filters .form-select:active,
+.admin-field .form-select:focus,
+.admin-field .form-select:active {
+    color: #fff;
+    background-color: #166c5c;
+    border-color: #166c5c;
+    box-shadow: 0 0 0 2px rgba(57, 139, 124, .18);
+}
+.admin-filters .form-select:focus,
+.admin-filters .form-select:active,
+.admin-field .form-select:focus,
+.admin-field .form-select:active {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+}
+.admin-filters .form-select option:checked,
+.admin-field .form-select option:checked {
+    color: #fff;
+    background: #166c5c;
+}
+.admin-filters .form-select option,
+.admin-field .form-select option {
+    color: #171b19;
+    background: #fff;
+}
+
+
+/* Hanya panel ketika dropdown dibuka yang memakai desain referensi.
+   Kontrol tertutup mengikuti ukuran, posisi, dan tampilan select asli. */
+.admin-custom-select{position:relative;display:block;min-width:0;width:100%;}
+.admin-custom-select>select{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;opacity:0!important;pointer-events:none!important;z-index:-1!important;}
+.admin-custom-select__trigger{box-sizing:border-box;cursor:pointer;}
+.admin-custom-select__panel{position:absolute;z-index:1200;top:calc(100% + 3px);left:0;width:100%;max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;padding:5px;background:#398f80;border:1px solid #267b6d;border-radius:7px;box-shadow:0 3px 7px rgba(0,0,0,.16);}
+.admin-custom-select__panel[hidden]{display:none!important;}
+.admin-custom-select__option{display:block;width:100%;min-height:38px;padding:7px 9px;border:1px solid #176f60;border-radius:5px;background:#fff;color:#111;font-family:inherit;font-size:inherit;font-weight:400;line-height:1.25;text-align:center;white-space:normal;cursor:pointer;}
+.admin-custom-select__option:hover,.admin-custom-select__option[aria-selected="true"]{background:#f4faf8;color:#111;border-color:#176f60;}
+.admin-custom-select__option:focus-visible{outline:2px solid #176f60;outline-offset:2px;}
+@media(max-width:650px){.admin-custom-select__option{min-height:36px;font-size:14px}}
+
+/* Penyelarasan tabel dan form sesuai referensi pengguna */
+.admin-table { min-width: 1480px; table-layout: fixed; }
+.admin-table thead th:nth-child(1) { width: 4%; }
+.admin-table thead th:nth-child(2) { width: 8%; }
+.admin-table thead th:nth-child(3) { width: 11%; }
+.admin-table thead th:nth-child(4) { width: 9%; }
+.admin-table thead th:nth-child(5) { width: 10%; }
+.admin-table thead th:nth-child(6) { width: 23%; }
+.admin-table thead th:nth-child(7) { width: 8%; }
+.admin-table thead th:nth-child(8) { width: 9%; }
+.admin-table thead th:nth-child(9) { width: 9%; }
+.admin-table thead th:nth-child(10) { width: 8%; }
+.admin-table thead th:nth-child(11) { width: 8%; }
+.admin-table thead th:nth-child(12) { width: 8%; }
+.admin-table tbody td.destination-description { min-width: 280px; text-align: left; line-height: 1.45; }
+.admin-table-wrap { overflow-x: auto; overscroll-behavior-x: contain; }
+.admin-form-container { max-height: 100vh; overflow-y: auto; scrollbar-gutter: stable; }
+.admin-destination-form { padding: 0 8px 24px 0; }
+.required-mark { color: inherit; margin-left: 3px; }
+.admin-field .form-control:invalid,
+.admin-field .form-select:invalid,
+.admin-destination-form.was-validated .form-control:invalid,
+.admin-destination-form.was-validated .form-select:invalid {
+    border-color: #6fa99c !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+.admin-destination-form .invalid-feedback { color: #dc3545 !important; }
+
+
+/* Konsistensi warna teks field pada form Tambah/Edit Wisata admin. */
+.admin-form-page .admin-field .form-control,
+.admin-form-page .admin-field .form-select,
+.admin-form-page .admin-field .form-control:focus,
+.admin-form-page .admin-field .form-select:focus {
+    color: var(--admin-ink, #171b19) !important;
+    -webkit-text-fill-color: var(--admin-ink, #171b19) !important;
+}
+.admin-form-page .admin-field .form-control::placeholder {
+    color: #969a98 !important;
+    -webkit-text-fill-color: #969a98 !important;
+    opacity: 1;
+}
+.admin-form-page .admin-field .form-select option {
+    color: var(--admin-ink, #171b19);
+    background: #fff;
+}
+
+
+/* Validasi pilihan wilayah dan kategori pada form tambah/edit wisata.
+   Pesan error merah ditampilkan tanpa mengubah outline field dari warna hijau. */
+.admin-destination-form .admin-field .invalid-feedback.is-visible {
+    display: block;
+    margin-top: 3px;
+    color: #ff0000 !important;
+    font-size: 14px;
+    line-height: 1.25;
+}
+.admin-destination-form .admin-custom-select__trigger.is-invalid {
+    border-color: #6fa99c !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+
+/* Dropdown Tambah/Edit: placeholder sesuai referensi dan panah bawah selalu terlihat. */
+.admin-form-page .admin-custom-select__trigger {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    color: var(--admin-ink, #171b19);
+    background-color: #fff !important;
+    background-image: none !important;
+    padding-right: 28px !important;
+}
+.admin-form-page .admin-custom-select__trigger.is-placeholder {
+    color: #969a98 !important;
+    -webkit-text-fill-color: #969a98 !important;
+}
+.admin-form-page .admin-custom-select__trigger::after {
+    content: "";
+    flex: 0 0 10px;
+    width: 10px;
+    height: 10px;
+    margin: -5px 8px 0 0;
+    border-right: 2px solid #999;
+    border-bottom: 2px solid #999;
+    transform: rotate(45deg);
+    transition: transform .15s ease;
+}
+.admin-form-page .admin-custom-select.is-open .admin-custom-select__trigger::after {
+    margin: 5px 8px 0 0;
+    transform: rotate(225deg);
+}
+
+/* Hilangkan ikon centang hijau bawaan Bootstrap pada seluruh field form. */
+.admin-form-page .admin-destination-form.was-validated .form-control:valid,
+.admin-form-page .admin-destination-form.was-validated .form-select:valid,
+.admin-form-page .admin-destination-form .form-control:valid,
+.admin-form-page .admin-destination-form .form-select:valid,
+.admin-form-page .admin-destination-form.was-validated .form-control:invalid,
+.admin-form-page .admin-destination-form.was-validated .form-select:invalid {
+    background-image: none !important;
+    box-shadow: none !important;
+}
+.admin-form-page .admin-destination-form.was-validated .form-control:valid,
+.admin-form-page .admin-destination-form.was-validated .form-select:valid {
+    border-color: #6fa99c !important;
+}
+
+
+/* Final alignment patch for custom dropdown arrows and form action buttons. */
+.admin-form-page .admin-custom-select {
+    position: relative !important;
+    width: 100%;
+}
+.admin-form-page .admin-custom-select__trigger {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding-right: 58px !important;
+    text-align: left !important;
+}
+.admin-form-page .admin-custom-select__trigger::after {
+    position: absolute !important;
+    top: 50% !important;
+    right: 25px !important;
+    flex: none !important;
+    width: 11px !important;
+    height: 11px !important;
+    margin: -7px 0 0 !important;
+    transform: rotate(45deg) !important;
+}
+.admin-form-page .admin-custom-select.is-open .admin-custom-select__trigger::after {
+    margin: 0 !important;
+    transform: translateY(-50%) rotate(225deg) !important;
+}
+/* Tombol Tambah/Edit ditempatkan tepat di bawah panel upload foto. */
+.admin-form-page .admin-form-actions {
+    grid-column: 2 !important;
+    justify-content: flex-end !important;
+    align-self: start !important;
+    margin-top: 30px !important;
+    margin-bottom: 0 !important;
+    transform: none !important;
+}
+/* Pesan validasi foto selalu rata tengah tepat di bawah area unggah. */
+.admin-form-page .upload-feedback {
+    display: none !important;
+    width: 100%;
+    margin: 14px 0 0 !important;
+    color: #ff0000 !important;
+    font-family: 'Poppins', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: center;
+}
+.admin-form-page .upload-feedback.is-visible {
+    display: block !important;
+}
+@media (max-width: 700px) {
+    .admin-form-page .admin-custom-select__trigger { padding-right: 52px !important; }
+    .admin-form-page .admin-custom-select__trigger::after { right: 21px !important; }
+    .admin-form-page .admin-form-actions {
+        grid-column: 1 !important;
+        margin-top: 24px !important;
+        transform: none !important;
+    }
+}
+
+/* Panah bawah untuk seluruh dropdown filter pada halaman admin Data Wisata. */
+.admin-custom-select__trigger {
+    position: relative !important;
+    padding-right: 44px !important;
+    text-align: left !important;
+    background-image: none !important;
+}
+.admin-custom-select__trigger::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 17px;
+    width: 10px;
+    height: 10px;
+    margin-top: -6px;
+    border-right: 2px solid #999;
+    border-bottom: 2px solid #999;
+    transform: rotate(45deg);
+    transition: transform .15s ease;
+    pointer-events: none;
+}
+.admin-custom-select.is-open .admin-custom-select__trigger::after {
+    margin-top: 0;
+    transform: translateY(-50%) rotate(225deg);
+}

@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/api/destinations/{{destinationId}}/location"
+method: GET
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Location response has address and coordinate fields', function () {
+          pm.response.to.have.status(200);
+          const location = pm.response.json().data;
+          pm.expect(location).to.have.property('alamat');
+          pm.expect(location).to.have.property('latitude');
+          pm.expect(location).to.have.property('longitude');
+          pm.expect(location.koordinat_lengkap).to.be.a('boolean');
+          if (location.koordinat_lengkap) {
+              pm.expect(location.latitude).to.be.a('number').within(-90, 90);
+              pm.expect(location.longitude).to.be.a('number').within(-180, 180);
+          } else {
+              pm.expect(location.latitude).to.eql(null);
+              pm.expect(location.longitude).to.eql(null);
+          }
+      });
+    language: text/javascript
+order: 7000

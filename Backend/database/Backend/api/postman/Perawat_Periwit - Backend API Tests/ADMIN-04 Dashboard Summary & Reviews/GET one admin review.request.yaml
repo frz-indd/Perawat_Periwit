@@ -1,0 +1,7 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/api/admin/reviews/{{reviewId}}'
+order: 3000
+headers:
+  Accept: application/json
+  Authorization: 'Bearer {{adminJwtToken}}'

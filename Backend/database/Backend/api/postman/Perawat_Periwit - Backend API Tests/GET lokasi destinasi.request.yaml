@@ -1,0 +1,11 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/api/destinations/{{destinationId}}/location'
+order: 8000
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Location returns valid coordinate fields', function () { pm.response.to.have.status(200); const d=pm.response.json().data; pm.expect(d).to.have.property('alamat'); pm.expect(d.koordinat_lengkap).to.be.a('boolean'); if(d.koordinat_lengkap){pm.expect(d.latitude).to.be.within(-90,90);pm.expect(d.longitude).to.be.within(-180,180);}else{pm.expect(d.latitude).to.eql(null);pm.expect(d.longitude).to.eql(null);} });

@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/categories/999999/wisata"
+method: GET
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Unknown category ID returns 404', function () {
+          pm.response.to.have.status(404);
+          pm.expect(pm.response.json().status).to.eql('category_not_found');
+      });
+    language: text/javascript
+order: 5000
