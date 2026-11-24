@@ -63,10 +63,8 @@ if ($reviewText === "" || $textLength > 500) {
     $respond(422, ["status" => "validation_error", "message" => "Teks ulasan wajib diisi dan maksimal 500 karakter."]);
 }
 
-$pesanModerasi = moderasiKomentar($reviewText);
-if ($pesanModerasi !== null) {
-    $respond(422, ["status" => "blocked_word", "message" => $pesanModerasi]);
-}
+// Komentar tetap diterima; kata kasar otomatis disamarkan sebelum disimpan.
+$reviewText = sensorKomentar($reviewText);
 
 $destinationId = $_GET["id"] ?? "";
 if (!is_string($destinationId) || !preg_match('/^[A-Za-z0-9_-]{1,16}$/', $destinationId)) {
