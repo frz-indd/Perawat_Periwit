@@ -117,10 +117,16 @@
 
   Array.prototype.forEach.call(document.querySelectorAll('.ub-mata'), function (b) {
     b.addEventListener('click', function () {
-      var el = $(b.getAttribute('data-target')), lihat = el.type === 'password';
-      el.type = lihat ? 'text' : 'password';
-      b.setAttribute('aria-pressed', lihat);
-      b.setAttribute('aria-label', lihat ? 'Sembunyikan password' : 'Tampilkan password');
+      var el = $(b.getAttribute('data-target'));
+      if (!el) return;
+      var isHidden = el.type === 'password';
+      el.type = isHidden ? 'text' : 'password';
+      var icon = b.querySelector('i');
+      if (icon) {
+        icon.className = isHidden ? 'bi bi-eye-fill' : 'bi bi-eye-slash-fill';
+      }
+      b.setAttribute('aria-pressed', String(isHidden));
+      b.setAttribute('aria-label', isHidden ? 'Sembunyikan password' : 'Tampilkan password');
       el.focus();
     });
   });

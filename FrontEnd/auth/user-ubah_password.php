@@ -73,11 +73,8 @@ $e = fn($s) => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 function mata(string $id): void
 {
     echo '<button type="button" class="ub-mata" aria-label="Tampilkan password" aria-pressed="false" data-target="' . $id . '">'
-       . '<svg viewBox="0 0 22 14" aria-hidden="true">'
-       . '<path fill="currentColor" fill-rule="evenodd" d="M0 7C4 2 7.4 0 11 0S18 2 22 7C18 12 14.6 14 11 14S4 12 0 7ZM11 3.4a3.6 3.6 0 1 0 0 7.2a3.6 3.6 0 1 0 0-7.2Z"/>'
-       . '<path class="ub-mata__coret" d="M2.5 13.2L19.5 0.8" fill="none" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/>'
-       . '<path class="ub-mata__coret" d="M2.5 13.2L19.5 0.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
-       . '</svg></button>';
+       . '<i class="bi bi-eye-slash-fill" aria-hidden="true"></i>'
+       . '</button>';
 }
 ?>
 <!DOCTYPE html>
@@ -90,8 +87,21 @@ function mata(string $id): void
   <title>Buat Password Baru | Explore Majaku</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Inter:wght@400;500&family=Noto+Serif:wght@400;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../CSS/admin-ubah_password.css?v=<?= time() ?>">
+  <style>
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear,
+    .ub-input::-ms-reveal,
+    .ub-input::-ms-clear {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+  </style>
 </head>
 <body>
 
