@@ -140,22 +140,6 @@
         return config.uploadBaseUrl + cleanPath.split('/').map(encodeURIComponent).join('/');
     }
 
-    function categoryLabel(value) {
-        const raw = String(value == null ? '' : value).toLocaleLowerCase('id-ID');
-        if (raw.includes('alam') || raw.includes('gunung')) return 'Wisata Alam & pegunungan';
-        if (raw.includes('air') || raw.includes('curug')) return 'Wisata Air & Curug';
-        if (raw.includes('buatan') || raw.includes('kuliner')) return 'Wisata Buatan & Kuliner';
-        if (raw.includes('sejarah') || raw.includes('budaya')) return 'Wisata Sejarah & Budaya';
-        return String(value == null || value === '' ? '-' : value);
-    }
-
-    function regionLabel(value) {
-        const raw = String(value == null ? '' : value).toLocaleLowerCase('id-ID');
-        if (raw.includes('majalengka')) return 'Majalengka';
-        if (raw.includes('kuningan')) return 'Kuningan';
-        return String(value == null || value === '' ? '-' : value);
-    }
-
     function formatPrice(price) {
         if (price === null || price === undefined || price === '') return '-';
         const amount = Number(price);
@@ -212,12 +196,9 @@
                 + '<td>' + rowNumber + '</td>'
                 + '<td>' + imageCell + '</td>'
                 + '<td>' + escapeHtml(item.name || '-') + '</td>'
-                + '<td>' + escapeHtml(regionLabel(item.region || item.kabupaten || '-')) + '</td>'
-                + '<td>' + escapeHtml(categoryLabel(typeof item.category === 'string' ? item.category : (item.category && item.category.name) || '-')) + '</td>'
-                + '<td class="destination-description">' + escapeHtml(item.description || '-') + '</td>'
+                + '<td>' + escapeHtml(item.region || item.kabupaten || '-') + '</td>'
+                + '<td>' + escapeHtml(typeof item.category === 'string' ? item.category : (item.category && item.category.name) || '-') + '</td>'
                 + '<td>' + formatPrice(item.price) + '</td>'
-                + '<td>' + escapeHtml(item.operating_days || '-') + '</td>'
-                + '<td>' + escapeHtml(item.operating_hours || ((item.open_time && item.close_time) ? item.open_time + ' - ' + item.close_time : '-')) + '</td>'
                 + '<td>' + ratingCell + '</td>'
                 + '<td>' + locationCell + '</td>'
                 + '<td><a class="destination-edit" href="' + escapeHtml(config.formUrl) + '?id=' + encodeURIComponent(item.id) + '" aria-label="Edit ' + escapeHtml(item.name) + '"><i class="bi bi-pencil"></i></a>'
@@ -297,9 +278,7 @@
         items.forEach(function (item) {
             const option = document.createElement('option');
             option.value = String(item.id);
-            if (select === elements.category) option.textContent = categoryLabel(item.name);
-            else if (select === elements.region) option.textContent = regionLabel(item.name);
-            else option.textContent = item.name;
+            option.textContent = item.name;
             select.appendChild(option);
         });
         if (placeholder) select.options[0].textContent = placeholder;
