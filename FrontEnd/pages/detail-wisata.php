@@ -220,10 +220,29 @@ function simpanUlasan(mysqli $conn, int $userId, string $tourismId, int $rating,
         }
         $stmt->close();
 
-        $kolomRata = $conn->query("SHOW COLUMNS FROM wisata LIKE 'average_rating'");
-        if ($kolomRata && $kolomRata->num_rows > 0) {
-            $stmt = $conn->prepare('UPDATE wisata SET average_rating = (SELECT ROUND(AVG(rating), 2) FROM ulasan WHERE Id_wisata = ?) WHERE id_wisata = ?');
-            $stmt->bind_param('ss', $tourismId, $tourismId);
+        // Sinkronkan ringkasan sesuai nama kolom yang tersedia di database.
+        $kolomWisata = [];
+        $hasilKolomWisata = $conn->query('SHOW COLUMNS FROM wisata');
+        while ($kolom = $hasilKolomWisata->fetch_assoc()) {
+            $kolomWisata[] = $kolom['Field'];
+        }
+        $setRingkasan = [];
+        if (in_array('rata_rata_rating', $kolomWisata, true)) {
+            $setRingkasan[] = 'rata_rata_rating = (SELECT ROUND(AVG(rating), 2) FROM ulasan WHERE Id_wisata = ?)';
+        } elseif (in_array('average_rating', $kolomWisata, true)) {
+            $setRingkasan[] = 'average_rating = (SELECT ROUND(AVG(rating), 2) FROM ulasan WHERE Id_wisata = ?)';
+        }
+        if (in_array('jumlah_ulasan', $kolomWisata, true)) {
+            $setRingkasan[] = 'jumlah_ulasan = (SELECT COUNT(*) FROM ulasan WHERE Id_wisata = ?)';
+        }
+        if ($setRingkasan !== []) {
+            $sqlRingkasan = 'UPDATE wisata SET ' . implode(', ', $setRingkasan) . ' WHERE id_wisata = ?';
+            $stmt = $conn->prepare($sqlRingkasan);
+            if (count($setRingkasan) === 2) {
+                $stmt->bind_param('sss', $tourismId, $tourismId, $tourismId);
+            } else {
+                $stmt->bind_param('ss', $tourismId, $tourismId);
+            }
             $stmt->execute();
             $stmt->close();
         }
@@ -858,7 +877,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <textarea id="komentar" name="komentar" rows="5" maxlength="500"
                       placeholder="Ceritakan Pengalamanmu di sini..."><?= e($komentarSaya) ?></textarea>
             <p class="dialog__catatan" id="catatan-sensor" aria-live="polite">Komentar tetap dikirim; kata kasar otomatis diganti tanda bintang (*).</p>
-            <p class="dialog__catatan">Jika kamu sudah pernah mengulas wisata ini, ulasan yang kamu kirim akan menggantikan ulasan sebelumnya di wisata ini saja.</p>
+            <p class="dialog__catatan">Kamu bisa memberikan ulasan untuk banyak wisata. Jika mengirim ulasan lagi untuk wisata yang sama, ulasan sebelumnya di wisata tersebut akan diperbarui.</p>
 
             <p class="dialog__error" id="error-ulasan" role="alert"<?= $galatSimpan === '' ? ' hidden' : '' ?>><?= e($galatSimpan) ?></p>
 

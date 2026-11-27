@@ -27,7 +27,9 @@ if (($_SERVER["REQUEST_METHOD"] ?? "") !== "POST") {
 }
 
 $userId = filter_var($_SESSION["id_user"] ?? null, FILTER_VALIDATE_INT);
-if ($userId === false || $userId < 1 || ($_SESSION["role"] ?? "user") !== "user") {
+$sessionRole = $_SESSION["role"] ?? "user";
+$isUserRole = in_array((string) $sessionRole, ["user", "0"], true);
+if ($userId === false || $userId < 1 || !$isUserRole) {
     $respond(401, ["status" => "unauthenticated", "message" => "Silakan login sebagai pengguna untuk mengirim ulasan."]);
 }
 
@@ -125,8 +127,7 @@ try {
         $responseCode = 201;
     }
 
-    // Database lama mungkin belum memiliki kolom wisata.average_rating.
-    // Hitung rating langsung dari tabel ulasan agar penyimpanan tetap berhasil.
+    // Hitung ringkasan berdasarkan seluruh ulasan untuk destinasi ini.
     $averageQuery = $conn->prepare(
         "SELECT ROUND(AVG(rating), 2), COUNT(*)
          FROM ulasan WHERE Id_wisata = ?"
@@ -137,13 +138,32 @@ try {
     $averageQuery->fetch();
     $averageQuery->close();
 
-    // Jika kolom ringkasan tersedia, sinkronkan untuk kompatibilitas halaman lain.
-    $averageColumn = $conn->query("SHOW COLUMNS FROM wisata LIKE 'average_rating'");
-    if ($averageColumn && $averageColumn->num_rows > 0) {
-        $update = $conn->prepare(
-            "UPDATE wisata SET average_rating = ? WHERE id_wisata = ?"
-        );
-        $update->bind_param("ds", $averageRating, $destinationId);
+    // Nama kolom mengikuti database hosting: rata_rata_rating dan jumlah_ulasan.
+    $availableColumns = [];
+    $columnResult = $conn->query("SHOW COLUMNS FROM `wisata`");
+    while ($column = $columnResult->fetch_assoc()) {
+        $availableColumns[] = $column["Field"];
+    }
+    $setParts = [];
+    if (in_array("rata_rata_rating", $availableColumns, true)) {
+        $setParts[] = "rata_rata_rating = ?";
+    } elseif (in_array("average_rating", $availableColumns, true)) {
+        $setParts[] = "average_rating = ?";
+    }
+    if (in_array("jumlah_ulasan", $availableColumns, true)) {
+        $setParts[] = "jumlah_ulasan = ?";
+    }
+
+    if ($setParts !== []) {
+        $updateSql = "UPDATE wisata SET " . implode(", ", $setParts) . " WHERE id_wisata = ?";
+        $update = $conn->prepare($updateSql);
+        if (count($setParts) === 2) {
+            $update->bind_param("dis", $averageRating, $reviewCount, $destinationId);
+        } elseif (strpos($updateSql, "jumlah_ulasan = ?") !== false) {
+            $update->bind_param("is", $reviewCount, $destinationId);
+        } else {
+            $update->bind_param("ds", $averageRating, $destinationId);
+        }
         $update->execute();
         $update->close();
     }
