@@ -8,7 +8,8 @@ info:
     juga membutuhkan token CSRF sesuai dokumentasi endpoint. Implementasi
     PUT /users/me saat ini memvalidasi session pengguna; PUT lokasi dan POST
     ulasan juga memvalidasi X-CSRF-Token. Terapkan
-    destination_location_migration.sql dan destination_reviews_migration.sql
+    destination_location_migration.sql, destination_reviews_migration.sql,
+    dan fix_review_user_destination_unique.sql
     sebelum menggunakan fitur lokasi/ulasan pada database lama.
 servers:
   - url: http://localhost/Perawat_Periwit
