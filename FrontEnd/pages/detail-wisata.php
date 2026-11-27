@@ -179,33 +179,19 @@ function simpanUlasan(mysqli $conn, int $userId, string $tourismId, int $rating,
     }
     $adaTanggal = in_array('tanggal_ulasan', $kolom, true);
 
-    $stmt = $conn->prepare('SELECT Id_ulasan FROM ulasan WHERE Id_user = ? AND Id_wisata = ? ORDER BY Id_ulasan DESC LIMIT 1');
+    // Satu akun hanya memiliki satu baris ulasan per destinasi.
+    // UNIQUE KEY pada (Id_user, Id_wisata) + UPSERT menjaga aturan ini
+    // bahkan jika pengguna menekan tombol kirim beberapa kali bersamaan.
+    $sql = $adaTanggal
+        ? 'INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar, tanggal_ulasan) VALUES (?, ?, ?, ?, NOW()) '
+            . 'ON DUPLICATE KEY UPDATE Id_ulasan = LAST_INSERT_ID(Id_ulasan), rating = VALUES(rating), komentar = VALUES(komentar), tanggal_ulasan = NOW()'
+        : 'INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar) VALUES (?, ?, ?, ?) '
+            . 'ON DUPLICATE KEY UPDATE Id_ulasan = LAST_INSERT_ID(Id_ulasan), rating = VALUES(rating), komentar = VALUES(komentar)';
+    $stmt = $conn->prepare($sql);
     if (!$stmt) {
         throw new RuntimeException('Query ulasan gagal disiapkan.');
     }
-    $stmt->bind_param('is', $userId, $tourismId);
-    $stmt->execute();
-    $lama = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
-
-    if ($lama) {
-        $sql = 'UPDATE ulasan SET rating = ?, komentar = ?' . ($adaTanggal ? ', tanggal_ulasan = NOW()' : '') . ' WHERE Id_ulasan = ?';
-        $stmt = $conn->prepare($sql);
-        if (!$stmt) {
-            throw new RuntimeException('Query ulasan gagal disiapkan.');
-        }
-        $idUlasan = (int) $lama['Id_ulasan'];
-        $stmt->bind_param('isi', $rating, $komentar, $idUlasan);
-    } else {
-        $sql = $adaTanggal
-            ? 'INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar, tanggal_ulasan) VALUES (?, ?, ?, ?, NOW())'
-            : 'INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar) VALUES (?, ?, ?, ?)';
-        $stmt = $conn->prepare($sql);
-        if (!$stmt) {
-            throw new RuntimeException('Query ulasan gagal disiapkan.');
-        }
-        $stmt->bind_param('isis', $userId, $tourismId, $rating, $komentar);
-    }
+    $stmt->bind_param('isis', $userId, $tourismId, $rating, $komentar);
     if (!$stmt->execute()) {
         $stmt->close();
         throw new RuntimeException('Ulasan gagal disimpan.');
