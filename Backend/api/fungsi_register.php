@@ -183,7 +183,7 @@ try {
         // tabel user di instalasi lama masih NULL.
         if (!$emailExists && $conn->query("SHOW TABLES LIKE 'user_oauth_account'")->num_rows > 0) {
             $checkGoogleEmail = $conn->prepare(
-                "SELECT Id_oauth_account FROM user_oauth_account WHERE LOWER(TRIM(email)) = ? LIMIT 1"
+                "SELECT oa.Id_oauth_account FROM user_oauth_account AS oa INNER JOIN `user` AS u ON u.Id_user = oa.Id_user WHERE LOWER(TRIM(oa.email)) = ? LIMIT 1"
             );
             $checkGoogleEmail->bind_param("s", $email);
             $checkGoogleEmail->execute();

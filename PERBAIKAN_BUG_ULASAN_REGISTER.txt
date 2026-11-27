@@ -1,0 +1,24 @@
+PERBAIKAN BUG ULASAN DAN REGISTER
+
+Perubahan kode:
+1. Ulasan disimpan berdasarkan pasangan Id_user + Id_wisata. User dapat mengulas banyak wisata.
+2. Jika user mengirim ulasan lagi untuk wisata yang sama, ulasan pada wisata itu diperbarui, bukan membuat baris ganda.
+3. Proses simpan menggunakan INSERT ... ON DUPLICATE KEY UPDATE agar request bersamaan tidak membuat duplikasi.
+4. Pemeriksaan email OAuth pada register hanya menghitung akun OAuth yang masih terhubung ke baris user aktif. Record OAuth yatim tidak lagi membuat email dianggap sudah terdaftar.
+
+PENTING - MIGRASI DATABASE:
+Jalankan file Backend/database/fix_review_user_destination_unique.sql satu kali melalui phpMyAdmin pada database eksplormajaku.
+Migrasi ini membersihkan duplikasi pada pasangan user+wisata, menghapus UNIQUE index keliru yang hanya mengunci Id_user (jika ada), lalu memastikan UNIQUE komposit (Id_user, Id_wisata) tersedia.
+Backup database sebelum menjalankan migrasi.
+
+Validasi:
+- PHP lint berhasil untuk Backend/api/destination_reviews.php
+- PHP lint berhasil untuk Backend/api/fungsi_register.php
+- PHP lint berhasil untuk FrontEnd/pages/detail-wisata.php
+
+Catatan:
+Pengujian integrasi memerlukan database hosting. Setelah upload kode dan menjalankan migrasi, uji:
+- User yang sama memberi ulasan wisata A, lalu wisata B: keduanya harus tersimpan.
+- User yang sama mengirim ulang ulasan wisata A: hanya ulasan A yang diperbarui.
+- Register dengan email baru: harus berhasil.
+- Register dengan email yang benar-benar sudah dipakai akun user/OAuth aktif: harus ditolak sebagai duplikat.

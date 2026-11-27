@@ -179,9 +179,8 @@ function simpanUlasan(mysqli $conn, int $userId, string $tourismId, int $rating,
     }
     $adaTanggal = in_array('tanggal_ulasan', $kolom, true);
 
-    // Satu akun hanya memiliki satu baris ulasan per destinasi.
-    // UNIQUE KEY pada (Id_user, Id_wisata) + UPSERT menjaga aturan ini
-    // bahkan jika pengguna menekan tombol kirim beberapa kali bersamaan.
+    // Kunci unik yang benar adalah (Id_user, Id_wisata), bukan Id_user saja.
+    // Dengan begitu ulasan untuk wisata berbeda tidak saling menimpa.
     $sql = $adaTanggal
         ? 'INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar, tanggal_ulasan) VALUES (?, ?, ?, ?, NOW()) '
             . 'ON DUPLICATE KEY UPDATE Id_ulasan = LAST_INSERT_ID(Id_ulasan), rating = VALUES(rating), komentar = VALUES(komentar), tanggal_ulasan = NOW()'
