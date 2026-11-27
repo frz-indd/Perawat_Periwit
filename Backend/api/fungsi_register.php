@@ -169,28 +169,18 @@ try {
     // Cek email sudah terdaftar
     if ($email !== "") {
 
-        // Cocokkan email tanpa membedakan huruf besar/kecil dan spasi.
         $checkEmail = $conn->prepare(
-            "SELECT Id_user FROM `user` WHERE LOWER(TRIM(Email)) = ? LIMIT 1"
+            "SELECT Id_user FROM `user` WHERE Email = ? LIMIT 1"
         );
+
         $checkEmail->bind_param("s", $email);
+
         $checkEmail->execute();
         $checkEmail->store_result();
-        $emailExists = $checkEmail->num_rows > 0;
-        $checkEmail->close();
 
-        // Akun Google juga merupakan akun terdaftar meskipun Email pada
-        // tabel user di instalasi lama masih NULL.
-        if (!$emailExists && $conn->query("SHOW TABLES LIKE 'user_oauth_account'")->num_rows > 0) {
-            $checkGoogleEmail = $conn->prepare(
-                "SELECT oa.Id_oauth_account FROM user_oauth_account AS oa INNER JOIN `user` AS u ON u.Id_user = oa.Id_user WHERE LOWER(TRIM(oa.email)) = ? LIMIT 1"
-            );
-            $checkGoogleEmail->bind_param("s", $email);
-            $checkGoogleEmail->execute();
-            $checkGoogleEmail->store_result();
-            $emailExists = $checkGoogleEmail->num_rows > 0;
-            $checkGoogleEmail->close();
-        }
+        $emailExists = $checkEmail->num_rows > 0;
+
+        $checkEmail->close();
 
         if ($emailExists) {
             respond(409, [
@@ -236,27 +226,32 @@ try {
         throw new RuntimeException("Gagal membuat hash password.");
     }
 
-    // Kolom Nama_user pada skema proyek wajib diisi. Form register saat ini
-    // belum meminta nama, jadi gunakan nama awal dari email atau "Pengguna".
-    $namaUser = "Pengguna";
-    if ($email !== "") {
-        $localPart = strstr($email, "@", true);
-        if (is_string($localPart) && trim($localPart) !== "") {
-            $namaUser = trim(str_replace([".", "_", "-"], " ", $localPart));
-        }
-    }
-
-    // Simpan akun sesuai jenis identitas.
+    // Simpan akun
     if ($phone === "") {
+
         $statement = $conn->prepare(
-            "INSERT INTO `user` (Nama_user, Email, Password) VALUES (?, ?, ?)"
+            "INSERT INTO `user` (Email, Password)
+             VALUES (?, ?)"
         );
-        $statement->bind_param("sss", $namaUser, $email, $passwordHash);
-    } else {
+
+        $statement->bind_param(
+            "ss",
+            $email,
+            $passwordHash
+        );
+
+    } elseif ($email === "") {
+
         $statement = $conn->prepare(
-            "INSERT INTO `user` (Nama_user, Email, No_telepon, Password) VALUES (?, NULL, ?, ?)"
+            "INSERT INTO `user` (Email, No_telepon, Password)
+             VALUES (NULL, ?, ?)"
         );
-        $statement->bind_param("sss", $namaUser, $phone, $passwordHash);
+
+        $statement->bind_param(
+            "ss",
+            $phone,
+            $passwordHash
+        );
     }
 
     $statement->execute();
@@ -281,34 +276,10 @@ try {
     error_log("Register database error: " . $exception->getMessage());
 
     if ((int) $exception->getCode() === 1062) {
-        // Jangan menganggap semua duplicate-key sebagai email duplikat.
-        // Periksa kembali kolom identitas yang benar-benar bentrok.
-        if ($email !== "") {
-            $duplicate = $conn->prepare("SELECT Id_user FROM `user` WHERE LOWER(TRIM(Email)) = ? LIMIT 1");
-            $duplicate->bind_param("s", $email);
-            $duplicate->execute();
-            $duplicate->store_result();
-            $emailDuplicate = $duplicate->num_rows > 0;
-            $duplicate->close();
-            if ($emailDuplicate) {
-                respond(409, ["status" => "email_exists", "field" => "identity", "message" => "Email sudah terdaftar. Silakan gunakan email lain."]);
-            }
-        }
-        if ($phone !== "") {
-            $duplicate = $conn->prepare("SELECT Id_user FROM `user` WHERE No_telepon = ? LIMIT 1");
-            $duplicate->bind_param("s", $phone);
-            $duplicate->execute();
-            $duplicate->store_result();
-            $phoneDuplicate = $duplicate->num_rows > 0;
-            $duplicate->close();
-            if ($phoneDuplicate) {
-                respond(409, ["status" => "phone_exists", "field" => "identity", "message" => "Nomor telepon sudah terdaftar. Silakan gunakan nomor lain."]);
-            }
-        }
         respond(409, [
-            "status" => "duplicate_conflict",
+            "status" => "email_exists",
             "field" => "identity",
-            "message" => "Data pendaftaran berbenturan dengan data unik di database. Periksa kembali email atau nomor telepon."
+            "message" => "Email atau nomor telepon sudah terdaftar."
         ]);
     }
 
