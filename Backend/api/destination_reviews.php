@@ -86,26 +86,41 @@ try {
     }
     $destination->close();
 
-    // Satu user boleh mengulas banyak wisata, tetapi hanya satu ulasan aktif
-    // per kombinasi user + wisata. UNIQUE KEY komposit menjadi pengaman
-    // terhadap request ganda yang datang hampir bersamaan.
-    $saveReview = $conn->prepare(
-        "INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar, tanggal_ulasan)
-         VALUES (?, ?, ?, ?, CURDATE())
-         ON DUPLICATE KEY UPDATE
-            Id_ulasan = LAST_INSERT_ID(Id_ulasan),
-            rating = VALUES(rating),
-            komentar = VALUES(komentar),
-            tanggal_ulasan = CURDATE()"
+    $existingReview = $conn->prepare(
+        "SELECT Id_ulasan FROM ulasan
+         WHERE Id_user = ? AND Id_wisata = ?
+         ORDER BY Id_ulasan DESC
+         LIMIT 1
+         FOR UPDATE"
     );
-    $saveReview->bind_param("isis", $userId, $destinationId, $rating, $reviewText);
-    $saveReview->execute();
-    $reviewId = (int) $conn->insert_id;
-    $affectedRows = $saveReview->affected_rows;
-    $saveReview->close();
-    // Jika baris baru dibuat, insert_id berisi ID baru. Saat update,
-    // LAST_INSERT_ID(Id_ulasan) mengembalikan ID ulasan yang diperbarui.
-    $responseCode = ($affectedRows === 1) ? 201 : 200;
+    $existingReview->bind_param("is", $userId, $destinationId);
+    $existingReview->execute();
+    $existingReview->bind_result($existingReviewId);
+    $hasExistingReview = $existingReview->fetch();
+    $existingReview->close();
+
+    if ($hasExistingReview) {
+        $saveReview = $conn->prepare(
+            "UPDATE ulasan
+             SET rating = ?, komentar = ?, tanggal_ulasan = CURDATE()
+             WHERE Id_ulasan = ?"
+        );
+        $reviewId = (int) $existingReviewId;
+        $saveReview->bind_param("isi", $rating, $reviewText, $reviewId);
+        $saveReview->execute();
+        $saveReview->close();
+        $responseCode = 200;
+    } else {
+        $saveReview = $conn->prepare(
+            "INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar, tanggal_ulasan)
+             VALUES (?, ?, ?, ?, CURDATE())"
+        );
+        $saveReview->bind_param("isis", $userId, $destinationId, $rating, $reviewText);
+        $saveReview->execute();
+        $reviewId = (int) $conn->insert_id;
+        $saveReview->close();
+        $responseCode = 201;
+    }
 
     $update = $conn->prepare(
         "UPDATE wisata

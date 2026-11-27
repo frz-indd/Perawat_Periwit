@@ -147,6 +147,15 @@ if (registerForm) {
                 return;
             }
 
+            if (result.status === 'duplicate_conflict') {
+                Auth.showMessage(
+                    message,
+                    result.message ||
+                        'Data pendaftaran berbenturan dengan data unik. Periksa kembali email atau nomor telepon.'
+                );
+                return;
+            }
+
             Auth.showMessage(
                 message,
                 'Terjadi kesalahan server. Silakan coba lagi beberapa saat.'

@@ -179,32 +179,59 @@ function simpanUlasan(mysqli $conn, int $userId, string $tourismId, int $rating,
     }
     $adaTanggal = in_array('tanggal_ulasan', $kolom, true);
 
-    // Kunci unik yang benar adalah (Id_user, Id_wisata), bukan Id_user saja.
-    // Dengan begitu ulasan untuk wisata berbeda tidak saling menimpa.
-    $sql = $adaTanggal
-        ? 'INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar, tanggal_ulasan) VALUES (?, ?, ?, ?, NOW()) '
-            . 'ON DUPLICATE KEY UPDATE Id_ulasan = LAST_INSERT_ID(Id_ulasan), rating = VALUES(rating), komentar = VALUES(komentar), tanggal_ulasan = NOW()'
-        : 'INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar) VALUES (?, ?, ?, ?) '
-            . 'ON DUPLICATE KEY UPDATE Id_ulasan = LAST_INSERT_ID(Id_ulasan), rating = VALUES(rating), komentar = VALUES(komentar)';
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        throw new RuntimeException('Query ulasan gagal disiapkan.');
-    }
-    $stmt->bind_param('isis', $userId, $tourismId, $rating, $komentar);
-    if (!$stmt->execute()) {
-        $stmt->close();
-        throw new RuntimeException('Ulasan gagal disimpan.');
-    }
-    $stmt->close();
+    $conn->begin_transaction();
+    try {
+        $lockDestination = $conn->prepare('SELECT id_wisata FROM wisata WHERE id_wisata = ? FOR UPDATE');
+        $lockDestination->bind_param('s', $tourismId);
+        $lockDestination->execute();
+        $lockDestination->store_result();
+        if ($lockDestination->num_rows !== 1) {
+            $lockDestination->close();
+            throw new RuntimeException('Destinasi tidak ditemukan.');
+        }
+        $lockDestination->close();
 
-    $kolomRata = $conn->query("SHOW COLUMNS FROM wisata LIKE 'average_rating'");
-    if ($kolomRata && $kolomRata->num_rows > 0) {
-        $stmt = $conn->prepare('UPDATE wisata SET average_rating = (SELECT ROUND(AVG(rating), 2) FROM ulasan WHERE Id_wisata = ?) WHERE id_wisata = ?');
-        if ($stmt) {
+        $stmt = $conn->prepare(
+            'SELECT Id_ulasan FROM ulasan WHERE Id_user = ? AND Id_wisata = ? ORDER BY Id_ulasan DESC LIMIT 1 FOR UPDATE'
+        );
+        $stmt->bind_param('is', $userId, $tourismId);
+        $stmt->execute();
+        $stmt->bind_result($existingReviewId);
+        $hasExistingReview = $stmt->fetch();
+        $stmt->close();
+
+        if ($hasExistingReview) {
+            $sql = 'UPDATE ulasan SET rating = ?, komentar = ?'
+                . ($adaTanggal ? ', tanggal_ulasan = NOW()' : '')
+                . ' WHERE Id_ulasan = ?';
+            $stmt = $conn->prepare($sql);
+            $reviewId = (int) $existingReviewId;
+            $stmt->bind_param('isi', $rating, $komentar, $reviewId);
+        } else {
+            $sql = $adaTanggal
+                ? 'INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar, tanggal_ulasan) VALUES (?, ?, ?, ?, NOW())'
+                : 'INSERT INTO ulasan (Id_user, Id_wisata, rating, komentar) VALUES (?, ?, ?, ?)';
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('isis', $userId, $tourismId, $rating, $komentar);
+        }
+        if (!$stmt->execute()) {
+            $stmt->close();
+            throw new RuntimeException('Ulasan gagal disimpan.');
+        }
+        $stmt->close();
+
+        $kolomRata = $conn->query("SHOW COLUMNS FROM wisata LIKE 'average_rating'");
+        if ($kolomRata && $kolomRata->num_rows > 0) {
+            $stmt = $conn->prepare('UPDATE wisata SET average_rating = (SELECT ROUND(AVG(rating), 2) FROM ulasan WHERE Id_wisata = ?) WHERE id_wisata = ?');
             $stmt->bind_param('ss', $tourismId, $tourismId);
             $stmt->execute();
             $stmt->close();
         }
+
+        $conn->commit();
+    } catch (Throwable $e) {
+        $conn->rollback();
+        throw $e;
     }
 }
 
@@ -831,7 +858,7 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
             <textarea id="komentar" name="komentar" rows="5" maxlength="500"
                       placeholder="Ceritakan Pengalamanmu di sini..."><?= e($komentarSaya) ?></textarea>
             <p class="dialog__catatan" id="catatan-sensor" aria-live="polite">Komentar tetap dikirim; kata kasar otomatis diganti tanda bintang (*).</p>
-            <p class="dialog__catatan">Jika kamu sudah pernah mengulas, ulasan yang kamu kirim akan menggantikan ulasan sebelumnya.</p>
+            <p class="dialog__catatan">Jika kamu sudah pernah mengulas wisata ini, ulasan yang kamu kirim akan menggantikan ulasan sebelumnya di wisata ini saja.</p>
 
             <p class="dialog__error" id="error-ulasan" role="alert"<?= $galatSimpan === '' ? ' hidden' : '' ?>><?= e($galatSimpan) ?></p>
 

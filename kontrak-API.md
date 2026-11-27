@@ -350,7 +350,7 @@ Body:
 
 `rating` harus bilangan bulat 1 sampai 5. `text` wajib berisi 1 sampai 500 karakter; nama field `komentar` juga dapat digunakan.
 
-Respons sukses `201` berisi `id_review`, `destination_id`, `rating`, `text`, `average_rating`, dan `review_count`. Ulasan disimpan di tabel `ulasan`; rata-rata disimpan pada kolom `wisata.average_rating`. Jalankan migration `Backend/database/destination_reviews_migration.sql` pada database lama.
+Respons sukses `201` berisi `id_review`, `destination_id`, `rating`, `text`, `average_rating`, dan `review_count`. Ulasan disimpan di tabel `ulasan`; rata-rata disimpan pada kolom `wisata.average_rating`. Pada database lama, jalankan `Backend/database/destination_reviews_migration.sql` dan `Backend/database/fix_review_user_destination_unique.sql`.
 
 Status yang diminta: `201` tersimpan, `400` JSON atau ID tidak valid, `401` belum login sebagai pengguna, `403` CSRF tidak valid, `404` destinasi tidak ditemukan, `405` metode tidak didukung, `415` Content-Type salah, `422` payload tidak valid, dan `500` kesalahan server.
 
