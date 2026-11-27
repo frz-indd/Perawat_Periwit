@@ -125,25 +125,28 @@ try {
         $responseCode = 201;
     }
 
-    $update = $conn->prepare(
-        "UPDATE wisata
-         SET average_rating = (SELECT ROUND(AVG(rating), 2) FROM ulasan WHERE Id_wisata = ?)
-         WHERE id_wisata = ?"
-    );
-    $update->bind_param("ss", $destinationId, $destinationId);
-    $update->execute();
-    $update->close();
-
+    // Database lama mungkin belum memiliki kolom wisata.average_rating.
+    // Hitung rating langsung dari tabel ulasan agar penyimpanan tetap berhasil.
     $averageQuery = $conn->prepare(
-        "SELECT average_rating,
-                (SELECT COUNT(*) FROM ulasan WHERE Id_wisata = ?) AS review_count
-         FROM wisata WHERE id_wisata = ?"
+        "SELECT ROUND(AVG(rating), 2), COUNT(*)
+         FROM ulasan WHERE Id_wisata = ?"
     );
-    $averageQuery->bind_param("ss", $destinationId, $destinationId);
+    $averageQuery->bind_param("s", $destinationId);
     $averageQuery->execute();
     $averageQuery->bind_result($averageRating, $reviewCount);
     $averageQuery->fetch();
     $averageQuery->close();
+
+    // Jika kolom ringkasan tersedia, sinkronkan untuk kompatibilitas halaman lain.
+    $averageColumn = $conn->query("SHOW COLUMNS FROM wisata LIKE 'average_rating'");
+    if ($averageColumn && $averageColumn->num_rows > 0) {
+        $update = $conn->prepare(
+            "UPDATE wisata SET average_rating = ? WHERE id_wisata = ?"
+        );
+        $update->bind_param("ds", $averageRating, $destinationId);
+        $update->execute();
+        $update->close();
+    }
 
     $conn->commit();
     $respond($responseCode, [

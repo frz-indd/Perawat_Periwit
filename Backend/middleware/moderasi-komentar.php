@@ -28,7 +28,7 @@ if (!function_exists('sensorKomentar')) {
 
         // Bentuk normal untuk pencocokan, termasuk substitusi angka/simbol.
         $normalisasi = static function (string $kata): string {
-            $kata = mb_strtolower($kata, 'UTF-8');
+            $kata = function_exists('mb_strtolower') ? mb_strtolower($kata, 'UTF-8') : strtolower($kata);
             $kata = strtr($kata, [
                 '0'=>'o','1'=>'i','!'=>'i','|'=>'i','3'=>'e','4'=>'a',
                 '@'=>'a','5'=>'s','$'=>'s','7'=>'t','8'=>'b'
@@ -66,7 +66,7 @@ if (!function_exists('sensorKomentar')) {
             static function ($m) use ($lookup, $normalisasi) {
                 $asli = $m[0];
                 return isset($lookup[$normalisasi($asli)])
-                    ? str_repeat('*', max(3, mb_strlen($asli, 'UTF-8')))
+                    ? str_repeat('*', max(3, function_exists('mb_strlen') ? mb_strlen($asli, 'UTF-8') : strlen($asli)))
                     : $asli;
             },
             $teks
