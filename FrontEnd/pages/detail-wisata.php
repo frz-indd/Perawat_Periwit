@@ -440,7 +440,7 @@ if ($galatSimpan !== '') {
 }
 
 $apiFavorit       = '../../api/favorites';
-$apiUlasan        = '../../api/destinations/' . rawurlencode($tourismId) . '/reviews';
+$apiUlasan        = '../../Backend/api/destination_reviews.php?id=' . rawurlencode($tourismId);
 $apiLokasi        = '../../api/destinations/' . rawurlencode($tourismId) . '/location';
 $urlSelesaiUlasan = 'detail-wisata.php?id=' . rawurlencode($tourismId) . '&ulasan=ok#judul-ulasan';
 
@@ -1288,29 +1288,31 @@ $ratingText = $destination['has_rating'] ? formatRating($destination['rating']) 
                     })
                 })
                     .then(function (r) {
-                        status = r.status;
-                        return r.json().catch(function () { return null; });
+                        var status = r.status;
+                        return r.json().catch(function () { return null; }).then(function (data) {
+                            return { status: status, data: data };
+                        });
                     })
-                    .then(function (d) {
+                    .then(function (hasil) {
+                        var status = hasil.status;
+                        var d = hasil.data;
                         if (d && d.status === 'success' && status >= 200 && status < 300) {
                             window.location.href = form.getAttribute('data-sukses');
                             return;
                         }
                         if (status === 401) {
                             selesai();
-                            dialogUlasan.tutup();
-                            popupLogin.buka('ulasan');
+                            if (window.dialogUlasan && typeof window.dialogUlasan.tutup === 'function') window.dialogUlasan.tutup();
+                            if (window.popupLogin && typeof window.popupLogin.buka === 'function') window.popupLogin.buka('ulasan');
+                            else tampilGalat('Sesi login berakhir. Silakan login kembali.');
                             return;
                         }
-                        if (status === 422 && d && d.message) {
-                            selesai();
-                            tampilGalat(d.message);
-                            return;
-                        }
-                        form.submit();
+                        selesai();
+                        tampilGalat((d && d.message) || 'Ulasan gagal disimpan. Periksa koneksi dan coba lagi.');
                     })
                     .catch(function () {
-                        form.submit();
+                        selesai();
+                        tampilGalat('Tidak dapat terhubung ke server. Periksa koneksi internet lalu coba lagi.');
                     });
             });
         })();

@@ -73,6 +73,9 @@ if (!is_string($destinationId) || !preg_match('/^[A-Za-z0-9_-]{1,16}$/', $destin
 
 try {
     require_once __DIR__ . "/../database/koneksi.php";
+    if (!($conn instanceof mysqli)) {
+        $respond(503, ["status" => "database_unavailable", "message" => "Koneksi database tidak tersedia. Periksa konfigurasi database hosting."]);
+    }
     $conn->begin_transaction();
 
     $destination = $conn->prepare("SELECT id_wisata FROM wisata WHERE id_wisata = ? FOR UPDATE");
