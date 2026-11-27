@@ -168,6 +168,7 @@ CREATE TABLE `ulasan` (
   `komentar` text NOT NULL,
   `tanggal_ulasan` date NOT NULL,
   PRIMARY KEY (`Id_ulasan`),
+  UNIQUE KEY `uq_ulasan_user_wisata` (`Id_user`,`Id_wisata`),
   KEY `fk_ulasan_user` (`Id_user`),
   KEY `fk_ulasan_wisata` (`Id_wisata`),
   CONSTRAINT `fk_ulasan_user` FOREIGN KEY (`Id_user`) REFERENCES `user` (`Id_user`) ON DELETE CASCADE ON UPDATE CASCADE,

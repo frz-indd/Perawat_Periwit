@@ -3,7 +3,7 @@ PERBAIKAN BUG ULASAN DAN REGISTER
 Perubahan kode:
 1. Ulasan disimpan berdasarkan pasangan Id_user + Id_wisata. User dapat mengulas banyak wisata.
 2. Jika user mengirim ulasan lagi untuk wisata yang sama, ulasan pada wisata itu diperbarui, bukan membuat baris ganda.
-3. Proses simpan menggunakan INSERT ... ON DUPLICATE KEY UPDATE agar request bersamaan tidak membuat duplikasi.
+3. API dan fallback halaman hanya memperbarui ulasan yang cocok dengan pasangan Id_user + Id_wisata. Benturan dengan indeks unik lain tidak akan menimpa ulasan wisata berbeda.
 4. Pemeriksaan email OAuth pada register hanya menghitung akun OAuth yang masih terhubung ke baris user aktif. Record OAuth yatim tidak lagi membuat email dianggap sudah terdaftar.
 
 PENTING - MIGRASI DATABASE:
