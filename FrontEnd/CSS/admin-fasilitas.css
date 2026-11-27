@@ -795,3 +795,504 @@ body.facility-feedback-open{overflow:hidden}
 .facility-destination-suggestion:focus { background:#e8f5f1; outline:none; }
 .facility-destination-suggestion small { display:block; margin-top:2px; color:#6b817b; font-size:12px; }
 .facility-destination-empty { padding:10px 12px; color:#687a75; font-size:13px; }
+
+
+/* Final matching pass: reference layout for desktop facility table and form */
+@media (min-width: 901px) {
+ body.admin-resource-facilities .admin-content { max-width:none!important; }
+ body.admin-resource-facilities .facility-panel { width:calc(100% - 40px)!important; max-width:none!important; margin:0 0 0 30px!important; }
+ .facility-table { min-width:0!important; }
+ .facility-table th:nth-child(1) { width:8.5%!important; }
+ .facility-table th:nth-child(2) { width:27.5%!important; }
+ .facility-table th:nth-child(3) { width:54%!important; }
+ .facility-table th:nth-child(4) { width:10%!important; }
+ .facility-table thead th { height:70px!important; }
+ .facility-table tbody td { height:62px!important; min-height:62px!important; padding:7px 10px!important; font-size:16px!important; }
+ .facility-icons-cell { padding:5px 8px!important; }
+ .facility-entries { display:flex!important; flex-wrap:wrap!important; align-items:center!important; gap:6px 7px!important; padding:0 3px!important; }
+ .facility-entry { display:inline-flex!important; min-height:31px!important; margin:0!important; }
+ .facility-entry .facility-icon-chip { display:inline-flex!important; flex:0 0 auto!important; width:auto!important; min-width:0!important; height:31px!important; padding:2px 6px!important; gap:4px!important; border:1px solid #166c5c!important; border-radius:6px!important; font-size:15px!important; white-space:nowrap!important; }
+ .facility-entry .facility-icon-chip img { width:22px!important; height:22px!important; padding:0!important; object-fit:contain!important; }
+ .facility-actions { gap:9px!important; }
+ .facility-action-button { width:30px!important; height:30px!important; min-width:30px!important; min-height:30px!important; }
+ .facility-action-button img { width:30px!important; height:30px!important; }
+ .facility-table-footer { padding:22px 10px 0!important; }
+}
+.facility-options-grid { grid-template-columns:repeat(3,minmax(0,1fr))!important; column-gap:18px!important; row-gap:8px!important; }
+.facility-modal__body .facility-destination-autocomplete > #facilityName {
+ display:block!important; width:min(538px,100%)!important; height:60px!important; padding:0 20px!important;
+ color:#222!important; background:#fff!important; border:1px solid #176f60!important; border-radius:11px!important;
+ font-family:'Poppins',Arial,sans-serif!important; font-size:20px!important;
+}
+.facility-modal__body .facility-option { grid-template-columns:20px 54px minmax(0,1fr)!important; }
+.facility-modal__body .facility-option-icon { display:flex; align-items:center; justify-content:center; width:54px; height:38px; border:1px solid #176f60; border-radius:4px; background:#fff; }
+.facility-modal__body .facility-option-icon svg { width:38px!important; height:32px!important; }
+.facility-modal__body .facility-option-icon--plain svg { width:38px!important; height:32px!important; }
+.facility-modal__footer { justify-content:flex-end!important; gap:14px!important; padding:42px 0 0!important; }
+.facility-cancel-button,.facility-save-button { min-height:54px!important; padding:8px 17px!important; border-radius:9px!important; font-family:'Poppins',Arial,sans-serif!important; font-size:18px!important; }
+.facility-cancel-button { min-width:135px!important; color:#176f60!important; background:#fff!important; border:1px solid #176f60!important; }
+.facility-save-button { min-width:240px!important; color:#fff!important; background:#176f60!important; border:1px solid #176f60!important; }
+.facility-form-error { text-align:center; }
+@media(max-width:900px) {
+ .facility-options-grid { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
+ .facility-modal__body { padding:30px 24px!important; }
+ .facility-modal__body h2 { font-size:30px!important; }
+ .facility-modal__subtitle { font-size:15px!important; }
+ .facility-modal__body > label[for="facilityName"],.facility-options-heading h3 { font-size:19px!important; }
+ .facility-modal__body .facility-destination-autocomplete > #facilityName { height:48px!important;font-size:15px!important; }
+ .facility-modal__footer { padding-top:22px!important; }
+ .facility-cancel-button,.facility-save-button { min-width:0!important;min-height:44px!important;font-size:14px!important; }
+}
+
+
+/* Ikon dan nama fasilitas berada dalam satu border/pill. */
+.facility-entry .facility-icon-chip {display:inline-flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:center!important;gap:4px!important;width:auto!important;min-width:0!important;height:31px!important;padding:2px 6px!important;border:1px solid #166c5c!important;border-radius:6px!important;background:#fff!important;color:#111!important;font-size:15px!important;line-height:1!important;white-space:nowrap!important;}
+.facility-entry .facility-icon-chip img {display:block!important;flex:0 0 22px!important;width:22px!important;height:22px!important;padding:0!important;object-fit:contain!important;}
+
+/* Modal tambah/edit: checkbox di luar, ikon dan teks di dalam satu kotak. */
+.facility-modal__body .facility-option {display:inline-flex!important;align-items:center!important;justify-content:flex-start!important;gap:5px!important;width:max-content!important;min-width:0!important;min-height:30px!important;margin:0!important;font-size:11px!important;line-height:1.1!important;white-space:nowrap!important;}
+.facility-modal__body .facility-option input {flex:0 0 11px!important;width:11px!important;height:11px!important;margin:0!important;border-radius:3px!important;}
+.facility-modal__body .facility-option-chip {display:inline-flex!important;align-items:center!important;justify-content:flex-start!important;gap:3px!important;min-width:0!important;min-height:22px!important;padding:1px 4px!important;border:1px solid #166c5c!important;border-radius:4px!important;background:#fff!important;color:#111!important;font-size:10px!important;line-height:1!important;white-space:nowrap!important;}
+.facility-modal__body .facility-option-chip .facility-option-icon {display:inline-flex!important;flex:0 0 17px!important;align-items:center!important;justify-content:center!important;width:17px!important;height:17px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;}
+.facility-modal__body .facility-option-chip .facility-option-icon img {display:block!important;width:17px!important;height:17px!important;padding:0!important;object-fit:contain!important;}
+.facility-options-grid {display:grid!important;grid-template-columns:repeat(3,max-content)!important;justify-content:space-between!important;align-items:center!important;column-gap:12px!important;row-gap:8px!important;padding-left:0!important;}
+@media(max-width:640px){.facility-options-grid{grid-template-columns:repeat(2,max-content)!important;justify-content:start!important;column-gap:14px!important;}}
+
+
+/* Figma parity: modal Tambah/Edit Fasilitas (desktop 710 x 630 reference). */
+@media (min-width: 901px) {
+  .facility-modal__dialog { width:min(710px,calc(100vw - 28px))!important; min-height:630px!important; max-height:calc(100vh - 28px)!important; overflow-y:auto!important; border-radius:18px!important; }
+  .facility-modal__body { padding:50px 65px 52px 60px!important; }
+  .facility-modal__body h2 { margin:0 0 -1px!important; font-size:40px!important; line-height:1.12!important; }
+  .facility-modal__subtitle { margin:0 0 24px 4px!important; font-size:19px!important; line-height:1.2!important; }
+  .facility-modal__body > label[for="facilityName"] { margin:0 0 1px 3px!important; font-size:25px!important; line-height:1.2!important; }
+  .facility-modal__body .facility-destination-autocomplete > #facilityName { width:100%!important; max-width:580px!important; height:60px!important; padding:0 20px!important; border-radius:11px!important; font-size:20px!important; }
+  .facility-options-heading { margin:26px 0 8px 3px!important; }
+  .facility-options-heading h3 { font-size:25px!important; line-height:1.15!important; }
+  .facility-options-grid { display:grid!important; grid-template-columns:repeat(3,max-content)!important; justify-content:space-between!important; align-items:center!important; column-gap:18px!important; row-gap:20px!important; width:100%!important; padding:0 0 0 3px!important; }
+  .facility-modal__body .facility-option { display:inline-flex!important; align-items:center!important; justify-content:flex-start!important; gap:10px!important; width:max-content!important; min-height:45px!important; margin:0!important; font-size:16px!important; line-height:1.2!important; white-space:nowrap!important; }
+  .facility-modal__body .facility-option input { flex:0 0 19px!important; width:19px!important; height:19px!important; margin:0!important; border:1px solid #176f60!important; border-radius:5px!important; }
+  .facility-modal__body .facility-option-chip { display:inline-flex!important; align-items:center!important; justify-content:center!important; gap:5px!important; min-width:0!important; min-height:40px!important; padding:4px 8px!important; border:1px solid #176f60!important; border-radius:5px!important; background:#fff!important; color:#080d0c!important; font-family:'Poppins',Arial,sans-serif!important; font-size:16px!important; line-height:1.2!important; white-space:nowrap!important; }
+  .facility-modal__body .facility-option-chip > span:last-child { color:#080d0c!important; }
+  .facility-modal__body .facility-option-chip .facility-option-icon { display:inline-flex!important; flex:0 0 26px!important; align-items:center!important; justify-content:center!important; width:26px!important; height:28px!important; padding:0!important; border:0!important; border-radius:0!important; background:transparent!important; }
+  .facility-modal__body .facility-option-chip .facility-option-icon svg { display:block!important; width:27px!important; height:27px!important; }
+  .facility-modal__body .facility-option-chip .facility-option-icon--plain svg { width:27px!important; height:27px!important; }
+  .facility-modal__footer { justify-content:flex-end!important; gap:16px!important; padding:96px 0 0!important; }
+  .facility-cancel-button,.facility-save-button { min-height:55px!important; padding:7px 16px!important; border-radius:10px!important; font-size:24px!important; gap:13px!important; }
+  .facility-cancel-button { min-width:136px!important; }
+  .facility-save-button { min-width:248px!important; }
+  .facility-cancel-button i,.facility-save-button i { font-size:28px!important; }
+}
+/* Tablet/mobile: keep controls readable and prevent horizontal overflow. */
+@media (max-width:900px) {
+  .facility-modal__dialog { width:min(100%,710px)!important; min-height:0!important; }
+  .facility-modal__body { padding:30px 26px 28px!important; }
+  .facility-modal__body h2 { font-size:clamp(28px,6vw,36px)!important; }
+  .facility-modal__subtitle { font-size:clamp(13px,2.8vw,17px)!important; margin-bottom:20px!important; }
+  .facility-modal__body > label[for="facilityName"],.facility-options-heading h3 { font-size:clamp(19px,3.5vw,23px)!important; }
+  .facility-modal__body .facility-destination-autocomplete > #facilityName { width:100%!important; height:52px!important; font-size:16px!important; }
+  .facility-options-grid { grid-template-columns:repeat(2,max-content)!important; justify-content:space-between!important; gap:12px 16px!important; padding:0 0 0 3px!important; }
+  .facility-modal__body .facility-option { gap:7px!important; min-height:40px!important; font-size:14px!important; }
+  .facility-modal__body .facility-option input { flex-basis:17px!important; width:17px!important; height:17px!important; }
+  .facility-modal__body .facility-option-chip { min-height:36px!important; padding:3px 6px!important; font-size:14px!important; }
+  .facility-modal__body .facility-option-chip .facility-option-icon { flex-basis:23px!important; width:23px!important; height:24px!important; }
+  .facility-modal__body .facility-option-chip .facility-option-icon svg { width:23px!important; height:23px!important; }
+  .facility-modal__footer { padding-top:38px!important; gap:10px!important; }
+  .facility-cancel-button,.facility-save-button { min-width:0!important; min-height:46px!important; font-size:16px!important; padding:7px 12px!important; }
+  .facility-cancel-button i,.facility-save-button i { font-size:20px!important; }
+}
+@media(max-width:430px) { .facility-options-grid { grid-template-columns:1fr!important; justify-content:start!important; } .facility-modal__footer { flex-wrap:wrap!important; } }
+
+
+/* FINAL ICON SIZE FIX: source icons are IMG elements, not inline SVG. */
+@media (min-width: 901px) {
+  .facility-modal__body .facility-option-chip {
+    min-height: 42px !important;
+    gap: 6px !important;
+    padding: 3px 9px !important;
+  }
+  .facility-modal__body .facility-option-chip .facility-option-icon {
+    flex: 0 0 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+  }
+  .facility-modal__body .facility-option-chip .facility-option-icon img {
+    display: block !important;
+    width: 34px !important;
+    height: 34px !important;
+    max-width: none !important;
+    max-height: none !important;
+    padding: 0 !important;
+    object-fit: contain !important;
+  }
+}
+@media (max-width: 900px) {
+  .facility-modal__body .facility-option-chip .facility-option-icon img {
+    width: 27px !important;
+    height: 27px !important;
+    max-width: none !important;
+    max-height: none !important;
+    padding: 0 !important;
+    object-fit: contain !important;
+  }
+}
+
+
+/* Popup hasil Tambah Fasilitas: mengikuti referensi Figma 470 x 470. */
+.facility-result-card {
+  box-sizing: border-box !important;
+  width: min(470px, calc(100vw - 32px)) !important;
+  min-height: 470px !important;
+  padding: 48px 59px 39px !important;
+  border-radius: 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+}
+.facility-result-icon {
+  flex: 0 0 134px !important;
+  width: 134px !important;
+  height: 134px !important;
+  margin: 0 auto 37px !important;
+  font-size: 92px !important;
+}
+.facility-result-icon.is-success { font-size: 78px !important; }
+.facility-result-card h2 {
+  margin: 0 0 7px !important;
+  font-size: 32px !important;
+  line-height: 1.25 !important;
+  font-weight: 600 !important;
+}
+.facility-result-card p {
+  margin: 0 0 32px !important;
+  font-size: 20px !important;
+  line-height: 1.5 !important;
+}
+.facility-result-card .facility-feedback-primary {
+  width: 100% !important;
+  min-height: 64px !important;
+  margin: auto 0 0 !important;
+  border-radius: 10px !important;
+  font-size: 24px !important;
+  font-weight: 500 !important;
+}
+@media (max-width: 650px) {
+  .facility-result-card {
+    width: min(470px, calc(100vw - 32px)) !important;
+    min-height: 0 !important;
+    padding: 38px 28px 28px !important;
+  }
+  .facility-result-icon {
+    flex-basis: 110px !important;
+    width: 110px !important;
+    height: 110px !important;
+    margin-bottom: 28px !important;
+  }
+  .facility-result-card h2 { font-size: 25px !important; }
+  .facility-result-card p { font-size: 16px !important; margin-bottom: 28px !important; }
+  .facility-result-card .facility-feedback-primary { min-height: 54px !important; font-size: 18px !important; }
+}
+
+
+/* Fasilitas: popup hasil Tambah/Edit (referensi 470 x 470 px). */
+.facility-result-card {
+  box-sizing: border-box !important;
+  width: min(470px, calc(100vw - 32px)) !important;
+  min-height: 470px !important;
+  padding: 48px 59px 39px !important;
+  border-radius: 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+}
+.facility-result-card .facility-result-icon {
+  flex: 0 0 134px !important;
+  width: 134px !important;
+  height: 134px !important;
+  margin: 0 auto 37px !important;
+  font-size: 92px !important;
+}
+.facility-result-card .facility-result-icon.is-success { font-size: 78px !important; }
+.facility-result-card .facility-result-icon.is-trash {
+  background: #cbd8d0 !important;
+  color: #176f60 !important;
+  font-size: 58px !important;
+}
+.facility-result-card h2 {
+  margin: 0 0 7px !important;
+  font-size: 32px !important;
+  line-height: 1.25 !important;
+  font-weight: 600 !important;
+}
+.facility-result-card p {
+  margin: 0 0 32px !important;
+  font-size: 20px !important;
+  line-height: 1.5 !important;
+}
+.facility-result-card .facility-feedback-primary {
+  width: 100% !important;
+  min-height: 64px !important;
+  margin: auto 0 0 !important;
+  border-radius: 10px !important;
+  font-size: 24px !important;
+  font-weight: 500 !important;
+}
+
+/* Fasilitas: popup konfirmasi hapus (referensi 570 x 570 px). */
+.facility-confirm-card {
+  box-sizing: border-box !important;
+  width: min(570px, calc(100vw - 32px)) !important;
+  min-height: 570px !important;
+  padding: 40px 72px 60px !important;
+  border-radius: 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+}
+.facility-confirm-card .facility-feedback-icon {
+  width: 110px !important;
+  height: 110px !important;
+  margin: 0 auto 35px !important;
+  font-size: 58px !important;
+}
+.facility-confirm-card h2 {
+  margin: 0 0 8px !important;
+  font-size: 25px !important;
+  line-height: 1.5 !important;
+}
+.facility-confirm-card p {
+  margin: 0 0 16px !important;
+  font-size: 20px !important;
+  line-height: 1.5 !important;
+}
+.facility-confirm-card .facility-feedback-primary,
+.facility-confirm-card .facility-feedback-secondary {
+  min-height: 65px !important;
+  border-radius: 11px !important;
+  font-size: 22px !important;
+}
+.facility-confirm-card .facility-feedback-primary { margin-top: auto !important; }
+
+@media (max-width: 650px) {
+  .facility-result-card {
+    width: min(470px, calc(100vw - 32px)) !important;
+    min-height: 0 !important;
+    padding: 38px 28px 28px !important;
+  }
+  .facility-result-card .facility-result-icon {
+    flex-basis: 110px !important;
+    width: 110px !important;
+    height: 110px !important;
+    margin-bottom: 28px !important;
+  }
+  .facility-result-card h2 { font-size: 25px !important; }
+  .facility-result-card p { font-size: 16px !important; margin-bottom: 28px !important; }
+  .facility-result-card .facility-feedback-primary { min-height: 54px !important; font-size: 18px !important; }
+  .facility-confirm-card {
+    width: min(570px, calc(100vw - 32px)) !important;
+    min-height: 0 !important;
+    padding: 34px 28px 30px !important;
+  }
+  .facility-confirm-card h2 { font-size: 20px !important; }
+  .facility-confirm-card p { font-size: 16px !important; }
+  .facility-confirm-card .facility-feedback-primary,
+  .facility-confirm-card .facility-feedback-secondary { min-height: 54px !important; font-size: 17px !important; }
+}
+
+/* FINAL: tabel Fasilitas mengikuti lebar dan proporsi screenshot referensi. */
+@media (min-width: 901px) {
+  body.admin-resource-facilities .admin-content {
+    width: 100% !important;
+    max-width: none !important;
+  }
+  body.admin-resource-facilities .facility-panel {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+  body.admin-resource-facilities .facility-table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+  body.admin-resource-facilities .facility-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed !important;
+  }
+  body.admin-resource-facilities .facility-table th:nth-child(1),
+  body.admin-resource-facilities .facility-table td:nth-child(1) { width: 8.5% !important; }
+  body.admin-resource-facilities .facility-table th:nth-child(2),
+  body.admin-resource-facilities .facility-table td:nth-child(2) { width: 27.5% !important; }
+  body.admin-resource-facilities .facility-table th:nth-child(3),
+  body.admin-resource-facilities .facility-table td:nth-child(3) { width: 54% !important; }
+  body.admin-resource-facilities .facility-table th:nth-child(4),
+  body.admin-resource-facilities .facility-table td:nth-child(4) { width: 10% !important; }
+
+  /* Kelima chip fasilitas harus tetap satu baris seperti referensi. */
+  body.admin-resource-facilities .facility-icons-cell {
+    padding: 5px 8px !important;
+    overflow: hidden !important;
+    text-align: left !important;
+  }
+  body.admin-resource-facilities .facility-entries {
+    display: flex !important;
+    flex-flow: row nowrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 1px !important;
+    white-space: nowrap !important;
+  }
+  body.admin-resource-facilities .facility-entry {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    min-width: max-content !important;
+    min-height: 31px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    font-size: 14px !important;
+    line-height: 1.15 !important;
+  }
+  body.admin-resource-facilities .facility-entry .facility-icon-chip {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    width: max-content !important;
+    min-width: max-content !important;
+    height: 31px !important;
+    padding: 2px 5px !important;
+    border: 1px solid #166c5c !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+  }
+  body.admin-resource-facilities .facility-entry .facility-icon-chip img {
+    display: block !important;
+    flex: 0 0 21px !important;
+    width: 21px !important;
+    height: 21px !important;
+    max-width: 21px !important;
+    padding: 0 !important;
+    object-fit: contain !important;
+  }
+  body.admin-resource-facilities .facility-entry .facility-icon-chip > span {
+    display: inline-block !important;
+    flex: 0 0 auto !important;
+    overflow: visible !important;
+    color: #080b0a !important;
+    font-size: 14px !important;
+    white-space: nowrap !important;
+  }
+  body.admin-resource-facilities .facility-actions {
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+}
+
+
+/* Koreksi akhir: pertahankan ukuran dan posisi tabel versi terbaru,
+   persempit sedikit kolom fasilitas dan pulihkan ikon aksi 30x30 sesuai SVG desain. */
+@media (min-width: 901px) {
+  body.admin-resource-facilities .facility-table th:nth-child(1),
+  body.admin-resource-facilities .facility-table td:nth-child(1) { width: 8.5% !important; }
+  body.admin-resource-facilities .facility-table th:nth-child(2),
+  body.admin-resource-facilities .facility-table td:nth-child(2) { width: 29.5% !important; }
+  body.admin-resource-facilities .facility-table th:nth-child(3),
+  body.admin-resource-facilities .facility-table td:nth-child(3) { width: 52% !important; }
+  body.admin-resource-facilities .facility-table th:nth-child(4),
+  body.admin-resource-facilities .facility-table td:nth-child(4) { width: 10% !important; }
+
+  body.admin-resource-facilities .facility-icons-cell {
+    padding: 5px 6px !important;
+    text-align: left !important;
+    vertical-align: middle !important;
+    overflow: hidden !important;
+  }
+  body.admin-resource-facilities .facility-entries {
+    display: flex !important;
+    flex-flow: row nowrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 3px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
+  }
+  body.admin-resource-facilities .facility-entry {
+    flex: 0 0 auto !important;
+    min-width: max-content !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
+  }
+  body.admin-resource-facilities .facility-entry .facility-icon-chip {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    width: max-content !important;
+    min-width: max-content !important;
+    height: 30px !important;
+    padding: 2px 4px !important;
+    border: 1px solid #166c5c !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+    font-size: 13px !important;
+  }
+  body.admin-resource-facilities .facility-entry .facility-icon-chip img {
+    width: 19px !important;
+    height: 19px !important;
+    max-width: 19px !important;
+    flex: 0 0 19px !important;
+    padding: 0 !important;
+    object-fit: contain !important;
+  }
+  body.admin-resource-facilities .facility-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+  body.admin-resource-facilities .facility-action-button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+  body.admin-resource-facilities .facility-action-button img {
+    display: block !important;
+    width: 30px !important;
+    height: 30px !important;
+    max-width: 30px !important;
+    max-height: 30px !important;
+    object-fit: contain !important;
+  }
+  body.admin-resource-facilities .facility-action-button.is-edit,
+  body.admin-resource-facilities .facility-action-button.is-delete {
+    color: inherit !important;
+    background: transparent !important;
+  }
+}
